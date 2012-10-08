@@ -1,0 +1,26 @@
+{
+  "name": "cron-parser",
+  "version": "0.0.1",
+  "description": "A node.js library for parsing crontab instructions",
+  "main": "lib/parser.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "\"./node_modules/.bin/tap ./test/*.js\""
+  },
+  "repository": "",
+  "keywords": [
+    "cron",
+    "crontab",
+    "parser"
+  ],
+  "author": "Harri Siirak",
+  "license": "MIT",
+  "devDependencies": {
+    "tap": "~0.3.0"
+  },
+  "engines": {
+    "node": ">=0.8"
+  }
+}
