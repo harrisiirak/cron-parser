@@ -3,7 +3,7 @@ var test = require('tap').test;
 var CronInterval = require('../lib/interval');
 
 //test('parse primary interval', function(t) {
-  CronInterval.parse('*/5 5,12-14 12-26 4-6 3-4 *', function(err, interval) {
+  CronInterval.parse('*/5 5,12-19 5-26 9-11 * 2000-2020', function(err, interval) {
   	if (err) {
   		throw err;
   	}
