@@ -1,9 +1,24 @@
+var util = require('util');
 var test = require('tap').test;
 var CronInterval = require('../lib/interval');
 
 //test('parse primary interval', function(t) {
-  CronInterval.parse('2-59/5 1,10-20/2,10-20/4,22 11-26 1-6 *', function(err, interval) {
-  	console.log(arguments);
+  CronInterval.parse('*/5 5,12-14 12-26 4-6 3-4 *', function(err, interval) {
+  	if (err) {
+  		throw err;
+  	}
+
+  	for (var i = 0, c = 100; i < c; i++) {
+  		console.log(interval.next());
+  	}
+
+  	console.log('----');
+
+  	for (var i = 0, c = 50; i < c; i++) {
+  		//console.log(interval.prev());
+  	}
+
+  	console.log(util.inspect(interval, false, 100));
   });
 //});
 
