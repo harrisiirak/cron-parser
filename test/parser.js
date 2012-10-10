@@ -1,31 +1,118 @@
 var util = require('util');
 var test = require('tap').test;
-var CronInterval = require('../lib/interval');
+var CronExpression = require('../lib/expression');
 
-//test('parse primary interval', function(t) {
-  CronInterval.parse('*/5 5,12-19 5-26 9-11 *', function(err, interval) {
-  	if (err) {
-  		throw err;
-  	}
+test('empty expression test', function(t) {
+  CronExpression.parse('', function(err, interval) {
+  	t.ifError(err, 'Interval parse error');
+  	t.ok(interval, 'Interval parsed');
 
-  	for (var i = 0, c = 100; i < c; i++) {
-  		console.log(interval.next());
-  	}
+  	var date = new Date();
+  	date.addMinute();
 
-  	console.log('----');
+  	var next = interval.next();
 
-  	for (var i = 0, c = 50; i < c; i++) {
-  		//console.log(interval.prev());
-  	}
+  	t.ok(next, 'Found next scheduled interval');
+  	t.equal(next.getMinutes(), date.getMinutes(), 'Schedule matches');
 
-  	console.log(util.inspect(interval, false, 100));
-  });
-//});
-
-/*
-test('parse primary interval 2', function(t) {
-  CronInterval.parse('20,30,40 * * * mon,fri', function(err, interval) {
   	t.end();
   });
 });
-*/
+
+test('default expression test', function(t) {
+  CronExpression.parse('* * * * * *', function(err, interval) {
+  	t.ifError(err, 'Interval parse error');
+  	t.ok(interval, 'Interval parsed');
+
+  	var date = new Date();
+  	date.addMinute();
+
+  	var next = interval.next();
+
+  	t.ok(next, 'Found next scheduled interval');
+  	t.equal(next.getMinutes(), date.getMinutes(), 'Schedule matches');
+
+  	t.end();
+  });
+});
+
+test('incremental minutes expression test', function(t) {
+  CronExpression.parse('*/3 * * * * *', function(err, interval) {
+  	t.ifError(err, 'Interval parse error');
+  	t.ok(interval, 'Interval parsed');
+
+  	var next = interval.next();
+
+  	t.ok(next, 'Found next scheduled interval');
+  	t.equal(next.getMinutes() % 3, 0, 'Schedule matches');
+
+  	t.end();
+  });
+});
+
+test('fixed expression test', function(t) {
+  CronExpression.parse('10 2 12 8 0 2021', function(err, interval) {
+  	t.ifError(err, 'Interval parse error');
+  	t.ok(interval, 'Interval parsed');
+
+  	var next = interval.next();
+
+  	t.ok(next, 'Found next scheduled interval');
+  	t.equal(next.getFullYear(), 2021, 'Year matches');
+  	t.equal(next.getDay(), 0, 'Day matches');
+  	t.equal(next.getMonth(), 8, 'Month matches');
+  	t.equal(next.getDate(), 12, 'Day of month matches');
+  	t.equal(next.getHours(), 2, 'Hour matches');
+  	t.equal(next.getMinutes(), 10, 'Minute matches');
+
+  	t.end();
+  });
+});
+
+test('range test with iterator', function(t) {
+  CronExpression.parse('10-30 2 12 8 0 2021', function(err, interval) {
+  	t.ifError(err, 'Interval parse error');
+  	t.ok(interval, 'Interval parsed');
+
+  	var intervals = interval.iterate(20);
+  	t.ok(intervals, 'Found intervals');
+
+  	for (var i = 0, c = intervals.length; i < c; i++) {
+  		var next = intervals[i];
+
+	  	t.ok(next, 'Found next scheduled interval');
+	  	t.equal(next.getFullYear(), 2021, 'Year matches');
+	  	t.equal(next.getDay(), 0, 'Day matches');
+	  	t.equal(next.getMonth(), 8, 'Month matches');
+	  	t.equal(next.getDate(), 12, 'Day of month matches');
+	  	t.equal(next.getHours(), 2, 'Hour matches');
+	  	t.equal(next.getMinutes(), 10 + i, 'Minute matches');
+  	}
+
+  	t.end();
+  });
+});
+
+test('incremental range test with iterator', function(t) {
+  CronExpression.parse('10-30/2 2 12 8 0 2021', function(err, interval) {
+  	t.ifError(err, 'Interval parse error');
+  	t.ok(interval, 'Interval parsed');
+
+  	var intervals = interval.iterate(10);
+  	t.ok(intervals, 'Found intervals');
+
+  	for (var i = 0, c = intervals.length; i < c; i++) {
+  		var next = intervals[i];
+
+	  	t.ok(next, 'Found next scheduled interval');
+	  	t.equal(next.getFullYear(), 2021, 'Year matches');
+	  	t.equal(next.getDay(), 0, 'Day matches');
+	  	t.equal(next.getMonth(), 8, 'Month matches');
+	  	t.equal(next.getDate(), 12, 'Day of month matches');
+	  	t.equal(next.getHours(), 2, 'Hour matches');
+	  	t.equal(next.getMinutes(), 10 + (i * 2), 'Minute matches');
+  	}
+
+  	t.end();
+  });
+});
