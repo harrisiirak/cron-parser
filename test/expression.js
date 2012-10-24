@@ -20,7 +20,7 @@ test('empty expression test', function(t) {
 });
 
 test('default expression test', function(t) {
-  CronExpression.parse('* * * * * *', function(err, interval) {
+  CronExpression.parse('* * * * *', function(err, interval) {
   	t.ifError(err, 'Interval parse error');
   	t.ok(interval, 'Interval parsed');
 
@@ -37,7 +37,7 @@ test('default expression test', function(t) {
 });
 
 test('incremental minutes expression test', function(t) {
-  CronExpression.parse('*/3 * * * * *', function(err, interval) {
+  CronExpression.parse('*/3 * * * *', function(err, interval) {
   	t.ifError(err, 'Interval parse error');
   	t.ok(interval, 'Interval parsed');
 
@@ -51,14 +51,13 @@ test('incremental minutes expression test', function(t) {
 });
 
 test('fixed expression test', function(t) {
-  CronExpression.parse('10 2 12 8 0 2021', function(err, interval) {
+  CronExpression.parse('10 2 12 8 0', function(err, interval) {
   	t.ifError(err, 'Interval parse error');
   	t.ok(interval, 'Interval parsed');
 
   	var next = interval.next();
 
   	t.ok(next, 'Found next scheduled interval');
-  	t.equal(next.getFullYear(), 2021, 'Year matches');
   	t.equal(next.getDay(), 0, 'Day matches');
   	t.equal(next.getMonth(), 8, 'Month matches');
   	t.equal(next.getDate(), 12, 'Day of month matches');
@@ -70,7 +69,7 @@ test('fixed expression test', function(t) {
 });
 
 test('range test with iterator', function(t) {
-  CronExpression.parse('10-30 2 12 8 0 2021', function(err, interval) {
+  CronExpression.parse('10-30 2 12 8 0', function(err, interval) {
   	t.ifError(err, 'Interval parse error');
   	t.ok(interval, 'Interval parsed');
 
@@ -81,7 +80,6 @@ test('range test with iterator', function(t) {
   		var next = intervals[i];
 
 	  	t.ok(next, 'Found next scheduled interval');
-	  	t.equal(next.getFullYear(), 2021, 'Year matches');
 	  	t.equal(next.getDay(), 0, 'Day matches');
 	  	t.equal(next.getMonth(), 8, 'Month matches');
 	  	t.equal(next.getDate(), 12, 'Day of month matches');
@@ -94,7 +92,7 @@ test('range test with iterator', function(t) {
 });
 
 test('incremental range test with iterator', function(t) {
-  CronExpression.parse('10-30/2 2 12 8 0 2021', function(err, interval) {
+  CronExpression.parse('10-30/2 2 12 8 0', function(err, interval) {
   	t.ifError(err, 'Interval parse error');
   	t.ok(interval, 'Interval parsed');
 
@@ -105,7 +103,6 @@ test('incremental range test with iterator', function(t) {
   		var next = intervals[i];
 
 	  	t.ok(next, 'Found next scheduled interval');
-	  	t.equal(next.getFullYear(), 2021, 'Year matches');
 	  	t.equal(next.getDay(), 0, 'Day matches');
 	  	t.equal(next.getMonth(), 8, 'Month matches');
 	  	t.equal(next.getDate(), 12, 'Day of month matches');
@@ -114,5 +111,21 @@ test('incremental range test with iterator', function(t) {
   	}
 
   	t.end();
+  });
+});
+
+test('prefined expression', function(t) {
+  CronExpression.parse('@yearly', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    var date = new Date();
+    date.addYear();
+
+    var next = interval.next();
+    t.ok(next, 'Found next scheduled interval');
+
+    t.equal(next.getFullYear(), date.getFullYear(), 'Year matches');
+    t.end();
   });
 });
