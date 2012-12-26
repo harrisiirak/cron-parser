@@ -20,7 +20,7 @@ test('empty expression test', function(t) {
 });
 
 test('incremental minutes expression test', function(t) {
-  CronExpression.parse('0 */3 * * * *', function(err, interval) {
+  CronExpression.parse('*/3 * * * *', function(err, interval) {
     t.ifError(err, 'Interval parse error');
     t.ok(interval, 'Interval parsed');
 
