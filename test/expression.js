@@ -168,7 +168,7 @@ test('incremental range test with iterator', function(t) {
   });
 });
 
-test('prefined expression', function(t) {
+test('predefined expression', function(t) {
   CronExpression.parse('@yearly', function(err, interval) {
     t.ifError(err, 'Interval parse error');
     t.ok(interval, 'Interval parsed');
@@ -180,6 +180,60 @@ test('prefined expression', function(t) {
     t.ok(next, 'Found next scheduled interval');
 
     t.equal(next.getFullYear(), date.getFullYear(), 'Year matches');
+    t.end();
+  });
+});
+
+test('expression limited with start and end date', function(t) {
+  var options = {
+    currentDate: new Date('Wed, 26 Dec 2012 12:38:53 UTC'),
+    endDate: new Date('Wed, 26 Dec 2012 14:40:00 UTC')
+  };
+
+  CronExpression.parse('*/20 * * * *', options, function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    var dates = interval.iterate(10);
+    t.equal(dates.length, 7, 'Dates count matches');
+
+    interval.reset(); // Reset
+
+    var next = interval.next();
+    t.equal(next.getHours(), 14, 'Hour matches');
+    t.equal(next.getMinutes(), 40, 'Minute matches');
+
+    next = interval.next();
+    t.equal(next.getHours(), 15, 'Hour matches');
+    t.equal(next.getMinutes(), 00, 'Minute matches');
+
+    next = interval.next();
+    t.equal(next.getHours(), 15, 'Hour matches');
+    t.equal(next.getMinutes(), 20, 'Minute matches');
+
+    next = interval.next();
+    t.equal(next.getHours(), 15, 'Hour matches');
+    t.equal(next.getMinutes(), 40, 'Minute matches');
+
+    next = interval.next();
+    t.equal(next.getHours(), 16, 'Hour matches');
+    t.equal(next.getMinutes(), 00, 'Minute matches');
+
+    next = interval.next();
+    t.equal(next.getHours(), 16, 'Hour matches');
+    t.equal(next.getMinutes(), 20, 'Minute matches');
+
+    next = interval.next();
+    t.equal(next.getHours(), 16, 'Hour matches');
+    t.equal(next.getMinutes(), 40, 'Minute matches');
+
+    try {
+      next = interval.next();
+      t.ok(false, 'Should fail');
+    } catch (e) {
+      t.ok(true, 'Failed as expected');
+    }
+
     t.end();
   });
 });
