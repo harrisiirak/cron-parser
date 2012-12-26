@@ -1,4 +1,4 @@
-cron-parser
-===========
+node-cron-parser
+================
 
-Cron expression parser and iterator for node.js
+Node.js library for parsing crontab instructions
