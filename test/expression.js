@@ -19,7 +19,6 @@ test('empty expression test', function(t) {
   });
 });
 
-
 test('default expression test', function(t) {
   CronExpression.parse('* * * * *', function(err, interval) {
   	t.ifError(err, 'Interval parse error');
@@ -34,6 +33,60 @@ test('default expression test', function(t) {
   	t.equal(next.getMinutes(), date.getMinutes(), 'Schedule matches');
 
   	t.end();
+  });
+});
+
+test('second value out of the range', function(t) {
+  CronExpression.parse('61 * * * * *', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'No interval iterator expected');
+
+    t.end();
+  });
+});
+
+test('minute value out of the range', function(t) {
+  CronExpression.parse('* 32,72 * * * *', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'No interval iterator expected');
+
+    t.end();
+  });
+});
+
+test('hour value out of the range', function(t) {
+  CronExpression.parse('* * 12-36 * * *', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'No interval iterator expected');
+
+    t.end();
+  });
+});
+
+test('day of the month value out of the range', function(t) {
+  CronExpression.parse('* * * 10-15,40 * *', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'No interval iterator expected');
+
+    t.end();
+  });
+});
+
+test('month value out of the range', function(t) {
+  CronExpression.parse('* * * * */10,12-13 *', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'No interval iterator expected');
+
+    t.end();
+  });
+});
+
+test('day of the week value out of the range', function(t) {
+  CronExpression.parse('* * * * * 9', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'No interval iterator expected');
+
+    t.end();
   });
 });
 
