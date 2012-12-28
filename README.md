@@ -5,7 +5,7 @@ Node.js library for parsing crontab instructions
 
 Setup
 ========
-```bash 
+```bash
 npm install cron-parser
 ```
 
@@ -31,10 +31,10 @@ Usage
 
 Simple expression.
 
-```javascript 
+```javascript
 var parser = require('cron-parser');
 
-parser.parseDateExpression('*/2 * * * *', function(err, interval) {
+parser.parseExpression('*/2 * * * *', function(err, interval) {
   if (err) {
     console.log('Error: ' + err.message);
     return;
@@ -47,7 +47,7 @@ parser.parseDateExpression('*/2 * * * *', function(err, interval) {
 
 Define start and end date (limited timespan).
 
-```javascript 
+```javascript
 var parser = require('cron-parser');
 
 var options = {
@@ -55,7 +55,7 @@ var options = {
   endDate: new Date('Wed, 26 Dec 2012 14:40:00 UTC')
 };
 
-parser.parseDateExpression('*/22 * * * *', options, function(err, interval) {
+parser.parseExpression('*/22 * * * *', options, function(err, interval) {
   if (err) {
     console.log('Error: ' + err.message);
     return;
