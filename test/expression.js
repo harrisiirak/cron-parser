@@ -36,6 +36,21 @@ test('default expression test', function(t) {
   });
 });
 
+test('default expression test (sync)', function(t) {
+  var interval = CronExpression.parseSync('* * * * *');
+  t.ok(interval, 'Interval parsed');
+
+  var date = new Date();
+  date.addMinute();
+
+  var next = interval.next();
+
+  t.ok(next, 'Found next scheduled interval');
+  t.equal(next.getMinutes(), date.getMinutes(), 'Schedule matches');
+
+  t.end();
+});
+
 test('second value out of the range', function(t) {
   CronExpression.parse('61 * * * * *', function(err, interval) {
     t.ok(err, 'Error expected');
