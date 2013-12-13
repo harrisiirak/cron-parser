@@ -44,6 +44,15 @@ parser.parseExpression('*/2 * * * *', function(err, interval) {
   console.log('Date: ', interval.next()); // Sat Dec 29 2012 00:44:00 GMT+0200 (EET)
 });
 ```
+Alternatively this can be done synchronously.
+
+```javascript
+var parser = require('cron-parser');
+
+var interval = parser.parseExpressionSync('*/2 * * * *');
+console.log('Date: ', interval.next()); // Sat Dec 29 2012 00:42:00 GMT+0200 (EET)
+console.log('Date: ', interval.next()); // Sat Dec 29 2012 00:44:00 GMT+0200 (EET)
+```
 
 Define start and end date (limited timespan).
 
