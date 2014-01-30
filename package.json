@@ -9,7 +9,10 @@
   "scripts": {
     "test": "./node_modules/.bin/tap ./test/*.js"
   },
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:harrisiirak/node-cron-parser.git"
+  },
   "keywords": [
     "cron",
     "crontab",
