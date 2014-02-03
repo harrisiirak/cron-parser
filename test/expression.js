@@ -60,6 +60,16 @@ test('second value out of the range', function(t) {
   });
 });
 
+test('second value out of the range', function(t) {
+  CronExpression.parse('-1 * * * * *', function(err, interval) {
+    console.log('Error', err);
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'No interval iterator expected');
+
+    t.end();
+  });
+});
+
 test('minute value out of the range', function(t) {
   CronExpression.parse('* 32,72 * * * *', function(err, interval) {
     t.ok(err, 'Error expected');
