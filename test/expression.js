@@ -60,6 +60,16 @@ test('second value out of the range', function(t) {
   });
 });
 
+test('second value out of the range', function(t) {
+  CronExpression.parse('-1 * * * * *', function(err, interval) {
+    console.log('Error', err);
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'No interval iterator expected');
+
+    t.end();
+  });
+});
+
 test('minute value out of the range', function(t) {
   CronExpression.parse('* 32,72 * * * *', function(err, interval) {
     t.ok(err, 'Error expected');
@@ -201,8 +211,8 @@ test('predefined expression', function(t) {
 
 test('expression limited with start and end date', function(t) {
   var options = {
-    currentDate: new Date('Wed, 26 Dec 2012 12:38:53 UTC'),
-    endDate: new Date('Wed, 26 Dec 2012 14:40:00 UTC')
+    currentDate: new Date('Wed, 26 Dec 2012 14:38:53'),
+    endDate: new Date('Wed, 26 Dec 2012 16:40:00')
   };
 
   CronExpression.parse('*/20 * * * *', options, function(err, interval) {
@@ -220,7 +230,7 @@ test('expression limited with start and end date', function(t) {
 
     next = interval.next();
     t.equal(next.getHours(), 15, 'Hour matches');
-    t.equal(next.getMinutes(), 00, 'Minute matches');
+    t.equal(next.getMinutes(), 0, 'Minute matches');
 
     next = interval.next();
     t.equal(next.getHours(), 15, 'Hour matches');
@@ -232,7 +242,7 @@ test('expression limited with start and end date', function(t) {
 
     next = interval.next();
     t.equal(next.getHours(), 16, 'Hour matches');
-    t.equal(next.getMinutes(), 00, 'Minute matches');
+    t.equal(next.getMinutes(), 0, 'Minute matches');
 
     next = interval.next();
     t.equal(next.getHours(), 16, 'Hour matches');
@@ -252,3 +262,4 @@ test('expression limited with start and end date', function(t) {
     t.end();
   });
 });
+
