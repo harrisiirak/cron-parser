@@ -1,6 +1,9 @@
 cron-parser
 ================
 
+[![Build Status](https://travis-ci.org/harrisiirak/cron-parser.png?branch=master)](https://travis-ci.org/harrisiirak/cron-parser)
+[![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)
+
 Node.js library for parsing crontab instructions
 
 Setup
@@ -17,7 +20,7 @@ Supported format
 ┬    ┬    ┬    ┬    ┬    ┬
 │    │    │    │    │    |
 │    │    │    │    │    └ day of week (0 - 6)
-│    │    │    │    └───── month (0 - 11)
+│    │    │    │    └───── month (1 - 12)
 │    │    │    └────────── day of month (1 - 31)
 │    │    └─────────────── hour (0 - 23)
 │    └──────────────────── minute (0 - 59)
