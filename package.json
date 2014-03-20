@@ -1,6 +1,6 @@
 {
   "name": "cron-parser",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Node.js library for parsing crontab instructions",
   "main": "lib/parser.js",
   "directories": {
@@ -21,7 +21,8 @@
   "author": "Harri Siirak",
   "contributors": [
     "Renault John Lecoultre",
-    "Richard Astbury <richard.astbury@gmail.com>"
+    "Richard Astbury <richard.astbury@gmail.com>",
+    "Meaglin Wasabi <Meaglin.wasabi@gmail.com>"
   ],
   "license": "MIT",
   "devDependencies": {
