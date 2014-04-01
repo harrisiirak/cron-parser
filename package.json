@@ -22,7 +22,8 @@
   "contributors": [
     "Renault John Lecoultre",
     "Richard Astbury <richard.astbury@gmail.com>",
-    "Meaglin Wasabi <Meaglin.wasabi@gmail.com>"
+    "Meaglin Wasabi <Meaglin.wasabi@gmail.com>",
+    "Mike Kusold <hello@mikekusold.com>"
   ],
   "license": "MIT",
   "devDependencies": {

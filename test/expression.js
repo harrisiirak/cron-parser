@@ -147,6 +147,60 @@ test('fixed expression test', function(t) {
   });
 });
 
+test('invalid characters test - symbol', function(t) {
+  CronExpression.parse('10 ! 12 8 0', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'Invalid characters, got value: !');
+
+    t.end();
+  });
+});
+
+test('invalid characters test - letter', function(t) {
+  CronExpression.parse('10 x 12 8 0', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'Invalid characters, got value: x');
+
+    t.end();
+  });
+});
+
+test('invalid characters test - parentheses', function(t) {
+  CronExpression.parse('10 ) 12 8 0', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'Invalid characters, got value: )');
+
+    t.end();
+  });
+});
+
+test('interval with invalid characters test', function(t) {
+  CronExpression.parse('10 */A 12 8 0', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'Invalid characters, got value: */A');
+
+    t.end();
+  });
+});
+
+test('range with invalid characters test', function(t) {
+  CronExpression.parse('10 0-z 12 8 0', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'Invalid characters, got value: 0-z');
+
+    t.end();
+  });
+});
+
+test('group with invalid characters test', function(t) {
+  CronExpression.parse('10 0,1,z 12 8 0', function(err, interval) {
+    t.ok(err, 'Error expected');
+    t.equal(interval, undefined, 'Invalid characters, got value: 0,1,z');
+
+    t.end();
+  });
+});
+
 test('range test with iterator', function(t) {
   CronExpression.parse('10-30 2 12 8 0', function(err, interval) {
     t.ifError(err, 'Interval parse error');
