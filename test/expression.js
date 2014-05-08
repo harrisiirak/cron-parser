@@ -317,3 +317,50 @@ test('expression limited with start and end date', function(t) {
   });
 });
 
+test('expression using days of week strings', function(t) {
+  CronExpression.parse('15 10 * * MON-TUE', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    var intervals = interval.iterate(8);
+    t.ok(intervals, 'Found intervals');
+
+    for (var i = 0, c = intervals.length; i < c; i++) {
+      var next = intervals[i];
+      var day = next.getDay();
+
+      t.ok(next, 'Found next scheduled interval');
+      t.ok(day == 1 || day == 2, "Day matches")
+      t.equal(next.getHours(), 10, 'Hour matches');
+      t.equal(next.getMinutes(), 15, 'Minute matches');
+    }
+
+    t.end();
+  });
+});
+
+test('expression using mixed days of week strings', function(t) {
+  CronExpression.parse('15 10 * jAn-FeB mOn-tUE', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    var intervals = interval.iterate(8);
+    t.ok(intervals, 'Found intervals');
+
+    for (var i = 0, c = intervals.length; i < c; i++) {
+      var next = intervals[i];
+      var day = next.getDay();
+      var month = next.getMonth();
+
+      t.ok(next, 'Found next scheduled interval');
+      t.ok(month == 0 || month == 2, "Month Matches");
+      t.ok(day == 1 || day == 2, "Day matches");
+      t.equal(next.getHours(), 10, 'Hour matches');
+      t.equal(next.getMinutes(), 15, 'Minute matches');
+    }
+
+    t.end();
+  });
+});
+
+
