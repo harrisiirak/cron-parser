@@ -88,6 +88,7 @@ test('hour value out of the range', function(t) {
   });
 });
 
+
 test('day of the month value out of the range', function(t) {
   CronExpression.parse('* * * 10-15,40 * *', function(err, interval) {
     t.ok(err, 'Error expected');
@@ -139,7 +140,7 @@ test('fixed expression test', function(t) {
     t.ok(next, 'Found next scheduled interval');
     t.equal(next.getDay(), 0, 'Day matches');
     t.equal(next.getMonth(), 7, 'Month matches');
-    t.equal(next.getDate(), 12, 'Day of month matches');
+    t.equal(next.getDate(), 3, 'Day of month matches');
     t.equal(next.getHours(), 2, 'Hour matches');
     t.equal(next.getMinutes(), 10, 'Minute matches');
 
@@ -215,7 +216,7 @@ test('range test with iterator', function(t) {
       t.ok(next, 'Found next scheduled interval');
       t.equal(next.getDay(), 0, 'Day matches');
       t.equal(next.getMonth(), 7, 'Month matches');
-      t.equal(next.getDate(), 12, 'Day of month matches');
+      t.equal(next.getDate(), 3, 'Day of month matches');
       t.equal(next.getHours(), 2, 'Hour matches');
       t.equal(next.getMinutes(), 10 + i, 'Minute matches');
     }
@@ -238,7 +239,7 @@ test('incremental range test with iterator', function(t) {
       t.ok(next, 'Found next scheduled interval');
       t.equal(next.getDay(), 0, 'Day matches');
       t.equal(next.getMonth(), 7, 'Month matches');
-      t.equal(next.getDate(), 12, 'Day of month matches');
+      t.equal(next.getDate(), 3, 'Day of month matches');
       t.equal(next.getHours(), 2, 'Hour matches');
       t.equal(next.getMinutes(), 10 + (i * 2), 'Minute matches');
     }
@@ -329,6 +330,7 @@ test('expression using days of week strings', function(t) {
       var next = intervals[i];
       var day = next.getDay();
 
+
       t.ok(next, 'Found next scheduled interval');
       t.ok(day == 1 || day == 2, "Day matches")
       t.equal(next.getHours(), 10, 'Hour matches');
@@ -363,4 +365,39 @@ test('expression using mixed days of week strings', function(t) {
   });
 });
 
+test('day of month and week are both set', function(t) {
+  CronExpression.parse('10 2 12 8 0', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
 
+    var next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 0, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 3, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 0, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 10, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 2, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 12, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 0, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 17, 'Day of month matches');
+
+    t.end();
+  });
+});
