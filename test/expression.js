@@ -19,7 +19,7 @@ test('empty expression test', function(t) {
   });
 });
 
-test('default expression test', function(t) {
+test('default expression test (with callback)', function(t) {
   CronExpression.parse('* * * * *', function(err, interval) {
     t.ifError(err, 'Interval parse error');
     t.ok(interval, 'Interval parsed');
@@ -36,8 +36,8 @@ test('default expression test', function(t) {
   });
 });
 
-test('default expression test (sync)', function(t) {
-  var interval = CronExpression.parseSync('* * * * *');
+test('default expression test (without callback)', function(t) {
+  var interval = CronExpression.parse('* * * * *');
   t.ok(interval, 'Interval parsed');
 
   var date = new Date();
