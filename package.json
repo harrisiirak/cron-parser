@@ -2,12 +2,14 @@
   "name": "cron-parser",
   "version": "0.4.1",
   "description": "Node.js library for parsing crontab instructions",
-  "main": "lib/parser.js",
+  "main": "dist/cron-parser.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "./node_modules/.bin/tap ./test/*.js"
+    "test": "tap ./test/*.js",
+    "build": "atma",
+    "watch": "atma run watch"
   },
   "repository": {
     "type": "git",
@@ -28,7 +30,8 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "tap": "~0.4.0"
+    "tap": "~0.4.0",
+    "atma": "latest"
   },
   "engines": {
     "node": ">=0.8"
