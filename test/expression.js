@@ -401,3 +401,19 @@ test('day of month and week are both set', function(t) {
     t.end();
   });
 });
+
+test('Summertime bug test', function(t) {
+  var month = new Date().getMonth() + 1;
+  CronExpression.parse('0 0 0 1 '+month+' *', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    var next = interval.next();
+
+    // Before fix the bug it was getting a timeout error if you are
+    // in a timezone that changes the DST to ST in the hour 00:00h.
+    t.ok(next, 'Found next scheduled interval');
+
+    t.end();
+  });
+});
