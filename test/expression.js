@@ -140,7 +140,7 @@ test('fixed expression test', function(t) {
     t.ok(next, 'Found next scheduled interval');
     t.equal(next.getDay(), 0, 'Day matches');
     t.equal(next.getMonth(), 7, 'Month matches');
-    t.equal(next.getDate(), 3, 'Day of month matches');
+    t.equal(next.getDate(), 2, 'Day of month matches');
     t.equal(next.getHours(), 2, 'Hour matches');
     t.equal(next.getMinutes(), 10, 'Minute matches');
 
@@ -216,7 +216,7 @@ test('range test with iterator', function(t) {
       t.ok(next, 'Found next scheduled interval');
       t.equal(next.getDay(), 0, 'Day matches');
       t.equal(next.getMonth(), 7, 'Month matches');
-      t.equal(next.getDate(), 3, 'Day of month matches');
+      t.equal(next.getDate(), 2, 'Day of month matches');
       t.equal(next.getHours(), 2, 'Hour matches');
       t.equal(next.getMinutes(), 10 + i, 'Minute matches');
     }
@@ -239,7 +239,7 @@ test('incremental range test with iterator', function(t) {
       t.ok(next, 'Found next scheduled interval');
       t.equal(next.getDay(), 0, 'Day matches');
       t.equal(next.getMonth(), 7, 'Month matches');
-      t.equal(next.getDate(), 3, 'Day of month matches');
+      t.equal(next.getDate(), 2, 'Day of month matches');
       t.equal(next.getHours(), 2, 'Hour matches');
       t.equal(next.getMinutes(), 10 + (i * 2), 'Minute matches');
     }
@@ -375,19 +375,19 @@ test('day of month and week are both set', function(t) {
     t.ok(next, 'Found next scheduled interval');
     t.equal(next.getDay(), 0, 'Day matches');
     t.equal(next.getMonth(), 7, 'Month matches');
-    t.equal(next.getDate(), 3, 'Day of month matches');
+    t.equal(next.getDate(), 2, 'Day of month matches');
 
     next = interval.next();
 
     t.ok(next, 'Found next scheduled interval');
     t.equal(next.getDay(), 0, 'Day matches');
     t.equal(next.getMonth(), 7, 'Month matches');
-    t.equal(next.getDate(), 10, 'Day of month matches');
+    t.equal(next.getDate(), 9, 'Day of month matches');
 
     next = interval.next();
 
     t.ok(next, 'Found next scheduled interval');
-    t.equal(next.getDay(), 2, 'Day matches');
+    t.equal(next.getDay(), 3, 'Day matches');
     t.equal(next.getMonth(), 7, 'Month matches');
     t.equal(next.getDate(), 12, 'Day of month matches');
 
@@ -396,7 +396,7 @@ test('day of month and week are both set', function(t) {
     t.ok(next, 'Found next scheduled interval');
     t.equal(next.getDay(), 0, 'Day matches');
     t.equal(next.getMonth(), 7, 'Month matches');
-    t.equal(next.getDate(), 17, 'Day of month matches');
+    t.equal(next.getDate(), 16, 'Day of month matches');
 
     t.end();
   });
