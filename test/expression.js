@@ -62,7 +62,6 @@ test('second value out of the range', function(t) {
 
 test('second value out of the range', function(t) {
   CronExpression.parse('-1 * * * * *', function(err, interval) {
-    console.log('Error', err);
     t.ok(err, 'Error expected');
     t.equal(interval, undefined, 'No interval iterator expected');
 
@@ -413,6 +412,122 @@ test('Summertime bug test', function(t) {
     // Before fix the bug it was getting a timeout error if you are
     // in a timezone that changes the DST to ST in the hour 00:00h.
     t.ok(next, 'Found next scheduled interval');
+
+    t.end();
+  });
+});
+
+test('day of month and week are both set and dow is 7', function(t) {
+  CronExpression.parse('10 2 12 8 7', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    var next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 0, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 2, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 0, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 9, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 3, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 12, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 0, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 16, 'Day of month matches');
+
+    t.end();
+  });
+});
+
+test('day of month and week are both set and dow is 6,0', function(t) {
+  CronExpression.parse('10 2 12 8 6,0', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    var next = interval.next();
+
+    console.error(next);
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 6, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 1, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 6, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 8, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 3, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 12, 'Day of month matches');
+
+    // next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 3, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 12, 'Day of month matches');
+
+    t.end();
+  });
+});
+
+
+test('day of month and week are both set and dow is 6-7', function(t) {
+  CronExpression.parse('10 2 12 8 6-7', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    var next = interval.next();
+
+    console.error(next);
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 6, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 1, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 6, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 8, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 3, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 12, 'Day of month matches');
+
+    // next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getDay(), 3, 'Day matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+    t.equal(next.getDate(), 12, 'Day of month matches');
 
     t.end();
   });

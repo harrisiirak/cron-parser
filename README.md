@@ -19,7 +19,7 @@ Supported format
 *    *    *    *    *    *
 ┬    ┬    ┬    ┬    ┬    ┬
 │    │    │    │    │    |
-│    │    │    │    │    └ day of week (0 - 6)
+│    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
 │    │    │    │    └───── month (1 - 12)
 │    │    │    └────────── day of month (1 - 31)
 │    │    └─────────────── hour (0 - 23)
@@ -39,7 +39,7 @@ var parser = require('cron-parser');
 
 try {
   var interval = parser.parseExpression('*/2 * * * *');
-  
+
   console.log('Date: ', interval.next()); // Sat Dec 29 2012 00:42:00 GMT+0200 (EET)
   console.log('Date: ', interval.next()); // Sat Dec 29 2012 00:44:00 GMT+0200 (EET)
 } catch (err) {
@@ -60,7 +60,7 @@ var options = {
 
 try {
   var interval = parser.parseExpression('*/22 * * * *', options);
-  
+
   while (true) {
     try {
   		console.log(interval.next());
