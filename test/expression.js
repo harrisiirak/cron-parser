@@ -461,8 +461,6 @@ test('day of month and week are both set and dow is 6,0', function(t) {
 
     var next = interval.next();
 
-    console.error(next);
-
     t.ok(next, 'Found next scheduled interval');
     t.equal(next.getDay(), 6, 'Day matches');
     t.equal(next.getMonth(), 7, 'Month matches');
@@ -500,8 +498,6 @@ test('day of month and week are both set and dow is 6-7', function(t) {
     t.ok(interval, 'Interval parsed');
 
     var next = interval.next();
-
-    console.error(next);
 
     t.ok(next, 'Found next scheduled interval');
     t.equal(next.getDay(), 6, 'Day matches');
