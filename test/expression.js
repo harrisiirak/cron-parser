@@ -528,3 +528,19 @@ test('day of month and week are both set and dow is 6-7', function(t) {
     t.end();
   });
 });
+
+test('day of month value can\'t be larger than days in month maximum value if it\'s defined explicitly', function(t) {
+  CronExpression.parse('0 4 29 2 *', function(err, interval) {
+    t.ifError(err, 'Interval parse error');
+    t.ok(interval, 'Interval parsed');
+
+    try {
+      interval.next();
+      t.ok(false, 'Should fail');
+    } catch (e) {
+      t.ok(true, 'Failed as expected');
+    }
+
+    t.end();
+  });
+});
