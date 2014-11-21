@@ -1,0 +1,4 @@
+test/
+lib/
+build.js
+.travis.yml

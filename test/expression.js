@@ -1,7 +1,9 @@
 var util = require('util');
 var test = require('tap').test;
-var CronExpression = require('../lib/expression');
-
+var CronParser = require('../dist/cron-parser');
+var CronExpression = {
+    parse: CronParser.parseExpression
+};
 test('empty expression test', function(t) {
   CronExpression.parse('', function(err, interval) {
     t.ifError(err, 'Interval parse error');
