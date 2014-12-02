@@ -1,0 +1,11 @@
+{
+  "name": "cron-parser",
+  "main": "./browser/cron-dev.js",
+  "keywords": [
+    "cron",
+    "crontab",
+    "parser"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
