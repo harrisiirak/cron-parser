@@ -48,14 +48,15 @@ try {
 
 ```
 
-Define start and end date (limited timespan).
+Iteration with limited timespan. Also returns ES6 compatible iterator (when iterator flag is set to true).
 
 ```javascript
 var parser = require('cron-parser');
 
 var options = {
   currentDate: new Date('Wed, 26 Dec 2012 12:38:53 UTC'),
-  endDate: new Date('Wed, 26 Dec 2012 14:40:00 UTC')
+  endDate: new Date('Wed, 26 Dec 2012 14:40:00 UTC'),
+  iterator: true
 };
 
 try {
@@ -69,12 +70,12 @@ try {
   	}
   }
 
-  // Wed Dec 26 2012 14:44:00 GMT+0200 (EET)
-  // Wed Dec 26 2012 15:00:00 GMT+0200 (EET)
-  // Wed Dec 26 2012 15:22:00 GMT+0200 (EET)
-  // Wed Dec 26 2012 15:44:00 GMT+0200 (EET)
-  // Wed Dec 26 2012 16:00:00 GMT+0200 (EET)
-  // Wed Dec 26 2012 16:22:00 GMT+0200 (EET)
+  // { value: 'Wed Dec 26 2012 14:44:00 GMT+0200 (EET)', done: false }
+  // { value: 'Wed Dec 26 2012 15:00:00 GMT+0200 (EET)', done: false }
+  // { value: 'Wed Dec 26 2012 15:22:00 GMT+0200 (EET)', done: false }
+  // { value: 'Wed Dec 26 2012 15:44:00 GMT+0200 (EET)', done: false }
+  // { value: 'Wed Dec 26 2012 16:00:00 GMT+0200 (EET)', done: false }
+  // { value: 'Wed Dec 26 2012 16:22:00 GMT+0200 (EET)', done: true }
 } catch (err) {
   console.log('Error: ' + err.message);
 }

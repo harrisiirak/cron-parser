@@ -593,3 +593,37 @@ test('day of month value can\'t be larger than days in month maximum value if it
 
   t.end();
 });
+
+
+test('valid ES6 iterator should be returned if iterator options is set to true', function(t) {
+  try {
+    var options = {
+      currentDate: new Date('Wed, 26 Dec 2012 14:38:53'),
+      endDate: new Date('Wed, 26 Dec 2012 15:40:00'),
+      iterator: true
+    };
+
+    var val = null;
+    var interval = CronExpression.parse('*/25 * * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    val = interval.next();
+    t.ok(val, 'Next iteration resolved');
+    t.ok(val.value, 'Iterator value is set');
+    t.notOk(val.done, 'Iterator is not finished');
+
+    val = interval.next();
+    t.ok(val, 'Next iteration resolved');
+    t.ok(val.value, 'Iterator value is set');
+    t.notOk(val.done, 'Iterator is not finished');
+
+    val = interval.next();
+    t.ok(val, 'Next iteration resolved');
+    t.ok(val.value, 'Iterator value is set');
+    t.ok(val.done, 'Iterator is finished');
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
