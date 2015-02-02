@@ -30,15 +30,18 @@ test('load crontab file', function(t) {
   });
 });
 
-test('no next date', function(t){
-  
+test('no next date', function(t) {
   var options = {
     currentDate: new Date(2014, 0, 1),
     endDate: new Date(2014, 0, 1)
   };
-  CronParser.parseExpression('* * 2 * *', options, function(err, interval) {
-    t.ifError(err, 'Parse read error');
+
+  try {
+    var interval = CronParser.parseExpression('* * 2 * *', options);
     t.equal(interval.hasNext(), false);
-    t.end();
-  });
-})
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
