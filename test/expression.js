@@ -401,6 +401,84 @@ test('expression using mixed days of week strings', function(t) {
   t.end();
 });
 
+test('expression using non-standard second field (wildcard)', function(t) {
+  try {
+    var options = {
+      currentDate: new Date('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new Date('Wed, 26 Dec 2012 15:40:00')
+    };
+
+    var interval = CronExpression.parse('* * * * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    var intervals = interval.iterate(10);
+    t.ok(intervals, 'Found intervals');
+
+    for (var i = 0, c = intervals.length; i < c; i++) {
+      var next = intervals[i];
+
+      t.ok(next, 'Found next scheduled interval');
+      t.equal(next.getSeconds(), i, 'Second matches');
+    }
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('expression using non-standard second field (step)', function(t) {
+  try {
+    var options = {
+      currentDate: new Date('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new Date('Wed, 26 Dec 2012 15:40:00')
+    };
+
+    var interval = CronExpression.parse('*/20 * * * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    var intervals = interval.iterate(3);
+    t.ok(intervals, 'Found intervals');
+
+    for (var i = 0, c = intervals.length; i < c; i++) {
+      var next = intervals[i];
+
+      t.ok(next, 'Found next scheduled interval');
+      t.equal(next.getSeconds(), i * 20, 'Second matches');
+    }
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('expression using non-standard second field (range)', function(t) {
+  try {
+    var options = {
+      currentDate: new Date('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new Date('Wed, 26 Dec 2012 15:40:00')
+    };
+
+    var interval = CronExpression.parse('20-40/10 * * * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    var intervals = interval.iterate(3);
+    t.ok(intervals, 'Found intervals');
+
+    for (var i = 0, c = intervals.length; i < c; i++) {
+      var next = intervals[i];
+
+      t.ok(next, 'Found next scheduled interval');
+      t.equal(next.getSeconds(), 20 + (i * 10), 'Second matches');
+    }
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
 test('day of month and week are both set', function(t) {
   try {
     var interval = CronExpression.parse('10 2 12 8 0');
