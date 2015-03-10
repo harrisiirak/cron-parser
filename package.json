@@ -26,7 +26,8 @@
     "Mike Kusold <hello@mikekusold.com>",
     "Alex Kit <alex.kit@atmajs.com>",
     "Santiago Gimeno <santiago.gimeno@gmail.com>",
-    "Daniel <darc.tec@gmail.com>"
+    "Daniel <darc.tec@gmail.com>",
+    "Christian Steininger<christian.steininger.cs@gmail.com>"
   ],
   "license": "MIT",
   "devDependencies": {
