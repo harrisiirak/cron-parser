@@ -656,7 +656,7 @@ test('day of month and week are both set and dow is 6-7', function(t) {
 
 test('day of month value can\'t be larger than days in month maximum value if it\'s defined explicitly', function(t) {
   try {
-    var interval = CronExpression.parse('0 4 29 2 *');
+    var interval = CronExpression.parse('0 4 30 2 *');
     t.ok(interval, 'Interval parsed');
 
     try {
