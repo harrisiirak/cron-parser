@@ -654,6 +654,39 @@ test('day of month and week are both set and dow is 6-7', function(t) {
   t.end();
 });
 
+test('day and date in week should matches', function(t){
+  try {
+    var interval = CronExpression.parse('0 1 1 1 * 1');
+    t.ok(interval, 'Interval parsed');
+
+    var next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getHours(), 1, 'Hours matches');
+    t.equal(next.getDay(), 1, 'Day matches');
+    t.equal(next.getDate(), 1, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getHours(), 1, 'Hours matches');
+    t.equal(next.getDay(), 1, 'Day matches');
+    t.equal(next.getDate(), 1, 'Day of month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getHours(), 1, 'Hours matches');
+    t.equal(next.getDay(), 1, 'Day matches');
+    t.equal(next.getDate(), 1, 'Day of month matches');
+
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
 test('day of month value can\'t be larger than days in month maximum value if it\'s defined explicitly', function(t) {
   try {
     var interval = CronExpression.parse('0 4 30 2 *');
