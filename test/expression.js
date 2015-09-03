@@ -1,13 +1,14 @@
 var util = require('util');
 var test = require('tap').test;
 var CronExpression = require('../lib/expression');
+var CronDate = require('../lib/date');
 
 test('empty expression test', function(t) {
   try {
     var interval = CronExpression.parse('');
     t.ok(interval, 'Interval parsed');
 
-    var date = new Date();
+    var date = new CronDate();
     date.addMinute();
 
     var next = interval.next();
@@ -26,7 +27,7 @@ test('default expression test', function(t) {
     var interval = CronExpression.parse('* * * * *');
     t.ok(interval, 'Interval parsed');
 
-    var date = new Date();
+    var date = new CronDate();
     date.addMinute();
 
     var next = interval.next();
@@ -276,7 +277,7 @@ test('predefined expression', function(t) {
     var interval = CronExpression.parse('@yearly');
     t.ok(interval, 'Interval parsed');
 
-    var date = new Date();
+    var date = new CronDate();
     date.addYear();
 
     var next = interval.next();
@@ -293,8 +294,8 @@ test('predefined expression', function(t) {
 test('expression limited with start and end date', function(t) {
   try {
     var options = {
-      currentDate: new Date('Wed, 26 Dec 2012 14:38:53'),
-      endDate: new Date('Wed, 26 Dec 2012 16:40:00')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      endDate: new CronDate('Wed, 26 Dec 2012 16:40:00')
     };
 
     var interval = CronExpression.parse('*/20 * * * *', options);
@@ -374,7 +375,7 @@ test('expression using days of week strings', function(t) {
 test('expression using mixed days of week strings', function(t) {
   try {
     var options = {
-      currentDate: new Date('Wed, 26 Dec 2012 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
     };
 
     var interval = CronExpression.parse('15 10 * jAn-FeB mOn-tUE', options);
@@ -404,8 +405,8 @@ test('expression using mixed days of week strings', function(t) {
 test('expression using non-standard second field (wildcard)', function(t) {
   try {
     var options = {
-      currentDate: new Date('Wed, 26 Dec 2012 14:38:00'),
-      endDate: new Date('Wed, 26 Dec 2012 15:40:00')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
     };
 
     var interval = CronExpression.parse('* * * * * *', options);
@@ -430,8 +431,8 @@ test('expression using non-standard second field (wildcard)', function(t) {
 test('expression using non-standard second field (step)', function(t) {
   try {
     var options = {
-      currentDate: new Date('Wed, 26 Dec 2012 14:38:00'),
-      endDate: new Date('Wed, 26 Dec 2012 15:40:00')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
     };
 
     var interval = CronExpression.parse('*/20 * * * * *', options);
@@ -456,8 +457,8 @@ test('expression using non-standard second field (step)', function(t) {
 test('expression using non-standard second field (range)', function(t) {
   try {
     var options = {
-      currentDate: new Date('Wed, 26 Dec 2012 14:38:00'),
-      endDate: new Date('Wed, 26 Dec 2012 15:40:00')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
     };
 
     var interval = CronExpression.parse('20-40/10 * * * * *', options);
@@ -520,7 +521,7 @@ test('day of month and week are both set', function(t) {
 
 test('Summertime bug test', function(t) {
   try {
-    var month = new Date().getMonth() + 1;
+    var month = new CronDate().getMonth() + 1;
     var interval = CronExpression.parse('0 0 0 1 '+month+' *');
     t.ok(interval, 'Interval parsed');
 
@@ -709,8 +710,8 @@ test('day of month value can\'t be larger than days in month maximum value if it
 test('valid ES6 iterator should be returned if iterator options is set to true', function(t) {
   try {
     var options = {
-      currentDate: new Date('Wed, 26 Dec 2012 14:38:53'),
-      endDate: new Date('Wed, 26 Dec 2012 15:40:00'),
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
       iterator: true
     };
 
