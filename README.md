@@ -40,8 +40,9 @@ var parser = require('cron-parser');
 try {
   var interval = parser.parseExpression('*/2 * * * *');
 
-  console.log('Date: ', interval.next()); // Sat Dec 29 2012 00:42:00 GMT+0200 (EET)
-  console.log('Date: ', interval.next()); // Sat Dec 29 2012 00:44:00 GMT+0200 (EET)
+  console.log('Date: ', interval.next().toString()); // Sat Dec 29 2012 00:42:00 GMT+0200 (EET)
+  console.log('Date: ', interval.next().toString()); // Sat Dec 29 2012 00:44:00 GMT+0200 (EET)
+  console.log('Date: ', interval.next().toUTC().toString()); // Sat Dec 28 2012 22:46:00 GMT+0200 (EET)
 } catch (err) {
   console.log('Error: ' + err.message);
 }
@@ -64,20 +65,29 @@ try {
 
   while (true) {
     try {
-  		console.log(interval.next());
-  	} catch (e) {
-  		break;
-  	}
+      var obj = interval.next();
+      console.log('value:', obj.value.toString(), 'done:', obj.done);
+    } catch (e) {
+      break;
+    }
   }
 
-  // { value: 'Wed Dec 26 2012 14:44:00 GMT+0200 (EET)', done: false }
-  // { value: 'Wed Dec 26 2012 15:00:00 GMT+0200 (EET)', done: false }
-  // { value: 'Wed Dec 26 2012 15:22:00 GMT+0200 (EET)', done: false }
-  // { value: 'Wed Dec 26 2012 15:44:00 GMT+0200 (EET)', done: false }
-  // { value: 'Wed Dec 26 2012 16:00:00 GMT+0200 (EET)', done: false }
-  // { value: 'Wed Dec 26 2012 16:22:00 GMT+0200 (EET)', done: true }
+  // value: Wed Dec 26 2012 14:44:00 GMT+0200 (EET) done: false
+  // value: Wed Dec 26 2012 15:00:00 GMT+0200 (EET) done: false
+  // value: Wed Dec 26 2012 15:22:00 GMT+0200 (EET) done: false
+  // value: Wed Dec 26 2012 15:44:00 GMT+0200 (EET) done: false
+  // value: Wed Dec 26 2012 16:00:00 GMT+0200 (EET) done: false
+  // value: Wed Dec 26 2012 16:22:00 GMT+0200 (EET) done: true
 } catch (err) {
   console.log('Error: ' + err.message);
 }
 
 ```
+
+Options
+========
+
+* *currentDate* - Start date of the iteration
+* *endDate* - End date of the iteration
+* *iterator* - Return ES6 compatible iterator object 
+* *utc* - Enable UTC
