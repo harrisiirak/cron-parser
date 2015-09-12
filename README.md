@@ -83,3 +83,11 @@ try {
 }
 
 ```
+
+Options
+========
+
+* *currentDate* - Start date of the iteration
+* *endDate* - End date of the iteration
+* *iterator* - Return ES6 compatible iterator object 
+* *utc* - Enable UTC
