@@ -769,7 +769,6 @@ test('Must not parse an expression which has repeat 0 times', function(t) {
   try {
     var expression = CronExpression.parse('0 */0 * * *');
     var val = expression.next();
-    t.notOk(val);
   } catch (err) {
     t.ok(err, 'Error expected');
     t.equal(err.message, 'Constraint error, cannot repeat at every 0 time.');
@@ -782,7 +781,6 @@ test('Must not parse an expression which has repeat negative number times', func
   try {
     var expression = CronExpression.parse('0 */-5 * * *');
     var val = expression.next();
-    t.notOk(val);
   } catch (err) {
     t.ok(err, 'Error expected');
     t.equal(err.message, 'Constraint error, cannot repeat at every -5 time.');
