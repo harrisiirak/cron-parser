@@ -764,3 +764,29 @@ test('valid ES6 iterator should be returned if iterator options is set to true',
 
   t.end();
 });
+
+test('Must not parse an expression which has repeat 0 times', function(t) {
+  try {
+    var expression = CronExpression.parse('0 */0 * * *');
+    var val = expression.next();
+    t.notOk(val);
+  } catch (err) {
+    t.ok(err, 'Error expected');
+    t.equal(err.message, 'Constraint error, cannot repeat at every 0 time.');
+  }
+
+  t.end();
+});
+
+test('Must not parse an expression which has repeat negative number times', function(t) {
+  try {
+    var expression = CronExpression.parse('0 */-5 * * *');
+    var val = expression.next();
+    t.notOk(val);
+  } catch (err) {
+    t.ok(err, 'Error expected');
+    t.equal(err.message, 'Constraint error, cannot repeat at every -5 time.');
+  }
+
+  t.end();
+});
