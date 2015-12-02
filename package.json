@@ -1,6 +1,6 @@
 {
   "name": "cron-parser",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Node.js library for parsing crontab instructions",
   "main": "lib/parser.js",
   "directories": {
@@ -28,8 +28,9 @@
     "Alex Kit <alex.kit@atmajs.com>",
     "Santiago Gimeno <santiago.gimeno@gmail.com>",
     "Daniel <darc.tec@gmail.com>",
-    "Christian Steininger<christian.steininger.cs@gmail.com>",
-    "Mykola Piskovyi <m.piskovyi@gmail.com>"
+    "Christian Steininger <christian.steininger.cs@gmail.com>",
+    "Mykola Piskovyi <m.piskovyi@gmail.com>",
+    "Brian Vaughn <brian.david.vaughn@gmail.com>"
   ],
   "license": "MIT",
   "devDependencies": {
