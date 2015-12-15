@@ -444,7 +444,7 @@ test('expression using non-standard second field (wildcard)', function(t) {
       var next = intervals[i];
 
       t.ok(next, 'Found next scheduled interval');
-      t.equal(next.getSeconds(), i, 'Second matches');
+      t.equal(next.getSeconds(), i + 1, 'Second matches');
     }
   } catch (err) {
     t.ifError(err, 'Interval parse error');
@@ -466,12 +466,9 @@ test('expression using non-standard second field (step)', function(t) {
     var intervals = interval.iterate(3);
     t.ok(intervals, 'Found intervals');
 
-    for (var i = 0, c = intervals.length; i < c; i++) {
-      var next = intervals[i];
-
-      t.ok(next, 'Found next scheduled interval');
-      t.equal(next.getSeconds(), i * 20, 'Second matches');
-    }
+    t.equal(intervals[0].getSeconds(), 20, 'Second matches');
+    t.equal(intervals[1].getSeconds(), 40, 'Second matches');
+    t.equal(intervals[2].getSeconds(), 0, 'Second matches');
   } catch (err) {
     t.ifError(err, 'Interval parse error');
   }
