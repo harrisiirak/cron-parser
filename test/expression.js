@@ -294,8 +294,8 @@ test('predefined expression', function(t) {
 test('expression limited with start and end date', function(t) {
   try {
     var options = {
-      currentDate: new CronDate('2012-12-26 14:38:53'),
-      endDate: new CronDate('2012-12-26 16:40:00')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      endDate: new CronDate('Wed, 26 Dec 2012 16:40:00')
     };
 
     var interval = CronExpression.parse('*/20 * * * *', options);
@@ -400,7 +400,7 @@ test('expression using days of week strings', function(t) {
 test('expression using mixed days of week strings', function(t) {
   try {
     var options = {
-      currentDate: new CronDate('2012-12-26 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
     };
 
     var interval = CronExpression.parse('15 10 * jAn-FeB mOn-tUE', options);
@@ -430,8 +430,8 @@ test('expression using mixed days of week strings', function(t) {
 test('expression using non-standard second field (wildcard)', function(t) {
   try {
     var options = {
-      currentDate: new CronDate('2012-12-26 14:38:00'),
-      endDate: new CronDate('2012-12-26 15:40:00')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
     };
 
     var interval = CronExpression.parse('* * * * * *', options);
@@ -456,8 +456,8 @@ test('expression using non-standard second field (wildcard)', function(t) {
 test('expression using non-standard second field (step)', function(t) {
   try {
     var options = {
-      currentDate: new CronDate('2012-12-26 14:38:00'),
-      endDate: new CronDate('2012-12-26 15:40:00')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
     };
 
     var interval = CronExpression.parse('*/20 * * * * *', options);
@@ -479,8 +479,8 @@ test('expression using non-standard second field (step)', function(t) {
 test('expression using non-standard second field (range)', function(t) {
   try {
     var options = {
-      currentDate: new CronDate('2012-12-26 14:38:53'),
-      endDate: new CronDate('2012-12-26 15:40:00')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
     };
 
     var interval = CronExpression.parse('20-40/10 * * * * *', options);
@@ -732,8 +732,8 @@ test('day of month value can\'t be larger than days in month maximum value if it
 test('valid ES6 iterator should be returned if iterator options is set to true', function(t) {
   try {
     var options = {
-      currentDate: new CronDate('2012-12-26 14:38:53'),
-      endDate: new CronDate('2012-12-26 15:40:00'),
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
       iterator: true
     };
 
