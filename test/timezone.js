@@ -23,6 +23,19 @@ test('It works on DST start', function(t) {
     t.equal(date.getHours(), 5, '5 AM');
     t.equal(date.getDate(), 27, 'on the 27th');
 
+    interval = CronExpression.parse('30 2 * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    date = interval.next();
+    t.equal(date.getMinutes(), 30, '30 Minutes');
+    t.equal(date.getHours(), 2, '2 AM');
+    t.equal(date.getDate(), 27, 'on the 27th');
+
+    date = interval.next();
+    t.equal(date.getMinutes(), 30, '30 Minutes');
+    t.equal(date.getHours(), 2, '2 AM');
+    t.equal(date.getDate(), 28, 'on the 28th');
+
     interval = CronExpression.parse('0 3 * * *', options);
     t.ok(interval, 'Interval parsed');
 
