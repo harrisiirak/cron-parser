@@ -264,6 +264,113 @@ test('It works on DST end', function(t) {
     t.throws(function() {
         date = interval.next();
     });
+
+    options = {
+        currentDate : new Date('Sun Oct 29 2016 01:00:00 GMT+0200')
+    }
+
+    interval = CronExpression.parse('0 12 * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 29, '29th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 30, '30th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 31, '31st');
+
+    options = {
+        currentDate : new Date('Sun Oct 29 2016 02:59:00 GMT+0200')
+    }
+
+    interval = CronExpression.parse('0 12 * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 29, '29th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 30, '30th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 31, '31st');
+
+    options = {
+        currentDate : new Date('Sun Oct 29 2016 02:59:59 GMT+0200')
+    }
+
+    interval = CronExpression.parse('0 12 * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 29, '29th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 30, '30th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 31, '31st');
+
+    options = {
+        currentDate : new Date('Sun Oct 30 2016 01:00:00 GMT+0200')
+    }
+
+    interval = CronExpression.parse('0 12 * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 30, '30th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 31, '31st');
+
+    options = {
+        currentDate : new Date('Sun Oct 30 2016 01:59:00 GMT+0200')
+    }
+
+    interval = CronExpression.parse('0 12 * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 30, '30th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 31, '31st');
+
+    options = {
+        currentDate : new Date('Sun Oct 30 2016 01:59:59 GMT+0200')
+    }
+
+    interval = CronExpression.parse('0 12 * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 30, '30th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 31, '31st');
+
+    options = {
+        currentDate : new Date('Sun Oct 30 2016 02:59:00 GMT+0200')
+    }
+
+    interval = CronExpression.parse('0 12 * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 30, '30th');
+    date = interval.next();
+    t.equal(date.getHours(), 12, '12');
+    t.equal(date.getDate(), 31, '31st');
    } catch (err) {
     t.ifError(err, 'Interval parse error');
   }
