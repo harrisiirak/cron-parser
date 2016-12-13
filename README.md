@@ -42,7 +42,6 @@ try {
 
   console.log('Date: ', interval.next().toString()); // Sat Dec 29 2012 00:42:00 GMT+0200 (EET)
   console.log('Date: ', interval.next().toString()); // Sat Dec 29 2012 00:44:00 GMT+0200 (EET)
-  console.log('Date: ', interval.next().toUTC().toString()); // Sat Dec 28 2012 22:46:00 GMT+0200 (EET)
 } catch (err) {
   console.log('Error: ' + err.message);
 }
