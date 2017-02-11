@@ -353,6 +353,7 @@ test('expression limited with start and end date', function(t) {
   try {
     var options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
       endDate: new CronDate('Wed, 26 Dec 2012 16:40:00')
     };
 
@@ -360,10 +361,16 @@ test('expression limited with start and end date', function(t) {
     t.ok(interval, 'Interval parsed');
 
     var dates = interval.iterate(10);
-    t.equal(dates.length, 7, 'Dates count matches');
+    t.equal(dates.length, 7, 'Dates count matches for positive iteration');
 
-    interval.reset(); // Reset
+    interval.reset();
 
+    var dates = interval.iterate(-10);
+    t.equal(dates.length, 6, 'Dates count matches for negative iteration');
+
+    interval.reset();
+
+    // Forward iteration
     var next = interval.next();
     t.equal(next.getHours(), 14, 'Hour matches');
     t.equal(next.getMinutes(), 40, 'Minute matches');
@@ -394,6 +401,47 @@ test('expression limited with start and end date', function(t) {
 
     try {
       interval.next();
+      t.ok(false, 'Should fail');
+    } catch (e) {
+      t.ok(true, 'Failed as expected');
+    }
+
+    // TODO: Currently, encountering an out-of-range failure (as above)
+    // still results in a new interval being set on the object.
+    // Until/unless this is fixed, the below test will fail.
+    // next = interval.previous();
+    // t.equal(next.getHours(), 16, 'Hour matches');
+    // t.equal(next.getMinutes(), 20, 'Minute matches');
+
+    interval.reset();
+
+    // Backward iteration
+    var previous = interval.previous();
+    t.equal(previous.getHours(), 14, 'Hour matches');
+    t.equal(previous.getMinutes(), 20, 'Minute matches');
+
+    previous = interval.previous();
+    t.equal(previous.getHours(), 14, 'Hour matches');
+    t.equal(previous.getMinutes(), 0, 'Minute matches');
+
+    previous = interval.previous();
+    t.equal(previous.getHours(), 13, 'Hour matches');
+    t.equal(previous.getMinutes(), 40, 'Minute matches');
+
+    previous = interval.previous();
+    t.equal(previous.getHours(), 13, 'Hour matches');
+    t.equal(previous.getMinutes(), 20, 'Minute matches');
+
+    previous = interval.previous();
+    t.equal(previous.getHours(), 13, 'Hour matches');
+    t.equal(previous.getMinutes(), 0, 'Minute matches');
+
+    previous = interval.previous();
+    t.equal(previous.getHours(), 12, 'Hour matches');
+    t.equal(previous.getMinutes(), 40, 'Minute matches');
+
+    try {
+      interval.previous();
       t.ok(false, 'Should fail');
     } catch (e) {
       t.ok(true, 'Failed as expected');
