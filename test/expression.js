@@ -409,39 +409,39 @@ test('expression limited with start and end date', function(t) {
     // TODO: Currently, encountering an out-of-range failure (as above)
     // still results in a new interval being set on the object.
     // Until/unless this is fixed, the below test will fail.
-    // next = interval.previous();
+    // next = interval.prev();
     // t.equal(next.getHours(), 16, 'Hour matches');
     // t.equal(next.getMinutes(), 20, 'Minute matches');
 
     interval.reset();
 
     // Backward iteration
-    var previous = interval.previous();
-    t.equal(previous.getHours(), 14, 'Hour matches');
-    t.equal(previous.getMinutes(), 20, 'Minute matches');
+    var prev = interval.prev();
+    t.equal(prev.getHours(), 14, 'Hour matches');
+    t.equal(prev.getMinutes(), 20, 'Minute matches');
 
-    previous = interval.previous();
-    t.equal(previous.getHours(), 14, 'Hour matches');
-    t.equal(previous.getMinutes(), 0, 'Minute matches');
+    prev = interval.prev();
+    t.equal(prev.getHours(), 14, 'Hour matches');
+    t.equal(prev.getMinutes(), 0, 'Minute matches');
 
-    previous = interval.previous();
-    t.equal(previous.getHours(), 13, 'Hour matches');
-    t.equal(previous.getMinutes(), 40, 'Minute matches');
+    prev = interval.prev();
+    t.equal(prev.getHours(), 13, 'Hour matches');
+    t.equal(prev.getMinutes(), 40, 'Minute matches');
 
-    previous = interval.previous();
-    t.equal(previous.getHours(), 13, 'Hour matches');
-    t.equal(previous.getMinutes(), 20, 'Minute matches');
+    prev = interval.prev();
+    t.equal(prev.getHours(), 13, 'Hour matches');
+    t.equal(prev.getMinutes(), 20, 'Minute matches');
 
-    previous = interval.previous();
-    t.equal(previous.getHours(), 13, 'Hour matches');
-    t.equal(previous.getMinutes(), 0, 'Minute matches');
+    prev = interval.prev();
+    t.equal(prev.getHours(), 13, 'Hour matches');
+    t.equal(prev.getMinutes(), 0, 'Minute matches');
 
-    previous = interval.previous();
-    t.equal(previous.getHours(), 12, 'Hour matches');
-    t.equal(previous.getMinutes(), 40, 'Minute matches');
+    prev = interval.prev();
+    t.equal(prev.getHours(), 12, 'Hour matches');
+    t.equal(prev.getMinutes(), 40, 'Minute matches');
 
     try {
-      interval.previous();
+      interval.prev();
       t.ok(false, 'Should fail');
     } catch (e) {
       t.ok(true, 'Failed as expected');
