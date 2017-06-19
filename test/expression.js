@@ -548,7 +548,6 @@ test('expression using non-standard second field (wildcard)', function(t) {
 
     for (var i = 0, c = intervals.length; i < c; i++) {
       var next = intervals[i];
-
       t.ok(next, 'Found next scheduled interval');
       t.equal(next.getSeconds(), i + 1, 'Second matches');
     }
