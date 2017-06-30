@@ -463,13 +463,14 @@ test('parse expression as UTC', function(t) {
 
     var date = interval.next();
     t.equal(date.getUTCHours(), 10, 'Correct UTC hour value');
+    t.equal(date.getHours(), 10, 'Correct UTC hour value');
 
     interval = CronExpression.parse('0 */5 * * * *', options);
 
     var date = interval.next(), now = new Date();
     now.setMinutes(now.getMinutes() + 5 - (now.getMinutes() % 5));
 
-    t.equal(date.getHours(), now.getHours(), 'Correct local time for 5 minute interval');
+    t.equal(date.getHours(), now.getUTCHours(), 'Correct local time for 5 minute interval');
 
   } catch (err) {
     t.ifError(err, 'UTC parse error');
