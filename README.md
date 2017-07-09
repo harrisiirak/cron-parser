@@ -126,4 +126,4 @@ will be expecting. Using one of the supported `string` formats will solve the is
 
 * *iterator* - Return ES6 compatible iterator object 
 * *utc* - Enable UTC
-* *tz* - Timezone string
+* *tz* - Timezone string. It won't be used in case `utc` is enabled
