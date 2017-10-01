@@ -719,7 +719,7 @@ test('day of month and week are both set and dow is 6,0', function(t) {
     t.ok(next.getDay() === 6 || next.getDate() === 12, 'Day or day of month matches');
     t.equal(next.getMonth(), 7, 'Month matches');
 
-    // next = interval.next();
+    next = interval.next();
 
     t.ok(next, 'Found next scheduled interval');
     t.ok(next.getDay() === 0 || next.getDate() === 12, 'Day or day of month matches');
