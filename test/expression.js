@@ -799,7 +799,7 @@ test('day and date in week should matches', function(t){
 
 test('day of month value can\'t be larger than days in month maximum value if it\'s defined explicitly', function(t) {
   try {
-    var interval = CronExpression.parse('0 4 30 2 *');
+    var interval = CronExpression.parse('0 4 31 4 *');
     t.ok(interval, 'Interval parsed');
 
     try {
@@ -814,7 +814,6 @@ test('day of month value can\'t be larger than days in month maximum value if it
 
   t.end();
 });
-
 
 test('valid ES6 iterator should be returned if iterator options is set to true', function(t) {
   try {
