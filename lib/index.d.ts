@@ -50,11 +50,12 @@ declare class CronDate {
 }
 
 interface ParserOptions {
-  currentDate: string | number | Date
-  endDate: string | number | Date
-  iterator: boolean
-  utc: boolean
-  tz: string
+  currentDate?: string | number | Date
+  startDate?: string | number | Date
+  endDate?: string | number | Date
+  iterator?: boolean
+  utc?: boolean
+  tz?: string
 }
 
 declare class CronExpression {
