@@ -2,7 +2,7 @@
   "name": "cron-parser",
   "repo": "harrisiirak/cron-parser",
   "description": "Node.js library for parsing crontab instructions",
-  "version": "2.4.5",
+  "version": "2.5.0",
   "keywords": ["cron", "crontab", "parser"],
   "dependencies": {},
   "development": {},
