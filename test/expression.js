@@ -871,3 +871,76 @@ test('Must not parse an expression which has repeat negative number times', func
 
   t.end();
 });
+
+test('dow 6,7 6,0 0,6 7,6 should be equivalent', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+    };
+
+    var expressions = [
+      '30 16 * * 6,7',
+      '30 16 * * 6,0',
+      '30 16 * * 0,6',
+      '30 16 * * 7,6'
+    ];
+
+    expressions.forEach(function(expression) {
+      var interval = CronExpression.parse(expression, options);
+      t.ok(interval, 'Interval parsed');
+
+      var val = interval.next();
+      t.equal(val.getDay(), 6, 'Day matches');
+
+      val = interval.next();
+      t.equal(val.getDay(), 0, 'Day matches');
+
+      val = interval.next();
+      t.equal(val.getDay(), 6, 'Day matches');
+    });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('hour 0 9,11,1 * * * and 0 1,9,11 * * * should be equivalent', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 00:00:00'),
+    };
+
+    var expressions = [
+      '0 9,11,1 * * *',
+      '0 1,9,11 * * *'
+    ];
+
+    expressions.forEach(function(expression) {
+      var interval = CronExpression.parse(expression, options);
+      t.ok(interval, 'Interval parsed');
+
+      var val = interval.next();
+      t.equal(val.getHours(), 1, 'Hour matches');
+
+      val = interval.next();
+      t.equal(val.getHours(), 9, 'Hour matches');
+
+      val = interval.next();
+      t.equal(val.getHours(), 11, 'Hour matches');
+
+      val = interval.next();
+      t.equal(val.getHours(), 1, 'Hour matches');
+
+      val = interval.next();
+      t.equal(val.getHours(), 9, 'Hour matches');
+
+      val = interval.next();
+      t.equal(val.getHours(), 11, 'Hour matches');
+    });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
