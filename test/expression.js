@@ -643,6 +643,69 @@ test('day of month and week are both set', function(t) {
   t.end();
 });
 
+test('day of month is unspecified', function(t) {
+  try {
+    var interval = CronExpression.parse('10 2 ? * 3');
+
+    t.ok(interval, 'Interval parsed');
+    
+    var next = interval.next();
+    t.ok(next, 'Found next scheduled interal');
+    t.ok(next.getDay() === 3, 'day of week matches');
+
+    next = interval.next();
+    t.ok(next, 'Found next scheduled interal');
+    t.ok(next.getDay() === 3, 'day of week matches');
+
+    next = interval.next();
+    t.ok(next, 'Found next scheduled interal');
+    t.ok(next.getDay() === 3, 'day of week matches');
+
+    next = interval.next();
+    t.ok(next, 'Found next scheduled interal');
+    t.ok(next.getDay() === 3, 'day of week matches');
+
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('day of week is unspecified', function(t) {
+  try {
+    var interval = CronExpression.parse('10 2 3,6 * ?');
+
+    t.ok(interval, 'Interval parsed');
+
+    var next = interval.next();
+    t.ok(next, 'Found next scheduled interal');
+    t.ok(next.getDate() === 3 || next.getDate() === 6, 'date matches');
+    var prevDate = next.getDate();
+
+    next = interval.next();
+    t.ok(next, 'Found next scheduled interal');
+    t.ok((next.getDate() === 3 || next.getDate() === 6) &&
+      next.getDate() !== prevDate, 'date matches and is not previous date');
+    prevDate = next.getDate();
+
+    next = interval.next();
+    t.ok(next, 'Found next scheduled interal');
+    t.ok((next.getDate() === 3 || next.getDate() === 6) &&
+      next.getDate() !== prevDate, 'date matches and is not previous date');
+    prevDate = next.getDate();
+
+    next = interval.next();
+    t.ok(next, 'Found next scheduled interal');
+    t.ok((next.getDate() === 3 || next.getDate() === 6) &&
+      next.getDate() !== prevDate, 'date matches and is not previous date');
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
 test('Summertime bug test', function(t) {
   try {
     var month = new CronDate().getMonth() + 1;
