@@ -5,7 +5,7 @@ var CronParser = require('../lib/parser');
 // Globals
 
 test('load crontab file', function(t) {
-  CronParser.parseFile('./crontab.example', function(err, result) {
+  CronParser.parseFile(__dirname + '/crontab.example', function(err, result) {
     t.ifError(err, 'File read error');
     t.ok(result, 'Crontab parsed parsed');
 
