@@ -120,7 +120,7 @@ test('It works on DST start', function(t) {
 
     // Out of the timespan range
     t.throws(function() {
-        date = interval.next();
+      date = interval.next();
     });
   } catch (err) {
     t.ifError(err, 'Interval parse error');
@@ -232,7 +232,7 @@ test('It works on DST end', function(t) {
 
     // Out of the timespan range
     t.throws(function() {
-        date = interval.next();
+      date = interval.next();
     });
 
     options.endDate = '2016-10-30 04:00:01';
@@ -262,12 +262,12 @@ test('It works on DST end', function(t) {
 
     // Out of the timespan range
     t.throws(function() {
-        date = interval.next();
+      date = interval.next();
     });
 
     options = {
-        currentDate : new Date('Sun Oct 29 2016 01:00:00 GMT+0200')
-    }
+      currentDate : new Date('Sun Oct 29 2016 01:00:00 GMT+0200')
+    };
 
     interval = CronExpression.parse('0 12 * * *', options);
     t.ok(interval, 'Interval parsed');
@@ -283,8 +283,8 @@ test('It works on DST end', function(t) {
     t.equal(date.getDate(), 31, '31st');
 
     options = {
-        currentDate : new Date('Sun Oct 29 2016 02:59:00 GMT+0200')
-    }
+      currentDate : new Date('Sun Oct 29 2016 02:59:00 GMT+0200')
+    };
 
     interval = CronExpression.parse('0 12 * * *', options);
     t.ok(interval, 'Interval parsed');
@@ -300,8 +300,8 @@ test('It works on DST end', function(t) {
     t.equal(date.getDate(), 31, '31st');
 
     options = {
-        currentDate : new Date('Sun Oct 29 2016 02:59:59 GMT+0200')
-    }
+      currentDate : new Date('Sun Oct 29 2016 02:59:59 GMT+0200')
+    };
 
     interval = CronExpression.parse('0 12 * * *', options);
     t.ok(interval, 'Interval parsed');
@@ -317,8 +317,8 @@ test('It works on DST end', function(t) {
     t.equal(date.getDate(), 31, '31st');
 
     options = {
-        currentDate : new Date('Sun Oct 30 2016 01:00:00 GMT+0200')
-    }
+      currentDate : new Date('Sun Oct 30 2016 01:00:00 GMT+0200')
+    };
 
     interval = CronExpression.parse('0 12 * * *', options);
     t.ok(interval, 'Interval parsed');
@@ -331,8 +331,8 @@ test('It works on DST end', function(t) {
     t.equal(date.getDate(), 31, '31st');
 
     options = {
-        currentDate : new Date('Sun Oct 30 2016 01:59:00 GMT+0200')
-    }
+      currentDate : new Date('Sun Oct 30 2016 01:59:00 GMT+0200')
+    };
 
     interval = CronExpression.parse('0 12 * * *', options);
     t.ok(interval, 'Interval parsed');
@@ -345,8 +345,8 @@ test('It works on DST end', function(t) {
     t.equal(date.getDate(), 31, '31st');
 
     options = {
-        currentDate : new Date('Sun Oct 30 2016 01:59:59 GMT+0200')
-    }
+      currentDate : new Date('Sun Oct 30 2016 01:59:59 GMT+0200')
+    };
 
     interval = CronExpression.parse('0 12 * * *', options);
     t.ok(interval, 'Interval parsed');
@@ -359,8 +359,8 @@ test('It works on DST end', function(t) {
     t.equal(date.getDate(), 31, '31st');
 
     options = {
-        currentDate : new Date('Sun Oct 30 2016 02:59:00 GMT+0200')
-    }
+      currentDate : new Date('Sun Oct 30 2016 02:59:00 GMT+0200')
+    };
 
     interval = CronExpression.parse('0 12 * * *', options);
     t.ok(interval, 'Interval parsed');
@@ -371,9 +371,35 @@ test('It works on DST end', function(t) {
     date = interval.next();
     t.equal(date.getHours(), 12, '12');
     t.equal(date.getDate(), 31, '31st');
-   } catch (err) {
+  } catch (err) {
     t.ifError(err, 'Interval parse error');
   }
+
+  t.end();
+});
+
+test('it will work with #131 issue case', function(t) {
+  var options = {
+    tz: 'America/Sao_Paulo',
+    currentDate : new Date('Sun Oct 30 2018 02:59:00 GMT+0200')
+  };
+
+  var interval = CronExpression.parse('0 9 1 1 *', options);
+  var date = interval.next();
+
+  t.equal(date.getFullYear(), 2019);
+  t.equal(date.getDate(), 1);
+  t.equal(date.getMonth(), 0);
+
+  date = interval.prev();
+  t.equal(date.getFullYear(), 2018);
+  t.equal(date.getDate(), 1);
+  t.equal(date.getMonth(), 0);
+
+  date = interval.prev();
+  t.equal(date.getFullYear(), 2017);
+  t.equal(date.getDate(), 1);
+  t.equal(date.getMonth(), 0);
 
   t.end();
 });
