@@ -403,3 +403,19 @@ test('it will work with #131 issue case', function(t) {
 
   t.end();
 });
+
+test('it will work with #137 issue case', function(t) {
+  var options = {
+    tz: 'America/New_York',
+    currentDate : new Date('10/28/2018')
+  };
+
+  var interval = CronExpression.parse('0 12 * * 3', options);
+  var date = interval.next();
+
+  t.equal(date.getFullYear(), 2018);
+  t.equal(date.getDate(), 31);
+  t.equal(date.getMonth(), 9);
+
+  t.end();
+});
