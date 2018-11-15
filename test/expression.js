@@ -1007,3 +1007,19 @@ test('hour 0 9,11,1 * * * and 0 1,9,11 * * * should be equivalent', function(t) 
 
   t.end();
 });
+
+test('it will work with #139 issue case', function(t) {
+  var options = {
+    currentDate : new Date('2018-11-15T16:15:33.522Z'),
+    tz: 'Europe/Madrid'
+  };
+
+  var interval = CronExpression.parse('0 0 0 1 * *', options);
+  var date = interval.next();
+
+  t.equal(date.getFullYear(), 2018);
+  t.equal(date.getDate(), 1);
+  t.equal(date.getMonth(), 11);
+
+  t.end();
+});
