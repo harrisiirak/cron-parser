@@ -648,7 +648,7 @@ test('day of month is unspecified', function(t) {
     var interval = CronExpression.parse('10 2 ? * 3');
 
     t.ok(interval, 'Interval parsed');
-    
+
     var next = interval.next();
     t.ok(next, 'Found next scheduled interal');
     t.ok(next.getDay() === 3, 'day of week matches');
@@ -1014,7 +1014,7 @@ test('it will work with #139 issue case', function(t) {
     tz: 'Europe/Madrid'
   };
 
-  var interval = CronExpression.parse('0 0 0 1 * *', options);
+  var interval = CronExpression.parse('0 0 0 1,2 * *', options);
   var date = interval.next();
 
   t.equal(date.getFullYear(), 2018);
