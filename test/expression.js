@@ -103,7 +103,7 @@ test('default expression (multi-space separated) test 1', function(t) {
   t.end();
 });
 
-test('second value out of the range', function(t) {
+test('value out of the range', function(t) {
   try {
     CronExpression.parse('61 * * * * *');
   } catch (err) {
@@ -124,6 +124,17 @@ test('second value out of the range', function(t) {
 
   t.end();
 });
+
+test('invalid range', function(t) {
+    try {
+      CronExpression.parse('- * * * * *');
+    } catch (err) {
+      t.ok(err, 'Error expected');
+      t.equal(err.message, 'Invalid range: -');
+    }
+
+    t.end();
+  });
 
 test('minute value out of the range', function(t) {
   try {
