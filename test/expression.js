@@ -841,6 +841,26 @@ test('day of month and week are both set and dow is 6-7', function(t) {
   t.end();
 });
 
+test('day of month validation should be ignored when day of month is wildcard and month is set', function (t) {
+  try {
+    var interval = CronExpression.parse('* * * * 2 *');
+    t.ok(interval, 'Interval parsed');
+
+    var next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getHours(), 0, 'Hours matches');
+    t.equal(next.getDate(), 1, 'Day of month matches');
+    t.equal(next.getMonth() + 1, 2, 'Month matches');
+
+    t.ok(next, 'Found next scheduled interval');
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
 test('day and date in week should matches', function(t){
   try {
     var interval = CronExpression.parse('0 1 1 1 * 1');
