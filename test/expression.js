@@ -176,6 +176,15 @@ test('invalid expression that contains too many fields', function (t) {
   t.end();
 });
 
+test('invalid expression that is unreachable', function (t) {
+  t.throws(function () {
+    const iter = CronExpression.parse('0 0 31 4 *');
+    iter.next();
+  }, 'Invalid expression, loop limit exceeded');
+
+  t.end();
+});
+
 test('incremental minutes expression test', function(t) {
   try {
     var interval = CronExpression.parse('*/3 * * * *');
