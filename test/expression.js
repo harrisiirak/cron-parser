@@ -192,6 +192,14 @@ test('day of the week value out of the range', function(t) {
   t.end();
 });
 
+test('invalid expression that contains too many fields', function (t) {
+  t.throws(function() {
+    CronExpression.parse('* * * * * * * *ASD');
+  }, 'Invalid cron expression');
+
+  t.end();
+});
+
 test('incremental minutes expression test', function(t) {
   try {
     var interval = CronExpression.parse('*/3 * * * *');
