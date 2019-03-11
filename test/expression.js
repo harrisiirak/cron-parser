@@ -104,90 +104,66 @@ test('default expression (multi-space separated) test 1', function(t) {
 });
 
 test('value out of the range', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('61 * * * * *');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, got value 61 expected range 0-59');
-  }
+  }, 'Constraint error, got value 61 expected range 0-59');
 
   t.end();
 });
 
 test('second value out of the range', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('-1 * * * * *');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, got value -1 expected range 0-59');
-  }
+  }, 'Constraint error, got value -1 expected range 0-59');
 
   t.end();
 });
 
 test('invalid range', function(t) {
-    try {
-      CronExpression.parse('- * * * * *');
-    } catch (err) {
-      t.ok(err, 'Error expected');
-      t.equal(err.message, 'Invalid range: -');
-    }
+  t.throws(function() {
+    CronExpression.parse('- * * * * *');
+  }, 'Invalid range: -');
 
-    t.end();
-  });
+  t.end();
+});
 
 test('minute value out of the range', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('* 32,72 * * * *');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, got value 72 expected range 0-59');
-  }
+  }, 'Constraint error, got value 72 expected range 0-59');
 
   t.end();
 });
 
 test('hour value out of the range', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('* * 12-36 * * *');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, got range 12-36 expected range 0-23');
-  }
+  }, 'Constraint error, got range 12-36 expected range 0-23');
 
   t.end();
 });
 
 
 test('day of the month value out of the range', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('* * * 10-15,40 * *');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, got value 40 expected range 1-31');
-  }
+  }, 'Constraint error, got value 40 expected range 1-31');
 
   t.end();
 });
 
 test('month value out of the range', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('* * * * */10,12-13 *');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, got range 12-13 expected range 1-12');
-  }
+  }, 'Constraint error, got range 12-13 expected range 1-12');
 
   t.end();
 });
 
 test('day of the week value out of the range', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('* * * * * 9');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, got value 9 expected range 0-7');
-  }
+  }, 'Constraint error, got value 9 expected range 0-7');
 
   t.end();
 });
@@ -236,67 +212,65 @@ test('fixed expression test', function(t) {
 });
 
 test('invalid characters test - symbol', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('10 ! 12 8 0');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Invalid characters, got value: !');
-  }
+  }, 'Invalid characters, got value: !');
 
   t.end();
 });
 
 test('invalid characters test - letter', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('10 x 12 8 0');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Invalid characters, got value: x');
-  }
+  }, 'Invalid characters, got value: x');
 
   t.end();
 });
 
 test('invalid characters test - parentheses', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('10 ) 12 8 0');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Invalid characters, got value: )');
-  }
+  }, 'Invalid characters, got value: )');
 
   t.end();
 });
 
 test('interval with invalid characters test', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('10 */A 12 8 0');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Invalid characters, got value: */A');
-  }
+  }, 'Invalid characters, got value: */A');
 
   t.end();
 });
 
 test('range with invalid characters test', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('10 0-z 12 8 0');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Invalid characters, got value: 0-z');
-  }
+  }, 'Invalid characters, got value: 0-z');
 
   t.end();
 });
 
 test('group with invalid characters test', function(t) {
-  try {
+  t.throws(function() {
     CronExpression.parse('10 0,1,z 12 8 0');
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Invalid characters, got value: 0,1,z');
-  }
+  }, 'Invalid characters, got value: 0,1,z');
+
+  t.end();
+});
+
+test('invalid expression which has repeat 0 times', function(t) {
+  t.throws(function() {
+    CronExpression.parse('0 */0 * * *');
+  }, 'Constraint error, cannot repeat at every 0 time.');
+
+  t.end();
+});
+
+test('invalid expression which has repeat negative number times', function(t) {
+  t.throws(function() {
+    CronExpression.parse('0 */-5 * * *');
+  }, 'Constraint error, cannot repeat at every -5 time.');
 
   t.end();
 });
@@ -945,30 +919,6 @@ test('valid ES6 iterator should be returned if iterator options is set to true',
     t.ok(val.done, 'Iterator is finished');
   } catch (err) {
     t.ifError(err, 'Interval parse error');
-  }
-
-  t.end();
-});
-
-test('Must not parse an expression which has repeat 0 times', function(t) {
-  try {
-    var expression = CronExpression.parse('0 */0 * * *');
-    var val = expression.next();
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, cannot repeat at every 0 time.');
-  }
-
-  t.end();
-});
-
-test('Must not parse an expression which has repeat negative number times', function(t) {
-  try {
-    var expression = CronExpression.parse('0 */-5 * * *');
-    var val = expression.next();
-  } catch (err) {
-    t.ok(err, 'Error expected');
-    t.equal(err.message, 'Constraint error, cannot repeat at every -5 time.');
   }
 
   t.end();
