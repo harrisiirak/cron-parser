@@ -176,6 +176,15 @@ test('invalid expression that contains too many fields', function (t) {
   t.end();
 });
 
+test('invalid explicit day of month definition', function(t) {
+  t.throws(function() {
+    const iter = CronExpression.parse('0 0 31 4 *');
+    iter.next();
+  }, 'Invalid explicit day of month definition');
+
+  t.end();
+});
+
 test('incremental minutes expression test', function(t) {
   try {
     var interval = CronExpression.parse('*/3 * * * *');
@@ -866,24 +875,6 @@ test('day and date in week should matches', function(t){
     t.equal(next.getHours(), 1, 'Hours matches');
     t.ok(next.getDay() === 1 || next.getDate() === 1, 'Day or day of month matches');
 
-  } catch (err) {
-    t.ifError(err, 'Interval parse error');
-  }
-
-  t.end();
-});
-
-test('day of month value can\'t be larger than days in month maximum value if it\'s defined explicitly', function(t) {
-  try {
-    var interval = CronExpression.parse('0 4 31 4 *');
-    t.ok(interval, 'Interval parsed');
-
-    try {
-      interval.next();
-      t.ok(false, 'Should fail');
-    } catch (e) {
-      t.ok(true, 'Failed as expected');
-    }
   } catch (err) {
     t.ifError(err, 'Interval parse error');
   }

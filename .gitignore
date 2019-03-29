@@ -15,4 +15,5 @@ results
 npm-debug.log
 
 .idea
+.history
 .vscode
