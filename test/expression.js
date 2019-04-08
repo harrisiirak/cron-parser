@@ -1003,3 +1003,233 @@ test('it will work with #139 issue case', function(t) {
 
   t.end();
 });
+
+test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek (# char)', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-04-30')
+    };
+
+    var expectedFirstDates = [
+      new CronDate('2019-05-05'),
+      new CronDate('2019-06-02'),
+      new CronDate('2019-07-07'),
+      new CronDate('2019-08-04')
+    ];
+    var expectedSecondDates = [
+      new CronDate('2019-05-12'),
+      new CronDate('2019-06-9'),
+      new CronDate('2019-07-14'),
+      new CronDate('2019-08-11')
+    ];
+    var expectedThirdDates = [
+      new CronDate('2019-05-19'),
+      new CronDate('2019-06-16'),
+      new CronDate('2019-07-21'),
+      new CronDate('2019-08-18')
+    ];
+    var expectedFourthDates = [
+      new CronDate('2019-05-26'),
+      new CronDate('2019-06-23'),
+      new CronDate('2019-07-28'),
+      new CronDate('2019-08-25')
+    ];
+    var expectedFifthDates = [
+      new CronDate('2019-6-30'),
+      new CronDate('2019-9-29'),
+      new CronDate('2019-12-29'),
+      new CronDate('2020-03-29')
+    ];
+
+    var allExpectedDates = [
+      expectedFirstDates,
+      expectedSecondDates,
+      expectedThirdDates,
+      expectedFourthDates,
+      expectedFifthDates
+    ];
+    var expressions = [
+      '0 0 0 ? * 0#1',
+      '0 0 0 ? * 0#2',
+      '0 0 0 ? * 0#3',
+      '0 0 0 ? * 0#4',
+      '0 0 0 ? * 0#5'
+    ];
+    expressions.forEach(function(expression, index) {
+      var interval = CronExpression.parse(expression, options);
+      var expectedDates = allExpectedDates[index];
+
+      expectedDates.forEach(function(expected) {
+        var date = interval.next();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "' + expression + '" has next() that matches expected: ' + expected.toISOString()
+        );
+      });
+      expectedDates
+        .slice(0, expectedDates.length - 1)
+        .reverse()
+        .forEach(function(expected) {
+          var date = interval.prev();
+          t.equal(
+            date.toISOString(), 
+            expected.toISOString(), 
+            'Expression "' + expression + '" has prev() that matches expected: ' + expected.toISOString()
+          );
+        });
+    });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work for valid second sunday in may', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-01-30')
+    };
+    var expectedDates = [
+      new CronDate('2019-05-12'),
+      new CronDate('2020-05-10'),
+      new CronDate('2021-05-09'),
+      new CronDate('2022-05-08')
+    ];
+
+    var interval = CronExpression.parse('0 0 0 ? MAY 0#2', options);
+    expectedDates.forEach(function(expected) {
+      var date = interval.next();
+      t.equal(
+        date.toISOString(), 
+        expected.toISOString(), 
+        'Expression "0 0 0 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
+      );
+    });
+    expectedDates
+      .slice(0, expectedDates.length - 1)
+      .reverse()
+      .forEach(function(expected) {
+        var date = interval.prev();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "0 0 0 ? MAY 0#2" has prev() that matches expected: ' + expected.toISOString()
+        );
+      });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work for valid second sunday at noon in may', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-05-12T11:59:00.000Z')
+    };
+    var expected = new CronDate('2019-05-12T12:00:00.000Z');
+
+    var interval = CronExpression.parse('0 0 12 ? MAY 0#2', options);
+    var date = interval.next();
+
+    t.equal(date.getFullYear(), expected.getFullYear(), 'Year matches');
+    t.equal(date.getMonth(), expected.getMonth(), 'Month matches');
+    t.equal(date.getDate(), expected.getDate(), 'Date matches');
+    t.equal(date.getDay(), expected.getDay(), 'Day of Week matches');
+    t.equal(date.getHours(), 12, 'Hour matches');
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work with both dayOfMonth and nth occurence of dayOfWeek', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-04-01')
+    };
+    
+    var expectedDates = [
+      new CronDate('2019-04-16'),
+      new CronDate('2019-04-17'),
+      new CronDate('2019-04-18'),
+      new CronDate('2019-05-15'),
+      new CronDate('2019-05-16'),
+      new CronDate('2019-05-18'),
+    ];
+
+    var interval = CronExpression.parse('0 0 0 16,18 * 3#3', options);
+
+    expectedDates.forEach(function(expected) {
+      var date = interval.next();
+      t.equal(
+        date.toISOString(), 
+        expected.toISOString(), 
+        'Expression "0 0 0 16,18 * 3#3" has next() that matches expected: ' + expected.toISOString()
+      );
+    });
+    expectedDates
+      .slice(0, expectedDates.length - 1)
+      .reverse()
+      .forEach(function(expected) {
+        var date = interval.prev();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "0 0 0 16,18 * 3#3" has prev() that matches expected: ' + expected.toISOString()
+        );
+      });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should error when passed invalid occurence value', function(t) {
+  var expressions = [
+    '0 0 0 ? * 1#',
+    '0 0 0 ? * 1#0',
+    '0 0 0 ? * 4#6',
+    '0 0 0 ? * 0##4',
+  ];
+  expressions.forEach(function(expression) {
+    t.throws(function() {
+      CronExpression.parse(expression);
+    }, new Error('Constraint error, invalid dayOfWeek occurrence number (#)'), expression);
+  });
+  
+  t.end();
+});
+
+// The Quartz documentation says that if the # character is used then no other expression can be used in the dayOfWeek term: http://www.quartz-scheduler.org/api/2.3.0/index.html
+test('cannot combine `-` range and # occurrence special characters', function(t) {
+  var expression = '0 0 0 ? * 2-4#2';
+  t.throws(function() {
+    CronExpression.parse(expression);
+  }, new Error('Constraint error, invalid dayOfWeek `#` and `-` special characters are incompatible'));
+  
+  t.end();
+});
+
+test('cannot combine `/` repeat interval and # occurrence special characters', function(t) {
+  var expression = '0 0 0 ? * 1/2#3';
+  t.throws(function() {
+    CronExpression.parse(expression);
+  }, new Error('Constraint error, invalid dayOfWeek `#` and `/` special characters are incompatible'));
+  
+  t.end();
+});
+
+test('cannot combine `,` list and # occurrence special characters', function(t) {
+  var expression = '0 0 0 ? * 0,6#4';
+  t.throws(function() {
+    CronExpression.parse(expression);
+  }, new Error('Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible'));
+  
+  t.end();
+});
