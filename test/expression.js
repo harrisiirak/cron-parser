@@ -1128,18 +1128,40 @@ test('should work for valid second sunday in may', function(t) {
 test('should work for valid second sunday at noon in may', function(t) {
   try {
     var options = {
-      currentDate: new CronDate('2019-05-12T11:59:00.000Z')
+      currentDate: new CronDate('2019-05-12T11:59:00.000')
     };
-    var expected = new CronDate('2019-05-12T12:00:00.000Z');
+    var expected = new CronDate('2019-05-12T12:00:00.000');
 
     var interval = CronExpression.parse('0 0 12 ? MAY 0#2', options);
     var date = interval.next();
 
-    t.equal(date.getFullYear(), expected.getFullYear(), 'Year matches');
-    t.equal(date.getMonth(), expected.getMonth(), 'Month matches');
-    t.equal(date.getDate(), expected.getDate(), 'Date matches');
-    t.equal(date.getDay(), expected.getDay(), 'Day of Week matches');
-    t.equal(date.getHours(), 12, 'Hour matches');
+    t.equal(
+      date.toISOString(), 
+      expected.toISOString(), 
+      'Expression "0 0 12 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
+    );
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work for valid second sunday at noon in may (UTC+3)', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-05-12T11:59:00.000', 'Europe/Sofia')
+    };
+    var expected = new CronDate('2019-05-12T12:00:00.000', 'Europe/Sofia');
+
+    var interval = CronExpression.parse('0 0 12 ? MAY 0#2', options);
+    var date = interval.next();
+
+    t.equal(
+      date.toISOString(), 
+      expected.toISOString(), 
+      'Expression "0 0 12 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
+    );
   } catch (err) {
     t.ifError(err, 'Interval parse error');
   }
