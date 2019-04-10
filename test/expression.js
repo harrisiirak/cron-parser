@@ -1,4 +1,3 @@
-var util = require('util');
 var test = require('tap').test;
 var CronExpression = require('../lib/expression');
 var CronDate = require('../lib/date');
@@ -106,7 +105,7 @@ test('default expression (multi-space separated) test 1', function(t) {
 test('value out of the range', function(t) {
   t.throws(function() {
     CronExpression.parse('61 * * * * *');
-  }, 'Constraint error, got value 61 expected range 0-59');
+  }, new Error('Constraint error, got value 61 expected range 0-59'));
 
   t.end();
 });
@@ -114,7 +113,7 @@ test('value out of the range', function(t) {
 test('second value out of the range', function(t) {
   t.throws(function() {
     CronExpression.parse('-1 * * * * *');
-  }, 'Constraint error, got value -1 expected range 0-59');
+  }, new Error('Constraint error, got value -1 expected range 0-59'));
 
   t.end();
 });
@@ -122,7 +121,7 @@ test('second value out of the range', function(t) {
 test('invalid range', function(t) {
   t.throws(function() {
     CronExpression.parse('- * * * * *');
-  }, 'Invalid range: -');
+  }, new Error('Invalid range: -'));
 
   t.end();
 });
@@ -130,7 +129,7 @@ test('invalid range', function(t) {
 test('minute value out of the range', function(t) {
   t.throws(function() {
     CronExpression.parse('* 32,72 * * * *');
-  }, 'Constraint error, got value 72 expected range 0-59');
+  }, new Error('Constraint error, got value 72 expected range 0-59'));
 
   t.end();
 });
@@ -138,7 +137,7 @@ test('minute value out of the range', function(t) {
 test('hour value out of the range', function(t) {
   t.throws(function() {
     CronExpression.parse('* * 12-36 * * *');
-  }, 'Constraint error, got range 12-36 expected range 0-23');
+  }, new Error('Constraint error, got range 12-36 expected range 0-23'));
 
   t.end();
 });
@@ -147,7 +146,7 @@ test('hour value out of the range', function(t) {
 test('day of the month value out of the range', function(t) {
   t.throws(function() {
     CronExpression.parse('* * * 10-15,40 * *');
-  }, 'Constraint error, got value 40 expected range 1-31');
+  }, ('Constraint error, got value 40 expected range 1-31'));
 
   t.end();
 });
@@ -155,7 +154,7 @@ test('day of the month value out of the range', function(t) {
 test('month value out of the range', function(t) {
   t.throws(function() {
     CronExpression.parse('* * * * */10,12-13 *');
-  }, 'Constraint error, got range 12-13 expected range 1-12');
+  }, new Error('Constraint error, got range 12-13 expected range 1-12'));
 
   t.end();
 });
@@ -163,7 +162,7 @@ test('month value out of the range', function(t) {
 test('day of the week value out of the range', function(t) {
   t.throws(function() {
     CronExpression.parse('* * * * * 9');
-  }, 'Constraint error, got value 9 expected range 0-7');
+  }, new Error('Constraint error, got value 9 expected range 0-7'));
 
   t.end();
 });
@@ -171,7 +170,7 @@ test('day of the week value out of the range', function(t) {
 test('invalid expression that contains too many fields', function (t) {
   t.throws(function() {
     CronExpression.parse('* * * * * * * *ASD');
-  }, 'Invalid cron expression');
+  }, new Error('Invalid cron expression'));
 
   t.end();
 });
@@ -180,7 +179,7 @@ test('invalid explicit day of month definition', function(t) {
   t.throws(function() {
     const iter = CronExpression.parse('0 0 31 4 *');
     iter.next();
-  }, 'Invalid explicit day of month definition');
+  }, new Error('Invalid explicit day of month definition'));
 
   t.end();
 });
@@ -223,7 +222,7 @@ test('fixed expression test', function(t) {
 test('invalid characters test - symbol', function(t) {
   t.throws(function() {
     CronExpression.parse('10 ! 12 8 0');
-  }, 'Invalid characters, got value: !');
+  }, new Error('Invalid characters, got value: !'));
 
   t.end();
 });
@@ -231,7 +230,7 @@ test('invalid characters test - symbol', function(t) {
 test('invalid characters test - letter', function(t) {
   t.throws(function() {
     CronExpression.parse('10 x 12 8 0');
-  }, 'Invalid characters, got value: x');
+  }, new Error('Invalid characters, got value: x'));
 
   t.end();
 });
@@ -239,7 +238,7 @@ test('invalid characters test - letter', function(t) {
 test('invalid characters test - parentheses', function(t) {
   t.throws(function() {
     CronExpression.parse('10 ) 12 8 0');
-  }, 'Invalid characters, got value: )');
+  }, new Error('Invalid characters, got value: )'));
 
   t.end();
 });
@@ -247,7 +246,7 @@ test('invalid characters test - parentheses', function(t) {
 test('interval with invalid characters test', function(t) {
   t.throws(function() {
     CronExpression.parse('10 */A 12 8 0');
-  }, 'Invalid characters, got value: */A');
+  }, new Error('Invalid characters, got value: */A'));
 
   t.end();
 });
@@ -255,7 +254,7 @@ test('interval with invalid characters test', function(t) {
 test('range with invalid characters test', function(t) {
   t.throws(function() {
     CronExpression.parse('10 0-z 12 8 0');
-  }, 'Invalid characters, got value: 0-z');
+  }, new Error('Invalid characters, got value: 0-z'));
 
   t.end();
 });
@@ -263,7 +262,7 @@ test('range with invalid characters test', function(t) {
 test('group with invalid characters test', function(t) {
   t.throws(function() {
     CronExpression.parse('10 0,1,z 12 8 0');
-  }, 'Invalid characters, got value: 0,1,z');
+  }, new Error('Invalid characters, got value: 0,1,z'));
 
   t.end();
 });
@@ -271,7 +270,7 @@ test('group with invalid characters test', function(t) {
 test('invalid expression which has repeat 0 times', function(t) {
   t.throws(function() {
     CronExpression.parse('0 */0 * * *');
-  }, 'Constraint error, cannot repeat at every 0 time.');
+  }, new Error('Constraint error, cannot repeat at every 0 time.'));
 
   t.end();
 });
@@ -279,7 +278,7 @@ test('invalid expression which has repeat 0 times', function(t) {
 test('invalid expression which has repeat negative number times', function(t) {
   t.throws(function() {
     CronExpression.parse('0 */-5 * * *');
-  }, 'Constraint error, cannot repeat at every -5 time.');
+  }, new Error('Constraint error, cannot repeat at every -5 time.'));
 
   t.end();
 });
@@ -1001,5 +1000,257 @@ test('it will work with #139 issue case', function(t) {
   t.equal(date.getDate(), 1);
   t.equal(date.getMonth(), 11);
 
+  t.end();
+});
+
+test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek (# char)', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-04-30')
+    };
+
+    var expectedFirstDates = [
+      new CronDate('2019-05-05'),
+      new CronDate('2019-06-02'),
+      new CronDate('2019-07-07'),
+      new CronDate('2019-08-04')
+    ];
+    var expectedSecondDates = [
+      new CronDate('2019-05-12'),
+      new CronDate('2019-06-9'),
+      new CronDate('2019-07-14'),
+      new CronDate('2019-08-11')
+    ];
+    var expectedThirdDates = [
+      new CronDate('2019-05-19'),
+      new CronDate('2019-06-16'),
+      new CronDate('2019-07-21'),
+      new CronDate('2019-08-18')
+    ];
+    var expectedFourthDates = [
+      new CronDate('2019-05-26'),
+      new CronDate('2019-06-23'),
+      new CronDate('2019-07-28'),
+      new CronDate('2019-08-25')
+    ];
+    var expectedFifthDates = [
+      new CronDate('2019-6-30'),
+      new CronDate('2019-9-29'),
+      new CronDate('2019-12-29'),
+      new CronDate('2020-03-29')
+    ];
+
+    var allExpectedDates = [
+      expectedFirstDates,
+      expectedSecondDates,
+      expectedThirdDates,
+      expectedFourthDates,
+      expectedFifthDates
+    ];
+    var expressions = [
+      '0 0 0 ? * 0#1',
+      '0 0 0 ? * 0#2',
+      '0 0 0 ? * 0#3',
+      '0 0 0 ? * 0#4',
+      '0 0 0 ? * 0#5'
+    ];
+    expressions.forEach(function(expression, index) {
+      var interval = CronExpression.parse(expression, options);
+      var expectedDates = allExpectedDates[index];
+
+      expectedDates.forEach(function(expected) {
+        var date = interval.next();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "' + expression + '" has next() that matches expected: ' + expected.toISOString()
+        );
+      });
+      expectedDates
+        .slice(0, expectedDates.length - 1)
+        .reverse()
+        .forEach(function(expected) {
+          var date = interval.prev();
+          t.equal(
+            date.toISOString(), 
+            expected.toISOString(), 
+            'Expression "' + expression + '" has prev() that matches expected: ' + expected.toISOString()
+          );
+        });
+    });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work for valid second sunday in may', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-01-30')
+    };
+    var expectedDates = [
+      new CronDate('2019-05-12'),
+      new CronDate('2020-05-10'),
+      new CronDate('2021-05-09'),
+      new CronDate('2022-05-08')
+    ];
+
+    var interval = CronExpression.parse('0 0 0 ? MAY 0#2', options);
+    expectedDates.forEach(function(expected) {
+      var date = interval.next();
+      t.equal(
+        date.toISOString(), 
+        expected.toISOString(), 
+        'Expression "0 0 0 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
+      );
+    });
+    expectedDates
+      .slice(0, expectedDates.length - 1)
+      .reverse()
+      .forEach(function(expected) {
+        var date = interval.prev();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "0 0 0 ? MAY 0#2" has prev() that matches expected: ' + expected.toISOString()
+        );
+      });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work for valid second sunday at noon in may', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-05-12T11:59:00.000')
+    };
+    var expected = new CronDate('2019-05-12T12:00:00.000');
+
+    var interval = CronExpression.parse('0 0 12 ? MAY 0#2', options);
+    var date = interval.next();
+
+    t.equal(
+      date.toISOString(), 
+      expected.toISOString(), 
+      'Expression "0 0 12 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
+    );
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work for valid second sunday at noon in may (UTC+3)', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-05-12T11:59:00.000', 'Europe/Sofia')
+    };
+    var expected = new CronDate('2019-05-12T12:00:00.000', 'Europe/Sofia');
+
+    var interval = CronExpression.parse('0 0 12 ? MAY 0#2', options);
+    var date = interval.next();
+
+    t.equal(
+      date.toISOString(), 
+      expected.toISOString(), 
+      'Expression "0 0 12 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
+    );
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work with both dayOfMonth and nth occurence of dayOfWeek', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-04-01')
+    };
+    
+    var expectedDates = [
+      new CronDate('2019-04-16'),
+      new CronDate('2019-04-17'),
+      new CronDate('2019-04-18'),
+      new CronDate('2019-05-15'),
+      new CronDate('2019-05-16'),
+      new CronDate('2019-05-18'),
+    ];
+
+    var interval = CronExpression.parse('0 0 0 16,18 * 3#3', options);
+
+    expectedDates.forEach(function(expected) {
+      var date = interval.next();
+      t.equal(
+        date.toISOString(), 
+        expected.toISOString(), 
+        'Expression "0 0 0 16,18 * 3#3" has next() that matches expected: ' + expected.toISOString()
+      );
+    });
+    expectedDates
+      .slice(0, expectedDates.length - 1)
+      .reverse()
+      .forEach(function(expected) {
+        var date = interval.prev();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "0 0 0 16,18 * 3#3" has prev() that matches expected: ' + expected.toISOString()
+        );
+      });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should error when passed invalid occurence value', function(t) {
+  var expressions = [
+    '0 0 0 ? * 1#',
+    '0 0 0 ? * 1#0',
+    '0 0 0 ? * 4#6',
+    '0 0 0 ? * 0##4',
+  ];
+  expressions.forEach(function(expression) {
+    t.throws(function() {
+      CronExpression.parse(expression);
+    }, new Error('Constraint error, invalid dayOfWeek occurrence number (#)'), expression);
+  });
+  
+  t.end();
+});
+
+// The Quartz documentation says that if the # character is used then no other expression can be used in the dayOfWeek term: http://www.quartz-scheduler.org/api/2.3.0/index.html
+test('cannot combine `-` range and # occurrence special characters', function(t) {
+  var expression = '0 0 0 ? * 2-4#2';
+  t.throws(function() {
+    CronExpression.parse(expression);
+  }, new Error('Constraint error, invalid dayOfWeek `#` and `-` special characters are incompatible'));
+  
+  t.end();
+});
+
+test('cannot combine `/` repeat interval and # occurrence special characters', function(t) {
+  var expression = '0 0 0 ? * 1/2#3';
+  t.throws(function() {
+    CronExpression.parse(expression);
+  }, new Error('Constraint error, invalid dayOfWeek `#` and `/` special characters are incompatible'));
+  
+  t.end();
+});
+
+test('cannot combine `,` list and # occurrence special characters', function(t) {
+  var expression = '0 0 0 ? * 0,6#4';
+  t.throws(function() {
+    CronExpression.parse(expression);
+  }, new Error('Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible'));
+  
   t.end();
 });
