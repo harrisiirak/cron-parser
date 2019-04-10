@@ -27,7 +27,7 @@ Supported format
 └───────────────────────── second (0 - 59, optional)
 ```
 
-Supports mixed use of ranges and range increments (L, W and # characters are not supported currently). See tests for examples.
+Supports mixed use of ranges and range increments (L and W characters are not supported currently). See tests for examples.
 
 Usage
 ========
