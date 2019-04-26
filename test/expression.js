@@ -1211,6 +1211,132 @@ test('should work with both dayOfMonth and nth occurence of dayOfWeek', function
   t.end();
 });
 
+test('should work with last for dayOfWeek', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-04-26')
+    };
+    
+    var expectedDates = [
+      new CronDate('2019-04-29'),
+      new CronDate('2019-05-27'),
+      new CronDate('2019-06-24'),
+      new CronDate('2019-07-29'),
+      new CronDate('2019-08-26')
+    ];
+
+    var interval = CronExpression.parse('0 0 0 ? * 1L', options);
+
+    expectedDates.forEach(function(expected) {
+      var date = interval.next();
+      t.equal(
+        date.toISOString(), 
+        expected.toISOString(), 
+        'Expression "0 0 0 ? * 1L" has next() that matches expected: ' + expected.toISOString()
+      );
+    });
+    expectedDates
+      .slice(0, expectedDates.length - 1)
+      .reverse()
+      .forEach(function(expected) {
+        var date = interval.prev();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "0 0 0 ? * 1L" has prev() that matches expected: ' + expected.toISOString()
+        );
+      });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work with last for dayOfMonth', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-04-27')
+    };
+    
+    var expectedDates = [
+      new CronDate('2019-05-27'),
+      new CronDate('2019-06-26'),
+      new CronDate('2019-07-27'),
+      new CronDate('2019-08-27'),
+      new CronDate('2019-09-26')
+    ];
+
+    var interval = CronExpression.parse('0 0 0 5L * ?', options);
+
+    expectedDates.forEach(function(expected) {
+      var date = interval.next();
+      t.equal(
+        date.toISOString(), 
+        expected.toISOString(), 
+        'Expression "0 0 0 5L * ?" has next() that matches expected: ' + expected.toISOString()
+      );
+    });
+    expectedDates
+      .slice(0, expectedDates.length - 1)
+      .reverse()
+      .forEach(function(expected) {
+        var date = interval.prev();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "0 0 0 5L * ?" has prev() that matches expected: ' + expected.toISOString()
+        );
+      });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('should work with step', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('2019-04-26')
+    };
+    
+    var expectedDates = [
+      new CronDate('2019-04-30'),
+      new CronDate('2019-05-05'),
+      new CronDate('2019-05-10'),
+      new CronDate('2019-05-15'),
+      new CronDate('2019-05-20')
+    ];
+
+    var interval = CronExpression.parse('0 0 0 5/5 * ?', options);
+
+    expectedDates.forEach(function(expected) {
+      var date = interval.next();
+      t.equal(
+        date.toISOString(), 
+        expected.toISOString(), 
+        'Expression "0 0 0 5/5 * ?" has next() that matches expected: ' + expected.toISOString()
+      );
+    });
+    expectedDates
+      .slice(0, expectedDates.length - 1)
+      .reverse()
+      .forEach(function(expected) {
+        var date = interval.prev();
+        t.equal(
+          date.toISOString(), 
+          expected.toISOString(), 
+          'Expression "0 0 0 5/5 * ?" has prev() that matches expected: ' + expected.toISOString()
+        );
+      });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
 test('should error when passed invalid occurence value', function(t) {
   var expressions = [
     '0 0 0 ? * 1#',
