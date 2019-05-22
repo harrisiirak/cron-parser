@@ -407,12 +407,9 @@ test('expression limited with start and end date', function(t) {
       t.ok(true, 'Failed as expected');
     }
 
-    // TODO: Currently, encountering an out-of-range failure (as above)
-    // still results in a new interval being set on the object.
-    // Until/unless this is fixed, the below test will fail.
-    // next = interval.prev();
-    // t.equal(next.getHours(), 16, 'Hour matches');
-    // t.equal(next.getMinutes(), 20, 'Minute matches');
+    next = interval.prev();
+    t.equal(next.getHours(), 16, 'Hour matches');
+    t.equal(next.getMinutes(), 20, 'Minute matches');
 
     interval.reset();
 
@@ -609,6 +606,47 @@ test('expression using non-standard second field (range)', function(t) {
   t.end();
 });
 
+test('expression using explicit month definition and */5 day of month step', function(t) {
+  var firstIterator = CronExpression.parse('0 12 */5 6 *', {
+    currentDate: '2019-06-01T11:00:00.000'
+  });
+  
+  var firstExpectedDates = [
+    new CronDate('2019-06-01T12:00:00.000'),
+    new CronDate('2019-06-06T12:00:00.000'),
+    new CronDate('2019-06-11T12:00:00.000'),
+    new CronDate('2019-06-16T12:00:00.000'),
+    new CronDate('2019-06-21T12:00:00.000'),
+    new CronDate('2019-06-26T12:00:00.000'),
+    new CronDate('2020-06-01T12:00:00.000')
+  ];
+
+  firstExpectedDates.forEach(function(expectedDate) {
+    t.equal(expectedDate.toISOString(), firstIterator.next().toISOString());
+  });
+
+  var secondIterator = CronExpression.parse('0 15 */5 5 *', {
+    currentDate: '2019-05-01T11:00:00.000'
+  });
+
+  var secondExpectedDates = [
+    new CronDate('2019-05-01T15:00:00.000'),
+    new CronDate('2019-05-06T15:00:00.000'),
+    new CronDate('2019-05-11T15:00:00.000'),
+    new CronDate('2019-05-16T15:00:00.000'),
+    new CronDate('2019-05-21T15:00:00.000'),
+    new CronDate('2019-05-26T15:00:00.000'),
+    new CronDate('2019-05-31T15:00:00.000'),
+    new CronDate('2020-05-01T15:00:00.000')
+  ];
+
+  secondExpectedDates.forEach(function(expectedDate) {
+    t.equal(expectedDate.toISOString(), secondIterator.next().toISOString());
+  });
+
+  t.end();
+});
+
 test('day of month and week are both set', function(t) {
   try {
     var interval = CronExpression.parse('10 2 12 8 0');
@@ -724,6 +762,7 @@ test('Summertime bug test', function(t) {
 
   t.end();
 });
+
 
 test('day of month and week are both set and dow is 7', function(t) {
   try {
@@ -1380,3 +1419,4 @@ test('cannot combine `,` list and # occurrence special characters', function(t) 
   
   t.end();
 });
+
