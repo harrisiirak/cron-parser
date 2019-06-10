@@ -43,10 +43,10 @@
   "license": "MIT",
   "dependencies": {
     "is-nan": "^1.2.1",
-    "moment-timezone": "^0.5.23"
+    "moment-timezone": "^0.5.25"
   },
   "devDependencies": {
-    "sinon": "^7.2.7",
+    "sinon": "^7.3.2",
     "tap": "^14.2.2"
   },
   "engines": {
