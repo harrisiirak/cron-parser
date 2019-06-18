@@ -451,6 +451,54 @@ test('expression limited with start and end date', function(t) {
   t.end();
 });
 
+test('reset to given date', function(t){
+  try {
+    var options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+    };
+
+    var interval = CronExpression.parse('*/20 * * * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    // Forward iteration
+    var next = interval.next();
+    t.equal(next.getHours(), 14, 'Hour matches');
+    t.equal(next.getMinutes(), 40, 'Minute matches');
+
+    interval.reset(); // defaults to initial currentDate
+
+    next = interval.next();
+    t.equal(next.getHours(), 14, 'Hour matches');
+    t.equal(next.getMinutes(), 40, 'Minute matches');
+
+    interval.reset(new CronDate('Wed, 26 Dec 2012 17:23:53'));
+
+    next = interval.next();
+    t.equal(next.getHours(), 17, 'Hour matches');
+    t.equal(next.getMinutes(), 40, 'Minute matches');
+
+    next = interval.next();
+    t.equal(next.getHours(), 18, 'Hour matches');
+    t.equal(next.getMinutes(), 0, 'Minute matches');
+
+    interval.reset(new Date('2019-06-18T08:18:36.000'));
+
+    next = interval.prev();
+    t.equal(next.getDate(), 18, 'Date matches');
+    t.equal(next.getHours(), 8, 'Hour matches');
+    t.equal(next.getMinutes(), 0, 'Minute matches');
+
+    next = interval.prev();
+    t.equal(next.getDate(), 18, 'Date matches');
+    t.equal(next.getHours(), 7, 'Hour matches');
+    t.equal(next.getMinutes(), 40, 'Minute matches');
+
+    t.end();
+  } catch (err) {
+    t.ifError(err, 'Reset error');
+  }
+});
+
 test('parse expression as UTC', function(t) {
   try {
     var options = {
@@ -610,7 +658,7 @@ test('expression using explicit month definition and */5 day of month step', fun
   var firstIterator = CronExpression.parse('0 12 */5 6 *', {
     currentDate: '2019-06-01T11:00:00.000'
   });
-  
+
   var firstExpectedDates = [
     new CronDate('2019-06-01T12:00:00.000'),
     new CronDate('2019-06-06T12:00:00.000'),
@@ -1100,8 +1148,8 @@ test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek 
       expectedDates.forEach(function(expected) {
         var date = interval.next();
         t.equal(
-          date.toISOString(), 
-          expected.toISOString(), 
+          date.toISOString(),
+          expected.toISOString(),
           'Expression "' + expression + '" has next() that matches expected: ' + expected.toISOString()
         );
       });
@@ -1111,8 +1159,8 @@ test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek 
         .forEach(function(expected) {
           var date = interval.prev();
           t.equal(
-            date.toISOString(), 
-            expected.toISOString(), 
+            date.toISOString(),
+            expected.toISOString(),
             'Expression "' + expression + '" has prev() that matches expected: ' + expected.toISOString()
           );
         });
@@ -1140,8 +1188,8 @@ test('should work for valid second sunday in may', function(t) {
     expectedDates.forEach(function(expected) {
       var date = interval.next();
       t.equal(
-        date.toISOString(), 
-        expected.toISOString(), 
+        date.toISOString(),
+        expected.toISOString(),
         'Expression "0 0 0 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
       );
     });
@@ -1151,8 +1199,8 @@ test('should work for valid second sunday in may', function(t) {
       .forEach(function(expected) {
         var date = interval.prev();
         t.equal(
-          date.toISOString(), 
-          expected.toISOString(), 
+          date.toISOString(),
+          expected.toISOString(),
           'Expression "0 0 0 ? MAY 0#2" has prev() that matches expected: ' + expected.toISOString()
         );
       });
@@ -1174,8 +1222,8 @@ test('should work for valid second sunday at noon in may', function(t) {
     var date = interval.next();
 
     t.equal(
-      date.toISOString(), 
-      expected.toISOString(), 
+      date.toISOString(),
+      expected.toISOString(),
       'Expression "0 0 12 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
     );
   } catch (err) {
@@ -1196,8 +1244,8 @@ test('should work for valid second sunday at noon in may (UTC+3)', function(t) {
     var date = interval.next();
 
     t.equal(
-      date.toISOString(), 
-      expected.toISOString(), 
+      date.toISOString(),
+      expected.toISOString(),
       'Expression "0 0 12 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
     );
   } catch (err) {
@@ -1212,7 +1260,7 @@ test('should work with both dayOfMonth and nth occurence of dayOfWeek', function
     var options = {
       currentDate: new CronDate('2019-04-01')
     };
-    
+
     var expectedDates = [
       new CronDate('2019-04-16'),
       new CronDate('2019-04-17'),
@@ -1227,8 +1275,8 @@ test('should work with both dayOfMonth and nth occurence of dayOfWeek', function
     expectedDates.forEach(function(expected) {
       var date = interval.next();
       t.equal(
-        date.toISOString(), 
-        expected.toISOString(), 
+        date.toISOString(),
+        expected.toISOString(),
         'Expression "0 0 0 16,18 * 3#3" has next() that matches expected: ' + expected.toISOString()
       );
     });
@@ -1238,8 +1286,8 @@ test('should work with both dayOfMonth and nth occurence of dayOfWeek', function
       .forEach(function(expected) {
         var date = interval.prev();
         t.equal(
-          date.toISOString(), 
-          expected.toISOString(), 
+          date.toISOString(),
+          expected.toISOString(),
           'Expression "0 0 0 16,18 * 3#3" has prev() that matches expected: ' + expected.toISOString()
         );
       });
@@ -1262,7 +1310,7 @@ test('should error when passed invalid occurence value', function(t) {
       CronExpression.parse(expression);
     }, new Error('Constraint error, invalid dayOfWeek occurrence number (#)'), expression);
   });
-  
+
   t.end();
 });
 
@@ -1272,7 +1320,7 @@ test('cannot combine `-` range and # occurrence special characters', function(t)
   t.throws(function() {
     CronExpression.parse(expression);
   }, new Error('Constraint error, invalid dayOfWeek `#` and `-` special characters are incompatible'));
-  
+
   t.end();
 });
 
@@ -1281,7 +1329,7 @@ test('cannot combine `/` repeat interval and # occurrence special characters', f
   t.throws(function() {
     CronExpression.parse(expression);
   }, new Error('Constraint error, invalid dayOfWeek `#` and `/` special characters are incompatible'));
-  
+
   t.end();
 });
 
@@ -1290,7 +1338,7 @@ test('cannot combine `,` list and # occurrence special characters', function(t) 
   t.throws(function() {
     CronExpression.parse(expression);
   }, new Error('Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible'));
-  
+
   t.end();
 });
 
