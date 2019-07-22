@@ -1,6 +1,6 @@
 {
   "name": "cron-parser",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "description": "Node.js library for parsing crontab instructions",
   "main": "lib/parser.js",
   "types": "lib/index.d.ts",
