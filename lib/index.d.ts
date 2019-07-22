@@ -75,7 +75,7 @@ declare class CronExpression {
   iterate(steps: number, callback?: (item: CronDate, i: number) => any): CronDate[]
 
   /** Reset expression iterator state */
-  reset(): void
+  reset(resetDate?: string | number | Date): void
 
   /** Parse input expression (async) */
   parse(expression: string, options?: ParserOptions, callback?: () => any): CronExpression
