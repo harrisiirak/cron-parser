@@ -31,16 +31,20 @@ test('parse cron with last day in feb', function(t) {
   };
 
   try {
-    var interval = CronParser.parseExpression('0 0 1,3,6-10,L 2 *', options);
+    var interval = CronParser.parseExpression('0 0 6-20/2,L 2 *', options);
     t.equal(interval.hasNext(), true);
     var next = null;
+    var items = 9;
+    var i = 0;
     while(interval.hasNext()) {
       next = interval.next();
       // console.log(next.toString());
+      i += 1;
       t.ok(next, 'has a date');
     }
     //leap year
     t.equal(next.getDate(), 29);
+    t.equal(i, items);
 
   } catch (err) {
     t.ifError(err, 'Parse read error');
