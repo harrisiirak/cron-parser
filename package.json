@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tap ./test-parsing/*.js"
+    "test": "tap ./test/*.js"
   },
   "repository": {
     "type": "git",
