@@ -1,3 +1,5 @@
 .idea
 .vscode
 .history
+.nyc_output
+node_modules
