@@ -968,6 +968,21 @@ test('day and date in week should matches', function(t){
   t.end();
 });
 
+test('should sort ranges and values in ascending order', function(t) {
+  var interval = CronExpression.parse('0 12,13,10,1-3 * * *');
+  t.ok(interval, 'Interval parsed');
+
+  var hours = [ 1, 2, 3, 10, 12, 13 ];
+  for (var i in hours) {
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.equal(next.getHours(), hours[i], 'Hours matches');
+  }
+
+  t.end();
+});
+
 test('valid ES6 iterator should be returned if iterator options is set to true', function(t) {
   try {
     var options = {
