@@ -969,7 +969,10 @@ test('day and date in week should matches', function(t){
 });
 
 test('should sort ranges and values in ascending order', function(t) {
-  var interval = CronExpression.parse('0 12,13,10,1-3 * * *');
+  var options = {
+    currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+  };
+  var interval = CronExpression.parse('0 12,13,10,1-3 * * *', options);
   t.ok(interval, 'Interval parsed');
 
   var hours = [ 1, 2, 3, 10, 12, 13 ];
