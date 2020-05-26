@@ -283,6 +283,47 @@ test('invalid expression which has repeat negative number times', function(t) {
   t.end();
 });
 
+test('range test with value and repeat (second)', function(t) {
+  var options = {
+    currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+  };
+  var interval = CronExpression.parse('0/30 * * * * ?', options);
+  t.ok(interval, 'Interval parsed');
+
+  var next = interval.next();
+  t.equal(next.getSeconds(), 0);
+
+  next = interval.next();
+  t.equal(next.getSeconds(), 30);
+
+  next = interval.next();
+  t.equal(next.getSeconds(), 0);
+
+  t.end();
+});
+
+test('range test with value and repeat (minute)', function(t) {
+  var options = {
+    currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+  };
+  var interval = CronExpression.parse('6/23 * * * *', options);
+  t.ok(interval, 'Interval parsed');
+
+  var next = interval.next();
+  t.equal(next.getMinutes(), 52);
+
+  next = interval.next();
+  t.equal(next.getMinutes(), 6);
+
+  next = interval.next();
+  t.equal(next.getMinutes(), 29);
+
+  next = interval.next();
+  t.equal(next.getMinutes(), 52);
+
+  t.end();
+});
+
 test('range test with iterator', function(t) {
   try {
     var interval = CronExpression.parse('10-30 2 12 8 0');
