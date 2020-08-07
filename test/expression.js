@@ -890,7 +890,10 @@ test('day of month and week are both set and dow is 7', function(t) {
 
 test('day of month and week are both set and dow is 6,0', function(t) {
   try {
-    var interval = CronExpression.parse('10 2 12 8 6,0');
+    var options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+    };
+    var interval = CronExpression.parse('10 2 12 8 6,0', options);
     t.ok(interval, 'Interval parsed');
 
     var next = interval.next();
@@ -926,7 +929,10 @@ test('day of month and week are both set and dow is 6,0', function(t) {
 
 test('day of month and week are both set and dow is 6-7', function(t) {
   try {
-    var interval = CronExpression.parse('10 2 12 8 6-7');
+    var options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+    };
+    var interval = CronExpression.parse('10 2 12 8 6-7', options);
     t.ok(interval, 'Interval parsed');
 
     var next = interval.next();
