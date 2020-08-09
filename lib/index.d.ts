@@ -49,7 +49,7 @@ declare class CronDate {
   toDate(): Date
 }
 
-export interface ParserOptions {
+interface ParserOptions {
   currentDate?: string | number | Date
   startDate?: string | number | Date
   endDate?: string | number | Date
