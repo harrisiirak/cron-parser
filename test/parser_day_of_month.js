@@ -38,7 +38,6 @@ test('parse cron with last day in feb', function(t) {
     var i = 0;
     while(interval.hasNext()) {
       next = interval.next();
-      // console.log(next.toString());
       i += 1;
       t.ok(next, 'has a date');
     }
@@ -65,7 +64,6 @@ test('parse cron with last day in feb', function(t) {
     var next = null;
     while(interval.hasNext()) {
       next = interval.next();
-      // console.log(next.toString());
       t.ok(next, 'has a date');
     }
     //common year
