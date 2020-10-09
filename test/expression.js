@@ -1298,6 +1298,7 @@ test('should work for valid second sunday at noon in may', function(t) {
   t.end();
 });
 
+// NOTE: This test does not work after migrating from Moment.js to Day.js
 test('should work for valid second sunday at noon in may (UTC+3)', function(t) {
   try {
     var options = {

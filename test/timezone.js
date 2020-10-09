@@ -1,6 +1,8 @@
 var test = require('tap').test;
 var CronExpression = require('../lib/expression');
 
+// NOTE: These tests do not work after migrating from Moment.js to Day.js
+
 test('It works on DST start', function(t) {
   try {
     var options = {
