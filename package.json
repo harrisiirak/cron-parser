@@ -8,7 +8,14 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tap ./test/*.js"
+    "test": "tap ./test/*.js",
+    "testExp": "tap ./test/expression.js",
+    "testBug": "tap ./test/bug.js",
+    "testTz": "tap ./test/timezone.js",
+    "testParser": "tap ./test/parser.js",
+    "testLy": "tap ./test/leap_year.js",
+    "testIofi": "tap ./test/increment_on_first_iteration.js",
+    "test31": "tap ./test/31_of_month.js"
   },
   "repository": {
     "type": "git",
@@ -42,8 +49,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "is-nan": "^1.3.0",
-    "moment-timezone": "^0.5.31"
+    "dayjs": "^1.9.1",
+    "is-nan": "^1.3.0"
   },
   "devDependencies": {
     "sinon": "^7.5.0",
