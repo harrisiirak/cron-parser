@@ -45,7 +45,8 @@
     "Nicholas Clawson <nickclaw@gmail.com>",
     "Brendan Warkentin <faazshift@gmail.com>",
     "Charlie Fish <fishcharlie.code@gmail.com>",
-    "Ian Graves <ian+diskimage@iangrav.es>"
+    "Ian Graves <ian+diskimage@iangrav.es>",
+    "Jeppe Kaare Larsen <jeppe@kaarelarsen.dk>"
   ],
   "license": "MIT",
   "dependencies": {
