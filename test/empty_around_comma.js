@@ -3,22 +3,20 @@
 var test = require('tap').test;
 var CronExpression = require('../lib/expression');
 
-test('both empty around comma', function (t) {
-  const options = {
-    utc: true
-  };
-  const instance = CronExpression.parse('*/10 * * * * ,', options);
-  t.deepEqual(instance._fields.dayOfWeek, [0, 1, 2, 3, 4, 5, 6, 7]);
+const options = {
+  utc: true
+};
 
+test('both empty around comma', function (t) {
+  t.throws(function () {
+    CronExpression.parse('*/10 * * * * ,', options);
+  }, new Error('Invalid cron expression, value can not specified as comma'));
   t.end();
 });
 
 test('one side empty around comma', function (t) {
-  const options = {
-    utc: true
-  };
-  const instance = CronExpression.parse('*/10 * * * * ,2', options);
-  t.deepEqual(instance._fields.dayOfWeek, [2]);
-
+  t.throws(function () {
+    CronExpression.parse('*/10 * * * * ,2', options);
+  }, new Error('Invalid cron expression, value can not dangling comma'));
   t.end();
 });
