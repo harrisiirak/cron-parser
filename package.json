@@ -46,7 +46,7 @@
     "moment-timezone": "^0.5.31"
   },
   "devDependencies": {
-    "sinon": "^7.5.0",
+    "sinon": "^9.2.1",
     "tap": "^14.10.8"
   },
   "engines": {
