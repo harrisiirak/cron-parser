@@ -17,6 +17,6 @@ test('both empty around comma', function (t) {
 test('one side empty around comma', function (t) {
   t.throws(function () {
     CronExpression.parse('*/10 * * * * ,2', options);
-  }, new Error('Invalid cron expression, value can not dangling comma'));
+  }, new Error('Invalid list value format'));
   t.end();
 });
