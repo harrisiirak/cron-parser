@@ -10,7 +10,7 @@ const options = {
 test('both empty around comma', function (t) {
   t.throws(function () {
     CronExpression.parse('*/10 * * * * ,', options);
-  }, new Error('Invalid cron expression, value can not specified as comma'));
+  }, new Error('Invalid list value format'));
   t.end();
 });
 
