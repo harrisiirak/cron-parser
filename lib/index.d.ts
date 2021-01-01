@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 export = CronParser
 
 declare class CronDate {
@@ -51,9 +50,9 @@ declare class CronDate {
 }
 
 interface ParserOptions {
-  currentDate?: string | number | Date | DateTime
-  startDate?: string | number | Date | DateTime
-  endDate?: string | number | Date | DateTime
+  currentDate?: string | number | Date
+  startDate?: string | number | Date
+  endDate?: string | number | Date
   iterator?: boolean
   utc?: boolean
   tz?: string
