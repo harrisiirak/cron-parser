@@ -47,6 +47,7 @@ declare class CronDate {
   getTime(): number
   toString(): string
   toDate(): Date
+  valueOf(): number
 }
 
 interface ParserOptions {
@@ -58,7 +59,7 @@ interface ParserOptions {
   tz?: string
 }
 
-declare class CronExpression {
+declare class CronExpression implements Iterable<CronDate> {
   constructor(fields: {}, options: {})
 
   /** Find next suitable date */
@@ -79,6 +80,8 @@ declare class CronExpression {
 
   /** Parse input expression (async) */
   parse(expression: string, options?: ParserOptions, callback?: () => any): CronExpression
+
+  [Symbol.iterator](): Iterator<CronDate>
 }
 
 interface StringResult {
