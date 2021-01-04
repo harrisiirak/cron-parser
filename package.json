@@ -8,7 +8,10 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tap ./test/*.js"
+    "test:unit": "tap ./test/*.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "test": "npm run lint && npm run test:unit"
   },
   "repository": {
     "type": "git",
@@ -46,6 +49,7 @@
     "moment-timezone": "^0.5.31"
   },
   "devDependencies": {
+    "eslint": "^7.17.0",
     "sinon": "^9.2.1",
     "tap": "^14.10.8"
   },

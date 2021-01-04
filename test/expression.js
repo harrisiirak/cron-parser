@@ -580,7 +580,7 @@ test('expression using days of week strings', function(t) {
 
 
       t.ok(next, 'Found next scheduled interval');
-      t.ok(day == 1 || day == 2, 'Day matches')
+      t.ok(day == 1 || day == 2, 'Day matches');
       t.equal(next.getHours(), 10, 'Hour matches');
       t.equal(next.getMinutes(), 15, 'Minute matches');
     }
