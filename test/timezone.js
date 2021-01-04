@@ -1,5 +1,4 @@
 var test = require('tap').test;
-var luxon = require('luxon');
 var CronExpression = require('../lib/expression');
 
 test('It works on DST start', function(t) {
@@ -214,8 +213,8 @@ test('It works on DST end', function(t) {
     t.equal(date.getDate(), 30, '30th');
 
     options.currentDate = '2016-10-30 00:00:01';
-    // 2016-10-30 03:00:01 in the tz occurs twice, so is non-deterministic, and so get the first occurance
-    options.endDate = luxon.DateTime.fromSQL('2016-10-30 02:00:01', { zone: options.tz }).plus({ hours: 1 }).toJSDate();
+    // specify the DST offset via ISO 8601 format, as 3am is repeated
+    options.endDate = '2016-10-30T03:00:01+03';
 
     interval = CronExpression.parse('0 * * * *', options);
     t.ok(interval, 'Interval parsed');
