@@ -1169,7 +1169,7 @@ test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek 
     ];
     var expectedSecondDates = [
       new CronDate('2019-05-12'),
-      new CronDate('2019-06-9'),
+      new CronDate('2019-06-09'),
       new CronDate('2019-07-14'),
       new CronDate('2019-08-11')
     ];
@@ -1186,8 +1186,8 @@ test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek 
       new CronDate('2019-08-25')
     ];
     var expectedFifthDates = [
-      new CronDate('2019-6-30'),
-      new CronDate('2019-9-29'),
+      new CronDate('2019-06-30'),
+      new CronDate('2019-09-29'),
       new CronDate('2019-12-29'),
       new CronDate('2020-03-29')
     ];
