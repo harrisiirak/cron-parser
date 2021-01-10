@@ -213,7 +213,8 @@ test('It works on DST end', function(t) {
     t.equal(date.getDate(), 30, '30th');
 
     options.currentDate = '2016-10-30 00:00:01';
-    options.endDate = '2016-10-30 03:00:01';
+    // specify the DST offset via ISO 8601 format, as 3am is repeated
+    options.endDate = '2016-10-30T03:00:01+03';
 
     interval = CronExpression.parse('0 * * * *', options);
     t.ok(interval, 'Interval parsed');

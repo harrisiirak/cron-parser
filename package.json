@@ -46,7 +46,7 @@
   "license": "MIT",
   "dependencies": {
     "is-nan": "^1.3.0",
-    "moment-timezone": "^0.5.31"
+    "luxon": "^1.25.0"
   },
   "devDependencies": {
     "eslint": "^7.17.0",
