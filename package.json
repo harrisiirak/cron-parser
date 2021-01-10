@@ -1,6 +1,6 @@
 {
   "name": "cron-parser",
-  "version": "2.18.0",
+  "version": "3.0.0",
   "description": "Node.js library for parsing crontab instructions",
   "main": "lib/parser.js",
   "types": "lib/index.d.ts",
@@ -41,7 +41,8 @@
     "Nicholas Clawson <nickclaw@gmail.com>",
     "Brendan Warkentin <faazshift@gmail.com>",
     "Charlie Fish <fishcharlie.code@gmail.com>",
-    "Ian Graves <ian+diskimage@iangrav.es>"
+    "Ian Graves <ian+diskimage@iangrav.es>",
+    "Andy Thompson <me@andytson.com>"
   ],
   "license": "MIT",
   "dependencies": {
