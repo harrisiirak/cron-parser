@@ -133,9 +133,9 @@ test('parse cron date formats with another timezone', (t) => {
   });
 
   test('CronDate with different timezone', (t) => {
-    var date = new CronDate('Mon, 4 Jan 2021 10:00:00', 'Antarctica/McMurdo');
+    var date = new CronDate('Mon, 4 Jan 2021 10:00:00', 'America/New_York');
     var d = new CronDate(date, 'Europe/Athens');
-    t.equal(d.toISOString(), '2021-01-03T23:00:00.000+02:00');
+    t.equal(d.toISOString(), '2021-01-04T17:00:00.000+02:00');
 
     t.end();
   });
