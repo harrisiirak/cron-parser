@@ -97,21 +97,21 @@ test('parse cron date formats with another timezone', (t) => {
   test('ISO 8601 without offset', (t) => {
     // implies format already in timezone
     var d = new CronDate('2021-01-04T10:00:00', 'Europe/Athens');
-    t.equal(d.toISOString(), '2021-01-04T10:00:00.000+02:00');
+    t.equal(d.toISOString(), '2021-01-04T08:00:00.000Z');
 
     t.end();
   });
 
   test('ISO 8601 with non-local offset', (t) => {
     var d = new CronDate('2021-01-04T10:00:00+01:00', 'Europe/Athens');
-    t.equal(d.toISOString(), '2021-01-04T11:00:00.000+02:00');
+    t.equal(d.toISOString(), '2021-01-04T09:00:00.000Z');
 
     t.end();
   });
 
   test('RFC2822 with non-local offset', (t) => {
     var d = new CronDate('Mon, 4 Jan 2021 10:00:00 +0100', 'Europe/Athens');
-    t.equal(d.toISOString(), '2021-01-04T11:00:00.000+02:00');
+    t.equal(d.toISOString(), '2021-01-04T09:00:00.000Z');
 
     t.end();
   });
@@ -119,7 +119,7 @@ test('parse cron date formats with another timezone', (t) => {
   test('milliseconds', (t) => {
     var date = luxon.DateTime.fromISO('2021-01-04T11:00:00.000+02:00').valueOf();
     var d = new CronDate(date, 'Europe/Athens');
-    t.equal(d.toISOString(), '2021-01-04T11:00:00.000+02:00');
+    t.equal(d.toISOString(), '2021-01-04T09:00:00.000Z');
 
     t.end();
   });
@@ -127,7 +127,7 @@ test('parse cron date formats with another timezone', (t) => {
   test('CronDate with same timezone', (t) => {
     var date = new CronDate('Mon, 4 Jan 2021 10:00:00', 'Europe/Athens');
     var d = new CronDate(date);
-    t.equal(d.toISOString(), '2021-01-04T10:00:00.000+02:00');
+    t.equal(d.toISOString(), '2021-01-04T08:00:00.000Z');
 
     t.end();
   });
@@ -135,7 +135,7 @@ test('parse cron date formats with another timezone', (t) => {
   test('CronDate with different timezone', (t) => {
     var date = new CronDate('Mon, 4 Jan 2021 10:00:00', 'America/New_York');
     var d = new CronDate(date, 'Europe/Athens');
-    t.equal(d.toISOString(), '2021-01-04T17:00:00.000+02:00');
+    t.equal(d.toISOString(), '2021-01-04T15:00:00.000Z');
 
     t.end();
   });
