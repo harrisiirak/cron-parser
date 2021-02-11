@@ -1,5 +1,3 @@
-export = CronParser
-
 declare class CronDate {
   addYear(): void
   addMonth(): void
@@ -87,11 +85,11 @@ interface StringResult {
   errors: { [key: string]: string }
 }
 
-declare namespace CronParser {
-  /** Wrapper for CronExpression.parse method */
-  function parseExpression(expression: string, options?: ParserOptions): CronExpression
-  /** Parse crontab file */
-  function parseFile(filePath: string, callback: (err: any, data: StringResult) => any): void
-  /** Parse content string */
-  function parseString(data: string): StringResult
-}
+/** Wrapper for CronExpression.parse method */
+export function parseExpression(expression: string, options?: ParserOptions): CronExpression
+
+/** Parse crontab file */
+export function parseFile(filePath: string, callback: (err: any, data: StringResult) => any): void
+
+/** Parse content string */
+export function parseString(data: string): StringResult
