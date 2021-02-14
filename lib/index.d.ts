@@ -1,5 +1,7 @@
+type DateTypes = CronDate | Date | number | string;
+
 declare class CronDate {
-  constructor(timestamp?: CronDate | Date | number | string, tz?: string);
+  constructor(timestamp?: DateTypes, tz?: string);
 
   addYear(): void
   addMonth(): void
@@ -52,12 +54,12 @@ declare class CronDate {
 }
 
 interface ParserOptions<IsIterable extends boolean> {
-  currentDate?: string | number | Date
-  startDate?: string | number | Date
-  endDate?: string | number | Date
-  iterator?: IsIterable
-  utc?: boolean
-  tz?: string
+  currentDate?: DateTypes;
+  startDate?: DateTypes;
+  endDate?: DateTypes;
+  iterator?: IsIterable;
+  utc?: boolean;
+  tz?: string;
   nthDayOfWeek?: number;
 }
 
