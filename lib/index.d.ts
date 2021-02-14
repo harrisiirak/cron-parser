@@ -1,4 +1,6 @@
 declare class CronDate {
+  constructor(timestamp?: CronDate | Date | number | string, tz?: string);
+
   addYear(): void
   addMonth(): void
   addDay(): void
@@ -45,6 +47,8 @@ declare class CronDate {
   getTime(): number
   toString(): string
   toDate(): Date
+
+  isLastDayOfMonth(): boolean;
 }
 
 interface ParserOptions<IsIterable extends boolean> {
