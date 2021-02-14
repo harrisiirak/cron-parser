@@ -79,17 +79,17 @@ declare class CronExpression {
   parse(expression: string, options?: ParserOptions, callback?: () => any): CronExpression
 }
 
-interface StringResult {
+export interface StringResult {
   variables: { [key: string]: string },
   expressions: CronExpression[],
-  errors: { [key: string]: string }
+  errors: { [key: string]: any },
 }
 
 /** Wrapper for CronExpression.parse method */
-export function parseExpression(expression: string, options?: ParserOptions): CronExpression
+export const parseExpression: typeof CronExpression.parse;
 
 /** Parse crontab file */
-export function parseFile(filePath: string, callback: (err: any, data: StringResult) => any): void
+export function parseFile(filePath: string, callback: (err: any, data: StringResult) => void): void;
 
 /** Parse content string */
-export function parseString(data: string): StringResult
+export function parseString(data: string): StringResult;
