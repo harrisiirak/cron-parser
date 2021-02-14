@@ -1,4 +1,5 @@
 var test = require('tap').test;
+var t = require('tap');
 var CronExpression = require('../lib/expression');
 var CronDate = require('../lib/date');
 
@@ -965,7 +966,7 @@ test('day of month and week are both set and dow is 6-7', function(t) {
   t.end();
 });
 
-test('day of month validation should be ignored when day of month is wildcard and month is set', function (t) {
+t.only('day of month validation should be ignored when day of month is wildcard and month is set', function (t) {
   try {
     var interval = CronExpression.parse('* * * * 2 *');
     t.ok(interval, 'Interval parsed');

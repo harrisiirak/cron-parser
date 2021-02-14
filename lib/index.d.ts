@@ -47,22 +47,25 @@ declare class CronDate {
   toDate(): Date
 }
 
-interface ParserOptions {
+interface ParserOptions<IsIterable extends boolean> {
   currentDate?: string | number | Date
   startDate?: string | number | Date
   endDate?: string | number | Date
-  iterator?: boolean
+  iterator?: IsIterable
   utc?: boolean
   tz?: string
+  nthDayOfWeek?: number;
 }
 
-declare class CronExpression {
-  constructor(fields: {}, options: {})
+type IteratorResultOrCronDate<IsIterable extends boolean = false> = IsIterable extends true
+  ? IteratorResult<CronDate, CronDate>
+  : CronDate;
 
+declare class CronExpression<IsIterable extends boolean = false> {
   /** Find next suitable date */
-  next(): CronDate
+  next(): IteratorResultOrCronDate<IsIterable>;
   /** Find previous suitable date */
-  prev(): CronDate
+  prev(): IteratorResultOrCronDate<IsIterable>;
 
   /** Check if next suitable date exists */
   hasNext(): boolean
@@ -70,13 +73,13 @@ declare class CronExpression {
   hasPrev(): boolean
 
   /** Iterate over expression iterator */
-  iterate(steps: number, callback?: (item: CronDate, i: number) => any): CronDate[]
+  iterate(steps: number, callback?: (item: IteratorResultOrCronDate<IsIterable>, i: number) => void): IteratorResultOrCronDate<IsIterable>[]
 
   /** Reset expression iterator state */
-  reset(resetDate?: string | number | Date): void
+  reset(resetDate?: CronDate | Date | number | string): void
 
-  /** Parse input expression (async) */
-  parse(expression: string, options?: ParserOptions, callback?: () => any): CronExpression
+  /** Parse input expression */
+  static parse<IsIterable extends boolean = false>(expression: string, options?: ParserOptions<IsIterable>): CronExpression<IsIterable>;
 }
 
 export interface StringResult {
