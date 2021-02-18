@@ -967,7 +967,10 @@ test('day of month and week are both set and dow is 6-7', function(t) {
 
 test('day of month validation should be ignored when day of month is wildcard and month is set', function (t) {
   try {
-    var interval = CronExpression.parse('* * * * 2 *');
+    var options = {
+      currentDate: new CronDate('2020-05-01T15:00:00.000')
+    };
+    var interval = CronExpression.parse('* * * * 2 *', options);
     t.ok(interval, 'Interval parsed');
 
     var next = interval.next();
