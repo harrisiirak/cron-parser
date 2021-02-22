@@ -58,8 +58,16 @@ interface ParserOptions {
   tz?: string
 }
 
+type CronFieldsKeys = 'second' | 'minute' | 'hour' | 'dayOfMonth' | 'month' | 'dayOfWeek'
+
+declare type CronFields = {
+  readonly [k in CronFieldsKeys]: readonly number[];
+}
+
 declare class CronExpression {
-  constructor(fields: {}, options: {})
+  public readonly fields: CronFields
+
+  constructor(fields: CronFields, options: {})
 
   /** Find next suitable date */
   next(): CronDate

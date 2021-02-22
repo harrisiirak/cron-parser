@@ -13,9 +13,10 @@ test('parse cron date formats with local timezone', (t) => {
   var expectedTime = new Date(2021, 0, 4, 10, 0, 0).toString();
 
   test('undefined date', (t) => {
+    const realDate = new Date();
     var d = new CronDate();
 
-    t.equal(d.toDate().toString(), new Date().toString());
+    t.equal(d.toDate().toString(), realDate.toString());
 
     t.end();
   });

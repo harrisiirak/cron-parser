@@ -8,10 +8,11 @@
     "test": "test"
   },
   "scripts": {
+    "test:tsd": "tsd",
     "test:unit": "TZ=UTC tap ./test/*.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "npm run lint && npm run test:unit"
+    "test": "npm run lint && npm run test:unit && npm run test:tsd"
   },
   "repository": {
     "type": "git",
@@ -52,12 +53,16 @@
   "devDependencies": {
     "eslint": "^7.17.0",
     "sinon": "^9.2.1",
-    "tap": "^14.10.8"
+    "tap": "^14.10.8",
+    "tsd": "^0.14.0"
   },
   "engines": {
     "node": ">=0.8"
   },
   "browser": {
     "fs": false
+  },
+  "tsd": {
+    "directory": "test"
   }
 }
