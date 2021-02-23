@@ -8,11 +8,18 @@ import {
     parseString,
     stringifyExpression,
     StringResult
-} from '../index';
-import * as CronParser from '../index';
+} from '../types/ts3';
+import * as CronParser from '../types/ts3';
 
 const interval = CronParser.parseExpression('0 1 2 3 * 1-3,5');
 const intervalIterator = CronParser.parseExpression('0 1 2 3 * 1-3,5', {iterator: true});
+
+expectType<readonly number[]>(interval.fields.second);
+expectType<readonly number[]>(interval.fields.minute);
+expectType<readonly number[]>(interval.fields.hour);
+expectType<readonly (number | 'L')[]>(interval.fields.dayOfMonth);
+expectType<readonly number[]>(interval.fields.month);
+expectType<readonly number[]>(interval.fields.dayOfWeek);
 
 expectError(interval.fields = interval.fields);
 
@@ -36,34 +43,22 @@ expectError(interval.fields.dayOfWeek.push(1));
 
 expectAssignable<typeof interval.fields.second[0]>(0);
 expectAssignable<typeof interval.fields.second[0]>(59);
-expectNotAssignable<typeof interval.fields.second[0]>(-1);
-expectNotAssignable<typeof interval.fields.second[0]>(60);
 
 expectAssignable<typeof interval.fields.minute[0]>(0);
 expectAssignable<typeof interval.fields.minute[0]>(59);
-expectNotAssignable<typeof interval.fields.minute[0]>(-1);
-expectNotAssignable<typeof interval.fields.minute[0]>(60);
 
 expectAssignable<typeof interval.fields.hour[0]>(0);
 expectAssignable<typeof interval.fields.hour[0]>(23);
-expectNotAssignable<typeof interval.fields.hour[0]>(-1);
-expectNotAssignable<typeof interval.fields.hour[0]>(24);
 
 expectAssignable<typeof interval.fields.dayOfMonth[0]>(1);
 expectAssignable<typeof interval.fields.dayOfMonth[0]>(31);
 expectAssignable<typeof interval.fields.dayOfMonth[0]>('L');
-expectNotAssignable<typeof interval.fields.dayOfMonth[0]>(0);
-expectNotAssignable<typeof interval.fields.dayOfMonth[0]>(32);
 
 expectAssignable<typeof interval.fields.month[0]>(1);
 expectAssignable<typeof interval.fields.month[0]>(12);
-expectNotAssignable<typeof interval.fields.month[0]>(0);
-expectNotAssignable<typeof interval.fields.month[0]>(13);
 
 expectAssignable<typeof interval.fields.dayOfWeek[0]>(0);
 expectAssignable<typeof interval.fields.dayOfWeek[0]>(7);
-expectNotAssignable<typeof interval.fields.dayOfWeek[0]>(-1);
-expectNotAssignable<typeof interval.fields.dayOfWeek[0]>(8);
 
 const parseOptions: ParserOptions<true> = {
     currentDate: 'f',

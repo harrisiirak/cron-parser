@@ -3,13 +3,21 @@
   "version": "3.2.0",
   "description": "Node.js library for parsing crontab instructions",
   "main": "lib/parser.js",
-  "types": "lib/index.d.ts",
+  "types": "index.d.ts",
+  "typesVersions": {
+    "<=4.1": {
+      "*": [
+        "types/ts3/*"
+      ]
+    }
+  },
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test:tsd": "tsd",
     "test:unit": "TZ=UTC tap ./test/*.js",
+    "test:cover": "TZ=UTC tap --coverage-report=html ./test/*.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "npm run lint && npm run test:unit && npm run test:tsd"
@@ -43,7 +51,8 @@
     "Brendan Warkentin <faazshift@gmail.com>",
     "Charlie Fish <fishcharlie.code@gmail.com>",
     "Ian Graves <ian+diskimage@iangrav.es>",
-    "Andy Thompson <me@andytson.com>"
+    "Andy Thompson <me@andytson.com>",
+    "Regev Brody <regevbr@gmail.com>"
   ],
   "license": "MIT",
   "dependencies": {
@@ -63,6 +72,12 @@
     "fs": false
   },
   "tsd": {
-    "directory": "test"
+    "directory": "test",
+    "compilerOptions": {
+      "lib": [
+        "es2017",
+        "dom"
+      ]
+    }
   }
 }
