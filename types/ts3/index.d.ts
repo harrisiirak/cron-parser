@@ -21,7 +21,7 @@ export type StringResult = IStringResult<CronFields>
 
 export function parseExpression<IsIterable extends boolean = false>(expression: string, options?: ParserOptions<IsIterable>): CronExpression<IsIterable>;
 
-export function stringifyExpression(fields: CronFields, options?: ParserOptions<boolean>): string;
+export function fieldsToExpression<IsIterable extends boolean = false>(fields: CronFields, options?: ParserOptions<IsIterable>): CronExpression<IsIterable>;
 
 export function parseFile(filePath: string, callback: (err: any, data: StringResult) => any): void;
 

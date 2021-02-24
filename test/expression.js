@@ -591,6 +591,14 @@ test('expression using days of week strings', function(t) {
   t.end();
 });
 
+test('expression using days of week strings - wrong alias', function(t) {
+  t.throws(function () {
+    CronExpression.parse('15 10 * * MON-TUR');
+  }, new Error('Validation error, cannot resolve alias "tur"'));
+
+  t.end();
+});
+
 test('expression using mixed days of week strings', function(t) {
   try {
     var options = {

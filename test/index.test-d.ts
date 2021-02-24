@@ -6,7 +6,7 @@ import {
     parseExpression,
     parseFile, ParserOptions,
     parseString,
-    stringifyExpression,
+    fieldsToExpression,
     StringResult
 } from '../index';
 
@@ -95,8 +95,12 @@ const fields: CronFields = {
     dayOfWeek: [1],
 }
 
-expectType<string>(stringifyExpression(fields))
-expectType<string>(stringifyExpression(fields, parseOptions))
+expectType<CronExpression>(fieldsToExpression(fields))
+expectType<CronExpression<true>>(fieldsToExpression(fields, parseOptions))
+
+expectType<string>(fieldsToExpression(fields).stringify())
+expectType<string>(fieldsToExpression(fields, parseOptions).stringify())
+expectType<string>(fieldsToExpression(fields, parseOptions).stringify(true))
 
 expectType<void>(parseFile('path', (err: any, data: StringResult) => console.log(data)))
 
@@ -115,6 +119,7 @@ expectType<CronDate>(interval.prev())
 expectType<boolean>(interval.hasNext())
 expectType<boolean>(interval.hasPrev())
 expectType<string>(interval.stringify())
+expectType<string>(interval.stringify(true))
 expectType<void>(interval.reset())
 expectType<void>(interval.reset("Sdf"))
 expectType<void>(interval.reset(5))

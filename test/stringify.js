@@ -6,9 +6,26 @@ test('stringify cron expression all stars no seconds', function (t) {
   try {
     var expected = '0 * * * * *';
     var interval = CronParser.parseExpression('* * * * *', {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression all stars no seconds (discard seconds)', function (t) {
+
+  try {
+    var expected = '* * * * *';
+    var interval = CronParser.parseExpression('* * * * *', {});
     var str = interval.stringify();
     t.equal(str, expected);
-    str = CronParser.stringifyExpression(interval.fields);
+    str = CronParser.fieldsToExpression(interval.fields).stringify();
     t.equal(str, expected);
 
   } catch (err) {
@@ -23,9 +40,26 @@ test('stringify cron expression all stars with seconds', function (t) {
   try {
     var expected = '* * * * * *';
     var interval = CronParser.parseExpression('* * * * * *', {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression all stars with seconds (discard seconds)', function (t) {
+
+  try {
+    var expected = '* * * * *';
+    var interval = CronParser.parseExpression('* * * * * *', {});
     var str = interval.stringify();
     t.equal(str, expected);
-    str = CronParser.stringifyExpression(interval.fields);
+    str = CronParser.fieldsToExpression(interval.fields).stringify();
     t.equal(str, expected);
 
   } catch (err) {
@@ -40,9 +74,26 @@ test('stringify cron expression', function (t) {
   try {
     var expected = '0 1,2,4-10,20-35/5,57 * * * *';
     var interval = CronParser.parseExpression('1,2,4-10,20-35/5,57 * * * *', {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression (discard seconds)', function (t) {
+
+  try {
+    var expected = '1,2,4-10,20-35/5,57 * * * *';
+    var interval = CronParser.parseExpression('1,2,4-10,20-35/5,57 * * * *', {});
     var str = interval.stringify();
     t.equal(str, expected);
-    str = CronParser.stringifyExpression(interval.fields);
+    str = CronParser.fieldsToExpression(interval.fields).stringify();
     t.equal(str, expected);
 
   } catch (err) {
@@ -57,9 +108,60 @@ test('stringify cron expression with star range step', function (t) {
   try {
     var expected = '0 */5 */2 * * *';
     var interval = CronParser.parseExpression('*/5 */2 */1 * *', {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression with star range step (discard seconds)', function (t) {
+
+  try {
+    var expected = '*/5 */2 * * *';
+    var interval = CronParser.parseExpression('*/5 */2 */1 * *', {});
     var str = interval.stringify();
     t.equal(str, expected);
-    str = CronParser.stringifyExpression(interval.fields);
+    str = CronParser.fieldsToExpression(interval.fields).stringify();
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression with semi range step', function (t) {
+
+  try {
+    var expected = '0 5/5 * * * *';
+    var interval = CronParser.parseExpression('5/5 * * * *', {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression with semi range step (discard seconds)', function (t) {
+
+  try {
+    var expected = '5/5 * * * *';
+    var interval = CronParser.parseExpression('5/5 * * * *', {});
+    var str = interval.stringify();
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify();
     t.equal(str, expected);
 
   } catch (err) {
@@ -74,9 +176,9 @@ test('stringify cron expression with L', function (t) {
   try {
     var expected = '0 * * 1,4-10,L * *';
     var interval = CronParser.parseExpression('* * 1,4-10,L * *', {});
-    var str = interval.stringify();
+    var str = interval.stringify(true);
     t.equal(str, expected);
-    str = CronParser.stringifyExpression(interval.fields);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
     t.equal(str, expected);
 
   } catch (err) {
@@ -86,17 +188,35 @@ test('stringify cron expression with L', function (t) {
   t.end();
 });
 
-test('stringify from fields out of order + default values', function (t) {
+test('stringify cron expression with L (discard seconds)', function (t) {
 
   try {
-    var expected = '1-5 1 1 1 * 1';
-    var str =     CronParser.stringifyExpression({
+    var expected = '* * 1,4-10,L * *';
+    var interval = CronParser.parseExpression('* * 1,4-10,L * *', {});
+    var str = interval.stringify();
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify();
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify from fields out of order', function (t) {
+
+  try {
+    var expected = '1-5 1 1 1 1 1';
+    var str = CronParser.fieldsToExpression({
       second: [5,2,1,4,3],
       minute: [1],
       hour: [1],
+      month: [1],
       dayOfMonth: [1],
       dayOfWeek: [1],
-    });
+    }).stringify(true);
     t.equal(str, expected);
   } catch (err) {
     t.ifError(err, 'Parse read error');
@@ -105,9 +225,43 @@ test('stringify from fields out of order + default values', function (t) {
   t.end();
 });
 
-test('validation error - missing values', function (t) {
+test('stringify from fields out of order (discard seconds)', function (t) {
+
+  try {
+    var expected = '1 1 1 1 1';
+    var str = CronParser.fieldsToExpression({
+      second: [5,2,1,4,3],
+      minute: [1],
+      hour: [1],
+      month: [1],
+      dayOfMonth: [1],
+      dayOfWeek: [1],
+    }).stringify();
+    t.equal(str, expected);
+  } catch (err) {
+    t.ifError(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('validation error - missing seconds', function (t) {
   t.throws(function () {
-    CronParser.stringifyExpression({
+    CronParser.fieldsToExpression({
+      minute: [1],
+      hour: [1],
+      dayOfMonth: [1],
+      month: [1],
+      dayOfWeek: [1],
+    });
+  }, new Error('Validation error, Field second is missing'));
+
+  t.end();
+});
+
+test('validation error - empty seconds', function (t) {
+  t.throws(function () {
+    CronParser.fieldsToExpression({
       second: [],
       minute: [1],
       hour: [1],
@@ -120,9 +274,38 @@ test('validation error - missing values', function (t) {
   t.end();
 });
 
+test('validation error - missing values - empty array', function (t) {
+  t.throws(function () {
+    CronParser.fieldsToExpression({
+      second: [1],
+      minute: [],
+      hour: [1],
+      dayOfMonth: [1],
+      month: [1],
+      dayOfWeek: [1],
+    });
+  }, new Error('Validation error, Field minute contains no values'));
+
+  t.end();
+});
+
+test('validation error - missing values', function (t) {
+  t.throws(function () {
+    CronParser.fieldsToExpression({
+      second: [1],
+      hour: [1],
+      dayOfMonth: [1],
+      month: [1],
+      dayOfWeek: [1],
+    });
+  }, new Error('Validation error, Field minute is missing'));
+
+  t.end();
+});
+
 test('validation error - range error', function (t) {
   t.throws(function () {
-    CronParser.stringifyExpression({
+    CronParser.fieldsToExpression({
       second: [-1, 1, 0],
       minute: [1],
       hour: [1],
@@ -137,7 +320,7 @@ test('validation error - range error', function (t) {
 
 test('validation error - bad chars error', function (t) {
   t.throws(function () {
-    CronParser.stringifyExpression({
+    CronParser.fieldsToExpression({
       second: [0, 'R'],
       minute: [1],
       hour: [1],
@@ -152,7 +335,7 @@ test('validation error - bad chars error', function (t) {
 
 test('validation error - duplicates', function (t) {
   t.throws(function () {
-    CronParser.stringifyExpression({
+    CronParser.fieldsToExpression({
       second: [1, 1],
       minute: [1],
       hour: [1],

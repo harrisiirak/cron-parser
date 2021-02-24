@@ -121,7 +121,7 @@ export interface ICronExpression<CronFields, IsIterable extends boolean> {
     /** Reset expression iterator state */
     reset(resetDate?: string | number | Date): void
 
-    stringify(): string
+    stringify(includeSeconds?: boolean): string
 }
 
 export interface IStringResult<CronFields> {
