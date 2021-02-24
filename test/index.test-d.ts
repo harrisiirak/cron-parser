@@ -9,10 +9,9 @@ import {
     stringifyExpression,
     StringResult
 } from '../index';
-import * as CronParser from '../index';
 
-const interval = CronParser.parseExpression('0 1 2 3 * 1-3,5');
-const intervalIterator = CronParser.parseExpression('0 1 2 3 * 1-3,5', {iterator: true});
+const interval = parseExpression('0 1 2 3 * 1-3,5');
+const intervalIterator = parseExpression('0 1 2 3 * 1-3,5', {iterator: true});
 
 expectError(interval.fields = interval.fields);
 
@@ -84,7 +83,6 @@ expectAssignable<{
     nthDayOfWeek?: number
 }>(parseOptions)
 
-expectType<CronExpression>(CronParser.parseExpression('0 1 2 3 * 1-3,5'))
 expectType<CronExpression>(parseExpression('0 1 2 3 * 1-3,5'))
 expectType<CronExpression<true>>(parseExpression('0 1 2 3 * 1-3,5', parseOptions))
 
@@ -97,14 +95,11 @@ const fields: CronFields = {
     dayOfWeek: [1],
 }
 
-expectType<string>(CronParser.stringifyExpression(fields))
 expectType<string>(stringifyExpression(fields))
 expectType<string>(stringifyExpression(fields, parseOptions))
 
-expectType<void>(CronParser.parseFile('path', (err: any, data: StringResult) => console.log(data)))
 expectType<void>(parseFile('path', (err: any, data: StringResult) => console.log(data)))
 
-expectType<StringResult>(CronParser.parseString('path'))
 expectType<StringResult>(parseString('path'))
 
 const stringResult = parseString('path');
