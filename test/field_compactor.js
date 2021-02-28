@@ -1,3 +1,5 @@
+'use strict';
+
 var test = require('tap').test;
 var compactField = require('../lib/field_compactor');
 
