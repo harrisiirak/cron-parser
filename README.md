@@ -4,7 +4,11 @@ cron-parser
 [![Build Status](https://travis-ci.com/harrisiirak/cron-parser.svg?branch=master)](https://travis-ci.com/harrisiirak/cron-parser)
 [![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)
 
-Node.js library for parsing crontab instructions. It includes support for timezones and DST transitions.
+Node.js library for parsing and manipulating crontab instructions. It includes support for timezones and DST transitions.
+
+__Compatibility__  
+Node >= 0.8  
+Typescript <= 4.2  
 
 Setup
 ========
@@ -21,7 +25,7 @@ Supported format
 │    │    │    │    │    |
 │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
 │    │    │    │    └───── month (1 - 12)
-│    │    │    └────────── day of month (1 - 31)
+│    │    │    └────────── day of month (1 - 31, L)
 │    │    └─────────────── hour (0 - 23)
 │    └──────────────────── minute (0 - 59)
 └───────────────────────── second (0 - 59, optional)
@@ -105,6 +109,21 @@ try {
 } catch (err) {
   console.log('Error: ' + err.message);
 }
+```
+
+Manipulation 
+
+```javascript
+var parser = require('cron-parser');
+
+var interval = parser.parseExpression('0 7 * * 0-4');
+var fields = JSON.parse(JSON.stringify(interval.fields)); // Fields is immutable
+fields.hour = [8];
+fields.minute = [29];
+fields.dayOfWeek = [1,3,4,5,6,7];
+var modifiedInterval = parser.fieldsToExpression(fields);
+var cronString = modifiedInterval.stringify();
+console.log(cronString); // "29 8 * * 1,3-7"
 ```
 
 Options

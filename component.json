@@ -7,5 +7,5 @@
   "dependencies": {},
   "development": {},
   "main": "lib/parser.js",
-  "scripts": ["lib/parser.js", "lib/expression.js", "lib/date.js"]
+  "scripts": ["lib/parser.js", "lib/expression.js", "lib/date.js", "lib/field_compactor.js", "lib/field_stringify.js"]
 }

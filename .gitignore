@@ -1,5 +1,6 @@
 node_modules/
 lib-cov
+coverage
 *.seed
 *.log
 *.csv
