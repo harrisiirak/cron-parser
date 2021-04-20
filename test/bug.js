@@ -22,7 +22,7 @@ test('parse expression as UTC', function(t) {
     t.equal(date.getHours(), now.getUTCHours(), 'Correct local time for 5 minute interval');
 
   } catch (err) {
-    t.ifError(err, 'UTC parse error');
+    t.error(err, 'UTC parse error');
   }
 
   t.end();

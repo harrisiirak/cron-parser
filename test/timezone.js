@@ -123,7 +123,7 @@ test('It works on DST start', function(t) {
       date = interval.next();
     });
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -373,7 +373,7 @@ test('It works on DST end', function(t) {
     t.equal(date.getHours(), 12, '12');
     t.equal(date.getDate(), 31, '31st');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();

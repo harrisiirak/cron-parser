@@ -14,7 +14,7 @@ test('stringify cron expression all stars no seconds', function (t) {
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -31,7 +31,7 @@ test('stringify cron expression all stars no seconds (discard seconds)', functio
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -48,7 +48,7 @@ test('stringify cron expression all stars with seconds', function (t) {
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -65,7 +65,7 @@ test('stringify cron expression all stars with seconds (discard seconds)', funct
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -82,7 +82,7 @@ test('stringify cron expression', function (t) {
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -99,7 +99,7 @@ test('stringify cron expression (discard seconds)', function (t) {
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -116,7 +116,7 @@ test('stringify cron expression with star range step', function (t) {
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -133,7 +133,7 @@ test('stringify cron expression with star range step (discard seconds)', functio
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -150,7 +150,7 @@ test('stringify cron expression with semi range step', function (t) {
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -167,7 +167,7 @@ test('stringify cron expression with semi range step (discard seconds)', functio
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -184,7 +184,7 @@ test('stringify cron expression with L', function (t) {
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -201,7 +201,7 @@ test('stringify cron expression with L (discard seconds)', function (t) {
     t.equal(str, expected);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -221,7 +221,7 @@ test('stringify from fields out of order', function (t) {
     }).stringify(true);
     t.equal(str, expected);
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -241,7 +241,7 @@ test('stringify from fields out of order (discard seconds)', function (t) {
     }).stringify();
     t.equal(str, expected);
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();

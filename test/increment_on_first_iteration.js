@@ -17,6 +17,6 @@ test('increment_on_first_itereation', function(t) {
     clock.restore();
     t.end();
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 });

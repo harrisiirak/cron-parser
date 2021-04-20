@@ -8,7 +8,7 @@ test('compact field - empty array', function(t) {
     var result = compactField([]);
     t.same(result, []);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -21,7 +21,7 @@ test('compact field - single element array', function(t) {
       count: 1
     }]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -40,7 +40,7 @@ test('compact field - 2 elements array', function(t) {
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -59,7 +59,7 @@ test('compact field - 2 elements array big step', function(t) {
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -76,7 +76,7 @@ test('compact field - 3 elements array 1 step', function(t) {
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -97,7 +97,7 @@ test('compact field - 3 elements array 1 step, dangling extra at end', function(
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -122,7 +122,7 @@ test('compact field - 3 elements array 1 step, dangling extra at end and beginni
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -149,7 +149,7 @@ test('compact field - 2 ranges with dangling in the middle', function(t) {
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -168,7 +168,7 @@ test('compact field - with chars', function(t) {
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -191,7 +191,7 @@ test('compact field - with chars and range', function(t) {
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -218,7 +218,7 @@ test('compact field - with chars and range (v2)', function(t) {
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });
@@ -244,7 +244,7 @@ test('compact field - with chars and range (v3)', function(t) {
       }
     ]);
   } catch (err) {
-    t.ifError(err, 'compact field error');
+    t.error(err, 'compact field error');
   }
   t.end();
 });

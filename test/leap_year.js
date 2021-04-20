@@ -12,6 +12,6 @@ test('leap year', function(t) {
     }
     t.end();
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 });

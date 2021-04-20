@@ -17,7 +17,7 @@ test('empty expression test', function(t) {
 
     t.end();
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 });
 
@@ -35,7 +35,7 @@ test('default expression test', function(t) {
     t.equal(next.getMinutes(), date.getMinutes(), 'Schedule matches');
 
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -55,7 +55,7 @@ test('default expression (tab separate) test', function(t) {
     t.equal(next.getMinutes(), date.getMinutes(), 'Schedule matches');
 
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -75,7 +75,7 @@ test('default expression (multi-space separated) test 1', function(t) {
     t.equal(next.getMinutes(), date.getMinutes(), 'Schedule matches');
 
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -96,7 +96,7 @@ test('default expression (multi-space separated) test 1', function(t) {
     t.equal(next.getMinutes(), date.getMinutes(), 'Schedule matches');
 
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -194,7 +194,7 @@ test('incremental minutes expression test', function(t) {
     t.ok(next, 'Found next scheduled interval');
     t.equal(next.getMinutes() % 3, 0, 'Schedule matches');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -213,7 +213,7 @@ test('fixed expression test', function(t) {
     t.equal(next.getHours(), 2, 'Hour matches');
     t.equal(next.getMinutes(), 10, 'Minute matches');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -342,7 +342,7 @@ test('range test with iterator', function(t) {
       t.equal(next.getMinutes(), 10 + i, 'Minute matches');
     }
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -366,7 +366,7 @@ test('incremental range test with iterator', function(t) {
       t.equal(next.getMinutes(), 10 + (i * 2), 'Minute matches');
     }
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -385,7 +385,7 @@ test('predefined expression', function(t) {
 
     t.equal(next.getFullYear(), date.getFullYear(), 'Year matches');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -486,7 +486,7 @@ test('expression limited with start and end date', function(t) {
       t.ok(true, 'Failed as expected');
     }
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -536,7 +536,7 @@ test('reset to given date', function(t){
 
     t.end();
   } catch (err) {
-    t.ifError(err, 'Reset error');
+    t.error(err, 'Reset error');
   }
 });
 
@@ -560,7 +560,7 @@ test('parse expression as UTC', function(t) {
     t.equal(date.getHours(), now.getUTCHours(), 'Correct local time for 5 minute interval');
 
   } catch (err) {
-    t.ifError(err, 'UTC parse error');
+    t.error(err, 'UTC parse error');
   }
 
   t.end();
@@ -585,7 +585,7 @@ test('expression using days of week strings', function(t) {
       t.equal(next.getMinutes(), 15, 'Minute matches');
     }
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -623,7 +623,7 @@ test('expression using mixed days of week strings', function(t) {
       t.equal(next.getMinutes(), 15, 'Minute matches');
     }
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -648,7 +648,7 @@ test('expression using non-standard second field (wildcard)', function(t) {
       t.equal(next.getSeconds(), i + 1, 'Second matches');
     }
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -671,7 +671,7 @@ test('expression using non-standard second field (step)', function(t) {
     t.equal(intervals[1].getSeconds(), 40, 'Second matches');
     t.equal(intervals[2].getSeconds(), 0, 'Second matches');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -697,7 +697,7 @@ test('expression using non-standard second field (range)', function(t) {
       t.equal(next.getSeconds(), 20 + (i * 10), 'Second matches');
     }
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -773,7 +773,7 @@ test('day of month and week are both set', function(t) {
     t.ok(next.getDay() === 0 || next.getDate() === 12, 'Day or day of month matches');
     t.equal(next.getMonth(), 7, 'Month matches');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -802,7 +802,7 @@ test('day of month is unspecified', function(t) {
     t.ok(next.getDay() === 3, 'day of week matches');
 
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -836,7 +836,7 @@ test('day of week is unspecified', function(t) {
     t.ok((next.getDate() === 3 || next.getDate() === 6) &&
       next.getDate() !== prevDate, 'date matches and is not previous date');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -854,7 +854,7 @@ test('Summertime bug test', function(t) {
     // in a timezone that changes the DST to ST in the hour 00:00h.
     t.ok(next, 'Found next scheduled interval');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -890,7 +890,7 @@ test('day of month and week are both set and dow is 7', function(t) {
     t.ok(next.getDay() === 0 || next.getDate() === 12, 'Day or day of month matches');
     t.equal(next.getMonth(), 7, 'Month matches');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -913,7 +913,7 @@ test('day of month is wildcard, month and day of week are both set', function(t)
       t.equal(next.getMonth(), 5, 'Month matches');
     });
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -951,7 +951,7 @@ test('day of month and week are both set and dow is 6,0', function(t) {
     t.ok(next.getDay() === 0 || next.getDate() === 12, 'Day or day of month matches');
     t.equal(next.getMonth(), 7, 'Month matches');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -990,7 +990,7 @@ test('day of month and week are both set and dow is 6-7', function(t) {
     t.ok(next.getDay() === 6 || next.getDate() === 12, 'Day or day of month matches');
     t.equal(next.getMonth(), 7, 'Month matches');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1013,7 +1013,7 @@ test('day of month validation should be ignored when day of month is wildcard an
 
     t.ok(next, 'Found next scheduled interval');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1043,7 +1043,7 @@ test('day and date in week should matches', function(t){
     t.ok(next.getDay() === 1 || next.getDate() === 1, 'Day or day of month matches');
 
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1094,7 +1094,7 @@ test('valid ES6 iterator should be returned if iterator options is set to true',
     t.ok(val.value, 'Iterator value is set');
     t.ok(val.done, 'Iterator is finished');
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1127,7 +1127,7 @@ test('dow 6,7 6,0 0,6 7,6 should be equivalent', function(t) {
       t.equal(val.getDay(), 6, 'Day matches');
     });
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1167,7 +1167,7 @@ test('hour 0 9,11,1 * * * and 0 1,9,11 * * * should be equivalent', function(t) 
       t.equal(val.getHours(), 11, 'Hour matches');
     });
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1265,7 +1265,7 @@ test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek 
         });
     });
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1304,7 +1304,7 @@ test('should work for valid second sunday in may', function(t) {
         );
       });
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1326,7 +1326,7 @@ test('should work for valid second sunday at noon in may', function(t) {
       'Expression "0 0 12 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
     );
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1348,7 +1348,7 @@ test('should work for valid second sunday at noon in may (UTC+3)', function(t) {
       'Expression "0 0 12 ? MAY 0#2" has next() that matches expected: ' + expected.toISOString()
     );
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();
@@ -1391,7 +1391,7 @@ test('should work with both dayOfMonth and nth occurence of dayOfWeek', function
         );
       });
   } catch (err) {
-    t.ifError(err, 'Interval parse error');
+    t.error(err, 'Interval parse error');
   }
 
   t.end();

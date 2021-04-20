@@ -6,7 +6,7 @@ var CronParser = require('../lib/parser');
 
 test('load crontab file', function(t) {
   CronParser.parseFile(__dirname + '/crontab.example', function(err, result) {
-    t.ifError(err, 'File read error');
+    t.error(err, 'File read error');
     t.ok(result, 'Crontab parsed parsed');
 
     t.equal(Object.keys(result.variables).length, 2, 'variables length matches');
@@ -40,7 +40,7 @@ test('no next date', function(t) {
     var interval = CronParser.parseExpression('* * 2 * *', options);
     t.equal(interval.hasNext(), false);
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();

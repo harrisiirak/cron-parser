@@ -18,7 +18,7 @@ test('parse cron with last day in a month', function(t) {
     }
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -46,7 +46,7 @@ test('parse cron with last day in feb', function(t) {
     t.equal(i, items);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
@@ -70,7 +70,7 @@ test('parse cron with last day in feb', function(t) {
     t.equal(next.getDate(), 28);
 
   } catch (err) {
-    t.ifError(err, 'Parse read error');
+    t.error(err, 'Parse read error');
   }
 
   t.end();
