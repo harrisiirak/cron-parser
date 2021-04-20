@@ -1,4 +1,3 @@
-var util = require('util');
 var test = require('tap').test;
 var CronParser = require('../lib/parser');
 
@@ -42,18 +41,6 @@ test('no next date', function(t) {
   } catch (err) {
     t.error(err, 'Parse read error');
   }
-
-  t.end();
-});
-
-test('prev with CurrentDate greater than 0ms should work', function(t) {
-  var options = {
-    currentDate: new Date('2017-06-13T18:21:25.002Z')
-  };
-
-  var interval = CronParser.parseExpression('*/5 * * * * *', options);
-  var prev = interval.prev();
-  t.equal(prev.getSeconds(), 25);
 
   t.end();
 });
