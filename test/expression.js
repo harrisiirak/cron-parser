@@ -896,6 +896,29 @@ test('day of month and week are both set and dow is 7', function(t) {
   t.end();
 });
 
+test('day of month is wildcard, month and day of week are both set', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('Mon, 31 May 2021 12:00:00')
+    };
+    var interval = CronExpression.parse('0 0 * 6 2', options);
+    t.ok(interval, 'Interval parsed');
+
+    var expectedDayMatches = [1, 8, 15, 22, 29];
+    expectedDayMatches.forEach(function(dayOfMonth) {
+      var next = interval.next();
+      t.ok(next, 'Found next scheduled interval');
+      t.equal(next.getDay(), 2, 'Day of week matches');
+      t.equal(next.getDate(), dayOfMonth, 'Day of month matches');
+      t.equal(next.getMonth(), 5, 'Month matches');
+    });
+  } catch (err) {
+    t.ifError(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
 test('day of month and week are both set and dow is 6,0', function(t) {
   try {
     var options = {
