@@ -7,7 +7,7 @@ cron-parser
 Node.js library for parsing and manipulating crontab instructions. It includes support for timezones and DST transitions.
 
 __Compatibility__  
-Node >= 0.8  
+Node >= 0.10  
 Typescript <= 4.2  
 
 Setup
