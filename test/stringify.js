@@ -207,6 +207,57 @@ test('stringify cron expression with L (discard seconds)', function (t) {
   t.end();
 });
 
+test('stringify cron expression with weekday L', function (t) {
+
+  try {
+    var expected = '0 0 0 * * 1L';
+    var interval = CronParser.parseExpression(expected, {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression with multiple weekday, one of them with an L', function (t) {
+
+  try {
+    var expected = '0 0 0 * * 4,6L';
+    var interval = CronParser.parseExpression(expected, {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression with multiple weekday, two of them with an L', function (t) {
+
+  try {
+    var expected = '0 0 0 * * 1L,5L';
+    var interval = CronParser.parseExpression(expected, {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
 test('stringify from fields out of order', function (t) {
 
   try {

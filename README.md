@@ -23,7 +23,7 @@ Supported format
 *    *    *    *    *    *
 ┬    ┬    ┬    ┬    ┬    ┬
 │    │    │    │    │    |
-│    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
+│    │    │    │    │    └ day of week (0 - 7, 1L - 7L) (0 or 7 is Sun)
 │    │    │    │    └───── month (1 - 12)
 │    │    │    └────────── day of month (1 - 31, L)
 │    │    └─────────────── hour (0 - 23)
@@ -31,7 +31,7 @@ Supported format
 └───────────────────────── second (0 - 59, optional)
 ```
 
-Supports mixed use of ranges and range increments (L and W characters are not supported currently). See tests for examples.
+Supports mixed use of ranges and range increments (W character not supported currently). See tests for examples.
 
 Usage
 ========
@@ -146,3 +146,25 @@ will be expecting. Using one of the supported `string` formats will solve the is
 * *iterator* - Return ES6 compatible iterator object 
 * *utc* - Enable UTC
 * *tz* - Timezone string. It won't be used in case `utc` is enabled
+
+Last weekday of the month
+=========================
+
+This library supports parsing the range `0L - 7L` in the `weekday` position of
+the cron expression, where the `L` means "last occurrence of this weekday for
+the month in progress".
+
+For example, the following expression will run on the last monday of the month
+at midnight:
+
+```
+0 0 * * * 1L
+```
+
+The library also supports combining `L` expressions with other weekday
+expressions. For example, the following cron will run every Monday as well
+as the last Wednesday of the month:
+
+```
+0 0 * * * 1,3L
+```
