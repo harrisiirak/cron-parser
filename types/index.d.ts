@@ -21,7 +21,7 @@ export type SixtyRange = Range<0, 30> | Range<30, 60>; // Typescript restriction
 export type HourRange = Range<0, 24>;
 export type DayOfTheMonthRange = Range<1, 32> | 'L';
 export type MonthRange = Range<1, 13>;
-export type DayOfTheWeekRange = Range<0, 8>;
+export type DayOfTheWeekRange = Range<0, 7>;
 
 export type CronFields = {
     readonly second: readonly SixtyRange[];
