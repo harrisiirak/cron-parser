@@ -135,9 +135,14 @@ Options
 `currentDate` and `endDate` accept `string`, `integer` and `Date` as input.
 
 In case of using `string` as input, not every string format accepted
-by the `Date` constructor will work correctly. The supported formats are: [`ISO8601`](http://momentjs.com/docs/#/parsing/string/) and the older
-[`ASP.NET JSON Date`](http://momentjs.com/docs/#/parsing/asp-net-json-date/) format. The reason being that those are the formats accepted by the
-[`moment`](http://momentjs.com) library which is being used to handle dates.
+by the `Date` constructor will work correctly. 
+The supported formats are: 
+- [`ISO8601`](https://moment.github.io/luxon/#/parsing?id=iso-8601)
+- [`HTTP and RFC2822`](https://moment.github.io/luxon/#/parsing?id=http-and-rfc2822)
+- [`SQL`](https://moment.github.io/luxon/#/parsing?id=sql) 
+
+The reason being that those are the formats accepted by the
+[`luxon`](https://moment.github.io/luxon/) library which is being used to handle dates.
 
 Using `Date` as an input can be problematic specially when using the `tz` option. The issue being that, when creating a new `Date` object without
 any timezone information, it will be created in the timezone of the system that is running the code. This (most of times) won't be what the user
