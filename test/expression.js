@@ -372,7 +372,26 @@ test('incremental range test with iterator', function(t) {
   t.end();
 });
 
-test('predefined expression', function(t) {
+test('predefined expression @annually', function(t) {
+  try {
+    var interval = CronExpression.parse('@annually');
+    t.ok(interval, 'Interval parsed');
+
+    var date = new CronDate();
+    date.addYear();
+
+    var next = interval.next();
+    t.ok(next, 'Found next scheduled interval');
+
+    t.equal(next.getFullYear(), date.getFullYear(), 'Year matches');
+  } catch (err) {
+    t.error(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('predefined expression @yearly', function(t) {
   try {
     var interval = CronExpression.parse('@yearly');
     t.ok(interval, 'Interval parsed');
@@ -384,6 +403,25 @@ test('predefined expression', function(t) {
     t.ok(next, 'Found next scheduled interval');
 
     t.equal(next.getFullYear(), date.getFullYear(), 'Year matches');
+  } catch (err) {
+    t.error(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
+test('predefined expression @midnight', function(t) {
+  try {
+    var interval = CronExpression.parse('@midnight');
+    t.ok(interval, 'Interval parsed');
+
+    var date = new CronDate();
+    date.addDay();
+
+    var next = interval.next();
+    t.ok(next, 'Found next scheduled interval');
+
+    t.equal(next.getDay(), date.getDay(), 'Day matches');
   } catch (err) {
     t.error(err, 'Interval parse error');
   }
