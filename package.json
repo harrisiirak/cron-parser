@@ -61,7 +61,7 @@
   "devDependencies": {
     "eslint": "^8.2.0",
     "sinon": "^10.0.0",
-    "tap": "^15.1.5",
+    "tap": "^16.0.1",
     "tsd": "^0.19.0"
   },
   "engines": {
