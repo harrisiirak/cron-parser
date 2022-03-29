@@ -85,7 +85,8 @@ test('parse cron with last weekday of the month', function(t) {
     { expression: '0 0 0 * * 4L', expectedDate: 30 },
     { expression: '0 0 0 * * 5L', expectedDate: 24 },
     { expression: '0 0 0 * * 6L', expectedDate: 25 },
-    { expression: '0 0 0 * * 0L', expectedDate: 26 }
+    { expression: '0 0 0 * * 0L', expectedDate: 26 },
+    { expression: '0 0 0 * * 7L', expectedDate: 26 }
   ];
 
   testCases.forEach(function({ expression, expectedDate }) {
