@@ -919,6 +919,52 @@ test('day of month is wildcard, month and day of week are both set', function(t)
   t.end();
 });
 
+test('day of month contains multiple ranges and day of week is wildcard', function(t) {
+  try {
+    var options = {
+      currentDate: new CronDate('Sat, 1 Dec 2012 14:38:53')
+    };
+    var interval = CronExpression.parse('0 0 0 2-4,7-31 * *', options);
+    t.ok(interval, 'Interval parsed');
+
+    var next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.ok(next.getDate() === 2, 'Day of month matches');
+    t.equal(next.getMonth(), 11, 'Month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.ok(next.getDate() === 3, 'Day of month matches');
+    t.equal(next.getMonth(), 11, 'Month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.ok(next.getDate() === 4, 'Day of month matches');
+    t.equal(next.getMonth(), 11, 'Month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.ok(next.getDate() === 7, 'Day of month matches');
+    t.equal(next.getMonth(), 11, 'Month matches');
+
+    next = interval.next();
+
+    t.ok(next, 'Found next scheduled interval');
+    t.ok(next.getDate() === 8, 'Day of month matches');
+    t.equal(next.getMonth(), 11, 'Month matches');
+
+    next = interval.next();
+  } catch (err) {
+    t.error(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
 test('day of month and week are both set and dow is 6,0', function(t) {
   try {
     var options = {
@@ -958,7 +1004,7 @@ test('day of month and week are both set and dow is 6,0', function(t) {
 });
 
 
-test('day of month and week are both set and dow is 6-7', function(t) {
+test('day of month and week are both set and dow is a range with value 6-7', function(t) {
   try {
     var options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
