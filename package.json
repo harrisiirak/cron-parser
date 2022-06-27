@@ -16,8 +16,8 @@
   },
   "scripts": {
     "test:tsd": "tsd",
-    "test:unit": "TZ=UTC tap ./test/*.js",
-    "test:cover": "TZ=UTC tap --coverage-report=html ./test/*.js",
+    "test:unit": "set TZ=UTC && tap ./test/*.js",
+    "test:cover": "set TZ=UTC && tap --coverage-report=html ./test/*.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "npm run lint && npm run test:unit && npm run test:tsd"
@@ -56,7 +56,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "luxon": "^1.28.0"
+    "luxon": "^2.4.0"
   },
   "devDependencies": {
     "eslint": "^8.2.0",
