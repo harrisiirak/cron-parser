@@ -1235,7 +1235,11 @@ test('it will work with #139 issue case', function(t) {
   t.end();
 });
 
-test('it will work with #271 issue case', function(t) {
+test('it will work with #271 issue case for Node v > 12', function(t) {
+  if(process.versions.node.startsWith('12.')) {
+      t.end();
+      return;
+  }
   var options = {
     currentDate : new Date('2022-01-01T00:00:00.000Z'),
     tz: 'EST5EDT'
