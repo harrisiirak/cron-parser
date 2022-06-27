@@ -1235,24 +1235,6 @@ test('it will work with #139 issue case', function(t) {
   t.end();
 });
 
-test('it will work with #271 issue case for Node v > 12', function(t) {
-  if(process.versions.node.startsWith('12.')) {
-      t.end();
-      return;
-  }
-  var options = {
-    currentDate : new Date('2022-01-01T00:00:00.000Z'),
-    tz: 'EST5EDT'
-  };
-
-  var interval = CronExpression.parse('0 0 5 * * *', options);
-  var date = interval.next();
-
-  t.equal(date.toISOString(), '2022-01-01T10:00:00.000Z');
-
-  t.end();
-});
-
 test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek (# char)', function(t) {
   try {
     var options = {
