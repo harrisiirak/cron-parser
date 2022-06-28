@@ -56,7 +56,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "luxon": "^1.28.0"
+    "luxon": "^2.4.0"
   },
   "devDependencies": {
     "eslint": "^8.2.0",
