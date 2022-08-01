@@ -55,7 +55,7 @@ test('stringify range', function (t) {
 
 test('stringify range step', function (t) {
   try {
-    var str = stringifyField([2, 4, 6], 0, 8);
+    var str = stringifyField([2, 4, 6], 0, 9);
     t.equal(str, '2-6/2');
   } catch (err) {
     t.error(err, 'stringify field error');
