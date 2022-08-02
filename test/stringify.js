@@ -258,6 +258,49 @@ test('stringify cron expression with multiple weekday, two of them with an L', f
   t.end();
 });
 
+test('stringify cron expression with wildcard day of month and single month value', function (t) {
+
+  try {
+    var expected = '* * * 4 *';
+    var interval = CronParser.parseExpression(expected, {});
+    var str = interval.stringify();
+    t.equal(str, expected);
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression with wildcard day of month and month rangee', function (t) {
+
+  try {
+    var expected = '* * * 4-6 *';
+    var interval = CronParser.parseExpression(expected, {});
+    var str = interval.stringify();
+    t.equal(str, expected);
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+
+test('stringify cron expression with day of month range and single month value', function (t) {
+
+  try {
+    var expected = '* * 1-25 4 *';
+    var interval = CronParser.parseExpression(expected, {});
+    var str = interval.stringify();
+    t.equal(str, expected);
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
 test('stringify from fields out of order', function (t) {
 
   try {
