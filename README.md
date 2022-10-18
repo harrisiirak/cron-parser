@@ -8,7 +8,7 @@ Node.js library for parsing and manipulating crontab instructions. It includes s
 
 __Compatibility__  
 Node >= 12.0.0
-Typescript <= 4.2  
+TypeScript >= 4.2
 
 Setup
 ========
