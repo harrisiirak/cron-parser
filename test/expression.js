@@ -372,6 +372,17 @@ test('incremental range test with iterator', function(t) {
   t.end();
 });
 
+test('range with the same start and end value', function(t) {
+  try {
+    var interval = CronExpression.parse('*/10 2-2 * * *');
+    t.ok(interval, 'Interval parsed');
+  } catch (err) {
+    t.error(err, 'Interval parse error');
+  }
+
+  t.end();
+});
+
 test('predefined expression', function(t) {
   try {
     var interval = CronExpression.parse('@yearly');
