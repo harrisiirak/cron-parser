@@ -1014,8 +1014,7 @@ test('day of month and week are both set and dow is 6,0', function(t) {
   t.end();
 });
 
-
-test('day of month and week are both set and dow is a range with value 6-7', function(t) {
+test('day of month and week are both set and dow is 6-7', function(t) {
   try {
     var options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
@@ -1024,30 +1023,37 @@ test('day of month and week are both set and dow is a range with value 6-7', fun
     t.ok(interval, 'Interval parsed');
 
     var next = interval.next();
-
     t.ok(next, 'Found next scheduled interval');
-    t.ok(next.getDay() === 6 || next.getDate() === 12, 'Day or day of month matches');
+    t.ok(next.getDay() === 6, 'Day of week matches');
     t.equal(next.getMonth(), 7, 'Month matches');
 
     next = interval.next();
-
     t.ok(next, 'Found next scheduled interval');
-    t.ok(next.getDay() === 6 || next.getDate() === 12, 'Day or day of month matches');
+    t.ok(next.getDay() === 0, 'Day of week matches');
     t.equal(next.getMonth(), 7, 'Month matches');
 
     next = interval.next();
-
     t.ok(next, 'Found next scheduled interval');
-    t.ok(next.getDay() === 6 || next.getDate() === 12, 'Day or day of month matches');
+    t.ok(next.getDay() === 6, 'Day of week matches');
     t.equal(next.getMonth(), 7, 'Month matches');
 
-    // next = interval.next();
-
+    next = interval.next();
     t.ok(next, 'Found next scheduled interval');
-    t.ok(next.getDay() === 6 || next.getDate() === 12, 'Day or day of month matches');
+    t.ok(next.getDay() === 0, 'Day of week matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+
+    next = interval.next();
+    t.ok(next, 'Found next scheduled interval');
+    t.ok(next.getDate() === 12, 'Day of month matches');
+    t.ok(next.getDay() === 1, 'Day of week matches');
+    t.equal(next.getMonth(), 7, 'Month matches');
+
+    next = interval.next();
+    t.ok(next, 'Found next scheduled interval');
+    t.ok(next.getDay() === 6, 'Day of week matches');
     t.equal(next.getMonth(), 7, 'Month matches');
   } catch (err) {
-    t.error(err, 'Interval parse error');
+    t.ifError(err, 'Interval parse error');
   }
 
   t.end();
