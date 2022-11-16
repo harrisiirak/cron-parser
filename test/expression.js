@@ -283,6 +283,14 @@ test('invalid expression which has repeat negative number times', function(t) {
   t.end();
 });
 
+test('invalid expression which has multiple combined repeat cycles', function(t) {
+  t.throws(function() {
+    CronExpression.parse('0 5/5/5 * * *');
+  }, new Error('Invalid repeat: 5/5/5'));
+
+  t.end();
+});
+
 test('range test with value and repeat (second)', function(t) {
   var options = {
     currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
