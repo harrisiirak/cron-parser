@@ -4,7 +4,6 @@ var test = require('tap').test;
 var CronParser = require('../lib/parser');
 
 test('stringify cron expression all stars no seconds', function (t) {
-
   try {
     var expected = '0 * * * * *';
     var interval = CronParser.parseExpression('* * * * *', {});
@@ -21,7 +20,6 @@ test('stringify cron expression all stars no seconds', function (t) {
 });
 
 test('stringify cron expression all stars no seconds (discard seconds)', function (t) {
-
   try {
     var expected = '* * * * *';
     var interval = CronParser.parseExpression('* * * * *', {});
@@ -38,7 +36,6 @@ test('stringify cron expression all stars no seconds (discard seconds)', functio
 });
 
 test('stringify cron expression all stars with seconds', function (t) {
-
   try {
     var expected = '* * * * * *';
     var interval = CronParser.parseExpression('* * * * * *', {});
@@ -55,7 +52,6 @@ test('stringify cron expression all stars with seconds', function (t) {
 });
 
 test('stringify cron expression all stars with seconds (discard seconds)', function (t) {
-
   try {
     var expected = '* * * * *';
     var interval = CronParser.parseExpression('* * * * * *', {});
@@ -72,7 +68,6 @@ test('stringify cron expression all stars with seconds (discard seconds)', funct
 });
 
 test('stringify cron expression', function (t) {
-
   try {
     var expected = '0 1,2,4-10,20-35/5,57 * * * *';
     var interval = CronParser.parseExpression('1,2,4-10,20-35/5,57 * * * *', {});
@@ -89,7 +84,6 @@ test('stringify cron expression', function (t) {
 });
 
 test('stringify cron expression (discard seconds)', function (t) {
-
   try {
     var expected = '1,2,4-10,20-35/5,57 * * * *';
     var interval = CronParser.parseExpression('1,2,4-10,20-35/5,57 * * * *', {});
@@ -106,7 +100,6 @@ test('stringify cron expression (discard seconds)', function (t) {
 });
 
 test('stringify cron expression with star range step', function (t) {
-
   try {
     var expected = '0 */5 */2 * * *';
     var interval = CronParser.parseExpression('*/5 */2 */1 * *', {});
@@ -123,7 +116,6 @@ test('stringify cron expression with star range step', function (t) {
 });
 
 test('stringify cron expression with star range step (discard seconds)', function (t) {
-
   try {
     var expected = '*/5 */2 * * *';
     var interval = CronParser.parseExpression('*/5 */2 */1 * *', {});
@@ -157,7 +149,6 @@ test('stringify cron expression with semi range step', function (t) {
 });
 
 test('stringify cron expression with semi range step (discard seconds)', function (t) {
-
   try {
     var expected = '5/5 * * * *';
     var interval = CronParser.parseExpression('5/5 * * * *', {});
@@ -174,7 +165,6 @@ test('stringify cron expression with semi range step (discard seconds)', functio
 });
 
 test('stringify cron expression with L', function (t) {
-
   try {
     var expected = '0 * * 1,4-10,L * *';
     var interval = CronParser.parseExpression('* * 1,4-10,L * *', {});
@@ -191,7 +181,6 @@ test('stringify cron expression with L', function (t) {
 });
 
 test('stringify cron expression with L (discard seconds)', function (t) {
-
   try {
     var expected = '* * 1,4-10,L * *';
     var interval = CronParser.parseExpression('* * 1,4-10,L * *', {});
@@ -208,7 +197,6 @@ test('stringify cron expression with L (discard seconds)', function (t) {
 });
 
 test('stringify cron expression with weekday L', function (t) {
-
   try {
     var expected = '0 0 0 * * 1L';
     var interval = CronParser.parseExpression(expected, {});
@@ -225,7 +213,6 @@ test('stringify cron expression with weekday L', function (t) {
 });
 
 test('stringify cron expression with multiple weekday, one of them with an L', function (t) {
-
   try {
     var expected = '0 0 0 * * 4,6L';
     var interval = CronParser.parseExpression(expected, {});
@@ -242,7 +229,6 @@ test('stringify cron expression with multiple weekday, one of them with an L', f
 });
 
 test('stringify cron expression with multiple weekday, two of them with an L', function (t) {
-
   try {
     var expected = '0 0 0 * * 1L,5L';
     var interval = CronParser.parseExpression(expected, {});
@@ -259,7 +245,6 @@ test('stringify cron expression with multiple weekday, two of them with an L', f
 });
 
 test('stringify cron expression with wildcard day of month and single month value', function (t) {
-
   try {
     var expected = '* * * 4 *';
     var interval = CronParser.parseExpression(expected, {});
@@ -273,7 +258,6 @@ test('stringify cron expression with wildcard day of month and single month valu
 });
 
 test('stringify cron expression with wildcard day of month and month rangee', function (t) {
-
   try {
     var expected = '* * * 4-6 *';
     var interval = CronParser.parseExpression(expected, {});
@@ -288,7 +272,6 @@ test('stringify cron expression with wildcard day of month and month rangee', fu
 
 
 test('stringify cron expression with day of month range and single month value', function (t) {
-
   try {
     var expected = '* * 1-25 4 *';
     var interval = CronParser.parseExpression(expected, {});
@@ -302,7 +285,6 @@ test('stringify cron expression with day of month range and single month value',
 });
 
 test('stringify from fields out of order', function (t) {
-
   try {
     var expected = '1-5 1 1 1 1 1';
     var str = CronParser.fieldsToExpression({
@@ -322,7 +304,6 @@ test('stringify from fields out of order', function (t) {
 });
 
 test('stringify from fields out of order (discard seconds)', function (t) {
-
   try {
     var expected = '1 1 1 1 1';
     var str = CronParser.fieldsToExpression({
@@ -332,6 +313,37 @@ test('stringify from fields out of order (discard seconds)', function (t) {
       month: [1],
       dayOfMonth: [1],
       dayOfWeek: [1],
+    }).stringify();
+    t.equal(str, expected);
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression with extended day of week range (0,7)', function (t) {
+  try {
+    var expected = '* * * * *';
+    var interval = CronParser.parseExpression('* * * * *');
+
+    var str = CronParser.fieldsToExpression({
+      second: interval.fields.second,
+      minute: interval.fields.minute,
+      hour: interval.fields.hour,
+      month: interval.fields.month,
+      dayOfMonth: interval.fields.dayOfMonth,
+      dayOfWeek: [0, 1, 2, 3, 4, 5, 6],
+    }).stringify();
+    t.equal(str, expected);
+
+    str = CronParser.fieldsToExpression({
+      second: interval.fields.second,
+      minute: interval.fields.minute,
+      hour: interval.fields.hour,
+      month: interval.fields.month,
+      dayOfMonth: interval.fields.dayOfMonth,
+      dayOfWeek: [0, 1, 2, 3, 4, 5, 6, 7],
     }).stringify();
     t.equal(str, expected);
   } catch (err) {
