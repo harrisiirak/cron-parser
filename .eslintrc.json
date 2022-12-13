@@ -11,7 +11,7 @@
         {
             "files": ["test/**.js"],
             "parserOptions": {
-                "ecmaVersion": "latest"
+                "ecmaVersion": 6
             }
         }
     ]
