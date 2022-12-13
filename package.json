@@ -77,7 +77,7 @@
     "directory": "test",
     "compilerOptions": {
       "lib": [
-        "es2022",
+        "es2017",
         "dom"
       ]
     }
