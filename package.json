@@ -56,12 +56,12 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "luxon": "^3.1.0"
+    "luxon": "^3.2.1"
   },
   "devDependencies": {
     "eslint": "^8.27.0",
     "sinon": "^14.0.2",
-    "tap": "^16.3.1",
+    "tap": "^16.3.3",
     "tsd": "^0.24.1"
   },
   "engines": {
