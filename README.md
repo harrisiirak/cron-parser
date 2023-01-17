@@ -4,7 +4,7 @@ cron-parser
 [![Build Status](https://travis-ci.com/harrisiirak/cron-parser.svg?branch=master)](https://travis-ci.com/harrisiirak/cron-parser)
 [![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)
 
-Node.js library for parsing and manipulating crontab instructions. It includes support for timezones and DST transitions.
+Node.js library for parsing and manipulating crontab instructions. It includes support for timezones and DST transitions. Try (online cron parser)[https://goonlinetools.com/cron-parser/?p=t]
 
 __Compatibility__  
 Node >= 12.0.0
