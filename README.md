@@ -1,7 +1,7 @@
 cron-parser
 ================
 
-[![Build Status](https://travis-ci.com/harrisiirak/cron-parser.svg?branch=master)](https://travis-ci.com/harrisiirak/cron-parser)
+[![Build Status](https://github.com/harrisiirak/cron-parser/actions/workflows/push.yml/badge.svg?branch=master)](https://github.com/harrisiirak/cron-parser/actions/workflows/push.yml)
 [![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)
 
 Node.js library for parsing and manipulating crontab instructions. It includes support for timezones and DST transitions.
