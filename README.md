@@ -163,7 +163,7 @@ For example, the following expression will run on the last monday of the month
 at midnight:
 
 ```
-0 0 * * * 1L
+0 0 0 * * 1L
 ```
 
 The library also supports combining `L` expressions with other weekday
@@ -171,5 +171,5 @@ expressions. For example, the following cron will run every Monday as well
 as the last Wednesday of the month:
 
 ```
-0 0 * * * 1,3L
+0 0 0 * * 1,3L
 ```
