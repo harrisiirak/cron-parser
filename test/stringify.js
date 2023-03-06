@@ -122,7 +122,6 @@ test('stringify cron expression with multiple values and retain original value',
     var str = interval.stringify(true);
     t.equal(str, expected);
     str = CronParser.fieldsToExpression(interval.fields).stringify(true);
-    console.log('comp', str, expected);
     t.equal(str, expected);
 
   } catch (err) {
@@ -139,7 +138,6 @@ test('stringify cron expression with multiple values and convert value to range 
     var str = interval.stringify(true);
     t.equal(str, expected);
     str = CronParser.fieldsToExpression(interval.fields).stringify(true);
-    console.log('comp', str, expected);
     t.equal(str, expected);
 
   } catch (err) {
