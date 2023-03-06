@@ -115,6 +115,38 @@ test('stringify cron expression with star range step', function (t) {
   t.end();
 });
 
+test('stringify cron expression with multiple values and retain original value', function (t) {
+  try {
+    var expected = '0 * * * * 1,3,5';
+    var interval = CronParser.parseExpression('* * * * 1,3,5', {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
+test('stringify cron expression with multiple values and convert value to range step', function (t) {
+  try {
+    var expected = '0 * * * * 0-6/2';
+    var interval = CronParser.parseExpression('* * * * 0,2,4,6', {});
+    var str = interval.stringify(true);
+    t.equal(str, expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    t.equal(str, expected);
+
+  } catch (err) {
+    t.error(err, 'Parse read error');
+  }
+
+  t.end();
+});
+
 test('stringify cron expression with star range step (discard seconds)', function (t) {
   try {
     var expected = '*/5 */2 * * *';
@@ -132,7 +164,6 @@ test('stringify cron expression with star range step (discard seconds)', functio
 });
 
 test('stringify cron expression with semi range step', function (t) {
-
   try {
     var expected = '0 5/5 * * * *';
     var interval = CronParser.parseExpression('5/5 * * * *', {});
@@ -257,7 +288,7 @@ test('stringify cron expression with wildcard day of month and single month valu
   t.end();
 });
 
-test('stringify cron expression with wildcard day of month and month rangee', function (t) {
+test('stringify cron expression with wildcard day of month and month range', function (t) {
   try {
     var expected = '* * * 4-6 *';
     var interval = CronParser.parseExpression(expected, {});
