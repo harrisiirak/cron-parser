@@ -35,8 +35,18 @@ test('stringify single value', function (t) {
 
 test('stringify multiple single values', function (t) {
   try {
-    var str = stringifyField([2, 5, 9], 0, 7);
+    var str = stringifyField([2, 5, 9], 0, 9);
     t.equal(str, '2,5,9');
+  } catch (err) {
+    t.error(err, 'stringify field error');
+  }
+  t.end();
+});
+
+test('stringify multiple ranged values', function (t) {
+  try {
+    var str = stringifyField([1, 3, 5, 6], 0, 9);
+    t.equal(str, '1,3,5,6');
   } catch (err) {
     t.error(err, 'stringify field error');
   }
