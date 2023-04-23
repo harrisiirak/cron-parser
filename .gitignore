@@ -19,3 +19,4 @@ npm-debug.log
 .history
 .vscode
 .nyc_output
+/yarn.lock
