@@ -1,11 +1,11 @@
 'use strict';
 
 var test = require('tap').test;
-var {stringifyField} = require('../lib/field_stringify');
+const {CronFields} = require('../lib/CronFields');
 
 test('stringify astrix', function (t) {
   try {
-    var str = stringifyField([1, 2, 3, 4], 1, 4);
+    var str = CronFields.stringifyField([1, 2, 3, 4], 1, 4);
     t.equal(str, '*');
   } catch (err) {
     t.error(err, 'stringify field error');
@@ -15,7 +15,7 @@ test('stringify astrix', function (t) {
 
 test('stringify astrix step', function (t) {
   try {
-    var str = stringifyField([0, 2, 4, 6], 0, 7);
+    var str = CronFields.stringifyField([0, 2, 4, 6], 0, 7);
     t.equal(str, '*/2');
   } catch (err) {
     t.error(err, 'stringify field error');
@@ -25,7 +25,7 @@ test('stringify astrix step', function (t) {
 
 test('stringify single value', function (t) {
   try {
-    var str = stringifyField([2], 0, 7);
+    var str = CronFields.stringifyField([2], 0, 7);
     t.equal(str, '2');
   } catch (err) {
     t.error(err, 'stringify field error');
@@ -35,7 +35,7 @@ test('stringify single value', function (t) {
 
 test('stringify multiple single values', function (t) {
   try {
-    var str = stringifyField([2, 5, 9], 0, 9);
+    var str = CronFields.stringifyField([2, 5, 9], 0, 9);
     t.equal(str, '2,5,9');
   } catch (err) {
     t.error(err, 'stringify field error');
@@ -45,7 +45,7 @@ test('stringify multiple single values', function (t) {
 
 test('stringify multiple ranged values', function (t) {
   try {
-    var str = stringifyField([1, 3, 5, 6], 0, 9);
+    var str = CronFields.stringifyField([1, 3, 5, 6], 0, 9);
     t.equal(str, '1,3,5,6');
   } catch (err) {
     t.error(err, 'stringify field error');
@@ -55,7 +55,7 @@ test('stringify multiple ranged values', function (t) {
 
 test('stringify range', function (t) {
   try {
-    var str = stringifyField([2, 3, 4], 0, 7);
+    var str = CronFields.stringifyField([2, 3, 4], 0, 7);
     t.equal(str, '2-4');
   } catch (err) {
     t.error(err, 'stringify field error');
@@ -65,7 +65,7 @@ test('stringify range', function (t) {
 
 test('stringify range step', function (t) {
   try {
-    var str = stringifyField([2, 4, 6], 0, 8);
+    var str = CronFields.stringifyField([2, 4, 6], 0, 8);
     t.equal(str, '2-6/2');
   } catch (err) {
     t.error(err, 'stringify field error');
@@ -75,7 +75,7 @@ test('stringify range step', function (t) {
 
 test('stringify semi range step', function (t) {
   try {
-    var str = stringifyField([4, 6, 8], 0, 9);
+    var str = CronFields.stringifyField([4, 6, 8], 0, 9);
     t.equal(str, '4/2');
   } catch (err) {
     t.error(err, 'stringify field error');
@@ -85,7 +85,7 @@ test('stringify semi range step', function (t) {
 
 test('stringify multi types', function (t) {
   try {
-    var str = stringifyField([1, 2, 4, 5, 6, 7, 8, 9, 10, 20, 25, 30, 35, 57], 0, 59);
+    var str = CronFields.stringifyField([1, 2, 4, 5, 6, 7, 8, 9, 10, 20, 25, 30, 35, 57], 0, 59);
     t.equal(str, '1,2,4-10,20-35/5,57');
   } catch (err) {
     t.error(err, 'stringify field error');

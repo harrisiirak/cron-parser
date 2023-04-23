@@ -1,6 +1,5 @@
 import {CronExpressionParser} from "./CronExpressionParser";
 import {CronDate, TimeUnit, DateMathOp} from './date';
-import {stringifyField} from "./field_stringify";
 import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from "../types";
 import {CronFields} from "./CronFields";
 import assert from "assert";

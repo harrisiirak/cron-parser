@@ -1,5 +1,6 @@
 import fs from 'fs';
-import {CronExpression, MappedFields} from './expression';
+import {CronExpression} from './expression';
+import {CronFields} from './CronFields';
 import assert from 'assert';
 
 // noinspection JSUnusedGlobalSymbols
@@ -42,8 +43,7 @@ class CronParser {
      * @param {object} [options] Parsing options
      * @return {object}
      */
-    static fieldsToExpression(fields: MappedFields, options?: object) {
-        console.log('######################### fieldsToExpression', fields.constructor.name);
+    static fieldsToExpression(fields: CronFields, options?: object) {
         return CronExpression.fieldsToExpression(fields, options);
     }
 

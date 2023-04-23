@@ -1,9 +1,14 @@
 import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../types';
 import {CronConstants, CronConstraints} from './CronConstants';
-import {stringifyField} from './field_stringify';
 import assert from 'assert';
-
 export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
+
+interface Range {
+    start: number;
+    count: number;
+    end?: number;
+    step?: number;
+}
 
 export type CronFieldsParams = {
     second: SixtyRange[];
@@ -13,7 +18,6 @@ export type CronFieldsParams = {
     month: MonthRange[];
     dayOfWeek: DayOfTheWeekRange[];
 }
-
 
 export class CronFields {
     readonly #second: SixtyRange[];
@@ -45,21 +49,16 @@ export class CronFields {
         const dayOfWeek = this.#dayOfWeek;
         const arr = [];
         if (includeSeconds) {
-            // second
-            arr.push(stringifyField(this.#second, constraints.second.min, constraints.second.max));
+            arr.push(CronFields.stringifyField(this.#second, constraints.second.min, constraints.second.max)); // second
         }
         const dayOfMonthMax = this.#month.length === 1 ? CronConstants.daysInMonth[this.#month[0] - 1] : constraints.dayOfMonth.max;
+        const dayOfWeekVal = dayOfWeek[dayOfWeek.length - 1] === 7 ? dayOfWeek.slice(0, -1) : dayOfWeek;
         arr.push(
-            // minute
-            stringifyField(this.#minute, constraints.minute.min, constraints.minute.max),
-            // hour
-            stringifyField(this.#hour, constraints.hour.min, constraints.hour.max),
-            // dayOfMonth
-            stringifyField(this.#dayOfMonth, constraints.dayOfMonth.min, dayOfMonthMax),
-            // month
-            stringifyField(this.#month, constraints.month.min, constraints.month.max),
-            // dayOfWeek
-            stringifyField(dayOfWeek[dayOfWeek.length - 1] === 7 ? dayOfWeek.slice(0, -1) : dayOfWeek, constraints.dayOfWeek.min, 6),
+            CronFields.stringifyField(this.#minute, constraints.minute.min, constraints.minute.max),   // minute
+            CronFields.stringifyField(this.#hour, constraints.hour.min, constraints.hour.max),         // hour
+            CronFields.stringifyField(this.#dayOfMonth, constraints.dayOfMonth.min, dayOfMonthMax),    // dayOfMonth
+            CronFields.stringifyField(this.#month, constraints.month.min, constraints.month.max),      // month
+            CronFields.stringifyField(dayOfWeekVal, constraints.dayOfWeek.min, 6),                // dayOfWeek
         );
         return arr.join(' ');
     }
@@ -106,25 +105,91 @@ export class CronFields {
         return dayOfMonth;
     }
 
+    static #handleSingleRange(range: Range, min: number, max: number): string | null {
+        const step = range.step;
+        if (step === 1 && range.start === min && range.end === max) return '*';
+        if (!step) return null;
+        if (step !== 1 && range.start === min && range.end === max - step + 1) return `*/${step}`;
+        return null;
+    }
+
+    static #handleMultipleRanges(range: Range, max: number): string {
+        const step = range.step;
+        if (step === 1) return `${range.start}-${range.end}`;
+
+        const multiplier = range.start === 0 ? range.count - 1 : range.count;
+        assert(step, 'Unexpected range step');
+        assert(range.end, 'Unexpected range end');
+        if (step * multiplier > range.end) {
+            const mapFn = (_: number, index: number) => index % step === 0 ? range.start + index : null;
+            const seed = {length: range.end - range.start + 1};
+            return Array.from(seed, mapFn).filter(value => value !== null).join(',');
+        }
+
+        return range.end === max - step + 1 ? `${range.start}/${step}` : `${range.start}-${range.end}/${step}`;
+    }
+
+    static stringifyField(arr: CronFieldTypes, min: number, max: number): string {
+        // FIXME: arr as unknown as number[]
+        const ranges = CronFields.compactField(arr as unknown as number[]);
+
+        if (ranges.length === 1) {
+            const singleRangeResult = CronFields.#handleSingleRange(ranges[0], min, max);
+            if (singleRangeResult) return singleRangeResult;
+        }
+
+        return ranges.map(range => range.count === 1 ? range.start.toString() : CronFields.#handleMultipleRanges(range, max)).join(',');
+    }
+
     static fieldSorter(a: number | string, b: number | string): number {
         const aIsNumber = typeof a === 'number';
         const bIsNumber = typeof b === 'number';
-
-        if (aIsNumber && bIsNumber) {
-            return a - (b as number);
-        }
-
-        if (aIsNumber) {
-            return -1;
-        }
-
-        if (bIsNumber) {
-            return 1;
-        }
-
-        return (a as string).localeCompare(b as string);
+        if (aIsNumber && bIsNumber) return (a as number) - (b as number);
+        if (!aIsNumber && !bIsNumber) return (a as string).localeCompare(b as string);
+        return aIsNumber ? -1 : 1;
     }
 
+    static compactField(input: number[]): Range[] {
+        if (input.length === 0) {
+            return [];
+        }
+        const output: Range[] = [];
+        let current: Range = { start: input[0], count: 1 };
+
+        input.slice(1).forEach((item, i, arr) => {
+            const prevItem = arr[i - 1] || current.start;
+            const nextItem = arr[i + 1];
+
+            if (current.step === undefined && nextItem !== undefined) {
+                const step = item - prevItem;
+                const nextStep = nextItem - item;
+
+                if (step <= nextStep) {
+                    current = { ...current, count: 2, end: item, step };
+                    return;
+                }
+                current.step = 1;
+            }
+
+            if (item - (current.end ?? 0) === current.step) {
+                current.count++;
+                current.end = item;
+            } else {
+                if (current.count === 1) {
+                    output.push({ start: current.start, count: 1 });
+                } else if (current.count === 2) {
+                    output.push({ start: current.start, count: 1 });
+                    output.push({ start: current.end ?? prevItem, count: 1 }); // it is impossible for current.end to be undefined, this makes typescript happy
+                } else {
+                    output.push(current);
+                }
+                current = { start: item, count: 1 };
+            }
+        });
+
+        output.push(current);
+        return output;
+    }
 
     get second(): SixtyRange[] {
         return [...this.#second];

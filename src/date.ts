@@ -1,6 +1,5 @@
 import {DateTime} from 'luxon';
 import assert from 'assert';
-import {stringifyField} from "./field_stringify";
 
 type VerbMap = { [key: string]: () => void };
 export type TimeUnit = 'Year' | 'Month' | 'Day' | 'Hour' | 'Minute' | 'Second';
