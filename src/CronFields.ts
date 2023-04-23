@@ -1,23 +1,6 @@
-import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../types';
 import {CronConstants, CronConstraints} from './CronConstants';
 import assert from 'assert';
-export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
-
-interface Range {
-    start: number;
-    count: number;
-    end?: number;
-    step?: number;
-}
-
-export type CronFieldsParams = {
-    second: SixtyRange[];
-    minute: SixtyRange[];
-    hour: HourRange[];
-    dayOfMonth: DayOfTheMonthRange[];
-    month: MonthRange[];
-    dayOfWeek: DayOfTheWeekRange[];
-}
+import {CronFieldsParams, Range, CronFieldTypes, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from './types';
 
 export class CronFields {
     readonly #second: SixtyRange[];

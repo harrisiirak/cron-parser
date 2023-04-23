@@ -1,31 +1,11 @@
-import {CronConstants} from "./CronConstants";
+import {CronConstants} from './CronConstants';
 import {CronFields} from './CronFields';
 import {CronDate} from './date';
-import {CronExpression, MappedFields} from './expression';
+import {CronExpression} from './expression';
 import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../types';
 import assert from 'assert';
 
-interface FieldConstraints {
-    min: number;
-    max: number;
-    chars: string[];
-}
-
-enum MonthsEnum {jan = 1, feb = 2, mar = 3, apr = 4, may = 5, jun = 6, jul = 7, aug = 8, sep = 9, oct = 10, nov = 11, dec = 12}
-
-enum DayOfWeekEnum {sun = 0, mon = 1, tue = 2, wed = 3, thu = 4, fri = 5, sat = 6}
-
-type CronAliasesType = { [key: string]: MonthsEnum | DayOfWeekEnum };
-
-interface CronExpressionParserOptions {
-    currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
-    endDate?: Date | string | number;
-    startDate?: Date | string | number;
-    iterator?: boolean;
-    utc?: boolean;
-    tz?: string;
-    nthDayOfWeek?: number;
-}
+import {FieldConstraints, CronAliasesType, CronExpressionParserOptions} from './types';
 
 export class CronExpressionParser {
 
@@ -43,7 +23,6 @@ export class CronExpressionParser {
         month: CronExpressionParser.standardValidCharacters,
         dayOfWeek: CronExpressionParser.dayOfWeekValidCharacters,
     };
-
 
     constructor() {
         throw new Error('This class is not meant to be instantiated.');
