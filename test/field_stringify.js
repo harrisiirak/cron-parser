@@ -1,7 +1,7 @@
 'use strict';
 
 var test = require('tap').test;
-var stringifyField = require('../lib/field_stringify');
+var {stringifyField} = require('../lib/field_stringify');
 
 test('stringify astrix', function (t) {
   try {

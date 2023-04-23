@@ -2,7 +2,7 @@ import {expectAssignable, expectError, expectNotAssignable, expectType} from 'ts
 import {
     CronDate,
     CronExpression,
-    CronFields, DateType,
+    CronFieldsType, DateType,
     parseExpression,
     parseFile, ParserOptions,
     parseString,
@@ -81,7 +81,7 @@ expectAssignable<{
 expectType<CronExpression>(parseExpression('0 1 2 3 * 1-3,5'))
 expectType<CronExpression<true>>(parseExpression('0 1 2 3 * 1-3,5', parseOptions))
 
-const fields: CronFields = {
+const fields: CronFieldsType = {
     second: [1, 1],
     minute: [1],
     hour: [1],
@@ -108,7 +108,7 @@ expectType<{
     errors: Record<string, any>,
 }>(stringResult)
 
-expectType<CronFields>(interval.fields)
+expectType<CronFieldsType>(interval.fields)
 expectType<CronDate>(interval.next())
 expectType<CronDate>(interval.prev())
 expectType<boolean>(interval.hasNext())

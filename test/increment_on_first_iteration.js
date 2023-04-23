@@ -1,7 +1,7 @@
 var util = require('util');
 var sinon = require('sinon');
 var test = require('tap').test;
-var CronExpression = require('../lib/expression');
+var {CronExpression} = require('../lib/expression');
 
 test('increment_on_first_itereation', function(t) {
   try {

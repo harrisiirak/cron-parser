@@ -1,7 +1,7 @@
 // empty around comma
 
 var test = require('tap').test;
-var CronExpression = require('../lib/expression');
+var {CronExpression} = require('../lib/expression');
 
 const options = {
   utc: true

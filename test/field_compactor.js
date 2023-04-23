@@ -1,7 +1,7 @@
 'use strict';
 
 var test = require('tap').test;
-var compactField = require('../lib/field_compactor');
+var {compactField} = require('../lib/field_compactor');
 
 test('compact field - empty array', function(t) {
   try {

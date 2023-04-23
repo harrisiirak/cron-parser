@@ -1,7 +1,7 @@
 'use strict';
 
 var test = require('tap').test;
-var CronParser = require('../lib/parser');
+var {CronParser} = require('../lib/parser');
 
 test('stringify cron expression all stars no seconds', function (t) {
   try {
@@ -10,7 +10,7 @@ test('stringify cron expression all stars no seconds', function (t) {
     var str = interval.stringify(true);
     t.equal(str, expected);
     str = CronParser.fieldsToExpression(interval.fields).stringify(true);
-    t.equal(str, expected);
+    t.equal(str, expected, `expected: ${expected}, actual: ${str}`);
 
   } catch (err) {
     t.error(err, 'Parse read error');

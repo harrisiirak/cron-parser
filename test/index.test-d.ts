@@ -72,7 +72,7 @@ const parseOptions: ParserOptions<true> = {
     utc: true,
     tz: 'f',
     nthDayOfWeek: 5,
-}
+};
 expectAssignable<{
     currentDate?: string | number | Date
     startDate?: string | number | Date
@@ -81,10 +81,10 @@ expectAssignable<{
     utc?: boolean
     tz?: string
     nthDayOfWeek?: number
-}>(parseOptions)
+}>(parseOptions);
 
-expectType<CronExpression>(parseExpression('0 1 2 3 * 1-3,5'))
-expectType<CronExpression<true>>(parseExpression('0 1 2 3 * 1-3,5', parseOptions))
+expectType<CronExpression>(parseExpression('0 1 2 3 * 1-3,5'));
+expectType<CronExpression<true>>(parseExpression('0 1 2 3 * 1-3,5', parseOptions));
 
 const fields: CronFields = {
     second: [1, 1],
@@ -93,46 +93,46 @@ const fields: CronFields = {
     dayOfMonth: [1],
     month: [1],
     dayOfWeek: [1],
-}
+};
 
-expectType<CronExpression>(fieldsToExpression(fields))
-expectType<CronExpression<true>>(fieldsToExpression(fields, parseOptions))
+expectType<CronExpression>(fieldsToExpression(fields));
+expectType<CronExpression<true>>(fieldsToExpression(fields, parseOptions));
 
-expectType<string>(fieldsToExpression(fields).stringify())
-expectType<string>(fieldsToExpression(fields, parseOptions).stringify())
-expectType<string>(fieldsToExpression(fields, parseOptions).stringify(true))
+expectType<string>(fieldsToExpression(fields).stringify());
+expectType<string>(fieldsToExpression(fields, parseOptions).stringify());
+expectType<string>(fieldsToExpression(fields, parseOptions).stringify(true));
 
-expectType<void>(parseFile('path', (err: any, data: StringResult) => console.log(data)))
+expectType<void>(parseFile('path', (err: any, data: StringResult) => console.log(data)));
 
-expectType<StringResult>(parseString('path'))
+expectType<StringResult>(parseString('path'));
 
 const stringResult = parseString('path');
 expectType<{
     variables: Record<string, string>,
     expressions: CronExpression[],
     errors: Record<string, any>,
-}>(stringResult)
+}>(stringResult);
 
-expectType<CronFields>(interval.fields)
-expectType<CronDate>(interval.next())
-expectType<CronDate>(interval.prev())
-expectType<boolean>(interval.hasNext())
-expectType<boolean>(interval.hasPrev())
-expectType<string>(interval.stringify())
-expectType<string>(interval.stringify(true))
-expectType<void>(interval.reset())
-expectType<void>(interval.reset("Sdf"))
-expectType<void>(interval.reset(5))
-expectType<void>(interval.reset(new Date()))
-expectType<CronDate[]>(interval.iterate(5))
-expectType<CronDate[]>(interval.iterate(5, (item: CronDate, i: number) => {}))
+expectType<CronFields>(interval.fields);
+expectType<CronDate>(interval.next());
+expectType<CronDate>(interval.prev());
+expectType<boolean>(interval.hasNext());
+expectType<boolean>(interval.hasPrev());
+expectType<string>(interval.stringify());
+expectType<string>(interval.stringify(true));
+expectType<void>(interval.reset());
+expectType<void>(interval.reset('Sdf'));
+expectType<void>(interval.reset(5));
+expectType<void>(interval.reset(new Date()));
+expectType<CronDate[]>(interval.iterate(5));
+expectType<CronDate[]>(interval.iterate(5, (item: CronDate, i: number) => {}));
 
-expectAssignable<DateType>(new Date())
-expectAssignable<DateType>(5)
-expectAssignable<DateType>("SDf")
+expectAssignable<DateType>(new Date());
+expectAssignable<DateType>(5);
+expectAssignable<DateType>('SDf');
 
 
-expectType<IteratorResult<CronDate, CronDate>>(intervalIterator.next())
-expectType<IteratorResult<CronDate, CronDate>>(intervalIterator.prev())
-expectType<IteratorResult<CronDate, CronDate>[]>(intervalIterator.iterate(5))
-expectType<IteratorResult<CronDate, CronDate>[]>(intervalIterator.iterate(5, (item: IteratorResult<CronDate, CronDate>, i: number) => {}))
+expectType<IteratorResult<CronDate, CronDate>>(intervalIterator.next());
+expectType<IteratorResult<CronDate, CronDate>>(intervalIterator.prev());
+expectType<IteratorResult<CronDate, CronDate>[]>(intervalIterator.iterate(5));
+expectType<IteratorResult<CronDate, CronDate>[]>(intervalIterator.iterate(5, (item: IteratorResult<CronDate, CronDate>, i: number) => {}));

@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var CronExpression = require('../lib/expression');
+var {CronExpression} = require('../lib/expression');
 
 test('It works on DST start', function(t) {
   try {

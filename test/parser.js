@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var CronParser = require('../lib/parser');
+var {CronParser} = require('../lib/parser');
 
 // Globals
 

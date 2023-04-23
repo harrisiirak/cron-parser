@@ -111,16 +111,16 @@ try {
 }
 ```
 
-Manipulation 
+Manipulation
 
 ```javascript
 var parser = require('cron-parser');
 
 var interval = parser.parseExpression('0 7 * * 0-4');
-var fields = JSON.parse(JSON.stringify(interval.fields)); // Fields is immutable
+var fields = JSON.parse(JSON.stringify(interval.#fields)); // Fields is immutable
 fields.hour = [8];
 fields.minute = [29];
-fields.dayOfWeek = [1,3,4,5,6,7];
+fields.dayOfWeek = [1, 3, 4, 5, 6, 7];
 var modifiedInterval = parser.fieldsToExpression(fields);
 var cronString = modifiedInterval.stringify();
 console.log(cronString); // "29 8 * * 1,3-7"

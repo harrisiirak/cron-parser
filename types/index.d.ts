@@ -7,14 +7,14 @@ import {
 } from './common';
 
 type BuildRangeTuple<Current extends [...number[]], Count extends number> =
-    Current["length"] extends Count
+    Current['length'] extends Count
         ? Current
         : BuildRangeTuple<[number, ...Current], Count>
 type RangeTuple<Count extends number> = BuildRangeTuple<[], Count>
 type BuildRange<Current extends number, End extends number, Accu extends [...number[]]> =
-    Accu["length"] extends End
+    Accu['length'] extends End
         ? Current
-        : BuildRange<Current | Accu["length"], End, [number, ...Accu]>
+        : BuildRange<Current | Accu['length'], End, [number, ...Accu]>
 type Range<StartInclusive extends number, EndExclusive extends number> = BuildRange<StartInclusive, EndExclusive, RangeTuple<StartInclusive>>
 
 export type SixtyRange = Range<0, 30> | Range<30, 60>; // Typescript restriction on recursion depth
@@ -32,7 +32,7 @@ export type CronFields = {
     readonly dayOfWeek: readonly DayOfTheWeekRange[];
 }
 
-export {ParserOptions, CronDate, DateType}
+export {ParserOptions, CronDate, DateType};
 export type CronExpression<IsIterable extends boolean = false> = ICronExpression<CronFields, IsIterable>
 export type StringResult = IStringResult<CronFields>
 

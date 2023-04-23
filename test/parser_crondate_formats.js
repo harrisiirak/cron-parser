@@ -1,6 +1,6 @@
 var luxon = require('luxon');
 var test = require('tap').test;
-var CronDate = require('../lib/date');
+var {CronDate} = require('../lib/date');
 
 test('parse cron date formats with local timezone', (t) => {
   // Some tests need the local offset to be compatible without invoking timezone management.
@@ -10,7 +10,7 @@ test('parse cron date formats with local timezone', (t) => {
   var offsetMinutes = offset % 60;
   var offsetSign = offset < 0 ? '-' : '+';
 
-  var expectedTime = new Date(2021, 0, 4, 10, 0, 0).toString();
+  const expectedTime = new Date(2021, 0, 4, 10, 0, 0).toString();
 
   test('undefined date', (t) => {
     const realDate = new Date();
@@ -31,22 +31,23 @@ test('parse cron date formats with local timezone', (t) => {
   test('ISO 8601', (t) => {
     var d = new CronDate('2021-01-04T10:00:00');
     t.equal(d.toDate().toString(), expectedTime);
-
     t.end();
   });
 
   test('ISO 8601 date', (t) => {
-
     var d = new CronDate('2021-01-04');
-    var expectedTime = new Date(2021, 0, 4, 0, 0, 0).toString();
-
+    const expectedTime = new Date(2021, 0, 4, 0, 0, 0).toString();
     t.equal(d.toDate().toString(), expectedTime);
-
     t.end();
   });
 
   test('RFC2822', (t) => {
     var offsetString = offsetSign + String(offsetHours).padStart(2, 0) + String(offsetMinutes).padStart(2, 0);
+    // FIXME - this test is confusing.  It's not clear what the expected time is.
+    //  For example: new Date('Mon, 4 Jan 2021 10:00:00 +0400') is Mon Jan 04 2021 01:00:00 GMT-0500 (Eastern Standard Time)
+    //  But the expected date is Mon Jan 04 2021 10:00:00 GMT-0500 (Eastern Standard Time)
+    //  new CronDate('Mon, 4 Jan 2021 10:00:00 +0400') is Mon Jan 04 2021 01:00:00 GMT-0500 (Eastern Standard Time)
+    //  Is this correct and the test is broken? Or is the test correct and the code is broken?
 
     var d = new CronDate('Mon, 4 Jan 2021 10:00:00 ' + offsetString);
     t.equal(d.toDate().toString(), expectedTime);

@@ -1,4 +1,15 @@
 {
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "module"
+    },
     "rules": {
         "eol-last": ["error", "always"],
         "quotes": ["error", "single"],
@@ -8,7 +19,7 @@
         {
             "files": ["test/**.js"],
             "parserOptions": {
-                "ecmaVersion": 6
+                "ecmaVersion": 2022
             }
         }
     ]

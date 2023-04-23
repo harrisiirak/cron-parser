@@ -1,7 +1,7 @@
 var util = require('util');
 var test = require('tap').test;
-var CronExpression = require('../lib/expression');
-var CronDate = require('../lib/date');
+var {CronExpression} = require('../lib/expression');
+var {CronDate} = require('../lib/date');
 
 
 test('parse expression as UTC', function(t) {
