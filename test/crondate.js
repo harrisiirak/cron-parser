@@ -2,7 +2,7 @@
 
 var test = require('tap').test;
 var {CronDate} = require('../lib/date');
-const {TimeUnitsEnum} = require('../src/types');
+const {TimeUnitsEnum} = require('../lib/types');
 
 test('is the last weekday of the month', function (t) {
     // Last monday of septhember
