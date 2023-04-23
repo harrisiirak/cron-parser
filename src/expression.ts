@@ -56,7 +56,6 @@ export class CronExpression {
     #applyTimezoneShift(currentDate: CronDate, dateMathOp: DateMathOpEnum, unit: TimeUnitsEnum): void {
         if (unit === TimeUnitsEnum.month || unit === TimeUnitsEnum.day) {
             const prevTime = currentDate.getTime();
-            // using a CronDate[key]() is tricky in ts, we will use a new function to do the same thing
             currentDate.handleMathOp(dateMathOp, unit);
             const currTime = currentDate.getTime();
             if (prevTime === currTime) {

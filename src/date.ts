@@ -517,18 +517,18 @@ export class CronDate {
     //     }
     // }
     //
-    // get dstStart(): number | null {
-    //     return this.#dstStart;
-    // }
-    // set dstStart(value: number | null) {
-    //     this.#dstStart = value;
-    // }
-    // get dstEnd(): number | null {
-    //     return this.#dstEnd;
-    // }
-    // set dstEnd(value: number | null) {
-    //     this.#dstEnd = value;
-    // }
+    get dstStart(): number | null {
+        return this.#dstStart;
+    }
+    set dstStart(value: number | null) {
+        this.#dstStart = value;
+    }
+    get dstEnd(): number | null {
+        return this.#dstEnd;
+    }
+    set dstEnd(value: number | null) {
+        this.#dstEnd = value;
+    }
 
 }
 
