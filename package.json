@@ -5,7 +5,7 @@
   "main": "lib/cjs/index.cjs.js",
   "module": "lib/esm/index.js",
   "types": "lib/types/index.d.ts",
-  "type": "commonjs",
+  "type": "module",
   "old_typesVersions": {
     "<4.1": {
       "*": [
@@ -28,7 +28,8 @@
     "test:cover": "cross-env TZ=UTC tap --coverage-report=html ./test/*.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "npm run lint && npm run test:unit && npm run test:tsd"
+    "test": "npm run lint && npm run test:unit && npm run test:tsd",
+    "jest:test": "npx jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -67,6 +68,7 @@
     "luxon": "^3.2.1"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.1",
     "@types/luxon": "^3.3.0",
     "@types/node": "^18.15.13",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
@@ -74,9 +76,11 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.39.0",
     "eslint-plugin-json": "^3.1.0",
+    "jest": "^29.5.0",
     "rimraf": "^5.0.0",
     "sinon": "^15.0.1",
     "tap": "^16.3.3",
+    "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
     "tsd": "^0.26.0",
     "typescript": "^5.0.4"
