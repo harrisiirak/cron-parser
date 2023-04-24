@@ -3,11 +3,14 @@ import {CronFields} from './CronFields';
 import {CronParser} from './CronParser';
 import {CronExpression} from './CronExpression';
 
-export {
+// compatible with CommonJS-style require
+const exported = {
     CronConstants,
     CronFields,
     CronParser,
     CronExpression,
+    default: CronParser,
 };
 
-export default CronParser;
+module.exports = exported;
+module.exports.default = exported.default;
