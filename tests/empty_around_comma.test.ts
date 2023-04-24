@@ -1,22 +1,19 @@
-// empty around comma
-
-var test = require('tap').test;
-var {CronExpression} = require('../lib/CronExpression');
+import { CronExpression } from '../src';
 
 const options = {
-  utc: true
+  utc: true,
 };
 
-test('both empty around comma', function (t) {
-  t.throws(function () {
-    CronExpression.parse('*/10 * * * * ,', options);
-  }, new Error('Invalid list value format'));
-  t.end();
-});
+describe('CronExpression', () => {
+  test('both empty around comma', () => {
+    expect(() => {
+      CronExpression.parse('*/10 * * * * ,', options);
+    }).toThrow(new Error('Invalid list value format'));
+  });
 
-test('one side empty around comma', function (t) {
-  t.throws(function () {
-    CronExpression.parse('*/10 * * * * ,2', options);
-  }, new Error('Invalid list value format'));
-  t.end();
+  test('one side empty around comma', () => {
+    expect(() => {
+      CronExpression.parse('*/10 * * * * ,2', options);
+    }).toThrow(new Error('Invalid list value format'));
+  });
 });
