@@ -1,26 +1,35 @@
 {
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
-    ],
-    "plugins": [
-        "@typescript-eslint"
-    ],
-    "parserOptions": {
-        "ecmaVersion": 2022,
-        "sourceType": "module"
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": [
+    "@typescript-eslint",
+    "json"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "rules": {
+    "eol-last": ["error", "always"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"]
+  },
+  "overrides": [
+    {
+      "files": ["test/**.js"],
+      "parserOptions": {
+        "ecmaVersion": 2022
+      }
     },
-    "rules": {
-        "eol-last": ["error", "always"],
-        "quotes": ["error", "single"],
-        "semi": ["error", "always"]
-    },
-    "overrides": [
-        {
-            "files": ["test/**.js"],
-            "parserOptions": {
-                "ecmaVersion": 2022
-            }
-        }
-    ]
+    {
+      "files": ["*.json"],
+      "parser": "eslint-plugin-json/parser",
+      "rules": {
+        "quotes": ["error", "double"]
+      }
+    }
+  ]
 }
+
