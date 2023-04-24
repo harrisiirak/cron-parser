@@ -10,4 +10,4 @@ export {
     CronExpression,
 };
 
-export default CronExpression;
+export default CronParser;
