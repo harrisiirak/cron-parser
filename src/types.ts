@@ -12,9 +12,9 @@ export type MonthRange = FieldRange<1, 13>;
 export type DayOfTheWeekRange = FieldRange<0, 8>;
 
 export interface FieldConstraints {
-    min: number;
-    max: number;
-    chars: string[];
+  min: number;
+  max: number;
+  chars: string[];
 }
 
 export enum MonthsEnum {jan = 1, feb = 2, mar = 3, apr = 4, may = 5, jun = 6, jul = 7, aug = 8, sep = 9, oct = 10, nov = 11, dec = 12}
@@ -26,75 +26,75 @@ export enum TimeUnitsEnum {second = 'second', minute = 'minute', hour = 'hour', 
 export enum DateMathOpEnum {add = 'add', subtract = 'subtract'}
 
 export enum PredefinedCronExpressionsEnum {
-    '@yearly' = '0 0 1 1 *',
-    '@monthly' = '0 0 1 * *',
-    '@weekly' = '0 0 * * 0',
-    '@daily' = '0 0 * * *',
-    '@hourly' = '0 * * * *'
+  '@yearly' = '0 0 1 1 *',
+  '@monthly' = '0 0 1 * *',
+  '@weekly' = '0 0 * * 0',
+  '@daily' = '0 0 * * *',
+  '@hourly' = '0 * * * *'
 
 }
 
 export type CronAliasesType = { [key: string]: MonthsEnum | DayOfWeekEnum };
 
 export interface CronExpressionParserOptions {
-    currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
-    endDate?: Date | string | number;
-    startDate?: Date | string | number;
-    iterator?: boolean;
-    utc?: boolean;
-    tz?: string;
-    nthDayOfWeek?: number;
+  currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
+  endDate?: Date | string | number;
+  startDate?: Date | string | number;
+  iterator?: boolean;
+  utc?: boolean;
+  tz?: string;
+  nthDayOfWeek?: number;
 }
 
 export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
 
 export interface Range {
-    start: number;
-    count: number;
-    end?: number;
-    step?: number;
+  start: number;
+  count: number;
+  end?: number;
+  step?: number;
 }
 
 export interface CronFieldsParams {
-    second: SixtyRange[];
-    minute: SixtyRange[];
-    hour: HourRange[];
-    dayOfMonth: DayOfTheMonthRange[];
-    month: MonthRange[];
-    dayOfWeek: DayOfTheWeekRange[];
+  second: SixtyRange[];
+  minute: SixtyRange[];
+  hour: HourRange[];
+  dayOfMonth: DayOfTheMonthRange[];
+  month: MonthRange[];
+  dayOfWeek: DayOfTheWeekRange[];
 }
 
 // *********************************************************************************************************************
 
 export interface CronParserOptions {
-    currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
-    endDate?: Date | string | number;
-    startDate?: Date | string | number;
-    iterator?: boolean;
-    utc?: boolean;
-    tz?: string;
-    nthDayOfWeek?: number;
+  currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
+  endDate?: Date | string | number;
+  startDate?: Date | string | number;
+  iterator?: boolean;
+  utc?: boolean;
+  tz?: string;
+  nthDayOfWeek?: number;
 }
 
 interface CronConstraints {
-    min: number;
-    max: number;
-    chars: string[];
+  min: number;
+  max: number;
+  chars: string[];
 
 }
 
 export interface MappedFields {
-    second: SixtyRange[];
-    minute: SixtyRange[];
-    hour: HourRange[];
-    dayOfMonth: DayOfTheMonthRange[];
-    month: MonthRange[];
-    dayOfWeek: DayOfTheWeekRange[];
+  second: SixtyRange[];
+  minute: SixtyRange[];
+  hour: HourRange[];
+  dayOfMonth: DayOfTheMonthRange[];
+  month: MonthRange[];
+  dayOfWeek: DayOfTheWeekRange[];
 }
 
 export interface IteratorFields {
-    value: CronDate;
-    done: boolean;
+  value: CronDate;
+  done: boolean;
 }
 
 export type IteratorResult = Iterator<IteratorFields>;
@@ -104,8 +104,8 @@ type KeyValueType = { [key: string]: number };
 type MonthsType = { [key: string]: MonthsEnum };
 type DayOfWeekType = { [key: string]: DayOfWeekEnum };
 type AliasesType = {
-    month: MonthsType;
-    dayOfWeek: DayOfWeekType;
+  month: MonthsType;
+  dayOfWeek: DayOfWeekType;
 };
 
 

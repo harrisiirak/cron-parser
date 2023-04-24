@@ -1,7 +1,7 @@
-const { CronConstants } = require('./CronConstants');
-const { CronFields } = require('./CronFields');
-const { CronParser } = require('./CronParser');
-const { CronExpression } = require('./CronExpression');
+const {CronConstants} = require('./CronConstants');
+const {CronFields} = require('./CronFields');
+const {CronParser} = require('./CronParser');
+const {CronExpression} = require('./CronExpression');
 
 module.exports.CronConstants = CronConstants;
 module.exports.CronFields = CronFields;

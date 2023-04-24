@@ -5,7 +5,7 @@ import {CronExpression} from './CronExpression';
 import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../types';
 import assert from 'assert';
 
-import {FieldConstraints, CronAliasesType, CronExpressionParserOptions} from './types';
+import {CronAliasesType, CronExpressionParserOptions, FieldConstraints} from './types';
 
 export class CronExpressionParser {
   // FIXME: these are a temporary solution to make the parser work with the current design of the library.
@@ -14,7 +14,7 @@ export class CronExpressionParser {
   private static standardValidCharacters = /^[,*\d/-]+$/;
   private static dayOfWeekValidCharacters = /^[?,*\dL#/-]+$/;
   private static dayOfMonthValidCharacters = /^[?,*\dL/-]+$/;
-  private static validCharacters: {[key: string]: RegExp} = {
+  private static validCharacters: { [key: string]: RegExp } = {
     second: CronExpressionParser.standardValidCharacters,
     minute: CronExpressionParser.standardValidCharacters,
     hour: CronExpressionParser.standardValidCharacters,
@@ -25,6 +25,17 @@ export class CronExpressionParser {
 
   constructor() {
     throw new Error('This class is not meant to be instantiated.');
+  }
+
+  static get predefined(): Record<string, string> {
+    return {
+      '@yearly': '0 0 1 1 *',
+      '@annually': '0 0 1 1 *',
+      '@monthly': '0 0 1 * *',
+      '@weekly': '0 0 * * 0',
+      '@daily': '0 0 * * *',
+      '@hourly': '0 * * * *',
+    };
   }
 
   static parse(expression: string, options: CronExpressionParserOptions = {}): CronExpression {
@@ -195,16 +206,5 @@ export class CronExpressionParser {
 
   static #isValidConstraintChar(constraints: FieldConstraints, value: string | number): boolean {
     return constraints.chars.some((char) => value.toString().includes(char));
-  }
-
-  static get predefined(): Record<string, string> {
-    return {
-      '@yearly': '0 0 1 1 *',
-      '@annually': '0 0 1 1 *',
-      '@monthly': '0 0 1 * *',
-      '@weekly': '0 0 * * 0',
-      '@daily': '0 0 * * *',
-      '@hourly': '0 * * * *',
-    };
   }
 }

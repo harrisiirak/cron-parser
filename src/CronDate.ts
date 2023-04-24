@@ -1,6 +1,6 @@
 import {DateTime} from 'luxon';
 import assert from 'assert';
-import {TimeUnitsEnum, DateMathOpEnum} from './types';
+import {DateMathOpEnum, TimeUnitsEnum} from './types';
 
 interface VerbMap {
   [key: string]: () => void
@@ -48,6 +48,22 @@ export class CronDate {
     if (tz && tz !== this.#date.zoneName) {
       this.#date = this.#date.setZone(tz);
     }
+  }
+
+  get dstStart(): number | null {
+    return this.#dstStart;
+  }
+
+  set dstStart(value: number | null) {
+    this.#dstStart = value;
+  }
+
+  get dstEnd(): number | null {
+    return this.#dstEnd;
+  }
+
+  set dstEnd(value: number | null) {
+    this.#dstEnd = value;
   }
 
   /**
@@ -446,15 +462,6 @@ export class CronDate {
   }
 
   /**
-   * Returns the UTC date.
-   * @private
-   * @returns {DateTime}
-   */
-  private _getUTC(): DateTime {
-    return this.#date.toUTC();
-  }
-
-  /**
    * Returns the date as a string.
    * @returns {string}
    */
@@ -488,7 +495,6 @@ export class CronDate {
     return this.#date.month !== newDate.month;
   }
 
-
   shiftTimezone(op: DateMathOpEnum, unit: TimeUnitsEnum, hoursLength: number): void {
     if (unit === TimeUnitsEnum.month || unit === TimeUnitsEnum.day) {
       const prevTime = this.getTime();
@@ -518,20 +524,13 @@ export class CronDate {
     }
   }
 
-  get dstStart(): number | null {
-    return this.#dstStart;
-  }
-
-  set dstStart(value: number | null) {
-    this.#dstStart = value;
-  }
-
-  get dstEnd(): number | null {
-    return this.#dstEnd;
-  }
-
-  set dstEnd(value: number | null) {
-    this.#dstEnd = value;
+  /**
+   * Returns the UTC date.
+   * @private
+   * @returns {DateTime}
+   */
+  private _getUTC(): DateTime {
+    return this.#date.toUTC();
   }
 
 }
