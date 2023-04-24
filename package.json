@@ -2,9 +2,9 @@
   "name": "cron-parser",
   "version": "4.8.1",
   "description": "Node.js library for parsing crontab instructions",
-  "main": "lib/index.cjs.js",
-  "module": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/cjs/index.js",
+  "module": "lib/esm/index.js",
+  "types": "lib/types/index.d.ts",
   "type": "commonjs",
   "old_typesVersions": {
     "<4.1": {
@@ -17,7 +17,10 @@
     "test": "test"
   },
   "scripts": {
-    "build": "tsc",
+    "clean": "rimraf lib",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm",
     "prepublishOnly": "npm run build",
     "prepare": "npm run build",
     "test:tsd": "tsd",
@@ -70,6 +73,7 @@
     "@typescript-eslint/parser": "^5.59.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.39.0",
+    "rimraf": "^5.0.0",
     "sinon": "^15.0.1",
     "tap": "^16.3.3",
     "ts-node": "^10.9.1",
