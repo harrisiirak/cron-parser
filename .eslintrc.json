@@ -23,13 +23,6 @@
       "parserOptions": {
         "ecmaVersion": 2022
       }
-    },
-    {
-      "files": ["*.json"],
-      "parser": "eslint-plugin-json/parser",
-      "rules": {
-        "quotes": ["error", "double"]
-      }
     }
   ]
 }
