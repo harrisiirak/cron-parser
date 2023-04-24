@@ -32,8 +32,8 @@ export class CronExpression {
     #isIterator: boolean;
     #hasIterated: boolean;
     #nthDayOfWeek: number;
-    #dstStart: number | null = null;
-    #dstEnd: number | null = null;
+    // #dstStart: number | null = null;
+    // #dstEnd: number | null = null;
     #fields: any;
 
     get fields(): CronFields {
@@ -53,38 +53,9 @@ export class CronExpression {
         this.#fields = new CronFields(fields);
     }
 
-    #applyTimezoneShift(currentDate: CronDate, dateMathOp: DateMathOpEnum, unit: TimeUnitsEnum): void {
-        if (unit === TimeUnitsEnum.month || unit === TimeUnitsEnum.day) {
-            const prevTime = currentDate.getTime();
-            currentDate.handleMathOp(dateMathOp, unit);
-            const currTime = currentDate.getTime();
-            if (prevTime === currTime) {
-                if (currentDate.getMinutes() === 0 && currentDate.getSeconds() === 0) {
-                    currentDate.addHour();
-                } else if (currentDate.getMinutes() === 59 && currentDate.getSeconds() === 59) {
-                    currentDate.subtractHour();
-                }
-            }
-        } else {
-            const previousHour = currentDate.getHours();
-            currentDate.handleMathOp(dateMathOp, unit);
-            const currentHour = currentDate.getHours();
-            const diff = currentHour - previousHour;
-            if (diff === 2) {
-                if (this.#fields.hour.length !== 24) {
-                    this.#dstStart = currentHour;
-                }
-            } else if (diff === 0 && currentDate.getMinutes() === 0 && currentDate.getSeconds() === 0) {
-                if (this.#fields.hour.length !== 24) {
-                    this.#dstEnd = currentHour;
-                }
-            }
-        }
-    };
-
     private matchMonth(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month)) {
-            this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.month);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.month, this.#fields.hour.length);
             return false;
         }
         return true;
@@ -103,17 +74,17 @@ export class CronExpression {
         const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= CronConstants.daysInMonth[currentDate.getMonth()];
         const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.length === CronExpression.#constraints[5].max - CronExpression.#constraints[5].min + 1;
         if (!dayOfMonthMatch && (!dayOfWeekMatch || isDayOfWeekWildcardMatch)) {
-            this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.day);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
             return false;
         }
 
         if (!isDayOfMonthWildcardMatch && isDayOfWeekWildcardMatch && !dayOfMonthMatch) {
-            this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.day);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
             return false;
         }
 
         if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && !dayOfWeekMatch) {
-            this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.day);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
             return false;
         }
         return true;
@@ -121,7 +92,7 @@ export class CronExpression {
 
     private matchNthDayOfWeek(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         if (this.#nthDayOfWeek > 0 && !CronExpression.#isNthDayMatch(currentDate, this.#nthDayOfWeek)) {
-            this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.day);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
             return false;
         }
         return true;
@@ -130,18 +101,18 @@ export class CronExpression {
     private matchHour(currentDate: CronDate, dateMathVerb: DateMathOpEnum, reverse: boolean): boolean {
         const currentHour = currentDate.getHours();
         if (!CronExpression.#matchSchedule(currentHour, this.#fields.hour)) {
-            if (this.#dstStart !== currentHour) {
-                this.#dstStart = null;
-                this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.hour);
+            if (currentDate.dstStart !== currentHour) {
+                currentDate.dstStart = null;
+                currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.hour, this.#fields.hour.length);
                 return false;
             } else if (!CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour)) {
                 currentDate.handleMathOp(dateMathVerb, TimeUnitsEnum.hour);
                 return false;
             }
-        } else if (this.#dstEnd === currentHour) {
+        } else if (currentDate.dstEnd === currentHour) {
             if (!reverse) {
-                this.#dstEnd = null;
-                this.#applyTimezoneShift(currentDate, DateMathOpEnum.add, TimeUnitsEnum.hour);
+                currentDate.dstEnd = null;
+                currentDate.shiftTimezone(DateMathOpEnum.add, TimeUnitsEnum.hour, this.#fields.hour.length);
                 return false;
             }
         }
@@ -150,7 +121,7 @@ export class CronExpression {
 
     private matchMinute(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute)) {
-            this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.minute);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.minute, this.#fields.hour.length);
             return false;
         }
         return true;
@@ -158,7 +129,7 @@ export class CronExpression {
 
     private matchSecond(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second)) {
-            this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.second);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.length);
             return false;
         }
         return true;
@@ -192,7 +163,7 @@ export class CronExpression {
 
             if (startTimestamp === currentDate.getTime()) {
                 if ((dateMathVerb === 'add') || (currentDate.getMilliseconds() === 0)) {
-                    this.#applyTimezoneShift(currentDate, dateMathVerb, TimeUnitsEnum.second);
+                    currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.length);
                 } else {
                     currentDate.setMilliseconds(0);
                 }

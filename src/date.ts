@@ -26,6 +26,8 @@ export class CronDate {
             this.#date = DateTime.local();
         } else if (timestamp instanceof CronDate) {
             this.#date = timestamp.#date;
+            this.#dstStart = timestamp.#dstStart;
+            this.#dstEnd = timestamp.#dstEnd;
         } else if (timestamp instanceof Date) {
             this.#date = DateTime.fromJSDate(timestamp, dateOpts);
         } else if (typeof timestamp === 'number') {
@@ -485,38 +487,35 @@ export class CronDate {
     }
 
 
+    shiftTimezone(op: DateMathOpEnum, unit: TimeUnitsEnum, hoursLength: number): void {
+        if (unit === TimeUnitsEnum.month || unit === TimeUnitsEnum.day) {
+            const prevTime = this.getTime();
+            this.handleMathOp(op, unit);
+            const currTime = this.getTime();
+            if (prevTime === currTime) {
+                if (this.getMinutes() === 0 && this.getSeconds() === 0) {
+                    this.addHour();
+                } else if (this.getMinutes() === 59 && this.getSeconds() === 59) {
+                    this.subtractHour();
+                }
+            }
+        } else {
+            const previousHour = this.getHours();
+            this.handleMathOp(op, unit);
+            const currentHour = this.getHours();
+            const diff = currentHour - previousHour;
+            if (diff === 2) {
+                if (hoursLength !== 24) {
+                    this.dstStart = currentHour;
+                }
+            } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
+                if (hoursLength !== 24) {
+                    this.dstEnd = currentHour;
+                }
+            }
+        }
+    }
 
-    // todo - doesn't work - few test fail
-    // shiftTimezone(op: DateMathOp, unit: TimeUnit, hoursLength: number): void {
-    //     if (unit === 'Month' || unit === 'Day') {
-    //         const prevTime = this.getTime();
-    //         // using a CronDate[key]() is tricky in ts, we will use a new function to do the same thing
-    //         this.handleMathOp(op, unit);
-    //         const currTime = this.getTime();
-    //         if (prevTime === currTime) {
-    //             if (this.getMinutes() === 0 && this.getSeconds() === 0) {
-    //                 this.addHour();
-    //             } else if (this.getMinutes() === 59 && this.getSeconds() === 59) {
-    //                 this.subtractHour();
-    //             }
-    //         }
-    //     } else {
-    //         const previousHour = this.getHours();
-    //         this.handleMathOp(op, unit);
-    //         const currentHour = this.getHours();
-    //         const diff = currentHour - previousHour;
-    //         if (diff === 2) {
-    //             if (hoursLength !== 24) {
-    //                 this.#dstStart = currentHour;
-    //             }
-    //         } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
-    //             if (hoursLength !== 24) {
-    //                 this.#dstEnd = currentHour;
-    //             }
-    //         }
-    //     }
-    // }
-    //
     get dstStart(): number | null {
         return this.#dstStart;
     }
