@@ -6,6 +6,7 @@
 - [ ] Update README.md
 - [ ] Add badges to README.md
 - [ ] Review GitHub actions
+- [ ] Add JSDocs documentation generation
 - [ ] Add new feature - check GitHub issues for new features
 - [ ] Check GitHub issues for bugs that we can fix
 - [ ] Update package.json version and manually lint it, removing any unused dependencies or config values
