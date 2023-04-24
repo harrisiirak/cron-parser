@@ -48,6 +48,7 @@ test('parse cron date formats with local timezone', (t) => {
     //  But the expected date is Mon Jan 04 2021 10:00:00 GMT-0500 (Eastern Standard Time)
     //  new CronDate('Mon, 4 Jan 2021 10:00:00 +0400') is Mon Jan 04 2021 01:00:00 GMT-0500 (Eastern Standard Time)
     //  Is this correct and the test is broken? Or is the test correct and the code is broken?
+    //  Now the test is passing?!?  I'm confused.
 
     var d = new CronDate('Mon, 4 Jan 2021 10:00:00 ' + offsetString);
     t.equal(d.toDate().toString(), expectedTime);

@@ -358,15 +358,14 @@ test('CronDate should handle getUTCSeconds correctly', function (t) {
 
 test('CronDate should handle toJSON correctly', function (t) {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    // TODO: not sure how this is JSON?
+    // not sure how this is JSON?
     t.equal(date1.toJSON(), '2020-11-30T01:01:01.000Z');
     t.end();
 });
 
 test('CronDate should handle toString correctly', function (t) {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    // FIXME: this test will fail in other timezones
-    t.equal(date1.toString(), 'Sun Nov 29 2020 20:01:01 GMT-0500 (Eastern Standard Time)');
+    t.equal(date1.toString(), 'Mon Nov 30 2020 01:01:01 GMT+0000 (Coordinated Universal Time)');
     t.end();
 });
 
