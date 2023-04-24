@@ -3,6 +3,7 @@
     "target": "es2022",
     "module": "commonjs",
     "allowJs": true,
+    "declaration": true,
     "outDir": "./lib",
     "strict": true,
     "resolveJsonModule": true,
