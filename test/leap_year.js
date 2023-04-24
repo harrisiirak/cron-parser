@@ -1,6 +1,6 @@
 var util = require('util');
 var test = require('tap').test;
-var {CronExpression} = require('../lib/expression');
+var {CronExpression} = require('../lib/CronExpression');
 
 test('leap year', function(t) {
   try {

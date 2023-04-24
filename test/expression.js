@@ -1,6 +1,6 @@
 var test = require('tap').test;
-var {CronExpression} = require('../lib/expression');
-var {CronDate} = require('../lib/date');
+var {CronExpression} = require('../lib/CronExpression');
+var {CronDate} = require('../lib/CronDate');
 
 test('empty expression test', function(t) {
   try {

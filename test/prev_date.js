@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var {CronExpression} = require('../lib/expression');
+var {CronExpression} = require('../lib/CronExpression');
 
 test('prev should match correctly (issue #98) when milliseconds are greater than 0', function(t) {
   var options = {

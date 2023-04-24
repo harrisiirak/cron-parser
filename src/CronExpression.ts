@@ -1,65 +1,65 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CronExpression = void 0;
-const CronConstants_1 = require("./CronConstants");
-const CronExpressionParser_1 = require("./CronExpressionParser");
-const date_1 = require("./date");
-const CronFields_1 = require("./CronFields");
-const assert_1 = __importDefault(require("assert"));
-const types_1 = require("./types");
+import {CronConstants, CronConstraints} from "./CronConstants";
+import {CronExpressionParser} from "./CronExpressionParser";
+import {CronDate} from './CronDate';
+import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from "../types";
+import {CronFields} from "./CronFields";
+import assert from "assert";
+import {DateMathOpEnum, TimeUnitsEnum, FieldConstraints, CronParserOptions, IteratorCallback, IteratorFields, PredefinedCronExpressionsEnum} from "./types";
+
 /**
  * Cron iteration loop safety limit
  */
 const LOOP_LIMIT = 10000;
-class CronExpression {
+
+export class CronExpression {
     // FIXME: This should be a private property - but it's used in tests
     static map = ['second', 'minute', 'hour', 'dayOfMonth', 'month', 'dayOfWeek'];
-    static #constraints = [
-        { min: 0, max: 59, chars: [] },
-        { min: 0, max: 59, chars: [] },
-        { min: 0, max: 23, chars: [] },
-        { min: 1, max: 31, chars: ['L'] },
-        { min: 1, max: 12, chars: [] },
-        { min: 0, max: 7, chars: ['L'] }, // Day of week
+    static #constraints: FieldConstraints[] = [
+        {min: 0, max: 59, chars: []}, // Second
+        {min: 0, max: 59, chars: []}, // Minute
+        {min: 0, max: 23, chars: []}, // Hour
+        {min: 1, max: 31, chars: ['L']}, // Day of month
+        {min: 1, max: 12, chars: []}, // Month
+        {min: 0, max: 7, chars: ['L']}, // Day of week
     ];
-    #options;
-    #utc;
-    #tz;
-    #currentDate;
-    #startDate;
-    #endDate;
-    #isIterator;
-    #hasIterated;
-    #nthDayOfWeek;
-    // #dstStart: number | null = null;
-    // #dstEnd: number | null = null;
-    #fields;
-    get fields() {
-        return new CronFields_1.CronFields(this.#fields);
+
+    #options: CronParserOptions;
+    #utc: boolean;
+    #tz: string | undefined;
+    #currentDate: CronDate;
+    #startDate: CronDate | null;
+    #endDate: CronDate | null;
+    #isIterator: boolean;
+    #hasIterated: boolean;
+    #nthDayOfWeek: number;
+    #fields: any;
+
+    get fields(): CronFields {
+        return new CronFields(this.#fields);
     }
-    constructor(fields, options) {
+
+    constructor(fields: CronFields, options: CronParserOptions) {
         this.#options = options;
         this.#utc = options.utc || false;
         this.#tz = this.#utc ? 'UTC' : options.tz;
-        this.#currentDate = new date_1.CronDate(options.currentDate, this.#tz);
-        this.#startDate = options.startDate ? new date_1.CronDate(options.startDate, this.#tz) : null;
-        this.#endDate = options.endDate ? new date_1.CronDate(options.endDate, this.#tz) : null;
+        this.#currentDate = new CronDate(options.currentDate, this.#tz);
+        this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
+        this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
         this.#isIterator = options.iterator || false;
         this.#hasIterated = false;
         this.#nthDayOfWeek = options.nthDayOfWeek || 0;
-        this.#fields = new CronFields_1.CronFields(fields);
+        this.#fields = new CronFields(fields);
     }
-    matchMonth(currentDate, dateMathVerb) {
+
+    private matchMonth(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month)) {
-            currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.month, this.#fields.hour.length);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.month, this.#fields.hour.length);
             return false;
         }
         return true;
     }
-    matchDayOfMonth(currentDate, dateMathVerb) {
+
+    private matchDayOfMonth(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         let dayOfMonthMatch = CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth);
         if (CronExpression.#isLInExpressions(this.#fields.dayOfMonth)) {
             dayOfMonthMatch = dayOfMonthMatch || currentDate.isLastDayOfMonth();
@@ -68,174 +68,180 @@ class CronExpression {
         if (CronExpression.#isLInExpressions(this.#fields.dayOfWeek)) {
             dayOfWeekMatch = dayOfWeekMatch || CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek, currentDate);
         }
-        const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= CronConstants_1.CronConstants.daysInMonth[currentDate.getMonth()];
+
+        const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= CronConstants.daysInMonth[currentDate.getMonth()];
         const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.length === CronExpression.#constraints[5].max - CronExpression.#constraints[5].min + 1;
         if (!dayOfMonthMatch && (!dayOfWeekMatch || isDayOfWeekWildcardMatch)) {
-            currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.day, this.#fields.hour.length);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
             return false;
         }
+
         if (!isDayOfMonthWildcardMatch && isDayOfWeekWildcardMatch && !dayOfMonthMatch) {
-            currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.day, this.#fields.hour.length);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
             return false;
         }
+
         if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && !dayOfWeekMatch) {
-            currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.day, this.#fields.hour.length);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
             return false;
         }
         return true;
     }
-    matchNthDayOfWeek(currentDate, dateMathVerb) {
+
+    private matchNthDayOfWeek(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         if (this.#nthDayOfWeek > 0 && !CronExpression.#isNthDayMatch(currentDate, this.#nthDayOfWeek)) {
-            currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.day, this.#fields.hour.length);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
             return false;
         }
         return true;
     }
-    matchHour(currentDate, dateMathVerb, reverse) {
+
+    private matchHour(currentDate: CronDate, dateMathVerb: DateMathOpEnum, reverse: boolean): boolean {
         const currentHour = currentDate.getHours();
         if (!CronExpression.#matchSchedule(currentHour, this.#fields.hour)) {
             if (currentDate.dstStart !== currentHour) {
                 currentDate.dstStart = null;
-                currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.hour, this.#fields.hour.length);
+                currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.hour, this.#fields.hour.length);
+                return false;
+            } else if (!CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour)) {
+                currentDate.handleMathOp(dateMathVerb, TimeUnitsEnum.hour);
                 return false;
             }
-            else if (!CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour)) {
-                currentDate.handleMathOp(dateMathVerb, types_1.TimeUnitsEnum.hour);
-                return false;
-            }
-        }
-        else if (currentDate.dstEnd === currentHour) {
+        } else if (currentDate.dstEnd === currentHour) {
             if (!reverse) {
                 currentDate.dstEnd = null;
-                currentDate.shiftTimezone(types_1.DateMathOpEnum.add, types_1.TimeUnitsEnum.hour, this.#fields.hour.length);
+                currentDate.shiftTimezone(DateMathOpEnum.add, TimeUnitsEnum.hour, this.#fields.hour.length);
                 return false;
             }
         }
         return true;
     }
-    matchMinute(currentDate, dateMathVerb) {
+
+    private matchMinute(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute)) {
-            currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.minute, this.#fields.hour.length);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.minute, this.#fields.hour.length);
             return false;
         }
         return true;
     }
-    matchSecond(currentDate, dateMathVerb) {
+
+    private matchSecond(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
         if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second)) {
-            currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.second, this.#fields.hour.length);
+            currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.length);
             return false;
         }
         return true;
     }
+
     /**
      * Find next or previous matching schedule date
      * @param {boolean} [reverse=false] - Whether to search in reverse direction
      * @return {CronDate}
      * @private
      */
-    #findSchedule(reverse = false) {
-        const dateMathVerb = reverse ? types_1.DateMathOpEnum.subtract : types_1.DateMathOpEnum.add;
-        const currentDate = new date_1.CronDate(this.#currentDate, this.#tz);
+    #findSchedule(reverse = false): CronDate {
+        const dateMathVerb: DateMathOpEnum = reverse ? DateMathOpEnum.subtract : DateMathOpEnum.add;
+        const currentDate = new CronDate(this.#currentDate, this.#tz);
         const startDate = this.#startDate;
         const endDate = this.#endDate;
         const startTimestamp = currentDate.getTime();
         let stepCount = 0;
+
         while (true) {
-            (0, assert_1.default)(stepCount++ < LOOP_LIMIT, 'Invalid expression, loop limit exceeded');
-            (0, assert_1.default)(!reverse || !(startDate && (startDate.getTime() > currentDate.getTime())), 'Out of the timespan range');
-            (0, assert_1.default)(reverse || !(endDate && (currentDate.getTime() > endDate.getTime())), 'Out of the timespan range');
-            if (!this.matchDayOfMonth(currentDate, dateMathVerb))
-                continue;
-            if (!this.matchNthDayOfWeek(currentDate, dateMathVerb))
-                continue;
-            if (!this.matchMonth(currentDate, dateMathVerb))
-                continue;
-            if (!this.matchHour(currentDate, dateMathVerb, reverse))
-                continue;
-            if (!this.matchMinute(currentDate, dateMathVerb))
-                continue;
-            if (!this.matchSecond(currentDate, dateMathVerb))
-                continue;
+            assert(stepCount++ < LOOP_LIMIT, 'Invalid expression, loop limit exceeded');
+            assert(!reverse || !(startDate && (startDate.getTime() > currentDate.getTime())), 'Out of the timespan range');
+            assert(reverse || !(endDate && (currentDate.getTime() > endDate.getTime())), 'Out of the timespan range');
+
+            if (!this.matchDayOfMonth(currentDate, dateMathVerb)) continue;
+            if (!this.matchNthDayOfWeek(currentDate, dateMathVerb)) continue;
+            if (!this.matchMonth(currentDate, dateMathVerb)) continue;
+            if (!this.matchHour(currentDate, dateMathVerb, reverse)) continue;
+            if (!this.matchMinute(currentDate, dateMathVerb)) continue;
+            if (!this.matchSecond(currentDate, dateMathVerb)) continue;
+
             if (startTimestamp === currentDate.getTime()) {
                 if ((dateMathVerb === 'add') || (currentDate.getMilliseconds() === 0)) {
-                    currentDate.shiftTimezone(dateMathVerb, types_1.TimeUnitsEnum.second, this.#fields.hour.length);
-                }
-                else {
+                    currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.length);
+                } else {
                     currentDate.setMilliseconds(0);
                 }
                 continue;
             }
             break;
         }
-        this.#currentDate = new date_1.CronDate(currentDate, this.#tz);
+
+        this.#currentDate = new CronDate(currentDate, this.#tz);
         this.#hasIterated = true;
         return currentDate;
-    }
-    ;
+    };
+
+
     /**
      * Find next suitable date
      *
      * @public
      * @return {CronDate|Object}
      */
-    next() {
+    next(): CronDate | { value: CronDate; done: boolean } {
         const schedule = this.#findSchedule();
         // Try to return ES6 compatible iterator
-        return this.#isIterator ? { value: schedule, done: !this.hasNext() } : schedule;
+        return this.#isIterator ? {value: schedule, done: !this.hasNext()} : schedule;
     }
+
     /**
      * Find previous suitable date
      *
      * @public
      * @return {CronDate|Object}
      */
-    prev() {
+    prev(): CronDate | { value: CronDate; done: boolean } {
         const schedule = this.#findSchedule(true);
         // Try to return ES6 compatible iterator
-        return this.#isIterator ? { value: schedule, done: !this.hasPrev() } : schedule;
+        return this.#isIterator ? {value: schedule, done: !this.hasPrev()} : schedule;
     }
+
     /**
      * Check if next suitable date exists
      *
      * @public
      * @return {Boolean}
      */
-    hasNext() {
+    hasNext(): boolean {
         const current = this.#currentDate;
         const hasIterated = this.#hasIterated;
+
         try {
             this.#findSchedule();
             return true;
-        }
-        catch (err) {
+        } catch (err) {
             return false;
-        }
-        finally {
+        } finally {
             this.#currentDate = current;
             this.#hasIterated = hasIterated;
         }
     }
+
     /**
      * Check if previous suitable date exists
      *
      * @public
      * @return {Boolean}
      */
-    hasPrev() {
+    hasPrev(): boolean {
         const current = this.#currentDate;
         const hasIterated = this.#hasIterated;
+
         try {
             this.#findSchedule(true);
             return true;
-        }
-        catch (err) {
+        } catch (err) {
             return false;
-        }
-        finally {
+        } finally {
             this.#currentDate = current;
             this.#hasIterated = hasIterated;
         }
     }
+
     /**
      * Iterate over expression iterator
      *
@@ -244,41 +250,45 @@ class CronExpression {
      * @param {Function} callback Optional callback
      * @return {Array} Array of the iterated results
      */
-    iterate(steps, callback) {
-        const dates = [];
-        const processStep = (step, action) => {
+    iterate(steps: number, callback?: IteratorCallback): (IteratorFields | CronDate)[] {
+        const dates: (IteratorFields | CronDate)[] = [];
+
+        const processStep = (step: number, action: () => IteratorFields | CronDate) => {
             try {
-                const item = action();
+                const item: IteratorFields | CronDate = action();
                 dates.push(item);
+
                 // Fire the callback
                 if (callback) {
                     callback(item, step);
                 }
-            }
-            catch (err) {
+            } catch (err) {
                 // Do nothing, as the loop will break on its own
             }
         };
+
         if (steps >= 0) {
             for (let i = 0; i < steps; i++) {
                 processStep(i, () => this.next());
             }
-        }
-        else {
+        } else {
             for (let i = 0; i > steps; i--) {
                 processStep(i, () => this.prev());
             }
         }
+
         return dates;
     }
+
     /**
      * Reset expression iterator state
      *
      * @public
      */
-    reset(newDate) {
-        this.#currentDate = new date_1.CronDate(newDate || this.#options.currentDate);
+    reset(newDate?: Date): void {
+        this.#currentDate = new CronDate(newDate || this.#options.currentDate);
     }
+
     /**
      * Stringify the expression
      *
@@ -289,6 +299,8 @@ class CronExpression {
     stringify(includeSeconds = false) {
         return this.#fields.stringify(includeSeconds);
     }
+
+
     /**
      * Parse input expression (async)
      *
@@ -296,9 +308,10 @@ class CronExpression {
      * @param {string} expression Input expression
      * @param {CronOptions} [options] Parsing options
      */
-    static parse(expression, options = {}) {
-        return CronExpressionParser_1.CronExpressionParser.parse(expression, options);
+    static parse(expression: string, options: CronParserOptions = {}): CronExpression {
+        return CronExpressionParser.parse(expression, options);
     }
+
     /**
      * Convert cron fields back to Cron Expression
      * @public
@@ -306,9 +319,10 @@ class CronExpression {
      * @param {CronOptions} [options] Parsing options
      * @return {CronExpression}
      */
-    static fieldsToExpression(fields, options) {
+    static fieldsToExpression(fields: CronFields, options?: CronParserOptions): CronExpression {
         return new CronExpression(fields, options || {});
     }
+
     /**
      * Match field value
      *
@@ -317,9 +331,10 @@ class CronExpression {
      * @return {boolean}
      * @private
      */
-    static #matchSchedule(value, sequence) {
+    static #matchSchedule(value: number, sequence: number[]): boolean {
         return sequence.some((element) => element === value);
     }
+
     /**
      * Helps determine if the provided date is the correct nth occurence of the
      * desired day of week.
@@ -329,7 +344,7 @@ class CronExpression {
      * @return {boolean}
      * @private
      */
-    static #isNthDayMatch(date, nthDayOfWeek) {
+    static #isNthDayMatch(date: CronDate, nthDayOfWeek: number): boolean {
         if (nthDayOfWeek >= 6) {
             return false;
         }
@@ -337,34 +352,40 @@ class CronExpression {
         const occurrence = Math.floor((dayOfMonth - 1) / 7) + 1;
         return nthDayOfWeek === 1 ? dayOfMonth < 8 : occurrence === nthDayOfWeek;
     }
+
     /**
      * Helper function that checks if 'L' is in the array
      *
      * @param {Array} expressions
      */
-    static #isLInExpressions(expressions) {
-        return expressions.length > 0 && expressions.some(function (expression) {
+    static #isLInExpressions(expressions: (number | string)[]): boolean {
+        return expressions.length > 0 && expressions.some(function (expression: number | string) {
             return typeof expression === 'string' && expression.indexOf('L') >= 0;
         });
     }
-    static #isLastWeekdayOfMonthMatch(expressions, currentDate) {
-        return expressions.some(function (expression) {
+
+    static #isLastWeekdayOfMonthMatch(expressions: (number | string)[], currentDate: CronDate): boolean {
+        return expressions.some(function (expression: (number | string)) {
             // There might be multiple expressions and not all of them will contain the "L".
             if (!CronExpression.#isLInExpressions([expression])) {
                 return false;
             }
+
             // The first character represents the weekday
             const c = expression.toString().charAt(0);
             const weekday = parseInt(c) % 7;
+
             if (Number.isNaN(weekday)) {
                 throw new Error('Invalid last weekday of the month expression: ' + expression);
             }
+
             return currentDate.getDay() === weekday && currentDate.isLastWeekdayOfMonth();
         });
     }
+
     static get predefined() {
-        return types_1.PredefinedCronExpressionsEnum;
+        return PredefinedCronExpressionsEnum;
     }
 }
-exports.CronExpression = CronExpression;
-exports.default = CronExpression;
+
+export default CronExpression;

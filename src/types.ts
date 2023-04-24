@@ -1,4 +1,4 @@
-import {CronDate} from './date';
+import {CronDate} from './CronDate';
 
 type BuildRangeTuple<Current extends [...number[]], Count extends number> = Current['length'] extends Count ? Current : BuildRangeTuple<[number, ...Current], Count>
 type RangeTuple<Count extends number> = BuildRangeTuple<[], Count>

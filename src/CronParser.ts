@@ -1,5 +1,5 @@
 import fs from 'fs';
-import {CronExpression} from './expression';
+import {CronExpression} from './CronExpression';
 import {CronFields} from './CronFields';
 import assert from 'assert';
 

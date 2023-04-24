@@ -1,6 +1,6 @@
 var luxon = require('luxon');
 var test = require('tap').test;
-var {CronDate} = require('../lib/date');
+var {CronDate} = require('../lib/CronDate');
 
 test('parse cron date formats with local timezone', (t) => {
   // Some tests need the local offset to be compatible without invoking timezone management.

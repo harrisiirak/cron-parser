@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var {CronExpression} = require('../lib/expression');
+var {CronExpression} = require('../lib/CronExpression');
 
 test('Fields are exposed', function (t) {
     try {

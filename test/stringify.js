@@ -1,7 +1,7 @@
 'use strict';
 
 var test = require('tap').test;
-var {CronParser} = require('../lib/parser');
+var {CronParser} = require('../lib/CronParser');
 
 test('stringify cron expression all stars no seconds', function (t) {
   try {

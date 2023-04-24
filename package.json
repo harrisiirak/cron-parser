@@ -17,6 +17,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test:tsd": "tsd",
     "test:unit": "cross-env TZ=UTC tap ./test/*.js",
     "test:cover": "cross-env TZ=UTC tap --coverage-report=html ./test/*.js",

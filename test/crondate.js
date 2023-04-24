@@ -1,7 +1,7 @@
 // empty around comma
 
 var test = require('tap').test;
-var {CronDate} = require('../lib/date');
+var {CronDate} = require('../lib/CronDate');
 const {TimeUnitsEnum} = require('../lib/types');
 
 test('is the last weekday of the month', function (t) {
