@@ -2,7 +2,8 @@
   "name": "cron-parser",
   "version": "4.8.1",
   "description": "Node.js library for parsing crontab instructions",
-  "main": "lib/index.js",
+  "main": "lib/index.cjs.js",
+  "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "type": "commonjs",
   "old_typesVersions": {
