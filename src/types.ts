@@ -1,4 +1,4 @@
-import {CronDate} from './CronDate';
+import {CronDate, CronExpression} from './';
 
 type BuildRangeTuple<Current extends [...number[]], Count extends number> = Current['length'] extends Count ? Current : BuildRangeTuple<[number, ...Current], Count>
 type RangeTuple<Count extends number> = BuildRangeTuple<[], Count>
@@ -64,7 +64,7 @@ export interface CronFieldsParams {
   dayOfWeek: DayOfTheWeekRange[];
 }
 
-// *********************************************************************************************************************
+export type ParseStringResponse = { variables: { [key: string]: number | string }, expressions: CronExpression[], errors: { [key: string]: unknown } }
 
 export interface CronParserOptions {
   currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
@@ -80,7 +80,6 @@ interface CronConstraints {
   min: number;
   max: number;
   chars: string[];
-
 }
 
 export interface MappedFields {

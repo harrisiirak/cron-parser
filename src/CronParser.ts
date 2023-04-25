@@ -1,6 +1,6 @@
 import fs from 'fs';
-import {CronExpression} from './CronExpression';
-import {CronFields} from './CronFields';
+import {ParseStringResponse} from './types';
+import {CronExpression, CronFields} from './';
 import assert from 'assert';
 
 // noinspection JSUnusedGlobalSymbols
@@ -13,7 +13,7 @@ class CronParser {
    * @param {object} [options] Parsing options
    * @return {object}
    */
-  static parseExpression(expression: string, options?: object) {
+  static parseExpression(expression: string, options?: object): CronExpression {
     return CronExpression.parse(expression, options);
   }
 
@@ -25,7 +25,7 @@ class CronParser {
    * @param {object} [options] Parsing options
    * @return {object}
    */
-  static fieldsToExpression(fields: CronFields, options?: object) {
+  static fieldsToExpression(fields: CronFields, options?: object): CronExpression {
     return CronExpression.fieldsToExpression(fields, options);
   }
 
@@ -39,8 +39,8 @@ class CronParser {
   static parseString(data: string) {
     const blocks = data.split('\n');
 
-    type Response = { variables: { [key: string]: number | string }, expressions: CronExpression[], errors: { [key: string]: unknown } }
-    const response: Response = {variables: {}, expressions: [], errors: {}};
+
+    const response: ParseStringResponse = {variables: {}, expressions: [], errors: {}};
 
     for (const block of blocks) {
       const entry = block.trim(); // Remove surrounding spaces
@@ -77,7 +77,7 @@ class CronParser {
    * @param {string} filePath Path to file
    * @param {function} callback
    */
-  static parseFile(filePath: string, callback: (error: Error | null, data?: object) => void) {
+  static parseFile(filePath: string, callback: (error: Error | null, data?: ParseStringResponse) => void) {
     fs.readFile(filePath, (err, data) => {
       if (err) {
         return void callback(err);

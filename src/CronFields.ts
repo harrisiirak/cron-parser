@@ -2,6 +2,15 @@ import {CronConstants, CronConstraints} from './CronConstants';
 import assert from 'assert';
 import {CronFieldsParams, CronFieldTypes, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, Range, SixtyRange} from './types';
 
+type ElementType = number | 'L' | 'W';
+
+interface FieldRange {
+  start: ElementType;
+  count: number;
+  end?: number;
+  step?: number;
+}
+
 export class CronFields {
   readonly #second: SixtyRange[];
   readonly #minute: SixtyRange[];
@@ -96,23 +105,35 @@ export class CronFields {
     return aIsNumber ? -1 : 1;
   }
 
-  static compactField(input: number[]): Range[] {
+  static compactField(input: ElementType[]): FieldRange[] {
     if (input.length === 0) {
       return [];
     }
-    const output: Range[] = [];
-    let current: Range = {start: input[0], count: 1};
+    const output: FieldRange[] = [];
+    let current: FieldRange | undefined = undefined;
 
-    input.slice(1).forEach((item, i, arr) => {
+    input.forEach((item, i, arr) => {
+      if (current === undefined) {
+        current = { start: item, count: 1 };
+        return;
+      }
+
       const prevItem = arr[i - 1] || current.start;
       const nextItem = arr[i + 1];
 
+      if (item === 'L' || item === 'W') {
+        output.push(current);
+        output.push({ start: item, count: 1 });
+        current = undefined;
+        return;
+      }
+
       if (current.step === undefined && nextItem !== undefined) {
-        const step = item - prevItem;
-        const nextStep = nextItem - item;
+        const step = item - (prevItem as number);
+        const nextStep = (nextItem as number) - item;
 
         if (step <= nextStep) {
-          current = {...current, count: 2, end: item, step};
+          current = { ...current, count: 2, end: item, step };
           return;
         }
         current.step = 1;
@@ -123,18 +144,20 @@ export class CronFields {
         current.end = item;
       } else {
         if (current.count === 1) {
-          output.push({start: current.start, count: 1});
+          output.push({ start: current.start, count: 1 });
         } else if (current.count === 2) {
-          output.push({start: current.start, count: 1});
-          output.push({start: current.end ?? prevItem, count: 1}); // it is impossible for current.end to be undefined, this makes typescript happy
+          output.push({ start: current.start, count: 1 });
+          output.push({ start: current.end ?? prevItem, count: 1 });
         } else {
           output.push(current);
         }
-        current = {start: item, count: 1};
+        current = { start: item, count: 1 };
       }
     });
 
-    output.push(current);
+    if (current) {
+      output.push(current);
+    }
     return output;
   }
 
@@ -155,7 +178,7 @@ export class CronFields {
     return dayOfMonth;
   }
 
-  static #handleSingleRange(range: Range, min: number, max: number): string | null {
+  static #handleSingleRange(range: FieldRange, min: number, max: number): string | null {
     const step = range.step;
     if (step === 1 && range.start === min && range.end === max) return '*';
     if (!step) return null;
@@ -163,7 +186,7 @@ export class CronFields {
     return null;
   }
 
-  static #handleMultipleRanges(range: Range, max: number): string {
+  static #handleMultipleRanges(range: FieldRange, max: number): string {
     const step = range.step;
     if (step === 1) return `${range.start}-${range.end}`;
 
@@ -171,7 +194,11 @@ export class CronFields {
     assert(step, 'Unexpected range step');
     assert(range.end, 'Unexpected range end');
     if (step * multiplier > range.end) {
-      const mapFn = (_: number, index: number) => index % step === 0 ? range.start + index : null;
+      const mapFn = (_: number, index: number) => {
+        assert(typeof range.start === 'number', 'Unexpected range start');
+        return index % step === 0 ? range.start + index : null;
+      };
+      assert(typeof range.start === 'number', 'Unexpected range start');
       const seed = {length: range.end - range.start + 1};
       return Array.from(seed, mapFn).filter(value => value !== null).join(',');
     }
