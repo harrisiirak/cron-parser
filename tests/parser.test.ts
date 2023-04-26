@@ -1,14 +1,14 @@
-import {CronParser, CronDate} from '../src';
+import {CronDate, CronParser} from '../src';
 
 describe('CronParser', () => {
   test('load crontab file', function () {
     CronParser.parseFile(__dirname + '/crontab.example', (err, result) => {
       if (err) {
         err.message = 'File read error: ' + err.message;
-        fail(err);
+        throw err;
       }
       if (!(result && 'variables' in result && 'expressions' in result && 'errors' in result)) {
-        fail('result is not ParseStringResponse');
+        throw new Error('result is not ParseStringResponse');
       }
       // t.ok(result, 'Crontab parsed parsed');
       expect(Object.keys(result.variables).length).toEqual(2); // variables length matches
@@ -35,13 +35,8 @@ describe('CronParser', () => {
       endDate: new Date(2014, 0, 1)
     };
 
-    try {
-      const interval = CronParser.parseExpression('* * 2 * *', options);
-      expect(interval.hasNext()).toEqual(false);
-    } catch (err: any) {
-      err.message = 'Parse error: ' + err.message;
-      fail(err);
-    }
+    const interval = CronParser.parseExpression('* * 2 * *', options);
+    expect(interval.hasNext()).toEqual(false);
   });
 });
 

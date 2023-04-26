@@ -18,16 +18,12 @@ describe('CronParser', () => {
       endDate: new Date(2014, 10, 1)
     };
 
-    try {
-      const interval = CronParser.parseExpression('0 0 L * *', options);
-      expect(interval.hasNext()).toBe(true);
+    const interval = CronParser.parseExpression('0 0 L * *', options);
+    expect(interval.hasNext()).toBe(true);
 
-      for (let i = 0; i < 10; ++i) {
-        const next = interval.next();
-        expect(next).toBeDefined();
-      }
-    } catch (err) {
-      fail(err);
+    for (let i = 0; i < 10; ++i) {
+      const next = interval.next();
+      expect(next).toBeDefined();
     }
   });
 
@@ -37,26 +33,23 @@ describe('CronParser', () => {
       endDate: new Date(2016, 10, 1)
     };
 
-    try {
-      const interval = CronParser.parseExpression('0 0 6-20/2,L 2 *', options);
-      expect(interval.hasNext()).toBe(true);
-      let next = null;
-      const items = 9;
-      let i = 0;
-      while (interval.hasNext()) {
-        next = interval.next();
-        i += 1;
-        expect(next).toBeDefined();
-      }
-      if (!(next instanceof CronDate)) {
-        fail('next is not instance of CronDate');
-      }
-      //leap year
-      expect(next.getDate()).toBe(29);
-      expect(i).toBe(items);
-    } catch (err) {
-      fail(err);
+    const interval = CronParser.parseExpression('0 0 6-20/2,L 2 *', options);
+    expect(interval.hasNext()).toBe(true);
+    let next = null;
+    const items = 9;
+    let i = 0;
+    while (interval.hasNext()) {
+      next = interval.next();
+      i += 1;
+      expect(next).toBeDefined();
     }
+    if (!(next instanceof CronDate)) {
+      throw new Error('next is not instance of CronDate');
+    }
+    //leap year
+    expect(next.getDate()).toBe(29);
+    expect(i).toBe(items);
+
   });
 
   test('parse cron with last day in feb', () => {
@@ -65,22 +58,18 @@ describe('CronParser', () => {
       endDate: new Date(2014, 10, 1)
     };
 
-    try {
-      const interval = CronParser.parseExpression('0 0 1,3,6-10,L 2 *', options);
-      expect(interval.hasNext()).toBe(true);
-      let next = null;
-      while (interval.hasNext()) {
-        next = interval.next();
-        expect(next).toBeDefined();
-      }
-      if (!(next instanceof CronDate)) {
-        fail('next is not instance of CronDate');
-      }
-      //common year
-      expect(next.getDate()).toBe(28);
-    } catch (err) {
-      fail(err);
+    const interval = CronParser.parseExpression('0 0 1,3,6-10,L 2 *', options);
+    expect(interval.hasNext()).toBe(true);
+    let next = null;
+    while (interval.hasNext()) {
+      next = interval.next();
+      expect(next).toBeDefined();
     }
+    if (!(next instanceof CronDate)) {
+      throw new Error('next is not instance of CronDate');
+    }
+    //common year
+    expect(next.getDate()).toBe(28);
   });
 
 
@@ -91,19 +80,15 @@ describe('CronParser', () => {
     };
 
     test(`parse cron with last weekday of the month: ${expression}`, () => {
-      try {
-        const interval = CronParser.parseExpression(expression, options);
+      const interval = CronParser.parseExpression(expression, options);
 
-        expect(interval.hasNext()).toBe(true);
+      expect(interval.hasNext()).toBe(true);
 
-        const next = interval.next();
-        if (!(next instanceof CronDate)) {
-          fail('next is not instance of CronDate');
-        }
-        expect(next.getDate()).toBe(expectedDate);
-      } catch (err) {
-        fail(err);
+      const next = interval.next();
+      if (!(next instanceof CronDate)) {
+        throw new Error('next is not instance of CronDate');
       }
+      expect(next.getDate()).toBe(expectedDate);
     });
   });
 
@@ -113,22 +98,17 @@ describe('CronParser', () => {
       currentDate: new Date(2021, 8, 1),
       endDate: new Date(2021, 11, 1)
     };
-
-    try {
-      const interval = CronParser.parseExpression('0 0 0 * * 1L,5L', options);
-      let next = interval.next();
-      if (!(next instanceof CronDate)) {
-        fail('next is not instance of CronDate');
-      }
-      expect(next.getDate()).toBe(24);
-      next = interval.next();
-      if (!(next instanceof CronDate)) {
-        fail('next is not instance of CronDate');
-      }
-      expect(next.getDate()).toBe(27);
-    } catch (err) {
-      fail(err);
+    const interval = CronParser.parseExpression('0 0 0 * * 1L,5L', options);
+    let next = interval.next();
+    if (!(next instanceof CronDate)) {
+      throw new Error('next is not instance of CronDate');
     }
+    expect(next.getDate()).toBe(24);
+    next = interval.next();
+    if (!(next instanceof CronDate)) {
+      throw new Error('next is not instance of CronDate');
+    }
+    expect(next.getDate()).toBe(27);
   });
 
   test('parses expression that runs on both every monday and last friday of month', () => {
@@ -136,36 +116,31 @@ describe('CronParser', () => {
       currentDate: new Date(2021, 8, 1),
       endDate: new Date(2021, 8, 30)
     };
+    const interval = CronParser.parseExpression('0 0 0 * * 1,5L', options);
 
-    try {
-      const interval = CronParser.parseExpression('0 0 0 * * 1,5L', options);
+    const dates = [];
 
-      const dates = [];
-
-      let isNotDone = true;
-      while (isNotDone) {
-        try {
-          const next = interval.next();
-          if (!(next instanceof CronDate)) {
-            fail('next is not instance of CronDate');
-          }
-          dates.push(next.getDate());
-        } catch (e) {
-          if (e instanceof Error && e.message !== 'Out of the timespan range') {
-            throw e;
-          }
-          isNotDone = false;
-          break;
+    let isNotDone = true;
+    while (isNotDone) {
+      try {
+        const next = interval.next();
+        if (!(next instanceof CronDate)) {
+          throw new Error('next is not instance of CronDate');
         }
+        dates.push(next.getDate());
+      } catch (e) {
+        if (e instanceof Error && e.message !== 'Out of the timespan range') {
+          throw e;
+        }
+        isNotDone = false;
+        break;
       }
-
-      expect(dates).toEqual([6, 13, 20, 24, 27]);
-    } catch (err) {
-      fail(err);
     }
+
+    expect(dates).toEqual([6, 13, 20, 24, 27]);
   });
 
-  test('fails to parse for invalid last weekday of month expression', () => {
+  test('throw new Errors to parse for invalid last weekday of month expression', () => {
     expect(() => {
       const interval = CronParser.parseExpression('0 0 0 * * L');
       interval.next();

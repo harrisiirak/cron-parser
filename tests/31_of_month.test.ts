@@ -1,20 +1,19 @@
-import { CronExpression, CronDate } from '../src';
+import {CronDate, CronExpression} from '../src';
 
 describe('expression 31 of month', () => {
   test('should correctly iterate through the next 20 occurrences', () => {
-    try {
-      const interval = CronExpression.parse('0 0 31 * *');
-      let i: number;
-      let d: CronDate | { value: CronDate; done: boolean };
-      let result = '';
-      for (i = 0; i < 20; ++i) {
-        d = interval.next();
-        result = d.toString();
-      }
+    const options = {
+      currentDate: new CronDate('2100-10-31T00:00:00', 'UTC')
+    };
+    const expected = (new Date('2103-08-31T00:00:00-0000')).toString();
 
-      expect(result).toBe('Fri Jan 30 2026 19:00:00 GMT-0500 (Eastern Standard Time)');
-    } catch (err: any) {
-      fail(`Interval parse error: ${err.message}`);
+    const interval = CronExpression.parse('0 0 31 * *', options);
+    let d: CronDate | { value: CronDate; done: boolean };
+    let result = '';
+    for (let i = 0; i < 20; ++i) {
+      d = interval.next();
+      result = d.toString();
     }
+    expect(result).toBe(expected);
   });
 });

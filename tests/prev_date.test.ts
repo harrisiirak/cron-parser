@@ -10,7 +10,7 @@ describe('prev date', () => {
     const interval = CronExpression.parse('*/5 * * * * *', options);
     const prev = interval.prev();
     if (!(prev instanceof CronDate)) {
-      fail('Expected prev to be an instance of CronDate');
+      throw new Error('Expected prev to be an instance of CronDate');
     }
     expect(prev.getSeconds()).toEqual(25);
   });
@@ -23,7 +23,7 @@ describe('prev date', () => {
     [25, 24, 23, 22].forEach(function (date) {
       const prev = interval.prev();
       if (!(prev instanceof CronDate)) {
-        fail('Expected prev to be an instance of CronDate');
+        throw new Error('Expected prev to be an instance of CronDate');
       }
       expect(prev.getFullYear()).toEqual(2012);
       expect(prev.getMonth()).toEqual(11);

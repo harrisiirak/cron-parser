@@ -38,8 +38,18 @@ export type CronAliasesType = { [key: string]: MonthsEnum | DayOfWeekEnum };
 
 export interface CronExpressionParserOptions {
   currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
-  endDate?: Date | string | number;
-  startDate?: Date | string | number;
+  endDate?: Date | string | number | CronDate;
+  startDate?: Date | string | number | CronDate;
+  iterator?: boolean;
+  utc?: boolean;
+  tz?: string;
+  nthDayOfWeek?: number;
+}
+
+export interface CronParserOptions {
+  currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
+  endDate?: Date | string | number | CronDate;
+  startDate?: Date | string | number | CronDate;
   iterator?: boolean;
   utc?: boolean;
   tz?: string;
@@ -65,16 +75,6 @@ export interface CronFieldsParams {
 }
 
 export type ParseStringResponse = { variables: { [key: string]: number | string }, expressions: CronExpression[], errors: { [key: string]: unknown } }
-
-export interface CronParserOptions {
-  currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
-  endDate?: Date | string | number;
-  startDate?: Date | string | number;
-  iterator?: boolean;
-  utc?: boolean;
-  tz?: string;
-  nthDayOfWeek?: number;
-}
 
 interface CronConstraints {
   min: number;

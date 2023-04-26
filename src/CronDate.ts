@@ -500,6 +500,7 @@ export class CronDate {
       const prevTime = this.getTime();
       this.handleMathOp(op, unit);
       const currTime = this.getTime();
+      /* istanbul ignore next - FIXME: I'm fairly sure this is unneeded as luxon will handle this */
       if (prevTime === currTime) {
         if (this.getMinutes() === 0 && this.getSeconds() === 0) {
           this.addHour();

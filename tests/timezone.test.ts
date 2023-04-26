@@ -18,7 +18,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(4); // Due to DST start in Athens, 3 is skipped
@@ -26,7 +26,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(5); // 5 AM
@@ -37,7 +37,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(30); // 30 Minutes
     expect(date.getHours()).toEqual(2); // 2 AM
@@ -45,7 +45,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(30); // 30 Minutes
     expect(date.getHours()).toEqual(2); // 2 AM
@@ -56,7 +56,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(4); // Due to DST start in Athens, 3 is skipped
@@ -64,7 +64,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(3); // 3 on the 28th
@@ -75,7 +75,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(4); // Due to DST start in Athens, 3 is skipped
@@ -83,7 +83,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(20); // 20 Minutes
     expect(date.getHours()).toEqual(4); // Due to DST start in Athens, 3 is skipped
@@ -91,7 +91,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(40); // 20 Minutes
     expect(date.getHours()).toEqual(4); // Due to DST start in Athens, 3 is skipped
@@ -99,7 +99,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(3); // 3 AM
@@ -112,7 +112,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(1); // 1 AM
@@ -120,7 +120,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(2); // 2 AM
@@ -128,7 +128,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(4); // 4 AM
@@ -136,7 +136,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(5); // 5 AM
@@ -150,7 +150,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(1); // 1 AM
@@ -158,7 +158,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(2); // 2 AM
@@ -166,7 +166,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0); // 0 Minutes
     expect(date.getHours()).toEqual(4); // 4 AM
@@ -189,21 +189,21 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3);
     expect(date.getDate()).toEqual(30);
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3); // Due to DST end in Athens (4-->3)
     expect(date.getDate()).toEqual(30);
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(4);
     expect(date.getDate()).toEqual(30);
@@ -223,14 +223,14 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3);
     expect(date.getDate()).toEqual(30);
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3);
     expect(date.getDate()).toEqual(31);
@@ -250,7 +250,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0);
     expect(date.getHours()).toEqual(3);
@@ -258,7 +258,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(20);
     expect(date.getHours()).toEqual(3);
@@ -266,7 +266,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(40);
     expect(date.getHours()).toEqual(3);
@@ -274,7 +274,7 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getMinutes()).toEqual(0);
     expect(date.getHours()).toEqual(3);
@@ -295,35 +295,35 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(1); // 1 AM
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(2); // 2 AM
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3); // 3 AM
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3); // 3 AM (DST end)
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(4); // 4 AM
     expect(date.getDate()).toEqual(30); // on the 30th
@@ -343,21 +343,21 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(1); // 1 AM
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(2); // 2 AM
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3); // 3 AM
     expect(date.getDate()).toEqual(30); // on the 30th
@@ -372,35 +372,35 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(1); // 1 AM
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(2); // 2 AM
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3); // 3 AM
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(3); // 3 AM (DST end)
     expect(date.getDate()).toEqual(30); // on the 30th
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(4); // 4 AM
     expect(date.getDate()).toEqual(30); // on the 30th
@@ -417,19 +417,19 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(29); // on the 29th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(30); // on the 30th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(31); // on the 31st
@@ -443,19 +443,19 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(29); // on the 29th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(30); // on the 30th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(31); // on the 31st
@@ -467,19 +467,19 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(29); // on the 29th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(30); // on the 30th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(31); // on the 31st
@@ -491,13 +491,13 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(30); // on the 30th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(31); // on the 31st
@@ -509,13 +509,13 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(30); // on the 30th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(31); // on the 31st
@@ -527,13 +527,13 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(30); // on the 30th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(31); // on the 31st
@@ -545,13 +545,13 @@ describe('CronExpression', () => {
 
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(30); // on the 30th
     date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getHours()).toEqual(12); // 12 PM
     expect(date.getDate()).toEqual(31); // on the 31st
@@ -567,7 +567,7 @@ describe('CronExpression', () => {
     const interval = CronExpression.parse('0 9 1 1 *', options);
     let date = interval.next();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
 
     expect(date.getFullYear()).toEqual(2019);
@@ -576,7 +576,7 @@ describe('CronExpression', () => {
 
     date = interval.prev();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getFullYear()).toEqual(2018);
     expect(date.getDate()).toEqual(1);
@@ -584,7 +584,7 @@ describe('CronExpression', () => {
 
     date = interval.prev();
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getFullYear()).toEqual(2017);
     expect(date.getDate()).toEqual(1);
@@ -602,7 +602,7 @@ describe('CronExpression', () => {
     const date = interval.next();
 
     if (!(date instanceof CronDate)) {
-      fail('date is not a CronDate');
+      throw new Error('date is not a CronDate');
     }
     expect(date.getFullYear()).toEqual(2018);
     expect(date.getDate()).toEqual(31);

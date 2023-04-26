@@ -29,8 +29,8 @@
     "test:cover": "cross-env TZ=UTC tap --coverage-report=html ./test/*.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "npm run lint && npm run test:unit && npm run test:tsd",
-    "jest:test": "npx jest --coverage"
+    "test": "cross-env TZ=UTC npm run lint && npm run test:unit && npm run test:tsd",
+    "jest:test": "cross-env TZ=UTC npx jest --coverage"
   },
   "husky": {
     "hooks": {

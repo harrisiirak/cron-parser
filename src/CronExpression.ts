@@ -245,7 +245,7 @@ export class CronExpression {
    *
    * @public
    */
-  reset(newDate?: Date): void {
+  reset(newDate?: Date | CronDate): void {
     this.#currentDate = new CronDate(newDate || this.#options.currentDate);
   }
 

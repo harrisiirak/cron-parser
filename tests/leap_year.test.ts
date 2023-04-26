@@ -4,8 +4,7 @@ import {CronDate, CronExpression} from '../src';
 describe('CronExpression', () => {
   const cronDateTypedTest = (date: unknown, testFn: (date: CronDate) => void): void => {
     if (!(date instanceof CronDate)) {
-      fail('date is not instance of CronDate');
-      return;
+      throw new Error('date is not instance of CronDate');
     }
     testFn(date);
   };

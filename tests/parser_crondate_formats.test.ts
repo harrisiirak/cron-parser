@@ -7,9 +7,9 @@ describe('parse cron date formats with local timezone', () => {
   const offsetMinutes = offset % 60;
   const offsetSign = offset < 0 ? '-' : '+';
   const expectedTime = new Date(2021, 0, 4, 10, 0, 0).toString();
-  const typeCheckCronDate = (d: unknown) => {
-    if (!(d instanceof CronDate)) {
-      fail('d is not instance of CronDate');
+  const typeCheckCronDate = (date: unknown) => {
+    if (!(date instanceof CronDate)) {
+      throw new Error('date is not instance of CronDate');
     }
   };
 
@@ -36,7 +36,7 @@ describe('parse cron date formats with local timezone', () => {
     expect(d.toDate().toString()).toBe(expectedTime);
   });
 
-  // THIS TEST MUST BE RAN WITH TZ=UTC!!!
+  // FIXME? THIS TEST MUST BE RAN WITH TZ=UTC!!!
   test('RFC2822', () => {
     const offsetString = offsetSign + String(offsetHours).padStart(2, '0') + String(offsetMinutes).padStart(2, '0');
     const d = new CronDate('Mon, 4 Jan 2021 10:00:00 ' + offsetString);
