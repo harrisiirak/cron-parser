@@ -1,3 +1,5 @@
+import {IFieldConstraints} from './types';
+
 export type CronConstraints = {
   second: { min: number, max: number, chars: string[] },
   minute: { min: number, max: number, chars: string[] },
@@ -12,7 +14,7 @@ export class CronConstants {
     throw new Error('This class is not meant to be instantiated.');
   }
 
-  static get constraints(): CronConstraints {
+  static get constraints(): IFieldConstraints {
     return {
       second: {min: 0, max: 59, chars: []},
       minute: {min: 0, max: 59, chars: []},

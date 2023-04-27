@@ -9,16 +9,37 @@ export type HourRange = IntRange<0, 24>;
 export type DayOfTheMonthRange = IntRange<1, 32> | 'L';
 export type MonthRange = IntRange<1, 13>;
 export type DayOfTheWeekRange = IntRange<0, 8>;
-
-export interface IFieldConstraints {
+export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
+export interface IFieldConstraint {
   min: number;
   max: number;
   chars: string[];
 }
 
+export type IFieldConstraints = {
+  second: IFieldConstraint,
+  minute: IFieldConstraint,
+  hour: IFieldConstraint,
+  dayOfMonth: IFieldConstraint,
+  month: IFieldConstraint,
+  dayOfWeek: IFieldConstraint,
+}
+
+export type CronConstraints = {
+  second: { min: number, max: number, chars: string[] },
+  minute: { min: number, max: number, chars: string[] },
+  hour: { min: number, max: number, chars: string[] },
+  dayOfMonth: { min: number, max: number, chars: string[] },
+  month: { min: number, max: number, chars: string[] },
+  dayOfWeek: { min: number, max: number, chars: string[] },
+}
+
 export enum MonthsEnum {jan = 1, feb = 2, mar = 3, apr = 4, may = 5, jun = 6, jul = 7, aug = 8, sep = 9, oct = 10, nov = 11, dec = 12}
+export enum DaysInMonthEnum {jan = 31, feb = 29, mar = 31, apr = 30, may = 31, jun = 30, jul = 31, aug = 31, sep = 30, oct = 31, nov = 30, dec = 31}
 
 export enum DayOfWeekEnum {sun = 0, mon = 1, tue = 2, wed = 3, thu = 4, fri = 5, sat = 6}
+
+
 
 export enum TimeUnitsEnum {second = 'second', minute = 'minute', hour = 'hour', day = 'day', month = 'month', year = 'year'}
 
@@ -52,7 +73,7 @@ export interface ICronParserOptions {
   nthDayOfWeek?: number;
 }
 
-export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
+
 
 export interface IRange {
   start: number;

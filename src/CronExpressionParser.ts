@@ -5,7 +5,7 @@ import {CronExpression} from './CronExpression';
 import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../types';
 import assert from 'assert';
 
-import {DayOfWeekEnum, ICronExpressionParserOptions, IFieldConstraints, MonthsEnum} from './types';
+import {DayOfWeekEnum, ICronExpressionParserOptions, IFieldConstraint, MonthsEnum} from './types';
 
 const STANDARD_VALID_CHARACTERS = /^[,*\d/-]+$/;
 const DAY_OF_MONTH_VALID_CHARACTERS = /^[?,*\dL/-]+$/;
@@ -14,7 +14,7 @@ const DAY_OF_WEEK_VALID_CHARACTERS = /^[?,*\dL#/-]+$/;
 
 export class CronExpressionParser {
   // FIXME: these are a temporary solution to make the parser work with the current design of the library.
-  private static constraints: IFieldConstraints[] = Object.values(CronConstants.constraints);
+  private static constraints: IFieldConstraint[] = Object.values(CronConstants.constraints);
   private static validCharacters: { [key: string]: RegExp } = {
     second: STANDARD_VALID_CHARACTERS,
     minute: STANDARD_VALID_CHARACTERS,
@@ -59,18 +59,11 @@ export class CronExpressionParser {
     return new CronExpression(fields, options);
   }
 
-  static #getAtoms(expression: string): string[] {
-    const atoms = expression.trim().split(/\s+/);
-    assert(atoms.length <= 6, 'Invalid cron expression');
-    return atoms;
-  }
-
   static #getRawFields(expression: string): { second: string, minute: string, hour: string, dayOfMonth: string, month: string, dayOfWeek: string } {
     expression = expression || '0 * * * * *';
-    const atoms = CronExpressionParser.#getAtoms(expression);
-    // FIXME: this should be the correct value but is not how the original library works
-    // const defaults = ['0', '*', '*', '*', '*', '*'];
-    const defaults = ['*', '*', '*', '*', '*', '0']; // FIXME <-- not sure about that last 0? should be 0 or *?
+    const atoms = expression.trim().split(/\s+/);
+    assert(atoms.length <= 6, 'Invalid cron expression');
+    const defaults = ['*', '*', '*', '*', '*', '*'];
     if (atoms.length < defaults.length) {
       atoms.unshift(...defaults.slice(atoms.length));
     }
@@ -78,7 +71,7 @@ export class CronExpressionParser {
     return {second, minute, hour, dayOfMonth, month, dayOfWeek};
   }
 
-  static #parseField(field: string, value: string, constraints: IFieldConstraints): (number | string)[] {
+  static #parseField(field: string, value: string, constraints: IFieldConstraint): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === 'month' || field === 'dayOfWeek') {
       value = value.replace(/[a-z]{3}/gi, (match) => {
@@ -97,10 +90,10 @@ export class CronExpressionParser {
     return CronExpressionParser.#parseSequence(value, constraints, field);
   }
 
-  static #parseSequence(val: string, constraints: IFieldConstraints, field: keyof typeof CronExpressionParser.validCharacters): (number | string)[] {
+  static #parseSequence(val: string, constraints: IFieldConstraint, field: keyof typeof CronExpressionParser.validCharacters): (number | string)[] {
     const stack: (number | string)[] = [];
 
-    function handleResult(result: number | string | (number | string)[], constraints: IFieldConstraints) {
+    function handleResult(result: number | string | (number | string)[], constraints: IFieldConstraint) {
       if (Array.isArray(result)) {
         result.forEach((value) => {
           if (CronExpressionParser.#isValidConstraintChar(constraints, value)) {
@@ -129,7 +122,7 @@ export class CronExpressionParser {
     return stack;
   }
 
-  static #parseRepeat(val: string, constraints: IFieldConstraints, field: keyof typeof CronExpressionParser.validCharacters): number[] | string[] | number | string {
+  static #parseRepeat(val: string, constraints: IFieldConstraint, field: keyof typeof CronExpressionParser.validCharacters): number[] | string[] | number | string {
     const atoms = val.split('/');
     assert(atoms.length <= 2, `Invalid repeat: ${val}`);
     if (atoms.length === 2) {
@@ -142,7 +135,7 @@ export class CronExpressionParser {
     return CronExpressionParser.#parseRange(val, 1, constraints, field);
   }
 
-  static #parseRange(val: string, repeatInterval: number, constraints: IFieldConstraints, field: keyof typeof CronExpressionParser.validCharacters): number[] | string[] | number | string {
+  static #parseRange(val: string, repeatInterval: number, constraints: IFieldConstraint, field: keyof typeof CronExpressionParser.validCharacters): number[] | string[] | number | string {
     const stack: number[] = [];
     const atoms: string[] = val.split('-');
 
@@ -206,7 +199,7 @@ export class CronExpressionParser {
     return val;
   }
 
-  static #isValidConstraintChar(constraints: IFieldConstraints, value: string | number): boolean {
+  static #isValidConstraintChar(constraints: IFieldConstraint, value: string | number): boolean {
     return constraints.chars.some((char) => value.toString().includes(char));
   }
 }

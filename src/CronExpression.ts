@@ -3,7 +3,7 @@ import {CronExpressionParser} from './CronExpressionParser';
 import {CronDate} from './CronDate';
 import {CronFields} from './CronFields';
 import assert from 'assert';
-import {ICronParserOptions, DateMathOpEnum, IFieldConstraints, IIteratorCallback, IIteratorFields, PredefinedCronExpressionsEnum, TimeUnitsEnum} from './types';
+import {ICronParserOptions, DateMathOpEnum, IFieldConstraint, IIteratorCallback, IIteratorFields, PredefinedCronExpressionsEnum, TimeUnitsEnum, MonthsEnum, DaysInMonthEnum} from './types';
 
 /**
  * Cron iteration loop safety limit
@@ -13,7 +13,7 @@ const LOOP_LIMIT = 10000;
 export class CronExpression {
   // FIXME: This should be a private property - but it's used in tests
   static map = ['second', 'minute', 'hour', 'dayOfMonth', 'month', 'dayOfWeek'];
-  static #constraints: IFieldConstraints[] = [
+  static #constraints: IFieldConstraint[] = [
     {min: 0, max: 59, chars: []}, // Second
     {min: 0, max: 59, chars: []}, // Minute
     {min: 0, max: 23, chars: []}, // Hour
@@ -278,7 +278,10 @@ export class CronExpression {
       dayOfWeekMatch = dayOfWeekMatch || CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek, currentDate);
     }
 
-    const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= CronConstants.daysInMonth[currentDate.getMonth()];
+    // FIXME: Should we do it this way? ie using an enum vs a constant array?
+    const monthKey = MonthsEnum[currentDate.getMonth() + 1].toString() as keyof typeof DaysInMonthEnum;
+    const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= DaysInMonthEnum[monthKey];
+    // const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= CronConstants.daysInMonth[currentDate.getMonth()];
     const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.length === CronExpression.#constraints[5].max - CronExpression.#constraints[5].min + 1;
     if (!dayOfMonthMatch && (!dayOfWeekMatch || isDayOfWeekWildcardMatch)) {
       currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
