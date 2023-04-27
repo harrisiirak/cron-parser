@@ -1,17 +1,16 @@
 import {CronDate, CronExpression} from './';
 
-type BuildRangeTuple<Current extends [...number[]], Count extends number> = Current['length'] extends Count ? Current : BuildRangeTuple<[number, ...Current], Count>
-type RangeTuple<Count extends number> = BuildRangeTuple<[], Count>
-type BuildRange<Current extends number, End extends number, Accu extends [...number[]]> = Accu['length'] extends End ? Current : BuildRange<Current | Accu['length'], End, [number, ...Accu]>
-type FieldRange<StartInclusive extends number, EndExclusive extends number> = BuildRange<StartInclusive, EndExclusive, RangeTuple<StartInclusive>>
+// TS >= 4.5 tail recursion optimization
+type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc['length']]>
+type IntRange<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>
 
-export type SixtyRange = FieldRange<0, 30> | FieldRange<30, 60>; // Typescript restriction on recursion depth
-export type HourRange = FieldRange<0, 24>;
-export type DayOfTheMonthRange = FieldRange<1, 32> | 'L';
-export type MonthRange = FieldRange<1, 13>;
-export type DayOfTheWeekRange = FieldRange<0, 8>;
+export type SixtyRange = IntRange<0, 60>;
+export type HourRange = IntRange<0, 24>;
+export type DayOfTheMonthRange = IntRange<1, 32> | 'L';
+export type MonthRange = IntRange<1, 13>;
+export type DayOfTheWeekRange = IntRange<0, 8>;
 
-export interface FieldConstraints {
+export interface IFieldConstraints {
   min: number;
   max: number;
   chars: string[];
@@ -31,12 +30,9 @@ export enum PredefinedCronExpressionsEnum {
   '@weekly' = '0 0 * * 0',
   '@daily' = '0 0 * * *',
   '@hourly' = '0 * * * *'
-
 }
 
-export type CronAliasesType = { [key: string]: MonthsEnum | DayOfWeekEnum };
-
-export interface CronExpressionParserOptions {
+export interface ICronExpressionParserOptions {
   currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;
@@ -46,7 +42,7 @@ export interface CronExpressionParserOptions {
   nthDayOfWeek?: number;
 }
 
-export interface CronParserOptions {
+export interface ICronParserOptions {
   currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;
@@ -58,14 +54,14 @@ export interface CronParserOptions {
 
 export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
 
-export interface Range {
+export interface IRange {
   start: number;
   count: number;
   end?: number;
   step?: number;
 }
 
-export interface CronFieldsParams {
+export interface ICronFieldsParams {
   second: SixtyRange[];
   minute: SixtyRange[];
   hour: HourRange[];
@@ -76,36 +72,12 @@ export interface CronFieldsParams {
 
 export type ParseStringResponse = { variables: { [key: string]: number | string }, expressions: CronExpression[], errors: { [key: string]: unknown } }
 
-interface CronConstraints {
-  min: number;
-  max: number;
-  chars: string[];
-}
-
-export interface MappedFields {
-  second: SixtyRange[];
-  minute: SixtyRange[];
-  hour: HourRange[];
-  dayOfMonth: DayOfTheMonthRange[];
-  month: MonthRange[];
-  dayOfWeek: DayOfTheWeekRange[];
-}
-
-export interface IteratorFields {
+export interface IIteratorFields {
   value: CronDate;
   done: boolean;
 }
 
-export type IteratorResult = Iterator<IteratorFields>;
-export type IteratorCallback = (item: IteratorFields | CronDate, index: number) => void;
-
-type KeyValueType = { [key: string]: number };
-type MonthsType = { [key: string]: MonthsEnum };
-type DayOfWeekType = { [key: string]: DayOfWeekEnum };
-type AliasesType = {
-  month: MonthsType;
-  dayOfWeek: DayOfWeekType;
-};
+export type IIteratorCallback = (item: IIteratorFields | CronDate, index: number) => void;
 
 
-enum DayOfWeek {sun = 0, mon = 1, tue = 2, wed = 3, thu = 4, fri = 5, sat = 6}
+

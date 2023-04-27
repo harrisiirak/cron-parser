@@ -1,5 +1,5 @@
 import {CronFields, CronParser} from '../src';
-import {CronFieldsParams} from '../src/types';
+import {ICronFieldsParams} from '../src/types';
 
 describe('CronParser', () => {
   it('should stringify cron expression all stars no seconds 0 * * * * *', function () {
@@ -228,7 +228,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing seconds', function () {
-    const input = <CronFieldsParams>{
+    const input = <ICronFieldsParams>{
       minute: [1],
       hour: [1],
       dayOfMonth: [1],
@@ -239,7 +239,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - empty seconds', function () {
-    const input = <CronFieldsParams>{
+    const input = <ICronFieldsParams>{
       second: [],
       minute: [1],
       hour: [1],
@@ -251,7 +251,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing values - empty array', function () {
-    const input = <CronFieldsParams>{
+    const input = <ICronFieldsParams>{
       second: [1],
       minute: [],
       hour: [1],
@@ -263,7 +263,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing values', function () {
-    const input = <CronFieldsParams>{
+    const input = <ICronFieldsParams>{
       second: [1],
       hour: [1],
       dayOfMonth: [1],
@@ -274,7 +274,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - range error', function () {
-    const input = <CronFieldsParams>{
+    const input = <ICronFieldsParams>{
       second: [-1, 1, 0],
       minute: [1],
       hour: [1],
@@ -286,7 +286,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - bad chars error', function () {
-    const input = <CronFieldsParams>{
+    const input = <ICronFieldsParams>{
       second: [0, 'R'],
       minute: [1],
       hour: [1],
@@ -298,7 +298,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - duplicates', function () {
-    const input = <CronFieldsParams>{
+    const input = <ICronFieldsParams>{
       second: [1, 1],
       minute: [1],
       hour: [1],

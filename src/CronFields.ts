@@ -1,6 +1,6 @@
 import {CronConstants, CronConstraints} from './CronConstants';
 import assert from 'assert';
-import {CronFieldsParams, CronFieldTypes, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, Range, SixtyRange} from './types';
+import {ICronFieldsParams, CronFieldTypes, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, IRange, SixtyRange} from './types';
 
 type ElementType = number | 'L' | 'W';
 
@@ -19,7 +19,7 @@ export class CronFields {
   readonly #month: MonthRange[];
   readonly #dayOfWeek: DayOfTheWeekRange[];
 
-  constructor({second, minute, hour, dayOfMonth, month, dayOfWeek}: CronFieldsParams) {
+  constructor({second, minute, hour, dayOfMonth, month, dayOfWeek}: ICronFieldsParams) {
     CronFields.validateField(second, 'second');
     CronFields.validateField(minute, 'minute');
     CronFields.validateField(hour, 'hour');

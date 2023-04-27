@@ -3,7 +3,7 @@ import {CronExpressionParser} from './CronExpressionParser';
 import {CronDate} from './CronDate';
 import {CronFields} from './CronFields';
 import assert from 'assert';
-import {CronParserOptions, DateMathOpEnum, FieldConstraints, IteratorCallback, IteratorFields, PredefinedCronExpressionsEnum, TimeUnitsEnum} from './types';
+import {ICronParserOptions, DateMathOpEnum, IFieldConstraints, IIteratorCallback, IIteratorFields, PredefinedCronExpressionsEnum, TimeUnitsEnum} from './types';
 
 /**
  * Cron iteration loop safety limit
@@ -13,7 +13,7 @@ const LOOP_LIMIT = 10000;
 export class CronExpression {
   // FIXME: This should be a private property - but it's used in tests
   static map = ['second', 'minute', 'hour', 'dayOfMonth', 'month', 'dayOfWeek'];
-  static #constraints: FieldConstraints[] = [
+  static #constraints: IFieldConstraints[] = [
     {min: 0, max: 59, chars: []}, // Second
     {min: 0, max: 59, chars: []}, // Minute
     {min: 0, max: 23, chars: []}, // Hour
@@ -22,7 +22,7 @@ export class CronExpression {
     {min: 0, max: 7, chars: ['L']}, // Day of week
   ];
 
-  #options: CronParserOptions;
+  #options: ICronParserOptions;
   #utc: boolean;
   #tz: string | undefined;
   #currentDate: CronDate;
@@ -33,7 +33,7 @@ export class CronExpression {
   #nthDayOfWeek: number;
   #fields: any;
 
-  constructor(fields: CronFields, options: CronParserOptions) {
+  constructor(fields: CronFields, options: ICronParserOptions) {
     this.#options = options;
     this.#utc = options.utc || false;
     this.#tz = this.#utc ? 'UTC' : options.tz;
@@ -61,7 +61,7 @@ export class CronExpression {
    * @param {string} expression Input expression
    * @param {CronOptions} [options] Parsing options
    */
-  static parse(expression: string, options: CronParserOptions = {}): CronExpression {
+  static parse(expression: string, options: ICronParserOptions = {}): CronExpression {
     return CronExpressionParser.parse(expression, options);
   }
 
@@ -72,7 +72,7 @@ export class CronExpression {
    * @param {CronOptions} [options] Parsing options
    * @return {CronExpression}
    */
-  static fieldsToExpression(fields: CronFields, options?: CronParserOptions): CronExpression {
+  static fieldsToExpression(fields: CronFields, options?: ICronParserOptions): CronExpression {
     return new CronExpression(fields, options || {});
   }
 
@@ -210,12 +210,12 @@ export class CronExpression {
    * @param {Function} callback Optional callback
    * @return {Array} Array of the iterated results
    */
-  iterate(steps: number, callback?: IteratorCallback): (IteratorFields | CronDate)[] {
-    const dates: (IteratorFields | CronDate)[] = [];
+  iterate(steps: number, callback?: IIteratorCallback): (IIteratorFields | CronDate)[] {
+    const dates: (IIteratorFields | CronDate)[] = [];
 
-    const processStep = (step: number, action: () => IteratorFields | CronDate) => {
+    const processStep = (step: number, action: () => IIteratorFields | CronDate) => {
       try {
-        const item: IteratorFields | CronDate = action();
+        const item: IIteratorFields | CronDate = action();
         dates.push(item);
 
         // Fire the callback

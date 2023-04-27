@@ -14,6 +14,7 @@ describe('parse cron date formats with local timezone', () => {
   };
 
   test('undefined date', () => {
+    // FIXME: this test can fail sometimes due to being off by 1 second
     const realDate = new Date();
     const d = new CronDate();
     typeCheckCronDate(d);
