@@ -135,63 +135,54 @@ export class CronExpressionParser {
     return CronExpressionParser.#parseRange(val, 1, constraints, field);
   }
 
-  static #parseRange(val: string, repeatInterval: number, constraints: IFieldConstraint, field: keyof typeof CronExpressionParser.validCharacters): number[] | string[] | number | string {
+  static #validateRange(min: number, max: number, constraints: IFieldConstraint): void {
+    assert(!isNaN(min) && !isNaN(max) && min >= constraints.min && max <= constraints.max, `Constraint error, got range ${min}-${max} expected range ${constraints.min}-${constraints.max}`);
+    assert(min <= max, `Invalid range: ${min}-${max}, min(${min}) > max(${max})`);
+  }
+
+  static #validateRepeatInterval(repeatInterval: number): void {
+    assert(!isNaN(repeatInterval) && repeatInterval > 0, `Constraint error, cannot repeat at every ${repeatInterval} time.`);
+  }
+
+  static #createRange(min: number, max: number, repeatInterval: number, field: keyof typeof CronExpressionParser.validCharacters): number[] {
     const stack: number[] = [];
-    const atoms: string[] = val.split('-');
-
-    if (atoms.length > 1) {
-      if (!atoms[0].length) {
-        assert(atoms[1].length > 0, `Invalid range: ${val}`);
-        return +val;
-      }
-
-      // Validate range
-      const min = +atoms[0];
-      const max = +atoms[1];
-
-      assert(!isNaN(min) && !isNaN(max) && min >= constraints.min && max <= constraints.max, `Constraint error, got range ${min}-${max} expected range ${constraints.min}-${constraints.max}`);
-      assert(min <= max, `Invalid range: ${val} min(${min}) > max(${max})`);
-
-      // Create range
-      let repeatIndex: number = +repeatInterval;
-      assert(!isNaN(repeatIndex) && repeatIndex > 0, `Constraint error, cannot repeat at every ${repeatIndex} time.`);
-
-      // JS DOW is in range of 0-6 (SUN-SAT) but we also support 7 in the expression. Handle case when range contains 7 instead of 0 and translate this value to 0
-      if (field === 'dayOfWeek' && max % 7 === 0) {
-        stack.push(0);
-      }
-
-      for (let index = min, count = max; index <= count; index++) {
-        const exists = stack.indexOf(index) !== -1;
-        if (!exists && repeatIndex > 0 && (repeatIndex % repeatInterval) === 0) {
-          repeatIndex = 1;
-          stack.push(index);
-        } else {
-          repeatIndex++;
-        }
-      }
-      return stack;
+    if (field === 'dayOfWeek' && max % 7 === 0) {
+      stack.push(0);
     }
+    for (let index = min; index <= max; index += repeatInterval) {
+      if (stack.indexOf(index) === -1) {
+        stack.push(index);
+      }
+    }
+    return stack;
+  }
 
-    return isNaN(+val) ? val : +val;
+  static #parseRange(val: string, repeatInterval: number, constraints: IFieldConstraint, field: keyof typeof CronExpressionParser.validCharacters): number[] | string[] | number | string {
+    const atoms: string[] = val.split('-');
+    if (atoms.length <= 1) {
+      return isNaN(+val) ? val : +val;
+    }
+    const [min, max] = atoms.map(num => parseInt(num));
+    this.#validateRange(min, max, constraints);
+    this.#validateRepeatInterval(repeatInterval);
+
+    // Create range
+    return this.#createRange(min, max, repeatInterval, field);
   }
 
   static #parseNthDay(val: string, options: ICronExpressionParserOptions): string {
     const atoms = val.split('#');
-    if (atoms.length > 1) {
-      const nthValue = +atoms[atoms.length - 1];
-      const matches = val.match(/([,-/])/);
-      if (matches) {
-        throw new Error(`Constraint error, invalid dayOfWeek \`#\` and \`${matches[0]}\` special characters are incompatible`);
-      }
-      if (atoms.length > 2 || Number.isNaN(nthValue) || (nthValue < 1 || nthValue > 5)) {
-        throw new Error('Constraint error, invalid dayOfWeek occurrence number (#)');
-      }
-      options.nthDayOfWeek = nthValue;
-      return atoms[0];
+    if (atoms.length <= 1) {
+      return val;
     }
-    return val;
+    const nthValue = +atoms[atoms.length - 1];
+    const matches = val.match(/([,-/])/);
+    assert(matches === null, `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`);
+    assert(atoms.length <= 2 && !isNaN(nthValue) && (nthValue >= 1 && nthValue <= 5), 'Constraint error, invalid dayOfWeek occurrence number (#)');
+    options.nthDayOfWeek = nthValue;
+    return atoms[0];
   }
+
   static #isValidConstraintChar(constraints: IFieldConstraint, value: string | number): boolean {
     return constraints.chars.some((char) => value.toString().includes(char));
   }
