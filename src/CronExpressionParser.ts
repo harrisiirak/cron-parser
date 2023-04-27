@@ -63,7 +63,7 @@ export class CronExpressionParser {
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);
     assert(atoms.length <= 6, 'Invalid cron expression');
-    const defaults = ['*', '*', '*', '*', '*', '*'];
+    const defaults = ['*', '*', '*', '*', '*', '0'];
     if (atoms.length < defaults.length) {
       atoms.unshift(...defaults.slice(atoms.length));
     }
@@ -180,25 +180,18 @@ export class CronExpressionParser {
     const atoms = val.split('#');
     if (atoms.length > 1) {
       const nthValue = +atoms[atoms.length - 1];
-      if (/,/.test(val)) {
-        throw new Error('Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible');
-      }
-      if (/\//.test(val)) {
-        throw new Error('Constraint error, invalid dayOfWeek `#` and `/` special characters are incompatible');
-      }
-      if (/-/.test(val)) {
-        throw new Error('Constraint error, invalid dayOfWeek `#` and `-` special characters are incompatible');
+      const matches = val.match(/([,-/])/);
+      if (matches) {
+        throw new Error(`Constraint error, invalid dayOfWeek \`#\` and \`${matches[0]}\` special characters are incompatible`);
       }
       if (atoms.length > 2 || Number.isNaN(nthValue) || (nthValue < 1 || nthValue > 5)) {
         throw new Error('Constraint error, invalid dayOfWeek occurrence number (#)');
       }
-
       options.nthDayOfWeek = nthValue;
       return atoms[0];
     }
     return val;
   }
-
   static #isValidConstraintChar(constraints: IFieldConstraint, value: string | number): boolean {
     return constraints.chars.some((char) => value.toString().includes(char));
   }
