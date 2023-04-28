@@ -1320,4 +1320,9 @@ describe('CronExpression', () => {
     }
     expect(interval.toString()).toEqual(expression);
   });
+
+  it('should throw error for expression missing fields when in strict mode (#244)', () => {
+    const expression = '20 15 * *';
+    expect(() => CronExpression.parse(expression, { strict: true })).toThrow();
+  });
 });

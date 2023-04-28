@@ -41,6 +41,7 @@ export class CronExpressionParser {
 
   static parse(expression: string, options: ICronParserOptions = {}): CronExpression {
     options.expression = expression;
+    options.strict ??= false;
     if (typeof options.currentDate === 'undefined') {
       options.currentDate = new CronDate(undefined, 'UTC');
     }
@@ -48,7 +49,7 @@ export class CronExpressionParser {
     const predefinedKey = expression as keyof typeof CronExpressionParser.predefined;
     expression = CronExpressionParser.predefined[predefinedKey] ? CronExpressionParser.predefined[predefinedKey] : expression;
 
-    const rawFields = CronExpressionParser.#getRawFields(expression);
+    const rawFields = CronExpressionParser.#getRawFields(expression, options);
     const second = CronExpressionParser.#parseField('second', rawFields.second, CronExpressionParser.constraints[0]) as SixtyRange[];
     const minute = CronExpressionParser.#parseField('minute', rawFields.minute, CronExpressionParser.constraints[1]) as SixtyRange[];
     const hour = CronExpressionParser.#parseField('hour', rawFields.hour, CronExpressionParser.constraints[2]) as HourRange[];
@@ -60,7 +61,8 @@ export class CronExpressionParser {
     return new CronExpression(fields, options);
   }
 
-  static #getRawFields(expression: string): { second: string, minute: string, hour: string, dayOfMonth: string, month: string, dayOfWeek: string } {
+  static #getRawFields(expression: string, options: ICronParserOptions): { second: string, minute: string, hour: string, dayOfMonth: string, month: string, dayOfWeek: string } {
+    assert(!options.strict || expression.split(/\s+/).length === 6, 'Invalid cron expression, expected 6 fields in strict mode!');
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);
     assert(atoms.length <= 6, 'Invalid cron expression');

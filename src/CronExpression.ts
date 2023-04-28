@@ -162,6 +162,13 @@ export class CronExpression {
     return this.#isIterator ? {value: schedule, done: !this.hasPrev()} : schedule;
   }
 
+  // current(): CronDate | { value: CronDate; done: boolean } {
+  //   if (this.#currentDate) {
+  //     return this.#currentDate
+  //   }
+  //   throw new Error('Has not interated!');
+  // }
+
   /**
    * Check if next suitable date exists
    *
