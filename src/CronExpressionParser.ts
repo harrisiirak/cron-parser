@@ -5,7 +5,7 @@ import {CronExpression} from './CronExpression';
 import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../types';
 import assert from 'assert';
 
-import {DayOfWeekEnum, ICronExpressionParserOptions, IFieldConstraint, MonthsEnum} from './types';
+import {DayOfWeekEnum, ICronExpressionParserOptions, ICronParserOptions, IFieldConstraint, MonthsEnum} from './types';
 
 const STANDARD_VALID_CHARACTERS = /^[,*\d/-]+$/;
 const DAY_OF_MONTH_VALID_CHARACTERS = /^[?,*\dL/-]+$/;
@@ -39,7 +39,8 @@ export class CronExpressionParser {
     };
   }
 
-  static parse(expression: string, options: ICronExpressionParserOptions = {}): CronExpression {
+  static parse(expression: string, options: ICronParserOptions = {}): CronExpression {
+    options.expression = expression;
     if (typeof options.currentDate === 'undefined') {
       options.currentDate = new CronDate(undefined, 'UTC');
     }

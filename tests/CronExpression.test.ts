@@ -1222,6 +1222,7 @@ describe('CronExpression', () => {
     for (let i = 2; i < 120; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getSeconds()).toEqual(i % 60));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 
   it('should correctly handle 1/2 * * ? * * (#156)', () => {
@@ -1233,6 +1234,7 @@ describe('CronExpression', () => {
     for (let i = 1; i < 120; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getSeconds()).toEqual(i % 60));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 
   it('should correctly handle 1-59/2 * * ? * * (#156)', () => {
@@ -1244,6 +1246,7 @@ describe('CronExpression', () => {
     for (let i = 1; i < 120; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getSeconds()).toEqual(i % 60));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 
   it('should correctly handle 0 */2 * ? * * (#156)', () => {
@@ -1255,6 +1258,7 @@ describe('CronExpression', () => {
     for (let i = 2; i < 120; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 60));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 
   it('should correctly handle 0 0/2 * ? * * (#156)', () => {
@@ -1266,6 +1270,7 @@ describe('CronExpression', () => {
     for (let i = 2; i < 120; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 60));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 
   it('should correctly handle 0 1/2 * ? * * (#156)', () => {
@@ -1277,6 +1282,7 @@ describe('CronExpression', () => {
     for (let i = 1; i < 121; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 60));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 
   it('should correctly handle 0 1-59/2 * ? * * (#156)', () => {
@@ -1288,6 +1294,7 @@ describe('CronExpression', () => {
     for (let i = 1; i < 121; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 60));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 
   it('should correctly handle 0 1-40/2 * ? * * (#156)', () => {
@@ -1299,6 +1306,7 @@ describe('CronExpression', () => {
     for (let i = 1; i < 121; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 40));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 
   it('should correctly handle 10/2 * * ? * * (#156)', () => {
@@ -1310,5 +1318,6 @@ describe('CronExpression', () => {
     for (let i = 10; i < 60; i += 2) {
       cronDateTypedTest(interval.next(), (date) => expect(date.getSeconds()).toEqual(i));
     }
+    expect(interval.toString()).toEqual(expression);
   });
 });

@@ -71,6 +71,7 @@ export interface ICronParserOptions {
   utc?: boolean;
   tz?: string;
   nthDayOfWeek?: number;
+  expression?: string;
 }
 
 

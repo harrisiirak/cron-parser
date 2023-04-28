@@ -32,6 +32,7 @@ export class CronExpression {
   #hasIterated: boolean;
   #nthDayOfWeek: number;
   #fields: any;
+  #expression?: string;
 
   constructor(fields: CronFields, options: ICronParserOptions) {
     this.#options = options;
@@ -44,6 +45,7 @@ export class CronExpression {
     this.#hasIterated = false;
     this.#nthDayOfWeek = options.nthDayOfWeek || 0;
     this.#fields = new CronFields(fields);
+    this.#expression = options.expression;
   }
 
   static get predefined() {
@@ -404,6 +406,10 @@ export class CronExpression {
       && minute.includes(dt.minute)
       && second.includes(dt.second)
     );
+  }
+
+  toString(): string {
+    return this.#expression || this.stringify(true);
   }
 }
 
