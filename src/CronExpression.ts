@@ -1,9 +1,9 @@
-import {CronConstants} from './CronConstants';
 import {CronExpressionParser} from './CronExpressionParser';
 import {CronDate} from './CronDate';
 import {CronFields} from './CronFields';
 import assert from 'assert';
-import {ICronParserOptions, DateMathOpEnum, IFieldConstraint, IIteratorCallback, IIteratorFields, PredefinedCronExpressionsEnum, TimeUnitsEnum, MonthsEnum, DaysInMonthEnum} from './types';
+import {DateMathOpEnum, DaysInMonthEnum, ICronParserOptions, IFieldConstraint, IIteratorCallback, IIteratorFields, MonthsEnum, PredefinedCronExpressionsEnum, TimeUnitsEnum} from './types';
+import {DateTime} from 'luxon';
 
 /**
  * Cron iteration loop safety limit
@@ -385,6 +385,25 @@ export class CronExpression {
     this.#currentDate = new CronDate(currentDate, this.#tz);
     this.#hasIterated = true;
     return currentDate;
+  }
+
+  /**
+   * Check if the cron expression includes the given date
+   * @param {Date|CronDate} date
+   */
+  includesDate(date: Date | CronDate): boolean {
+    const {second, minute, hour, dayOfMonth, month, dayOfWeek} = this.#fields;
+    const dtStr = date.toISOString();
+    assert(dtStr != null, 'Invalid date');
+    const dt = DateTime.fromISO(dtStr, {zone: this.#tz});
+    return (
+      dayOfMonth.includes(dt.day)
+      && dayOfWeek.includes(dt.weekday)
+      && month.includes(dt.month)
+      && hour.includes(dt.hour)
+      && minute.includes(dt.minute)
+      && second.includes(dt.second)
+    );
   }
 }
 

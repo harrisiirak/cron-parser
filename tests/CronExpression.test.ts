@@ -1192,4 +1192,123 @@ describe('CronExpression', () => {
     expect(() => CronExpression.parse(expression)).toThrow('Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible');
 
   });
+
+  it('should correctly determine if a given expression includes a Date (#153 and #299)', () => {
+    const expression = '* * 1-6 ? * *'; // 1am to 6am every day
+    const goodDate = new CronDate('2019-01-01T00:00:00.000');
+    const badDate = new CronDate('2019-01-01T07:00:00.000');
+    const interval = CronExpression.parse(expression);
+    expect(interval.includesDate(goodDate)).toBe(false);
+    expect(interval.includesDate(badDate)).toBe(false);
+    // TODO - add more tests cases
+  });
+
+  it('should correctly determine if a given expression includes a CronDate (#153 and #299)', () => {
+    const expression = '* * 1-6 ? * *'; // 1am to 6am every day
+    const goodDate = new CronDate('2019-01-01T01:00:00.000');
+    const badDate = new CronDate('2019-01-01T07:00:00.000');
+    const interval = CronExpression.parse(expression);
+    expect(interval.includesDate(goodDate)).toBe(true);
+    expect(interval.includesDate(badDate)).toBe(false);
+    // TODO - add more tests cases
+  });
+
+  it('should correctly handle */2 * * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '*/2 * * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 2; i < 120; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getSeconds()).toEqual(i % 60));
+    }
+  });
+
+  it('should correctly handle 1/2 * * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '1/2 * * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 1; i < 120; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getSeconds()).toEqual(i % 60));
+    }
+  });
+
+  it('should correctly handle 1-59/2 * * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '1-59/2 * * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 1; i < 120; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getSeconds()).toEqual(i % 60));
+    }
+  });
+
+  it('should correctly handle 0 */2 * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '0 */2 * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 2; i < 120; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 60));
+    }
+  });
+
+  it('should correctly handle 0 0/2 * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '0 0/2 * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 2; i < 120; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 60));
+    }
+  });
+
+  it('should correctly handle 0 1/2 * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '0 1/2 * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 1; i < 121; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 60));
+    }
+  });
+
+  it('should correctly handle 0 1-59/2 * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '0 1-59/2 * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 1; i < 121; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 60));
+    }
+  });
+
+  it('should correctly handle 0 1-40/2 * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '0 1-40/2 * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 1; i < 121; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getMinutes()).toEqual(i % 40));
+    }
+  });
+
+  it('should correctly handle 10/2 * * ? * * (#156)', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+    };
+    const expression = '10/2 * * ? * *';
+    const interval = CronExpression.parse(expression, options);
+    for (let i = 10; i < 60; i += 2) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getSeconds()).toEqual(i));
+    }
+  });
 });
