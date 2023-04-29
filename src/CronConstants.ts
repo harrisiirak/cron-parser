@@ -1,14 +1,5 @@
 import {IFieldConstraints} from './types';
 
-export type CronConstraints = {
-  second: { min: number, max: number, chars: string[] },
-  minute: { min: number, max: number, chars: string[] },
-  hour: { min: number, max: number, chars: string[] },
-  dayOfMonth: { min: number, max: number, chars: string[] },
-  month: { min: number, max: number, chars: string[] },
-  dayOfWeek: { min: number, max: number, chars: string[] },
-}
-
 export class CronConstants {
   constructor() {
     throw new Error('This class is not meant to be instantiated.');

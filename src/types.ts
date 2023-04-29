@@ -1,22 +1,33 @@
 import {CronDate, CronExpression} from './';
+import {CronSecond} from './fields/CronSecond';
+import {CronMinute} from './fields/CronMinute';
+import {CronHour} from './fields/CronHour';
+import {CronDayOfMonth} from './fields/CronDayOfMonth';
+import {CronMonth} from './fields/CronMonth';
+import {CronDayOfTheWeek} from './fields/CronDayOfTheWeek';
+
 
 // TS >= 4.5 tail recursion optimization
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc['length']]>
 type IntRange<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>
 
-export type SixtyRange = IntRange<0, 60>;
-export type HourRange = IntRange<0, 24>;
-export type DayOfTheMonthRange = IntRange<1, 32> | 'L';
-export type MonthRange = IntRange<1, 13>;
-export type DayOfTheWeekRange = IntRange<0, 8>;
+export type SixtyRange = IntRange<0, 60>; // 0-59 - non-inclusive
+export type HourRange = IntRange<0, 24>; // 0-23 - non-inclusive
+export type DayOfTheMonthRange = IntRange<1, 32> | 'L'; // 1-31 - non-inclusive
+export type MonthRange = IntRange<1, 13>; // 1-12 - non-inclusive
+export type DayOfTheWeekRange = IntRange<0, 8>; // 0-7 - non-inclusive
 export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
+export type CronChars = 'L' | 'W';
+export type CronMin = 0 | 1;
+export type CronMax = 7 | 12 | 23 | 31 | 59;
+
 export interface IFieldConstraint {
-  min: number;
-  max: number;
-  chars: string[];
+  min: CronMin;
+  max: CronMax;
+  chars: CronChars[];
 }
 
-export type IFieldConstraints = {
+export interface IFieldConstraints {
   second: IFieldConstraint,
   minute: IFieldConstraint,
   hour: IFieldConstraint,
@@ -25,20 +36,11 @@ export type IFieldConstraints = {
   dayOfWeek: IFieldConstraint,
 }
 
-export type CronConstraints = {
-  second: { min: number, max: number, chars: string[] },
-  minute: { min: number, max: number, chars: string[] },
-  hour: { min: number, max: number, chars: string[] },
-  dayOfMonth: { min: number, max: number, chars: string[] },
-  month: { min: number, max: number, chars: string[] },
-  dayOfWeek: { min: number, max: number, chars: string[] },
-}
-
 export enum MonthsEnum {jan = 1, feb = 2, mar = 3, apr = 4, may = 5, jun = 6, jul = 7, aug = 8, sep = 9, oct = 10, nov = 11, dec = 12}
+
 export enum DaysInMonthEnum {jan = 31, feb = 29, mar = 31, apr = 30, may = 31, jun = 30, jul = 31, aug = 31, sep = 30, oct = 31, nov = 30, dec = 31}
 
 export enum DayOfWeekEnum {sun = 0, mon = 1, tue = 2, wed = 3, thu = 4, fri = 5, sat = 6}
-
 
 
 export enum TimeUnitsEnum {second = 'second', minute = 'minute', hour = 'hour', day = 'day', month = 'month', year = 'year'}
@@ -76,7 +78,6 @@ export interface ICronParserOptions {
 }
 
 
-
 export interface IRange {
   start: number;
   count: number;
@@ -85,12 +86,12 @@ export interface IRange {
 }
 
 export interface ICronFieldsParams {
-  second: SixtyRange[];
-  minute: SixtyRange[];
-  hour: HourRange[];
-  dayOfMonth: DayOfTheMonthRange[];
-  month: MonthRange[];
-  dayOfWeek: DayOfTheWeekRange[];
+  second: SixtyRange[] | CronSecond;
+  minute: SixtyRange[] | CronMinute;
+  hour: HourRange[] | CronHour;
+  dayOfMonth: DayOfTheMonthRange[] | CronDayOfMonth;
+  month: MonthRange[] | CronMonth;
+  dayOfWeek: DayOfTheWeekRange[] | CronDayOfTheWeek;
 }
 
 export type ParseStringResponse = { variables: { [key: string]: number | string }, expressions: CronExpression[], errors: { [key: string]: unknown } }

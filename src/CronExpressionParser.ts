@@ -1,11 +1,12 @@
 import {CronConstants} from './CronConstants';
-import {CronFields} from './CronFields';
+import {CronDayOfMonth, CronFields, CronHour, CronMinute, CronSecond, CronMonth, CronDayOfTheWeek} from './CronFields';
 import {CronDate} from './CronDate';
 import {CronExpression} from './CronExpression';
 import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../types';
 import assert from 'assert';
 
 import {DayOfWeekEnum, ICronExpressionParserOptions, ICronParserOptions, IFieldConstraint, MonthsEnum} from './types';
+
 
 const STANDARD_VALID_CHARACTERS = /^[,*\d/-]+$/;
 const DAY_OF_MONTH_VALID_CHARACTERS = /^[?,*\dL/-]+$/;
@@ -63,7 +64,14 @@ export class CronExpressionParser {
     const dayOfMonth = CronExpressionParser.#parseField('dayOfMonth', rawFields.dayOfMonth, CronExpressionParser.constraints[3]) as DayOfTheMonthRange[];
     rawFields.dayOfWeek = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek, options);
     const dayOfWeek = CronExpressionParser.#parseField('dayOfWeek', rawFields.dayOfWeek, CronExpressionParser.constraints[5]) as DayOfTheWeekRange[];
-    const fields = new CronFields({second, minute, hour, dayOfMonth, month, dayOfWeek});
+    const fields = new CronFields({
+      second: new CronSecond(second, rawFields.second === '*'),
+      minute: new CronMinute(minute, rawFields.minute === '*'),
+      hour: new CronHour(hour, rawFields.hour === '*'),
+      dayOfMonth: new CronDayOfMonth(dayOfMonth, rawFields.dayOfMonth === '*'),
+      month: new CronMonth(month, rawFields.month === '*'),
+      dayOfWeek: new CronDayOfTheWeek(dayOfWeek, rawFields.dayOfWeek === '*'),
+    });
     return new CronExpression(fields, options);
   }
 

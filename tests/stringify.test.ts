@@ -176,6 +176,7 @@ describe('CronParser', () => {
     expect(str).toEqual(expected);
   });
 
+
   it('should stringify from fields out of order', function () {
     const expected = '1-5 1 1 1 1 1';
     const str = CronParser.fieldsToExpression(new CronFields({
@@ -247,7 +248,7 @@ describe('CronParser', () => {
       month: [1],
       dayOfWeek: [1],
     };
-    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('Validation error, Field second contains no values');
+    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('CronSecond Validation error, values contains no values');
   });
 
   it('should throw validation error - missing values - empty array', function () {
@@ -259,7 +260,7 @@ describe('CronParser', () => {
       month: [1],
       dayOfWeek: [1],
     };
-    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('Validation error, Field minute contains no values');
+    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('CronMinute Validation error, values contains no values');
   });
 
   it('should throw validation error - missing values', function () {
@@ -282,7 +283,7 @@ describe('CronParser', () => {
       month: [1],
       dayOfWeek: [1],
     };
-    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('Constraint error, got value -1 expected range 0-59');
+    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('CronSecond Validation error, got value -1 expected range 0-59');
   });
 
   it('should throw validation error - bad chars error', function () {
@@ -294,8 +295,9 @@ describe('CronParser', () => {
       month: [1],
       dayOfWeek: [1],
     };
-    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('Constraint error, got value R expected range 0-59');
+    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('CronSecond Validation error, got value R expected range 0-59');
   });
+
 
   it('should throw validation error - duplicates', function () {
     const input = <ICronFieldsParams>{
@@ -306,6 +308,6 @@ describe('CronParser', () => {
       month: [1],
       dayOfWeek: [1],
     };
-    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('Validation error, Field second contains duplicate values');
+    expect(() => CronParser.fieldsToExpression(new CronFields(input))).toThrowError('CronSecond Validation error, duplicate values found: 1');
   });
 });

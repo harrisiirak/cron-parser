@@ -1,8 +1,23 @@
-import {CronConstants, CronConstraints} from './CronConstants';
+import {CronConstants} from './CronConstants';
 import assert from 'assert';
-import {ICronFieldsParams, CronFieldTypes, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from './types';
+import {CronFieldTypes, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, ICronFieldsParams, IFieldConstraints, MonthRange, SixtyRange} from './types';
+import {CronSecond} from './fields/CronSecond';
+import {CronMinute} from './fields/CronMinute';
+import {CronHour} from './fields/CronHour';
+import {CronDayOfMonth} from './fields/CronDayOfMonth';
+import {CronMonth} from './fields/CronMonth';
+import {CronDayOfTheWeek} from './fields/CronDayOfTheWeek';
 
-type ElementType = number | 'L' | 'W' | '*';
+export {
+  CronSecond,
+  CronMinute,
+  CronHour,
+  CronDayOfMonth,
+  CronMonth,
+  CronDayOfTheWeek
+};
+
+type ElementType = number | 'L' | 'W';
 
 interface FieldRange {
   start: ElementType;
@@ -12,63 +27,79 @@ interface FieldRange {
 }
 
 export class CronFields {
-  readonly #second: SixtyRange[];
-  readonly #minute: SixtyRange[];
-  readonly #hour: HourRange[];
-  readonly #dayOfMonth: DayOfTheMonthRange[];
-  readonly #month: MonthRange[];
-  readonly #dayOfWeek: DayOfTheWeekRange[];
+  readonly #second: CronSecond;
+  readonly #minute: CronMinute;
+  readonly #hour: CronHour;
+  readonly #dayOfMonth: CronDayOfMonth;
+  readonly #month: CronMonth;
+  readonly #dayOfWeek: CronDayOfTheWeek;
 
   constructor({second, minute, hour, dayOfMonth, month, dayOfWeek}: ICronFieldsParams) {
-    CronFields.validateField(second, 'second');
-    CronFields.validateField(minute, 'minute');
-    CronFields.validateField(hour, 'hour');
-    CronFields.validateField(month, 'month');
-    CronFields.validateField(dayOfMonth, 'dayOfMonth', month);
-    CronFields.validateField(dayOfWeek, 'dayOfWeek');
+    // CronFields.validateField(second, 'second');
+    // CronFields.validateField(minute, 'minute');
+    // CronFields.validateField(hour, 'hour');
+    // CronFields.validateField(month, 'month');
+    // CronFields.validateField(dayOfMonth, 'dayOfMonth', month);
+    // CronFields.validateField(dayOfWeek, 'dayOfWeek');
     // FIXME: this is ugly need to separate the logic in #handleMaxDaysInMonth
-    dayOfMonth = CronFields.#handleMaxDaysInMonth(month, dayOfMonth);
-    this.#second = second.sort(CronFields.fieldSorter);
-    this.#minute = minute.sort(CronFields.fieldSorter);
-    this.#hour = hour.sort(CronFields.fieldSorter);
-    this.#dayOfMonth = dayOfMonth.sort(CronFields.fieldSorter);
-    this.#month = month.sort(CronFields.fieldSorter);
-    this.#dayOfWeek = dayOfWeek.sort(CronFields.fieldSorter);
+    if (!(dayOfMonth instanceof CronDayOfMonth)) {
+      dayOfMonth = CronFields.#handleMaxDaysInMonth(<MonthRange[]>month, dayOfMonth);
+    }
+    // this.#second = second.sort(CronFields.fieldSorter);
+    // this.#minute = minute.sort(CronFields.fieldSorter);
+    // this.#hour = hour.sort(CronFields.fieldSorter);
+    // this.#dayOfMonth = dayOfMonth.sort(CronFields.fieldSorter);
+    // this.#month = month.sort(CronFields.fieldSorter);
+    // this.#dayOfWeek = dayOfWeek.sort(CronFields.fieldSorter);
+    // this.#second = new CronSecond(second);
+    assert(second, 'Validation error, Field second is missing');
+    assert(minute, 'Validation error, Field minute is missing');
+    assert(hour, 'Validation error, Field hour is missing');
+    assert(dayOfMonth, 'Validation error, Field dayOfMonth is missing');
+    assert(month, 'Validation error, Field month is missing');
+    assert(dayOfWeek, 'Validation error, Field dayOfWeek is missing');
+
+    this.#second = second instanceof CronSecond ? second : new CronSecond(second);
+    this.#minute = minute instanceof CronMinute ? minute : new CronMinute(minute);
+    this.#hour = hour instanceof CronHour ? hour : new CronHour(hour);
+    this.#dayOfMonth = dayOfMonth instanceof CronDayOfMonth ? dayOfMonth : new CronDayOfMonth(dayOfMonth);
+    this.#month = month instanceof CronMonth ? month : new CronMonth(month);
+    this.#dayOfWeek = dayOfWeek instanceof CronDayOfTheWeek ? dayOfWeek : new CronDayOfTheWeek(dayOfWeek);
   }
 
   get second(): SixtyRange[] {
-    return [...this.#second];
+    return this.#second.values as SixtyRange[];
   }
 
   get minute(): SixtyRange[] {
-    return [...this.#minute];
+    return this.#minute.values as SixtyRange[];
   }
 
   get hour(): HourRange[] {
-    return [...this.#hour];
+    return this.#hour.values as HourRange[];
   }
 
   get dayOfMonth(): DayOfTheMonthRange[] {
-    return [...this.#dayOfMonth];
+    return this.#dayOfMonth.values as DayOfTheMonthRange[];
   }
 
   get month(): MonthRange[] {
-    return [...this.#month];
+    return this.#month.values as MonthRange[];
   }
 
   get dayOfWeek(): DayOfTheWeekRange[] {
-    return [...this.#dayOfWeek];
+    return this.#dayOfWeek.values as DayOfTheWeekRange[];
   }
 
   // FIXME: validateOptions
   static validateField(value: (number | string)[], field: string, month?: MonthRange[]): boolean {
     const {constraints} = CronConstants;
-    assert(field in constraints, `Validation error, Field ${field} is not valid`);
+    // assert(field in constraints, `Validation error, Field ${field} is not valid`);
     assert(value, `Validation error, Field ${field} is missing`);
     assert(Array.isArray(value), `Validation error, Field ${field} is not an array`);
     assert(value.length > 0, `Validation error, Field ${field} contains no values`);
 
-    const {min, max, chars} = constraints[field as keyof CronConstraints];
+    const {min, max, chars} = constraints[field as keyof IFieldConstraints];
     // check for duplicates
     const set = new Set(value);
     assert(set.size === value.length, `Validation error, Field ${field} contains duplicate values`);
@@ -114,16 +145,16 @@ export class CronFields {
 
     input.forEach((item, i, arr) => {
       if (current === undefined) {
-        current = { start: item, count: 1 };
+        current = {start: item, count: 1};
         return;
       }
 
       const prevItem = arr[i - 1] || current.start;
       const nextItem = arr[i + 1];
 
-      if (item === 'L' || item === 'W' || item === '*') {
+      if (item === 'L' || item === 'W') {
         output.push(current);
-        output.push({ start: item, count: 1 });
+        output.push({start: item, count: 1});
         current = undefined;
         return;
       }
@@ -133,7 +164,7 @@ export class CronFields {
         const nextStep = (nextItem as number) - item;
 
         if (step <= nextStep) {
-          current = { ...current, count: 2, end: item, step };
+          current = {...current, count: 2, end: item, step};
           return;
         }
         current.step = 1;
@@ -144,14 +175,14 @@ export class CronFields {
         current.end = item;
       } else {
         if (current.count === 1) {
-          output.push({ start: current.start, count: 1 });
+          output.push({start: current.start, count: 1});
         } else if (current.count === 2) {
-          output.push({ start: current.start, count: 1 });
-          output.push({ start: current.end ?? prevItem, count: 1 });
+          output.push({start: current.start, count: 1});
+          output.push({start: current.end ?? prevItem, count: 1});
         } else {
           output.push(current);
         }
-        current = { start: item, count: 1 };
+        current = {start: item, count: 1};
       }
     });
 
@@ -208,18 +239,18 @@ export class CronFields {
 
   stringify(includeSeconds = false): string {
     const {constraints} = CronConstants;
-    const dayOfWeek = this.#dayOfWeek;
+    const dayOfWeek = this.#dayOfWeek.values;
     const arr = [];
     if (includeSeconds) {
-      arr.push(CronFields.stringifyField(this.#second, constraints.second.min, constraints.second.max)); // second
+      arr.push(CronFields.stringifyField(this.#second.values, constraints.second.min, constraints.second.max)); // second
     }
-    const dayOfMonthMax = this.#month.length === 1 ? CronConstants.daysInMonth[this.#month[0] - 1] : constraints.dayOfMonth.max;
+    const dayOfMonthMax = this.#month.values.length === 1 ? CronConstants.daysInMonth[this.#month.values[0] - 1] : constraints.dayOfMonth.max;
     const dayOfWeekVal = dayOfWeek[dayOfWeek.length - 1] === 7 ? dayOfWeek.slice(0, -1) : dayOfWeek;
     arr.push(
-      CronFields.stringifyField(this.#minute, constraints.minute.min, constraints.minute.max),   // minute
-      CronFields.stringifyField(this.#hour, constraints.hour.min, constraints.hour.max),         // hour
-      CronFields.stringifyField(this.#dayOfMonth, constraints.dayOfMonth.min, dayOfMonthMax),    // dayOfMonth
-      CronFields.stringifyField(this.#month, constraints.month.min, constraints.month.max),      // month
+      CronFields.stringifyField(this.#minute.values, constraints.minute.min, constraints.minute.max),   // minute
+      CronFields.stringifyField(this.#hour.values, constraints.hour.min, constraints.hour.max),         // hour
+      CronFields.stringifyField(this.#dayOfMonth.values, constraints.dayOfMonth.min, dayOfMonthMax),    // dayOfMonth
+      CronFields.stringifyField(this.#month.values, constraints.month.min, constraints.month.max),      // month
       CronFields.stringifyField(dayOfWeekVal, constraints.dayOfWeek.min, 6),                // dayOfWeek
     );
     return arr.join(' ');
@@ -227,12 +258,12 @@ export class CronFields {
 
   debug(): { second: SixtyRange[], minute: SixtyRange[], hour: HourRange[], dayOfMonth: DayOfTheMonthRange[], month: MonthRange[], dayOfWeek: DayOfTheWeekRange[] } {
     return {
-      second: this.#second,
-      minute: this.#minute,
-      hour: this.#hour,
-      dayOfMonth: this.#dayOfMonth,
-      month: this.#month,
-      dayOfWeek: this.#dayOfWeek,
+      second: this.#second.values,
+      minute: this.#minute.values,
+      hour: this.#hour.values,
+      dayOfMonth: this.#dayOfMonth.values,
+      month: this.#month.values,
+      dayOfWeek: this.#dayOfWeek.values,
     };
   }
 }

@@ -15,7 +15,7 @@ import { MonthsEnum } from '../src/types';
 //     t.end();
 // });
 describe('CronFields constraints should be immutable', function () {
-  console.log(MonthsEnum);
+  // console.log(MonthsEnum);
   it('should be immutable', function () {
     // CronFields.constraints.second.min = 5;
     // CronFields.constraints.second.newValue = 5;

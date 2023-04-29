@@ -2,7 +2,21 @@ import {CronExpressionParser} from './CronExpressionParser';
 import {CronDate} from './CronDate';
 import {CronFields} from './CronFields';
 import assert from 'assert';
-import {DateMathOpEnum, DaysInMonthEnum, ICronParserOptions, IFieldConstraint, IIteratorCallback, IIteratorFields, MonthsEnum, PredefinedCronExpressionsEnum, TimeUnitsEnum} from './types';
+import {
+  CronFieldTypes,
+  DateMathOpEnum,
+  DayOfTheMonthRange,
+  DayOfTheWeekRange,
+  DaysInMonthEnum, HourRange,
+  ICronFieldsParams,
+  ICronParserOptions,
+  IFieldConstraint,
+  IIteratorCallback,
+  IIteratorFields, MonthRange,
+  MonthsEnum,
+  PredefinedCronExpressionsEnum, SixtyRange,
+  TimeUnitsEnum
+} from './types';
 import {DateTime} from 'luxon';
 
 /**
@@ -31,10 +45,10 @@ export class CronExpression {
   #isIterator: boolean;
   #hasIterated: boolean;
   #nthDayOfWeek: number;
-  #fields: any;
+  #fields: CronFields;
   #expression?: string;
 
-  constructor(fields: CronFields, options: ICronParserOptions) {
+  constructor(fields: CronFields | ICronFieldsParams, options: ICronParserOptions) {
     this.#options = options;
     this.#utc = options.utc || false;
     this.#tz = this.#utc ? 'UTC' : options.tz;
@@ -44,7 +58,8 @@ export class CronExpression {
     this.#isIterator = options.iterator || false;
     this.#hasIterated = false;
     this.#nthDayOfWeek = options.nthDayOfWeek || 0;
-    this.#fields = new CronFields(fields);
+    const {second, minute, hour, dayOfMonth, month, dayOfWeek} = fields;
+    this.#fields = new CronFields({second, minute, hour, dayOfMonth, month, dayOfWeek});
     this.#expression = options.expression;
   }
 
@@ -86,7 +101,7 @@ export class CronExpression {
    * @return {boolean}
    * @private
    */
-  static #matchSchedule(value: number, sequence: number[]): boolean {
+  static #matchSchedule(value: number, sequence: CronFieldTypes): boolean {
     return sequence.some((element) => element === value);
   }
 
@@ -414,12 +429,12 @@ export class CronExpression {
     assert(dtStr != null, 'Invalid date');
     const dt = DateTime.fromISO(dtStr, {zone: this.#tz});
     return (
-      dayOfMonth.includes(dt.day)
-      && dayOfWeek.includes(dt.weekday)
-      && month.includes(dt.month)
-      && hour.includes(dt.hour)
-      && minute.includes(dt.minute)
-      && second.includes(dt.second)
+      dayOfMonth.includes(<DayOfTheMonthRange>dt.day)
+      && dayOfWeek.includes(<DayOfTheWeekRange>dt.weekday)
+      && month.includes(<MonthRange>dt.month)
+      && hour.includes(<HourRange>dt.hour)
+      && minute.includes(<SixtyRange>dt.minute)
+      && second.includes(<SixtyRange>dt.second)
     );
   }
 

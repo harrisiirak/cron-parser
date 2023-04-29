@@ -21,3 +21,4 @@ npm-debug.log
 .nyc_output
 /yarn.lock
 /lib/
+/testing/
