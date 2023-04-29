@@ -1,5 +1,5 @@
-import { CronDate } from '../src';
-import { DateTime } from 'luxon';
+import {CronDate} from '../src';
+import {DateTime} from 'luxon';
 
 describe('parse cron date formats with local timezone', () => {
   const offset = new Date().getTimezoneOffset();
@@ -66,9 +66,7 @@ describe('parse cron date formats with local timezone', () => {
   });
 
   test('invalid', () => {
-    expect(() => {
-      const d = new CronDate('2021-01-4 10:00:00');
-    }).toThrow();
+    expect(() => new CronDate('2021-01-4 10:00:00')).toThrow();
   });
 });
 
@@ -79,7 +77,7 @@ describe('parse cron date formats with another timezone', () => {
   });
 
   test('ISO 8601 with non-local offset', () => {
-    const d = new CronDate('2021-01-04T10:00:00+01:00','Europe/Athens');
+    const d = new CronDate('2021-01-04T10:00:00+01:00', 'Europe/Athens');
     expect(d.toISOString()).toBe('2021-01-04T09:00:00.000Z');
   });
 

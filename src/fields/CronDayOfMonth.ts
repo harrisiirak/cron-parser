@@ -1,6 +1,6 @@
 import {CronField} from './CronField';
 import {CronConstants} from '../CronConstants';
-import {DayOfTheMonthRange, SixtyRange} from '../types';
+import {DayOfTheMonthRange} from '../types';
 const {min, max, chars} = CronConstants.constraints.dayOfMonth;
 
 export class CronDayOfMonth extends CronField {

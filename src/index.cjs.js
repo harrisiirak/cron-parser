@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 const {CronConstants} = require('./CronConstants');
 const {CronFields} = require('./CronFields');
 const {CronParser} = require('./CronParser');

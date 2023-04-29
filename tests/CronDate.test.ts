@@ -3,11 +3,11 @@ import { TimeUnitsEnum } from '../src/types';
 
 describe('CronDate tests', () => {
   test('is the last weekday of the month', () => {
-    // Last monday of septhember
+    // Last monday of september
     const date1 = new CronDate(new Date(2021, 8, 27));
     expect(date1.isLastWeekdayOfMonth()).toBe(true);
 
-    // Second-to-last monday of septhember
+    // Second-to-last monday of september
     const date2 = new CronDate(new Date(2021, 8, 20));
     expect(date2.isLastWeekdayOfMonth()).toBe(false);
   });

@@ -1,11 +1,15 @@
 {
+  "ignorePatterns": [
+    "lib/**",
+    "testing/**",
+    "**/*.json"
+  ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended"
   ],
   "plugins": [
-    "@typescript-eslint",
-    "json"
+    "@typescript-eslint"
   ],
   "parserOptions": {
     "ecmaVersion": 2022,
@@ -26,4 +30,3 @@
     }
   ]
 }
-

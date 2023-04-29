@@ -607,23 +607,31 @@ describe('CronExpression', () => {
   });
 
   test('day of month is unspecified', function () {
-    const interval = CronExpression.parse('10 2 ? * 3');
-    let next = interval.next();
+    // At 02:10:00am, on every Wednesday, every month
+    const expected = [
+      '2023-05-03T02:10:00.000Z',
+      '2023-05-10T02:10:00.000Z',
+      '2023-05-17T02:10:00.000Z',
+      '2023-05-24T02:10:00.000Z',
+      '2023-05-31T02:10:00.000Z',
+      '2023-06-07T02:10:00.000Z',
+      '2023-06-14T02:10:00.000Z',
+      '2023-06-21T02:10:00.000Z',
+      '2023-06-28T02:10:00.000Z',
+      '2023-07-05T02:10:00.000Z'
+    ];
 
-    expect(next).toBeTruthy();
-    cronDateTypedTest(next, (date) => expect(date.getDay() === 3).toBeTruthy()); // 'day of week matches'
+    const options = {
+      currentDate: '2023-04-29T00:00:00.000',
+      tz: 'UTC'
+    };
+    const interval = CronExpression.parse('10 2 ? * 3', options);
 
-    next = interval.next();
-    expect(next).toBeTruthy();
-    cronDateTypedTest(next, (date) => expect(date.getDay() === 3).toBeTruthy()); // 'day of week matches'
-
-    next = interval.next();
-    expect(next).toBeTruthy();
-    cronDateTypedTest(next, (date) => expect(date.getDay() === 3).toBeTruthy()); // 'day of week matches'
-
-    next = interval.next();
-    expect(next).toBeTruthy();
-    cronDateTypedTest(next, (date) => expect(date.getDay() === 3).toBeTruthy()); // 'day of week matches'
+    expected.forEach( (expectedDate)=> {
+      cronDateTypedTest(interval.next(), (date) => {
+        expect(date.toISOString()).toEqual(expectedDate);
+      });
+    });
 
   });
 
@@ -641,7 +649,6 @@ describe('CronExpression', () => {
     let prevDate = next.getDate();
     next = interval.next();
 
-    // t.ok(next, 'Found next scheduled interal');
     expect(next).toBeTruthy();
     cronDateTypedTest(next, (date) => expect((date.getDate() === 3 || date.getDate() === 6) && date.getDate() !== prevDate).toBeTruthy()); // 'date matches and is not previous date'
 
@@ -807,47 +814,77 @@ describe('CronExpression', () => {
   });
 
   test('day of month and week are both set and dow is 6-7', function () {
+    // if both "day of month" (field 3) and "day of week" (field 5) are restricted (not contain "*"), then one or both must match the current day.
+    // At 02:10 AM, on day 12 of the month, Saturday through Sunday, only in August
+
+    const expected = [
+      '2013-08-03T02:10:00.000Z', // - Saturday
+      '2013-08-04T02:10:00.000Z', // - Sunday
+      '2013-08-10T02:10:00.000Z', // - Saturday
+      '2013-08-11T02:10:00.000Z', // - Sunday
+      '2013-08-12T02:10:00.000Z', // - Monday - 12th of month
+      '2013-08-17T02:10:00.000Z', // - Saturday
+      '2013-08-18T02:10:00.000Z', // - Sunday
+      '2013-08-24T02:10:00.000Z', // - Saturday
+      '2013-08-25T02:10:00.000Z', // - Sunday
+      '2013-08-31T02:10:00.000Z', // - Saturday
+      '2014-08-02T02:10:00.000Z', // - Saturday
+      '2014-08-03T02:10:00.000Z', // - Sunday
+      '2014-08-09T02:10:00.000Z', // - Saturday
+      '2014-08-10T02:10:00.000Z', // - Sunday
+      '2014-08-12T02:10:00.000Z', // - Tuesday - 12th of month
+    ];
+
     const options = {
-      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      tz: 'UTC'
     };
     const interval = CronExpression.parse('10 2 12 8 6-7', options);
 
     let next = interval.next();
-    cronDateTypedTest(next, (next) => {
-      expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
-      expect(next.getMonth()).toEqual(7); // 'Month matches'
+    expected.forEach((expectedDate, i) => {
+      cronDateTypedTest(next, (next) => {
+        expect(`${i}:${next.toISOString()}`).toEqual(`${i}:${expectedDate}`);
+      });
+      next = interval.next();
     });
 
-    next = interval.next();
-    cronDateTypedTest(next, (next) => {
-      expect(next.getDay() === 0).toBeTruthy(); // 'Day of week matches'
-      expect(next.getMonth()).toEqual(7); // 'Month matches'
-    });
-
-    next = interval.next();
-    cronDateTypedTest(next, (next) => {
-      expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
-      expect(next.getMonth()).toEqual(7); // 'Month matches'
-    });
-
-    next = interval.next();
-    cronDateTypedTest(next, (next) => {
-      expect(next.getDay() === 0).toBeTruthy(); // 'Day of week matches'
-      expect(next.getMonth()).toEqual(7); // 'Month matches'
-    });
-
-    next = interval.next();
-    cronDateTypedTest(next, (next) => {
-      expect(next.getDate()).toEqual(12); // 'Day of month matches'
-      expect(next.getDay() === 1).toBeTruthy(); // 'Day of week matches'
-      expect(next.getMonth()).toEqual(7); // 'Month matches'
-    });
-
-    next = interval.next();
-    cronDateTypedTest(next, (next) => {
-      expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
-      expect(next.getMonth()).toEqual(7); // 'Month matches'
-    });
+    // cronDateTypedTest(next, (next) => {
+    //   console.log(next.toISOString());
+    //   expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
+    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
+    // });
+    //
+    // next = interval.next();
+    // cronDateTypedTest(next, (next) => {
+    //   expect(next.getDay() === 0).toBeTruthy(); // 'Day of week matches'
+    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
+    // });
+    //
+    // next = interval.next();
+    // cronDateTypedTest(next, (next) => {
+    //   expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
+    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
+    // });
+    //
+    // next = interval.next();
+    // cronDateTypedTest(next, (next) => {
+    //   expect(next.getDay() === 0).toBeTruthy(); // 'Day of week matches'
+    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
+    // });
+    //
+    // next = interval.next();
+    // cronDateTypedTest(next, (next) => {
+    //   expect(next.getDate()).toEqual(12); // 'Day of month matches'
+    //   expect(next.getDay() === 1).toBeTruthy(); // 'Day of week matches'
+    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
+    // });
+    //
+    // next = interval.next();
+    // cronDateTypedTest(next, (next) => {
+    //   expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
+    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
+    // });
   });
 
   test('day of month validation should be ignored when day of month is wildcard and month is set', function () {
@@ -866,7 +903,7 @@ describe('CronExpression', () => {
 
   });
 
-  test('day and date in week should matches', function () {
+  test('day and date in week should match', function () {
     const interval = CronExpression.parse('0 1 1 1 * 1');
 
     let next = interval.next();
@@ -913,7 +950,7 @@ describe('CronExpression', () => {
       iterator: true
     };
 
-    let val = null;
+    let val: CronDate | { value: CronDate; done: boolean };
     const interval = CronExpression.parse('*/25 * * * *', options);
 
     val = interval.next();
@@ -1018,7 +1055,7 @@ describe('CronExpression', () => {
     });
   });
 
-  test('should work for valid first/second/third/fourth/fifth occurence dayOfWeek (# char)', function () {
+  test('should work for valid first/second/third/fourth/fifth occurrence dayOfWeek (# char)', function () {
     const options = {
       currentDate: new CronDate('2019-04-30')
     };
@@ -1087,15 +1124,18 @@ describe('CronExpression', () => {
     });
   });
 
-  test('should work for valid second sunday in may', function () {
+  test('should work for valid second sunday in May', function () {
     const options = {
-      currentDate: new CronDate('2019-01-30')
+      currentDate: new CronDate('2023-05-06T00:00:00.000Z'),
+      tz: 'UTC'
     };
     const expectedDates = [
-      new CronDate('2019-05-12'),
-      new CronDate('2020-05-10'),
-      new CronDate('2021-05-09'),
-      new CronDate('2022-05-08')
+      new CronDate('2023-05-14T00:00:00.000Z'),
+      new CronDate('2024-05-12T00:00:00.000Z'),
+      new CronDate('2025-05-11T00:00:00.000Z'),
+      new CronDate('2026-05-10T00:00:00.000Z'),
+      new CronDate('2027-05-09T00:00:00.000Z'),
+      new CronDate('2028-05-14T00:00:00.000Z'),
     ];
 
     const interval = CronExpression.parse('0 0 0 ? MAY 0#2', options);
@@ -1112,7 +1152,7 @@ describe('CronExpression', () => {
       });
   });
 
-  test('should work for valid second sunday at noon in may', function () {
+  test('should work for valid second sunday at noon in May', function () {
     const options = {
       currentDate: new CronDate('2019-05-12T11:59:00.000')
     };
@@ -1123,7 +1163,7 @@ describe('CronExpression', () => {
     cronDateTypedTest(date, (date) => expect(date.toISOString()).toEqual(expected.toISOString())); // 'Date matches'
   });
 
-  test('should work for valid second sunday at noon in may (UTC+3)', function () {
+  test('should work for valid second sunday at noon in May (UTC+3)', function () {
     const options = {
       currentDate: new CronDate('2019-05-12T11:59:00.000', 'Europe/Sofia')
     };
@@ -1134,7 +1174,7 @@ describe('CronExpression', () => {
     cronDateTypedTest(date, (date) => expect(date.toISOString()).toEqual(expected.toISOString())); // 'Date matches'
   });
 
-  test('should work with both dayOfMonth and nth occurence of dayOfWeek', function () {
+  test('should work with both dayOfMonth and nth occurrence of dayOfWeek', function () {
     const options = {
       currentDate: new CronDate('2019-04-01')
     };
@@ -1163,7 +1203,7 @@ describe('CronExpression', () => {
       });
   });
 
-  test('should error when passed invalid occurence value', function () {
+  test('should error when passed invalid occurrence value', function () {
     const expressions = [
       '0 0 0 ? * 1#',
       '0 0 0 ? * 1#0',
@@ -1323,12 +1363,9 @@ describe('CronExpression', () => {
 
   it('should throw error for expression missing fields when in strict mode (#244)', () => {
     const expression = '20 15 * *';
-    expect(() => CronExpression.parse(expression, { strict: true })).toThrow();
+    expect(() => CronExpression.parse(expression, {strict: true})).toThrow();
   });
 
-  // TODO: this is NOT a valid Quartz expression, a valid expression would be: 0 0 12 ? * MON * or 0 12 ? * MON *
-  //   For non-quartz expressions, then both should be applied ie day of month and day of week
-  //   In the case of 0 12 1-31 * 1, this would be every day of the month at 12:00 effectively the same as 0 12 1-31 * *
   it('should correctly handle 0 12 1-31 * 1 strict (#284)', () => {
     // At 12:00 on every day-of-month from 1 through 31 and on Monday.
     const options = {
@@ -1338,7 +1375,7 @@ describe('CronExpression', () => {
     //                               1 2 3   4   5 6
     const expression = '0 0 12 1-31 * 1';
     // const interval = CronExpression.parse(expression, options);
-    expect(() => CronExpression.parse(expression, options)).toThrow('Cron expression error, cannot use both dayOfMonth and dayOfWeek together in strict mode');
+    expect(() => CronExpression.parse(expression, options)).toThrow('Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
   });
 
   it('should correctly handle 0 12 1-31 * 1 non-strict (#284)', () => {
@@ -1348,13 +1385,9 @@ describe('CronExpression', () => {
     };
     const expression = '0 12 1-31 * 1';
     const interval = CronExpression.parse(expression, options);
-    console.log(interval.fields.debug());
     const expected = [31, 1, 2, 3, 4, 5, 6, 7];
     for (let i = 0; i < expected.length; i++) {
-      cronDateTypedTest(interval.next(), (date) => {
-        console.log(date.getUTCDate(), expected[i]);
-        expect(date.getUTCDate()).toEqual(expected[i]);
-      });
+      cronDateTypedTest(interval.next(), (date) => expect(date.getUTCDate()).toEqual(expected[i]));
     }
     expect(interval.toString()).toEqual(expression);
   });

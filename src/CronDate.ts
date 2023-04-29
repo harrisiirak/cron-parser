@@ -248,6 +248,7 @@ export class CronDate {
       this.subtractUnit(unit);
       return;
     }
+    /* istanbul ignore next */
     throw new Error(`Invalid verb: ${verb}`);
   }
 

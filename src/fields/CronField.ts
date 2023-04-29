@@ -1,6 +1,13 @@
 import {CronChars, CronFieldTypes, CronMax, CronMin} from '../types';
 import assert from 'assert';
 
+type SerializedCronField = {
+  wildcard: boolean;
+  values: (number | string)[];
+  min: CronMin;
+  max: CronMax;
+  chars: CronChars[];
+}
 
 export class CronField {
   readonly #wildcard: boolean = false;
@@ -27,6 +34,16 @@ export class CronField {
 
   get values(): CronFieldTypes {
     return [...this.#values] as CronFieldTypes;
+  }
+
+  serialize(): SerializedCronField {
+    return {
+      wildcard: this.#wildcard,
+      values: this.#values,
+      min: this.#min,
+      max: this.#max,
+      chars: this.#chars
+    };
   }
 
   validate(): void {
@@ -58,7 +75,6 @@ export class CronField {
     assert(values.length > 0, `${this.constructor.name} Validation error, values contains no values`);
     assert([0, 1].includes(min), `${this.constructor.name} Validation error, min is not valid, value: ${min}`);
     assert([7, 12, 23, 31, 59].includes(max), `${this.constructor.name} Validation error, max is not valid, value: ${max}`);
-    assert(typeof wildcard === 'boolean', `${this.constructor.name} Validation error, wildcard type is invalid, type: ${typeof wildcard}`);
 
     this.#min = min;
     this.#max = max;

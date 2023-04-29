@@ -77,9 +77,11 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "debug": "^4.3.4",
     "luxon": "^3.2.1"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.7",
     "@types/jest": "^29.5.1",
     "@types/luxon": "^3.3.0",
     "@types/node": "^18.15.13",

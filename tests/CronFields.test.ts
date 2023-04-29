@@ -1,7 +1,7 @@
 // const {CronFields} = require('../lib/CronFields');
 // const {MonthsEnum} = require('../src/types.js');
-import { CronFields } from '../src';
-import { MonthsEnum } from '../src/types';
+// import { CronFields } from '../src';
+// import { MonthsEnum } from '../src/types';
 
 
 

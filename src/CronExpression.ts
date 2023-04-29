@@ -7,17 +7,20 @@ import {
   DateMathOpEnum,
   DayOfTheMonthRange,
   DayOfTheWeekRange,
-  DaysInMonthEnum, HourRange,
+  HourRange,
   ICronFieldsParams,
   ICronParserOptions,
   IFieldConstraint,
   IIteratorCallback,
-  IIteratorFields, MonthRange,
-  MonthsEnum,
-  PredefinedCronExpressionsEnum, SixtyRange,
+  IIteratorFields,
+  MonthRange,
+  PredefinedCronExpressionsEnum,
+  SixtyRange,
   TimeUnitsEnum
 } from './types';
 import {DateTime} from 'luxon';
+import debug from 'debug';
+const debugMatcher = debug('cron-parser:CronExpression:matcher');
 
 /**
  * Cron iteration loop safety limit
@@ -106,24 +109,6 @@ export class CronExpression {
   }
 
   /**
-   * Helps determine if the provided date is the correct nth occurence of the
-   * desired day of week.
-   *
-   * @param {CronDate} date
-   * @param {number} nthDayOfWeek
-   * @return {boolean}
-   * @private
-   */
-  static #isNthDayMatch(date: CronDate, nthDayOfWeek: number): boolean {
-    if (nthDayOfWeek >= 6) {
-      return false;
-    }
-    const dayOfMonth = date.getDate();
-    const occurrence = Math.floor((dayOfMonth - 1) / 7) + 1;
-    return nthDayOfWeek === 1 ? dayOfMonth < 8 : occurrence === nthDayOfWeek;
-  }
-
-  /**
    * Helper function that checks if 'L' is in the array
    *
    * @param {Array} expressions
@@ -181,7 +166,7 @@ export class CronExpression {
   //   if (this.#currentDate) {
   //     return this.#currentDate
   //   }
-  //   throw new Error('Has not interated!');
+  //   throw new Error('Has not iterated!');
   // }
 
   /**
@@ -284,94 +269,98 @@ export class CronExpression {
     return this.#fields.stringify(includeSeconds);
   }
 
-  private matchMonth(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
-    if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month)) {
-      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.month, this.#fields.hour.length);
+  private matchMonth(currentDate: CronDate): boolean {
+    if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
       return false;
     }
     return true;
   }
 
-  private matchDayOfMonth(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
-    // FIXME: Should we do it this way? ie using an enum vs a constant array?
-    const monthKey = MonthsEnum[currentDate.getMonth() + 1].toString() as keyof typeof DaysInMonthEnum;
-    const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= DaysInMonthEnum[monthKey];
-    const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.length === CronExpression.#constraints[5].max - CronExpression.#constraints[5].min + 1;
+  private matchDayOfMonth(currentDate: CronDate): boolean {
+    const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.isWildcard;
+    const isRestrictedDOM = !this.#fields.dayOfMonth.isWildcard;
+    const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.isWildcard;
+    const isRestrictedDOW = !this.#fields.dayOfWeek.isWildcard;
 
-    let dayOfMonthMatch = CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth);
-    let dayOfWeekMatch = CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek);
+    let matchedDOM = CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth.values);
+    let matchedDOW = CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek.values);
 
-    // console.log({monthKey, isDayOfMonthWildcardMatch, isDayOfWeekWildcardMatch, dayOfMonthMatch, dayOfWeekMatch}, this.#fields.debug())
+    if (CronExpression.#isLInExpressions(this.#fields.dayOfMonth.values)) {
+      matchedDOM = matchedDOM || currentDate.isLastDayOfMonth();
+    }
+    if (CronExpression.#isLInExpressions(this.#fields.dayOfWeek.values)) {
+      matchedDOW = matchedDOW || CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek.values, currentDate);
+    }
 
-    if ((!isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch) && (dayOfMonthMatch || dayOfWeekMatch)) {
+    // Restricted = not wildcard (not contain "*" or "?")
+    // Rule 1 - if both "day of month" and "day of week" are restricted, then one or both must match the current day.
+    if (isRestrictedDOM && isRestrictedDOW && (matchedDOM || matchedDOW)) {
+      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 1: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
       return true;
     }
 
-    if (CronExpression.#isLInExpressions(this.#fields.dayOfMonth)) {
-      dayOfMonthMatch = dayOfMonthMatch || currentDate.isLastDayOfMonth();
-    }
-    if (CronExpression.#isLInExpressions(this.#fields.dayOfWeek)) {
-      dayOfWeekMatch = dayOfWeekMatch || CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek, currentDate);
+    // Rule 2 - if "day of month" restricted and "day of week" not restricted, then "day of month" must match current day.
+    if (matchedDOM && !isRestrictedDOW) {
+      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 2: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
+      return true;
     }
 
-
-    if (!dayOfMonthMatch && (!dayOfWeekMatch || isDayOfWeekWildcardMatch)) {
-      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
+    if (!matchedDOM && (!matchedDOW || isDayOfWeekWildcardMatch)) {
+      debugMatcher(`REJECTED(matchDayOfMonth) - Rule A: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
       return false;
     }
 
-    if (!isDayOfMonthWildcardMatch && isDayOfWeekWildcardMatch && !dayOfMonthMatch) {
-      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
-      return false;
-    }
+    // if (!matchedDOW && (matchedDOM && !isDayOfMonthWildcardMatch)) {
+    //   debugMatcher(`REJECTED(matchDayOfMonth) - Rule B: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
+    //   return false;
+    // }
+    //
+    // if (!isDayOfMonthWildcardMatch && isDayOfWeekWildcardMatch && !matchedDOM) {
+    //   debugMatcher(`REJECTED(matchDayOfMonth) - Rule C: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
+    //   return false;
+    // }
 
-    if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && !dayOfWeekMatch) {
-      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
+    if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && !matchedDOW) {
+      debugMatcher(`REJECTED(matchDayOfMonth) - Rule D: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
       return false;
     }
     return true;
   }
 
-  private matchNthDayOfWeek(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
-    if (this.#nthDayOfWeek > 0 && !CronExpression.#isNthDayMatch(currentDate, this.#nthDayOfWeek)) {
-      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
-      return false;
-    }
-    return true;
+  private matchNthDayOfWeek(currentDate: CronDate): boolean {
+    return this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek;
   }
 
   private matchHour(currentDate: CronDate, dateMathVerb: DateMathOpEnum, reverse: boolean): boolean {
     const currentHour = currentDate.getHours();
-    if (!CronExpression.#matchSchedule(currentHour, this.#fields.hour)) {
+    if (!CronExpression.#matchSchedule(currentHour, this.#fields.hour.values)) {
       if (currentDate.dstStart !== currentHour) {
         currentDate.dstStart = null;
-        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.hour, this.#fields.hour.length);
+        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.hour, this.#fields.hour.values.length);
         return false;
-      } else if (!CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour)) {
+      } else if (!CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
         currentDate.handleMathOp(dateMathVerb, TimeUnitsEnum.hour);
         return false;
       }
     } else if (currentDate.dstEnd === currentHour) {
       if (!reverse) {
         currentDate.dstEnd = null;
-        currentDate.shiftTimezone(DateMathOpEnum.add, TimeUnitsEnum.hour, this.#fields.hour.length);
+        currentDate.shiftTimezone(DateMathOpEnum.add, TimeUnitsEnum.hour, this.#fields.hour.values.length);
         return false;
       }
     }
     return true;
   }
 
-  private matchMinute(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
-    if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute)) {
-      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.minute, this.#fields.hour.length);
+  private matchMinute(currentDate: CronDate): boolean {
+    if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
       return false;
     }
     return true;
   }
 
-  private matchSecond(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
-    if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second)) {
-      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.length);
+  private matchSecond(currentDate: CronDate): boolean {
+    if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
       return false;
     }
     return true;
@@ -395,17 +384,42 @@ export class CronExpression {
       assert(stepCount < LOOP_LIMIT, 'Invalid expression, loop limit exceeded');
       assert(!reverse || !(startDate && (startDate.getTime() > currentDate.getTime())), 'Out of the timespan range');
       assert(reverse || !(endDate && (currentDate.getTime() > endDate.getTime())), 'Out of the timespan range');
+      debugMatcher(`############## Start Of Match: ${currentDate.toISOString()} ##############`);
 
-      if (!this.matchDayOfMonth(currentDate, dateMathVerb)) continue;
-      if (!this.matchNthDayOfWeek(currentDate, dateMathVerb)) continue;
-      if (!this.matchMonth(currentDate, dateMathVerb)) continue;
-      if (!this.matchHour(currentDate, dateMathVerb, reverse)) continue;
-      if (!this.matchMinute(currentDate, dateMathVerb)) continue;
-      if (!this.matchSecond(currentDate, dateMathVerb)) continue;
+      if (!this.matchDayOfMonth(currentDate)) {
+        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.values.length);
+        debugMatcher(`REJECT: matchDayOfMonth startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        continue;
+      }
+      if (!this.matchNthDayOfWeek(currentDate)) {
+        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.values.length);
+        debugMatcher(`REJECT: matchNthDayOfWeek startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        continue;
+      }
+      if (!this.matchMonth(currentDate)) {
+        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.month, this.#fields.hour.values.length);
+        debugMatcher(`REJECT: matchMonth startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        continue;
+      }
+      if (!this.matchHour(currentDate, dateMathVerb, reverse)) {
+        debugMatcher(`REJECT: matchHour startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        continue;
+      }
+      if (!this.matchMinute(currentDate)) {
+        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.minute, this.#fields.hour.values.length);
+        debugMatcher(`REJECT: matchMinute startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        continue;
+      }
+      if (!this.matchSecond(currentDate)) {
+        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.values.length);
+        debugMatcher(`REJECT: matchSecond startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        continue;
+      }
 
       if (startTimestamp === currentDate.getTime()) {
+        debugMatcher(`REJECT: startTimestamp === currentDate.getTime() startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
         if ((dateMathVerb === 'add') || (currentDate.getMilliseconds() === 0)) {
-          currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.length);
+          currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.values.length);
         } else {
           currentDate.setMilliseconds(0);
         }
@@ -416,6 +430,7 @@ export class CronExpression {
 
     this.#currentDate = new CronDate(currentDate, this.#tz);
     this.#hasIterated = true;
+    debugMatcher(`************** MATCHED: ${this.#currentDate.toISOString()} **************`);
     return currentDate;
   }
 
@@ -429,12 +444,12 @@ export class CronExpression {
     assert(dtStr != null, 'Invalid date');
     const dt = DateTime.fromISO(dtStr, {zone: this.#tz});
     return (
-      dayOfMonth.includes(<DayOfTheMonthRange>dt.day)
-      && dayOfWeek.includes(<DayOfTheWeekRange>dt.weekday)
-      && month.includes(<MonthRange>dt.month)
-      && hour.includes(<HourRange>dt.hour)
-      && minute.includes(<SixtyRange>dt.minute)
-      && second.includes(<SixtyRange>dt.second)
+      dayOfMonth.values.includes(<DayOfTheMonthRange>dt.day)
+      && dayOfWeek.values.includes(<DayOfTheWeekRange>dt.weekday)
+      && month.values.includes(<MonthRange>dt.month)
+      && hour.values.includes(<HourRange>dt.hour)
+      && minute.values.includes(<SixtyRange>dt.minute)
+      && second.values.includes(<SixtyRange>dt.second)
     );
   }
 

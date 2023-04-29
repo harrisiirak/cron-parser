@@ -75,9 +75,27 @@ describe('CronParser', () => {
     expect(str).toEqual(expected);
   });
 
-  it('should stringify cron expression with multiple values and convert value to range step', function () {
-    const expected = '0 * * * * 0-6/2';
+  it('should correctly stringify cron expression * * * * 0,2,4 and convert value to range step', function () {
+    const expected = '0 * * * * 0-4/2';
+    const interval = CronParser.parseExpression('* * * * 0,2,4', {});
+    let str = interval.stringify(true);
+    expect(str).toEqual(expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    expect(str).toEqual(expected);
+  });
+
+  it('should correctly stringify cron expression * * * * 0,2,4,6 convert value to */2 step', function () {
+    const expected = '0 * * * * */2';
     const interval = CronParser.parseExpression('* * * * 0,2,4,6', {});
+    let str = interval.stringify(true);
+    expect(str).toEqual(expected);
+    str = CronParser.fieldsToExpression(interval.fields).stringify(true);
+    expect(str).toEqual(expected);
+  });
+
+  it('should correctly stringify cron expression * * * * */2', function () {
+    const expected = '0 * * * * */2';
+    const interval = CronParser.parseExpression('* * * * */2', {});
     let str = interval.stringify(true);
     expect(str).toEqual(expected);
     str = CronParser.fieldsToExpression(interval.fields).stringify(true);

@@ -1,6 +1,7 @@
 import {IFieldConstraints} from './types';
 
 export class CronConstants {
+  /* istanbul ignore next */
   constructor() {
     throw new Error('This class is not meant to be instantiated.');
   }
