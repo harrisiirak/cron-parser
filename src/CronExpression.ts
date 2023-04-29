@@ -278,20 +278,28 @@ export class CronExpression {
   }
 
   private matchDayOfMonth(currentDate: CronDate, dateMathVerb: DateMathOpEnum): boolean {
+    // FIXME: Should we do it this way? ie using an enum vs a constant array?
+    const monthKey = MonthsEnum[currentDate.getMonth() + 1].toString() as keyof typeof DaysInMonthEnum;
+    const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= DaysInMonthEnum[monthKey];
+    const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.length === CronExpression.#constraints[5].max - CronExpression.#constraints[5].min + 1;
+
     let dayOfMonthMatch = CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth);
+    let dayOfWeekMatch = CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek);
+
+    // console.log({monthKey, isDayOfMonthWildcardMatch, isDayOfWeekWildcardMatch, dayOfMonthMatch, dayOfWeekMatch}, this.#fields.debug())
+
+    if ((!isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch) && (dayOfMonthMatch || dayOfWeekMatch)) {
+      return true;
+    }
+
     if (CronExpression.#isLInExpressions(this.#fields.dayOfMonth)) {
       dayOfMonthMatch = dayOfMonthMatch || currentDate.isLastDayOfMonth();
     }
-    let dayOfWeekMatch = CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek);
     if (CronExpression.#isLInExpressions(this.#fields.dayOfWeek)) {
       dayOfWeekMatch = dayOfWeekMatch || CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek, currentDate);
     }
 
-    // FIXME: Should we do it this way? ie using an enum vs a constant array?
-    const monthKey = MonthsEnum[currentDate.getMonth() + 1].toString() as keyof typeof DaysInMonthEnum;
-    const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= DaysInMonthEnum[monthKey];
-    // const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.length >= CronConstants.daysInMonth[currentDate.getMonth()];
-    const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.length === CronExpression.#constraints[5].max - CronExpression.#constraints[5].min + 1;
+
     if (!dayOfMonthMatch && (!dayOfWeekMatch || isDayOfWeekWildcardMatch)) {
       currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.length);
       return false;

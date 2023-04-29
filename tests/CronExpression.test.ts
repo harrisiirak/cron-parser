@@ -1325,4 +1325,51 @@ describe('CronExpression', () => {
     const expression = '20 15 * *';
     expect(() => CronExpression.parse(expression, { strict: true })).toThrow();
   });
+
+  // TODO: this is NOT a valid Quartz expression, a valid expression would be: 0 0 12 ? * MON * or 0 12 ? * MON *
+  //   For non-quartz expressions, then both should be applied ie day of month and day of week
+  //   In the case of 0 12 1-31 * 1, this would be every day of the month at 12:00 effectively the same as 0 12 1-31 * *
+  it('should correctly handle 0 12 1-31 * 1 strict (#284)', () => {
+    // At 12:00 on every day-of-month from 1 through 31 and on Monday.
+    const options = {
+      currentDate: new CronDate('Mon, 12 Sep 2022 14:00:00', 'UTC'),
+      strict: true,
+    };
+    //                               1 2 3   4   5 6
+    const expression = '0 0 12 1-31 * 1';
+    // const interval = CronExpression.parse(expression, options);
+    expect(() => CronExpression.parse(expression, options)).toThrow('Cron expression error, cannot use both dayOfMonth and dayOfWeek together in strict mode');
+  });
+
+  it('should correctly handle 0 12 1-31 * 1 non-strict (#284)', () => {
+    // At 12:00 on Monday.
+    const options = {
+      currentDate: new CronDate('Sun, 30 Oct 2022 14:00:00', 'UTC'),
+    };
+    const expression = '0 12 1-31 * 1';
+    const interval = CronExpression.parse(expression, options);
+    console.log(interval.fields.debug());
+    const expected = [31, 1, 2, 3, 4, 5, 6, 7];
+    for (let i = 0; i < expected.length; i++) {
+      cronDateTypedTest(interval.next(), (date) => {
+        console.log(date.getUTCDate(), expected[i]);
+        expect(date.getUTCDate()).toEqual(expected[i]);
+      });
+    }
+    expect(interval.toString()).toEqual(expression);
+  });
+
+  it('should correctly handle 0 12 * * 1 (#284)', () => {
+    // At 12:00 on Monday.
+    const options = {
+      currentDate: new CronDate('Sun, 30 Oct 2022 14:00:00', 'UTC'),
+    };
+    const expression = '0 12 * * 1';
+    const interval = CronExpression.parse(expression, options);
+    const expected = [31, 7, 14, 21, 28];
+    for (let i = 0; i < expected.length; i++) {
+      cronDateTypedTest(interval.next(), (date) => expect(date.getUTCDate()).toEqual(expected[i]));
+    }
+    expect(interval.toString()).toEqual(expression);
+  });
 });

@@ -50,6 +50,12 @@ export class CronExpressionParser {
     expression = CronExpressionParser.predefined[predefinedKey] ? CronExpressionParser.predefined[predefinedKey] : expression;
 
     const rawFields = CronExpressionParser.#getRawFields(expression, options);
+    if (rawFields.dayOfMonth !== '*' && rawFields.dayOfWeek !== '*') {
+      if (options.strict) {
+        throw new Error('Cron expression error, cannot use both dayOfMonth and dayOfWeek together in strict mode!');
+      }
+      console.warn('Cron expression warning, using both dayOfMonth and dayOfWeek together will result in unexpected behavior!');
+    }
     const second = CronExpressionParser.#parseField('second', rawFields.second, CronExpressionParser.constraints[0]) as SixtyRange[];
     const minute = CronExpressionParser.#parseField('minute', rawFields.minute, CronExpressionParser.constraints[1]) as SixtyRange[];
     const hour = CronExpressionParser.#parseField('hour', rawFields.hour, CronExpressionParser.constraints[2]) as HourRange[];

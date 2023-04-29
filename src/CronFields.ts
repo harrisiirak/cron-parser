@@ -1,8 +1,8 @@
 import {CronConstants, CronConstraints} from './CronConstants';
 import assert from 'assert';
-import {ICronFieldsParams, CronFieldTypes, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, IRange, SixtyRange} from './types';
+import {ICronFieldsParams, CronFieldTypes, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from './types';
 
-type ElementType = number | 'L' | 'W';
+type ElementType = number | 'L' | 'W' | '*';
 
 interface FieldRange {
   start: ElementType;
@@ -121,7 +121,7 @@ export class CronFields {
       const prevItem = arr[i - 1] || current.start;
       const nextItem = arr[i + 1];
 
-      if (item === 'L' || item === 'W') {
+      if (item === 'L' || item === 'W' || item === '*') {
         output.push(current);
         output.push({ start: item, count: 1 });
         current = undefined;
@@ -223,5 +223,16 @@ export class CronFields {
       CronFields.stringifyField(dayOfWeekVal, constraints.dayOfWeek.min, 6),                // dayOfWeek
     );
     return arr.join(' ');
+  }
+
+  debug(): { second: SixtyRange[], minute: SixtyRange[], hour: HourRange[], dayOfMonth: DayOfTheMonthRange[], month: MonthRange[], dayOfWeek: DayOfTheWeekRange[] } {
+    return {
+      second: this.#second,
+      minute: this.#minute,
+      hour: this.#hour,
+      dayOfMonth: this.#dayOfMonth,
+      month: this.#month,
+      dayOfWeek: this.#dayOfWeek,
+    };
   }
 }
