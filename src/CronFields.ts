@@ -279,11 +279,11 @@ export class CronFields {
     }
 
     arr.push(
-      this.stringifyField(this.#minute),   // minute
-      this.stringifyField(this.#hour),         // hour
-      this.stringifyField(this.#dayOfMonth),    // dayOfMonth
-      this.stringifyField(this.#month),      // month
-      this.stringifyField(this.#dayOfWeek),                // dayOfWeek
+      this.stringifyField(this.#minute),    // minute
+      this.stringifyField(this.#hour),      // hour
+      this.stringifyField(this.#dayOfMonth),// dayOfMonth
+      this.stringifyField(this.#month),     // month
+      this.stringifyField(this.#dayOfWeek), // dayOfWeek
     );
     return arr.join(' ');
   }
