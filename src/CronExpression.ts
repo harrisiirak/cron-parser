@@ -20,6 +20,7 @@ import {
 } from './types';
 import {DateTime} from 'luxon';
 import debug from 'debug';
+
 const debugMatcher = debug('cron-parser:CronExpression:matcher');
 
 /**
@@ -27,9 +28,10 @@ const debugMatcher = debug('cron-parser:CronExpression:matcher');
  */
 const LOOP_LIMIT = 10000;
 
+/**
+ * Class representing a Cron expression.
+ */
 export class CronExpression {
-  // FIXME: This should be a private property - but it's used in tests
-  static map = ['second', 'minute', 'hour', 'dayOfMonth', 'month', 'dayOfWeek'];
   static #constraints: IFieldConstraint[] = [
     {min: 0, max: 59, chars: []}, // Second
     {min: 0, max: 59, chars: []}, // Minute
@@ -51,6 +53,12 @@ export class CronExpression {
   #fields: CronFields;
   #expression?: string;
 
+  /**
+   * Creates a new CronExpression instance.
+   *
+   * @param {CronFields | ICronFieldsParams} fields - Cron fields.
+   * @param {ICronParserOptions} options - Parser options.
+   */
   constructor(fields: CronFields | ICronFieldsParams, options: ICronParserOptions) {
     this.#options = options;
     this.#utc = options.utc || false;
@@ -66,42 +74,55 @@ export class CronExpression {
     this.#expression = options.expression;
   }
 
+  /**
+   * Getter for the predefined cron expressions.
+   *
+   * @returns {PredefinedCronExpressionsEnum} Predefined cron expressions.
+   */
   static get predefined() {
     return PredefinedCronExpressionsEnum;
   }
 
+  /**
+   * Getter for the cron fields.
+   *
+   * @returns {CronFields} Cron fields.
+   */
   get fields(): CronFields {
     return new CronFields(this.#fields);
   }
 
   /**
-   * Parse input expression (async)
+   * Asynchronously parses the input cron expression string.
    *
    * @public
-   * @param {string} expression Input expression
-   * @param {CronOptions} [options] Parsing options
+   * @param {string} expression - The input cron expression string.
+   * @param {CronOptions} [options] - Optional parsing options.
+   * @returns {CronExpression} - A new CronExpression instance.
    */
   static parse(expression: string, options: ICronParserOptions = {}): CronExpression {
     return CronExpressionParser.parse(expression, options);
   }
 
   /**
-   * Convert cron fields back to Cron Expression
+   * Converts cron fields back to a CronExpression instance.
+   *
    * @public
-   * @param {Record<string, number[]>} fields Input fields
-   * @param {CronOptions} [options] Parsing options
-   * @return {CronExpression}
+   * @param {Record<string, number[]>} fields - The input cron fields object.
+   * @param {CronOptions} [options] - Optional parsing options.
+   * @returns {CronExpression} - A new CronExpression instance.
    */
   static fieldsToExpression(fields: CronFields, options?: ICronParserOptions): CronExpression {
     return new CronExpression(fields, options || {});
   }
 
   /**
-   * Match field value
+   * Checks if the given value matches any element in the sequence.
    *
-   * @param {number} value
-   * @param {number[]} sequence
-   * @return {boolean}
+   * @param {number} value - The value to be matched.
+   * @param {number[]} sequence - The sequence to be checked against.
+   * @returns {boolean} - True if the value matches an element in the sequence; otherwise, false.
+   * @memberof CronExpression
    * @private
    */
   static #matchSchedule(value: number, sequence: CronFieldTypes): boolean {
@@ -109,40 +130,49 @@ export class CronExpression {
   }
 
   /**
-   * Helper function that checks if 'L' is in the array
+   * Checks if the 'L' character is present in any of the given expressions.
    *
-   * @param {Array} expressions
+   * @param {Array} expressions - An array of expressions to be checked.
+   * @returns {boolean} - True if the 'L' character is present in any of the expressions; otherwise, false.
+   * @memberof CronExpression
+   * @private
    */
   static #isLInExpressions(expressions: (number | string)[]): boolean {
-    return expressions.length > 0 && expressions.some(function (expression: number | string) {
+    return expressions.length > 0 && expressions.some((expression: number | string) => {
       return typeof expression === 'string' && expression.indexOf('L') >= 0;
     });
   }
 
+  /**
+   * Determines if the current date matches the last specified weekday of the month.
+   *
+   * @param {Array<(number|string)>} expressions - An array of expressions containing weekdays and "L" for the last weekday.
+   * @param {CronDate} currentDate - The current date object.
+   * @returns {boolean} - True if the current date matches the last specified weekday of the month; otherwise, false.
+   * @memberof CronExpression
+   * @private
+   */
   static #isLastWeekdayOfMonthMatch(expressions: (number | string)[], currentDate: CronDate): boolean {
-    return expressions.some(function (expression: (number | string)) {
+    return expressions.some((expression: (number | string)) => {
       // There might be multiple expressions and not all of them will contain the "L".
       if (!CronExpression.#isLInExpressions([expression])) {
         return false;
       }
 
       // The first character represents the weekday
-      const c = expression.toString().charAt(0);
-      const weekday = parseInt(c) % 7;
+      const weekday = parseInt(expression.toString().charAt(0), 10) % 7;
+      assert(!Number.isNaN(weekday), `Invalid last weekday of the month expression: ${expression}`);
 
-      if (Number.isNaN(weekday)) {
-        throw new Error('Invalid last weekday of the month expression: ' + expression);
-      }
-
+      // Check if the current date matches the last specified weekday of the month
       return currentDate.getDay() === weekday && currentDate.isLastWeekdayOfMonth();
     });
   }
 
   /**
-   * Find next suitable date
-   *
+   * Find the next scheduled date based on the cron expression.
+   * @returns {CronDate | { value: CronDate; done: boolean }} - The next scheduled date or an ES6 compatible iterator object.
+   * @memberof CronExpression
    * @public
-   * @return {CronDate|Object}
    */
   next(): CronDate | { value: CronDate; done: boolean } {
     const schedule = this.#findSchedule();
@@ -151,10 +181,10 @@ export class CronExpression {
   }
 
   /**
-   * Find previous suitable date
-   *
+   * Find the previous scheduled date based on the cron expression.
+   * @returns {CronDate | { value: CronDate; done: boolean }} - The previous scheduled date or an ES6 compatible iterator object.
+   * @memberof CronExpression
    * @public
-   * @return {CronDate|Object}
    */
   prev(): CronDate | { value: CronDate; done: boolean } {
     const schedule = this.#findSchedule(true);
@@ -162,18 +192,11 @@ export class CronExpression {
     return this.#isIterator ? {value: schedule, done: !this.hasPrev()} : schedule;
   }
 
-  // current(): CronDate | { value: CronDate; done: boolean } {
-  //   if (this.#currentDate) {
-  //     return this.#currentDate
-  //   }
-  //   throw new Error('Has not iterated!');
-  // }
-
   /**
-   * Check if next suitable date exists
-   *
+   * Check if there is a next scheduled date based on the current date and cron expression.
+   * @returns {boolean} - Returns true if there is a next scheduled date, false otherwise.
+   * @memberof CronExpression
    * @public
-   * @return {Boolean}
    */
   hasNext(): boolean {
     const current = this.#currentDate;
@@ -191,10 +214,10 @@ export class CronExpression {
   }
 
   /**
-   * Check if previous suitable date exists
-   *
+   * Check if there is a previous scheduled date based on the current date and cron expression.
+   * @returns {boolean} - Returns true if there is a previous scheduled date, false otherwise.
+   * @memberof CronExpression
    * @public
-   * @return {Boolean}
    */
   hasPrev(): boolean {
     const current = this.#currentDate;
@@ -212,16 +235,21 @@ export class CronExpression {
   }
 
   /**
-   * Iterate over expression iterator
-   *
+   * Iterate over a specified number of steps and optionally execute a callback function for each step.
+   * @param {number} steps - The number of steps to iterate. Positive value iterates forward, negative value iterates backward.
+   * @param {IIteratorCallback} [callback] - Optional callback function to be executed for each step.
+   * @returns {(IIteratorFields | CronDate)[]} - An array of iterator fields or CronDate objects.
+   * @memberof CronExpression
    * @public
-   * @param {number} steps Numbers of steps to iterate
-   * @param {Function} callback Optional callback
-   * @return {Array} Array of the iterated results
    */
   iterate(steps: number, callback?: IIteratorCallback): (IIteratorFields | CronDate)[] {
     const dates: (IIteratorFields | CronDate)[] = [];
 
+    /**
+     * Process each step and execute the action function.
+     * @param {number} step - The current step number.
+     * @param {() => IIteratorFields | CronDate} action - The action function to be executed for the current step.
+     */
     const processStep = (step: number, action: () => IIteratorFields | CronDate) => {
       try {
         const item: IIteratorFields | CronDate = action();
@@ -250,8 +278,9 @@ export class CronExpression {
   }
 
   /**
-   * Reset expression iterator state
-   *
+   * Reset the iterator's current date to a new date or the initial date.
+   * @param {Date | CronDate} [newDate] - Optional new date to reset to. If not provided, it will reset to the initial date.
+   * @memberof CronExpression
    * @public
    */
   reset(newDate?: Date | CronDate): void {
@@ -259,117 +288,101 @@ export class CronExpression {
   }
 
   /**
-   * Stringify the expression
-   *
+   * Generate a string representation of the cron expression.
+   * @param {boolean} [includeSeconds=false] - Whether to include the seconds field in the string representation.
+   * @returns {string} - The string representation of the cron expression.
+   * @memberof CronExpression
    * @public
-   * @param {boolean} [includeSeconds] Should stringify seconds
-   * @return {string}
    */
   stringify(includeSeconds = false) {
     return this.#fields.stringify(includeSeconds);
   }
 
-  private matchMonth(currentDate: CronDate): boolean {
-    if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
-      return false;
-    }
-    return true;
-  }
-
-  private matchDayOfMonth(currentDate: CronDate): boolean {
+  /**
+   * Determines if the given date matches the cron expression's day of month and day of week fields.
+   *
+   * The function checks the following rules:
+   * Rule 1: If both "day of month" and "day of week" are restricted (not wildcard), then one or both must match the current day.
+   * Rule 2: If "day of month" is restricted and "day of week" is not restricted, then "day of month" must match the current day.
+   * Rule 3: If "day of month" is a wildcard, "day of week" is not a wildcard, and "day of week" matches the current day, then the match is accepted.
+   * If none of the rules match, the match is rejected.
+   *
+   * @param {CronDate} currentDate - The current date to be evaluated against the cron expression.
+   * @returns {boolean} Returns true if the current date matches the cron expression's day of month and day of week fields, otherwise false.
+   * @memberof CronExpression
+   * @private
+   */
+  #matchDayOfMonth(currentDate: CronDate): boolean {
+    // Check if day of month and day of week fields are wildcards or restricted (not wildcard).
     const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.isWildcard;
-    const isRestrictedDOM = !this.#fields.dayOfMonth.isWildcard;
+    const isRestrictedDOM = !isDayOfMonthWildcardMatch;
     const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.isWildcard;
-    const isRestrictedDOW = !this.#fields.dayOfWeek.isWildcard;
+    const isRestrictedDOW = !isDayOfWeekWildcardMatch;
 
-    let matchedDOM = CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth.values);
-    let matchedDOW = CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek.values);
+    // Calculate if the current date matches the day of month and day of week fields.
+    const matchedDOM = CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth.values) || (CronExpression.#isLInExpressions(this.#fields.dayOfMonth.values) && currentDate.isLastDayOfMonth());
+    const matchedDOW = CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek.values) || (CronExpression.#isLInExpressions(this.#fields.dayOfWeek.values) && CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek.values, currentDate));
 
-    if (CronExpression.#isLInExpressions(this.#fields.dayOfMonth.values)) {
-      matchedDOM = matchedDOM || currentDate.isLastDayOfMonth();
-    }
-    if (CronExpression.#isLInExpressions(this.#fields.dayOfWeek.values)) {
-      matchedDOW = matchedDOW || CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek.values, currentDate);
-    }
-
-    // Restricted = not wildcard (not contain "*" or "?")
-    // Rule 1 - if both "day of month" and "day of week" are restricted, then one or both must match the current day.
+    // Rule 1: Both "day of month" and "day of week" are restricted; one or both must match the current day.
     if (isRestrictedDOM && isRestrictedDOW && (matchedDOM || matchedDOW)) {
-      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 1: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
+      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 1: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
       return true;
     }
 
-    // Rule 2 - if "day of month" restricted and "day of week" not restricted, then "day of month" must match current day.
+    // Rule 2: "day of month" restricted and "day of week" not restricted; "day of month" must match the current day.
     if (matchedDOM && !isRestrictedDOW) {
-      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 2: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
+      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 2: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
       return true;
     }
 
-    if (!matchedDOM && (!matchedDOW || isDayOfWeekWildcardMatch)) {
-      debugMatcher(`REJECTED(matchDayOfMonth) - Rule A: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
-      return false;
+    // Rule 3: "day of month" is a wildcard, "day of week" is not a wildcard, and "day of week" matches the current day.
+    if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && matchedDOW) {
+      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 3: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
+      return true;
     }
 
-    // if (!matchedDOW && (matchedDOM && !isDayOfMonthWildcardMatch)) {
-    //   debugMatcher(`REJECTED(matchDayOfMonth) - Rule B: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
-    //   return false;
-    // }
-    //
-    // if (!isDayOfMonthWildcardMatch && isDayOfWeekWildcardMatch && !matchedDOM) {
-    //   debugMatcher(`REJECTED(matchDayOfMonth) - Rule C: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
-    //   return false;
-    // }
-
-    if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && !matchedDOW) {
-      debugMatcher(`REJECTED(matchDayOfMonth) - Rule D: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}, isRestrictedDOM: ${isRestrictedDOM} isRestrictedDOW: ${isRestrictedDOW}`);
-      return false;
-    }
-    return true;
-  }
-
-  private matchNthDayOfWeek(currentDate: CronDate): boolean {
-    return this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek;
-  }
-
-  private matchHour(currentDate: CronDate, dateMathVerb: DateMathOpEnum, reverse: boolean): boolean {
-    const currentHour = currentDate.getHours();
-    if (!CronExpression.#matchSchedule(currentHour, this.#fields.hour.values)) {
-      if (currentDate.dstStart !== currentHour) {
-        currentDate.dstStart = null;
-        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.hour, this.#fields.hour.values.length);
-        return false;
-      } else if (!CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
-        currentDate.handleMathOp(dateMathVerb, TimeUnitsEnum.hour);
-        return false;
-      }
-    } else if (currentDate.dstEnd === currentHour) {
-      if (!reverse) {
-        currentDate.dstEnd = null;
-        currentDate.shiftTimezone(DateMathOpEnum.add, TimeUnitsEnum.hour, this.#fields.hour.values.length);
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private matchMinute(currentDate: CronDate): boolean {
-    if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
-      return false;
-    }
-    return true;
-  }
-
-  private matchSecond(currentDate: CronDate): boolean {
-    if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
-      return false;
-    }
-    return true;
+    // If none of the rules match, the match is rejected.
+    debugMatcher(`REJECTED(matchDayOfMonth) - No Rule Matched: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
+    return false;
   }
 
   /**
-   * Find next or previous matching schedule date
-   * @param {boolean} [reverse=false] - Whether to search in reverse direction
-   * @return {CronDate}
+   * Determines if the current hour matches the cron expression.
+   *
+   * @param {CronDate} currentDate - The current date object.
+   * @param {DateMathOpEnum} dateMathVerb - The date math operation enumeration value.
+   * @param {boolean} reverse - A flag indicating whether the matching should be done in reverse order.
+   * @returns {boolean} - True if the current hour matches the cron expression; otherwise, false.
+   */
+  #matchHour(currentDate: CronDate, dateMathVerb: DateMathOpEnum, reverse: boolean): boolean {
+    const currentHour = currentDate.getHours();
+    const isMatch = CronExpression.#matchSchedule(currentHour, this.#fields.hour.values);
+    const isDstStart = currentDate.dstStart === currentHour;
+    const isDstEnd = currentDate.dstEnd === currentHour;
+
+    if (!isMatch && !isDstStart) {
+      currentDate.dstStart = null;
+      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.hour, this.#fields.hour.values.length);
+      return false;
+    }
+    if (isDstStart && !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
+      currentDate.handleMathOp(dateMathVerb, TimeUnitsEnum.hour);
+      return false;
+    }
+    if (isDstEnd && !reverse) {
+      currentDate.dstEnd = null;
+      currentDate.shiftTimezone(DateMathOpEnum.add, TimeUnitsEnum.hour, this.#fields.hour.values.length);
+      return false;
+    }
+    return true;
+  }
+
+
+  /**
+   * Finds the next or previous schedule based on the cron expression.
+   *
+   * @param {boolean} [reverse=false] - If true, finds the previous schedule; otherwise, finds the next schedule.
+   * @returns {CronDate} - The next or previous schedule date.
    * @private
    */
   #findSchedule(reverse = false): CronDate {
@@ -386,38 +399,38 @@ export class CronExpression {
       assert(reverse || !(endDate && (currentDate.getTime() > endDate.getTime())), 'Out of the timespan range');
       debugMatcher(`############## Start Of Match: ${currentDate.toISOString()} ##############`);
 
-      if (!this.matchDayOfMonth(currentDate)) {
+      if (!this.#matchDayOfMonth(currentDate)) {
         currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.values.length);
-        debugMatcher(`REJECT: matchDayOfMonth startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        debugMatcher('REJECTED(matchDayOfMonth)');
         continue;
       }
-      if (!this.matchNthDayOfWeek(currentDate)) {
+      if (!(this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek)) {
         currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.values.length);
-        debugMatcher(`REJECT: matchNthDayOfWeek startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        debugMatcher('REJECTED(matchNthDayOfWeek)');
         continue;
       }
-      if (!this.matchMonth(currentDate)) {
+      if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
         currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.month, this.#fields.hour.values.length);
-        debugMatcher(`REJECT: matchMonth startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        debugMatcher('REJECTED(matchMonth)');
         continue;
       }
-      if (!this.matchHour(currentDate, dateMathVerb, reverse)) {
-        debugMatcher(`REJECT: matchHour startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+      if (!this.#matchHour(currentDate, dateMathVerb, reverse)) {
+        debugMatcher('REJECTED(matchHour)');
         continue;
       }
-      if (!this.matchMinute(currentDate)) {
+      if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
         currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.minute, this.#fields.hour.values.length);
-        debugMatcher(`REJECT: matchMinute startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        debugMatcher('REJECTED(matchMinute)');
         continue;
       }
-      if (!this.matchSecond(currentDate)) {
+      if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
         currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.values.length);
-        debugMatcher(`REJECT: matchSecond startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        debugMatcher('REJECTED(matchSecond)');
         continue;
       }
 
       if (startTimestamp === currentDate.getTime()) {
-        debugMatcher(`REJECT: startTimestamp === currentDate.getTime() startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
+        debugMatcher(`REJECTED(startTimestamp === currentDate.getTime()) startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
         if ((dateMathVerb === 'add') || (currentDate.getMilliseconds() === 0)) {
           currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.values.length);
         } else {
@@ -437,6 +450,7 @@ export class CronExpression {
   /**
    * Check if the cron expression includes the given date
    * @param {Date|CronDate} date
+   * @returns {boolean}
    */
   includesDate(date: Date | CronDate): boolean {
     const {second, minute, hour, dayOfMonth, month, dayOfWeek} = this.#fields;
@@ -453,6 +467,10 @@ export class CronExpression {
     );
   }
 
+  /**
+   * Returns the string representation of the cron expression.
+   * @returns {CronDate} - The next schedule date.
+   */
   toString(): string {
     return this.#expression || this.stringify(true);
   }

@@ -2,6 +2,9 @@ import fs from 'fs';
 import {ParseStringResponse} from './types';
 import {CronExpression, CronFields} from './';
 import assert from 'assert';
+import ErrnoException = NodeJS.ErrnoException;
+
+
 
 // noinspection JSUnusedGlobalSymbols
 class CronParser {
@@ -77,7 +80,7 @@ class CronParser {
    * @param {string} filePath Path to file
    * @param {function} callback
    */
-  static parseFile(filePath: string, callback: (error: Error | null, data?: ParseStringResponse) => void) {
+  static parseFile(filePath: string, callback: (error: ErrnoException | null, data?: ParseStringResponse) => void) {
     fs.readFile(filePath, (err, data) => {
       if (err) {
         return void callback(err);

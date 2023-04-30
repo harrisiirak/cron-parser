@@ -48,11 +48,15 @@ export enum TimeUnitsEnum {second = 'second', minute = 'minute', hour = 'hour', 
 export enum DateMathOpEnum {add = 'add', subtract = 'subtract'}
 
 export enum PredefinedCronExpressionsEnum {
-  '@yearly' = '0 0 1 1 *',
-  '@monthly' = '0 0 1 * *',
-  '@weekly' = '0 0 * * 0',
-  '@daily' = '0 0 * * *',
-  '@hourly' = '0 * * * *'
+  '@yearly' = '0 0 0 1 0 *',
+  '@monthly' = '0 0 0 1 * *',
+  '@weekly' = '0 0 0 * * 0',
+  '@daily' = '0 0 0 * * *',
+  '@hourly' = '0 0 * * * *',
+  '@minutely' = '0 * * * * *',
+  '@secondly' = '* * * * * *',
+  '@weekdays' = '0 0 0 * * 1-5',
+  '@weekends' = '0 0 0 * * 0,6'
 }
 
 export interface ICronExpressionParserOptions {
@@ -75,14 +79,6 @@ export interface ICronParserOptions {
   nthDayOfWeek?: number;
   expression?: string;
   strict?: boolean;
-}
-
-
-export interface IRange {
-  start: number;
-  count: number;
-  end?: number;
-  step?: number;
 }
 
 export interface ICronFieldsParams {

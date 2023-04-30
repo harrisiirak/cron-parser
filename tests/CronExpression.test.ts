@@ -333,12 +333,93 @@ describe('CronExpression', () => {
       expect(date.getHours()).toEqual(13); // 'Hour matches'
       expect(date.getMinutes()).toEqual(0); // 'Minute matches'
     });
+    expect(interval.hasPrev()).toBe(true);
     prev = interval.prev();
     cronDateTypedTest(prev, (date) => {
       expect(date.getHours()).toEqual(12); // 'Hour matches'
       expect(date.getMinutes()).toEqual(40); // 'Minute matches'
     });
+    expect(interval.hasPrev()).toBe(false);
     expect(() => interval.prev()).toThrow(); // 'Should fail'
+  });
+
+  test('expression limited with start and end date with prev', function () {
+    const options = <ICronParserOptions>{
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
+      endDate: new CronDate('Wed, 26 Dec 2012 16:40:00')
+    };
+
+    const interval = CronExpression.parse('*/20 * * * *', options);
+
+    // Backward iteration
+    let prev = interval.prev();
+    cronDateTypedTest(prev, (date) => {
+      expect(date.getHours()).toEqual(14); // 'Hour matches'
+      expect(date.getMinutes()).toEqual(20); // 'Minute matches'
+    });
+    prev = interval.prev();
+    cronDateTypedTest(prev, (date) => {
+      expect(date.getHours()).toEqual(14); // 'Hour matches'
+      expect(date.getMinutes()).toEqual(0); // 'Minute matches'
+    });
+    prev = interval.prev();
+    cronDateTypedTest(prev, (date) => {
+      expect(date.getHours()).toEqual(13); // 'Hour matches'
+      expect(date.getMinutes()).toEqual(40); // 'Minute matches'
+    });
+    prev = interval.prev();
+    cronDateTypedTest(prev, (date) => {
+      expect(date.getHours()).toEqual(13); // 'Hour matches'
+      expect(date.getMinutes()).toEqual(20); // 'Minute matches'
+    });
+    prev = interval.prev();
+    cronDateTypedTest(prev, (date) => {
+      expect(date.getHours()).toEqual(13); // 'Hour matches'
+      expect(date.getMinutes()).toEqual(0); // 'Minute matches'
+    });
+    expect(interval.hasPrev()).toBe(true);
+    prev = interval.prev();
+    cronDateTypedTest(prev, (date) => {
+      expect(date.getHours()).toEqual(12); // 'Hour matches'
+      expect(date.getMinutes()).toEqual(40); // 'Minute matches'
+    });
+    expect(interval.hasPrev()).toBe(false);
+    expect(() => interval.prev()).toThrow(); // 'Should fail'
+  });
+
+  test('iterate', function () {
+    const options = <ICronParserOptions>{
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
+      endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
+      tz: 'UTC'
+    };
+
+    const interval = CronExpression.parse('*/20 * * * *', options);
+    const expected1 = [
+      '2012-12-26T19:40:00.000Z',
+      '2012-12-26T20:00:00.000Z',
+      '2012-12-26T20:20:00.000Z',
+      '2012-12-26T20:40:00.000Z',
+      '2012-12-26T21:00:00.000Z',
+    ];
+
+    interval.iterate(5, (date) => {
+      cronDateTypedTest(date, (date) => {
+        expect(date.toISOString()).toEqual(expected1.shift());
+      });
+    });
+  });
+
+  test('predefined expression', () => {
+    expect(CronExpression.predefined).toEqual({
+      '@yearly': '0 0 1 1 *',
+      '@monthly': '0 0 1 * *',
+      '@weekly': '0 0 * * 0',
+      '@daily': '0 0 * * *',
+      '@hourly': '0 * * * *'
+    });
   });
 
   test('reset to given date', function () {
@@ -627,7 +708,7 @@ describe('CronExpression', () => {
     };
     const interval = CronExpression.parse('10 2 ? * 3', options);
 
-    expected.forEach( (expectedDate)=> {
+    expected.forEach((expectedDate) => {
       cronDateTypedTest(interval.next(), (date) => {
         expect(date.toISOString()).toEqual(expectedDate);
       });
