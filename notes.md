@@ -52,10 +52,10 @@ This pull request still has several items that need to be addressed before it ca
 3. The README.md file needs to be updated to reflect the changes introduced in the pull request.
 4. The package.json version should be updated, and a manual linting process should be performed to remove any unused dependencies or configuration values.
 5. The necessity of the component.json file should be evaluated.
-6. Redundant TypeScript types ICronExpressionParserOptions and ICronParser should be removed.
+6. Redundant TypeScript types ICronExpressionParserOptions and ICronParser should be resolved.
 7. Constant constraints should be refactored out of the code.
 8. Enums should be used instead of constants for better code readability and maintainability.
 9. The .editorconfig file should be removed in favor of using eslint for consistent code formatting.
 10. The archive folder should be removed from the repository.
 
-11. Once these items have been addressed, the pull request will be more comprehensive and ready for review.
+Once these items have been addressed, the pull request will be more comprehensive and ready for review.
