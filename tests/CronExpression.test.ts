@@ -414,11 +414,15 @@ describe('CronExpression', () => {
 
   test('predefined expression', () => {
     expect(CronExpression.predefined).toEqual({
-      '@yearly': '0 0 1 1 *',
-      '@monthly': '0 0 1 * *',
-      '@weekly': '0 0 * * 0',
-      '@daily': '0 0 * * *',
-      '@hourly': '0 * * * *'
+      '@daily': '0 0 0 * * *',
+      '@hourly': '0 0 * * * *',
+      '@minutely': '0 * * * * *',
+      '@monthly': '0 0 0 1 * *',
+      '@secondly': '* * * * * *',
+      '@weekdays': '0 0 0 * * 1-5',
+      '@weekends': '0 0 0 * * 0,6',
+      '@weekly': '0 0 0 * * 0',
+      '@yearly': '0 0 0 1 0 *'
     });
   });
 

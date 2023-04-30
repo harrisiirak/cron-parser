@@ -32,26 +32,17 @@ const LOOP_LIMIT = 10000;
  * Class representing a Cron expression.
  */
 export class CronExpression {
-  static #constraints: IFieldConstraint[] = [
-    {min: 0, max: 59, chars: []}, // Second
-    {min: 0, max: 59, chars: []}, // Minute
-    {min: 0, max: 23, chars: []}, // Hour
-    {min: 1, max: 31, chars: ['L']}, // Day of month
-    {min: 1, max: 12, chars: []}, // Month
-    {min: 0, max: 7, chars: ['L']}, // Day of week
-  ];
-
   #options: ICronParserOptions;
-  #utc: boolean;
-  #tz: string | undefined;
+  readonly #utc: boolean;
+  readonly #tz: string | undefined;
   #currentDate: CronDate;
-  #startDate: CronDate | null;
-  #endDate: CronDate | null;
-  #isIterator: boolean;
+  readonly #startDate: CronDate | null;
+  readonly #endDate: CronDate | null;
+  readonly #isIterator: boolean;
   #hasIterated: boolean;
-  #nthDayOfWeek: number;
-  #fields: CronFields;
-  #expression?: string;
+  readonly #nthDayOfWeek: number;
+  readonly #fields: CronFields;
+  readonly #expression?: string;
 
   /**
    * Creates a new CronExpression instance.
@@ -278,7 +269,7 @@ export class CronExpression {
   }
 
   /**
-   * Reset the iterator's current date to a new date or the initial date.
+   * Reset the iterators current date to a new date or the initial date.
    * @param {Date | CronDate} [newDate] - Optional new date to reset to. If not provided, it will reset to the initial date.
    * @memberof CronExpression
    * @public

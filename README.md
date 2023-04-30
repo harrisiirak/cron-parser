@@ -145,7 +145,7 @@ The reason being that those are the formats accepted by the
 [`luxon`](https://moment.github.io/luxon/) library which is being used to handle dates.
 
 Using `Date` as an input can be problematic specially when using the `tz` option. The issue being that, when creating a new `Date` object without
-any timezone information, it will be created in the timezone of the system that is running the code. This (most of times) won't be what the user
+any timezone information, it will be created in the timezone of the system that is running the code. This (most of the times) won't be what the user
 will be expecting. Using one of the supported `string` formats will solve the issue(see timezone example).
 
 * *iterator* - Return ES6 compatible iterator object 

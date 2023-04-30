@@ -4,10 +4,10 @@
 .nyc_output
 node_modules/
 src/
-test/
 .eslintrc.json
 tsconfig.cjs.json
 tsconfig.esm.json
-tsconfig.json/package-lock.json
+tsconfig.json
+/package-lock.json
 /yarn.lock
 /.github/

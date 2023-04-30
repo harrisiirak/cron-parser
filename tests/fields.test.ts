@@ -1,5 +1,5 @@
 import {CronExpression} from '../src';
-import {CronFields} from '../src/CronFields';
+import {CronFields} from '../src';
 
 describe('CronExpression', () => {
   test('Fields are exposed', () => {
