@@ -3,7 +3,7 @@ import assert from 'assert';
 import {DateMathOpEnum, TimeUnitsEnum} from './types';
 
 interface VerbMap {
-  [key: string]: () => void
+  [key: string]: () => void;
 }
 
 /**
@@ -50,18 +50,34 @@ export class CronDate {
     }
   }
 
+  /**
+   * Returns daylight savings start time.
+   * @returns {number | null}
+   */
   get dstStart(): number | null {
     return this.#dstStart;
   }
 
+  /**
+   * Sets daylight savings start time.
+   * @param {number | null} value
+   */
   set dstStart(value: number | null) {
     this.#dstStart = value;
   }
 
+  /**
+   * Returns daylight savings end time.
+   * @returns {number | null}
+   */
   get dstEnd(): number | null {
     return this.#dstEnd;
   }
 
+  /**
+   * Sets daylight savings end time.
+   * @param {number | null} value
+   */
   set dstEnd(value: number | null) {
     this.#dstEnd = value;
   }
@@ -77,60 +93,35 @@ export class CronDate {
    * Adds one month to the current CronDate.
    */
   addMonth(): void {
-    this.#date = this.#date.plus({months: 1})
-      // TODO - this is weird, but it's what the original code did
-      .startOf('month');
+    this.#date = this.#date.plus({months: 1}).startOf('month');
   }
 
   /**
    * Adds one day to the current CronDate.
    */
   addDay(): void {
-    this.#date = this.#date.plus({days: 1})
-      // TODO - this is weird, but it's what the original code did
-      .startOf('day');
+    this.#date = this.#date.plus({days: 1}).startOf('day');
   }
 
   /**
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    const prev = this.#date;
-    this.#date = this.#date.plus({hours: 1})
-      // TODO - this is weird, but it's what the original code did
-      .startOf('hour');
-    /* istanbul ignore next - TODO this is not need */
-    if (this.#date <= prev) {
-      this.#date = this.#date.plus({day: 1});
-    }
+    this.#date = this.#date.plus({hours: 1}).startOf('hour');
   }
 
   /**
    * Adds one minute to the current CronDate.
    */
   addMinute(): void {
-    const prev = this.#date;
-    this.#date = this.#date.plus({minutes: 1})
-      // TODO - this is weird, but it's what the original code did
-      .startOf('minute');
-    /* istanbul ignore next - TODO this is not need */
-    if (this.#date < prev) {
-      this.#date = this.#date.plus({hours: 1});
-    }
+    this.#date = this.#date.plus({minutes: 1}).startOf('minute');
   }
 
   /**
    * Adds one second to the current CronDate.
    */
   addSecond(): void {
-    const prev = this.#date;
-    this.#date = this.#date.plus({seconds: 1})
-      // TODO - this is weird, but it's what the original code did
-      .startOf('second');
-    /* istanbul ignore next - TODO this is not need */
-    if (this.#date < prev) {
-      this.#date = this.#date.plus({hours: 1});
-    }
+    this.#date = this.#date.plus({seconds: 1}).startOf('second');
   }
 
   /**
@@ -145,11 +136,7 @@ export class CronDate {
    * If the month is 1, it will subtract one year instead.
    */
   subtractMonth(): void {
-    this.#date = this.#date
-      .minus({months: 1})
-      // TODO - this is weird, but it's what the original code did
-      .endOf('month')
-      .startOf('second');
+    this.#date = this.#date.minus({months: 1}).endOf('month').startOf('second');
   }
 
   /**
@@ -157,11 +144,7 @@ export class CronDate {
    * If the day is 1, it will subtract one month instead.
    */
   subtractDay(): void {
-    this.#date = this.#date
-      .minus({days: 1})
-      // TODO - this is weird, but it's what the original code did
-      .endOf('day')
-      .startOf('second');
+    this.#date = this.#date.minus({days: 1}).endOf('day').startOf('second');
   }
 
   /**
@@ -169,16 +152,7 @@ export class CronDate {
    * If the hour is 0, it will subtract one day instead.
    */
   subtractHour(): void {
-    const prev = this.#date;
-    this.#date = this.#date
-      .minus({hours: 1})
-      // TODO - this is weird, but it's what the original code did
-      .endOf('hour')
-      .startOf('second');
-    /* istanbul ignore next - TODO this is not need */
-    if (this.#date >= prev) {
-      this.#date = this.#date.minus({hours: 1});
-    }
+    this.#date = this.#date.minus({hours: 1}).endOf('hour').startOf('second');
   }
 
   /**
@@ -186,15 +160,7 @@ export class CronDate {
    * If the minute is 0, it will subtract one hour instead.
    */
   subtractMinute(): void {
-    const prev = this.#date;
-    this.#date = this.#date.minus({minutes: 1})
-      .endOf('minute')
-      // TODO - this is weird, but it's what the original code did
-      .startOf('second');
-    /* istanbul ignore next - TODO this is not need */
-    if (this.#date > prev) {
-      this.#date = this.#date.minus({hours: 1});
-    }
+    this.#date = this.#date.minus({minutes: 1}).endOf('minute').startOf('second');
   }
 
   /**
@@ -202,17 +168,13 @@ export class CronDate {
    * If the second is 0, it will subtract one minute instead.
    */
   subtractSecond(): void {
-    const prev = this.#date;
-    this.#date = this.#date
-      .minus({seconds: 1})
-      // TODO - this is weird, but it's what the original code did
-      .startOf('second');
-    /* istanbul ignore next - TODO this is not need */
-    if (this.#date > prev) {
-      this.#date = this.#date.minus({hours: 1});
-    }
+    this.#date = this.#date.minus({seconds: 1}).startOf('second');
   }
 
+  /**
+   * Adds a unit of time to the current CronDate.
+   * @param {TimeUnitsEnum} unit
+   */
   addUnit(unit: TimeUnitsEnum): void {
     const unitMap: VerbMap = {
       [TimeUnitsEnum.year]: () => this.addYear(),
@@ -226,6 +188,10 @@ export class CronDate {
     unitMap[unit]();
   }
 
+  /**
+   * Subtracts a unit of time from the current CronDate.
+   * @param {TimeUnitsEnum} unit
+   */
   subtractUnit(unit: TimeUnitsEnum): void {
     const unitMap: VerbMap = {
       [TimeUnitsEnum.year]: () => this.subtractYear(),
@@ -239,6 +205,11 @@ export class CronDate {
     unitMap[unit]();
   }
 
+  /**
+   * Handles a math operation.
+   * @param {DateMathOpEnum} verb - {'add' | 'subtract'}
+   * @param {TimeUnitsEnum} unit - {'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'}
+   */
   handleMathOp(verb: DateMathOpEnum, unit: TimeUnitsEnum) {
     if (verb === DateMathOpEnum.add) {
       this.addUnit(unit);
@@ -248,7 +219,7 @@ export class CronDate {
       this.subtractUnit(unit);
       return;
     }
-    /* istanbul ignore next */
+    /* istanbul ignore next - this would only happen if an end user call the handleMathOp with an invalid verb */
     throw new Error(`Invalid verb: ${verb}`);
   }
 
@@ -330,7 +301,7 @@ export class CronDate {
    * @returns {number}
    */
   getUTCDate(): number {
-    return this._getUTC().day;
+    return this.#getUTC().day;
   }
 
   /**
@@ -338,7 +309,7 @@ export class CronDate {
    * @returns {number}
    */
   getUTCFullYear(): number {
-    return this._getUTC().year;
+    return this.#getUTC().year;
   }
 
   /**
@@ -346,7 +317,7 @@ export class CronDate {
    * @returns {number}
    */
   getUTCDay(): number {
-    const weekday = this._getUTC().weekday;
+    const weekday = this.#getUTC().weekday;
     return weekday === 7 ? 0 : weekday;
   }
 
@@ -355,7 +326,7 @@ export class CronDate {
    * @returns {number}
    */
   getUTCMonth(): number {
-    return this._getUTC().month - 1;
+    return this.#getUTC().month - 1;
   }
 
   /**
@@ -363,7 +334,7 @@ export class CronDate {
    * @returns {number}
    */
   getUTCHours(): number {
-    return this._getUTC().hour;
+    return this.#getUTC().hour;
   }
 
   /**
@@ -371,7 +342,7 @@ export class CronDate {
    * @returns {number}
    */
   getUTCMinutes(): number {
-    return this._getUTC().minute;
+    return this.#getUTC().minute;
   }
 
   /**
@@ -379,7 +350,7 @@ export class CronDate {
    * @returns {number}
    */
   getUTCSeconds(): number {
-    return this._getUTC().second;
+    return this.#getUTC().second;
   }
 
   /**
@@ -496,19 +467,15 @@ export class CronDate {
     return this.#date.month !== newDate.month;
   }
 
+  /**
+   * Primarily for internal use.
+   * @param {DateMathOpEnum} op - The operation to perform.
+   * @param {TimeUnitsEnum} unit - The unit of time to use.
+   * @param {number} [hoursLength] - The length of the hours.
+   */
   shiftTimezone(op: DateMathOpEnum, unit: TimeUnitsEnum, hoursLength: number): void {
     if (unit === TimeUnitsEnum.month || unit === TimeUnitsEnum.day) {
-      const prevTime = this.getTime();
       this.handleMathOp(op, unit);
-      const currTime = this.getTime();
-      /* istanbul ignore next - FIXME: I'm fairly sure this is unneeded as luxon will handle this */
-      if (prevTime === currTime) {
-        if (this.getMinutes() === 0 && this.getSeconds() === 0) {
-          this.addHour();
-        } else if (this.getMinutes() === 59 && this.getSeconds() === 59) {
-          this.subtractHour();
-        }
-      }
     } else {
       const previousHour = this.getHours();
       this.handleMathOp(op, unit);
@@ -531,7 +498,7 @@ export class CronDate {
    * @private
    * @returns {DateTime}
    */
-  private _getUTC(): DateTime {
+  #getUTC(): DateTime {
     return this.#date.toUTC();
   }
 

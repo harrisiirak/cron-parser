@@ -1,5 +1,5 @@
 import {CronFields, CronParser} from '../src';
-import {ICronFieldsParams} from '../src/types';
+import {ICronFields} from '../src/types';
 
 describe('CronParser', () => {
   it('should stringify cron expression all stars no seconds 0 * * * * *', function () {
@@ -194,6 +194,15 @@ describe('CronParser', () => {
     expect(str).toEqual(expected);
   });
 
+  // TODO: not supported yet
+  // it('should stringify cron expression with on last day of month range', function () {
+  //   const expected = '* * L-1 * *';
+  //   const interval = CronParser.parseExpression(expected, {});
+  //   const str = interval.stringify();
+  //   expect(str).toEqual(expected);
+  // });
+
+
 
   it('should stringify from fields out of order', function () {
     const expected = '1-5 1 1 1 1 1';
@@ -247,7 +256,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing seconds', function () {
-    const input = <ICronFieldsParams>{
+    const input = <ICronFields>{
       minute: [1],
       hour: [1],
       dayOfMonth: [1],
@@ -258,7 +267,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - empty seconds', function () {
-    const input = <ICronFieldsParams>{
+    const input = <ICronFields>{
       second: [],
       minute: [1],
       hour: [1],
@@ -270,7 +279,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing values - empty array', function () {
-    const input = <ICronFieldsParams>{
+    const input = <ICronFields>{
       second: [1],
       minute: [],
       hour: [1],
@@ -282,7 +291,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing values', function () {
-    const input = <ICronFieldsParams>{
+    const input = <ICronFields>{
       second: [1],
       hour: [1],
       dayOfMonth: [1],
@@ -293,7 +302,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - range error', function () {
-    const input = <ICronFieldsParams>{
+    const input = <ICronFields>{
       second: [-1, 1, 0],
       minute: [1],
       hour: [1],
@@ -305,7 +314,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - bad chars error', function () {
-    const input = <ICronFieldsParams>{
+    const input = <ICronFields>{
       second: [0, 'R'],
       minute: [1],
       hour: [1],
@@ -318,7 +327,7 @@ describe('CronParser', () => {
 
 
   it('should throw validation error - duplicates', function () {
-    const input = <ICronFieldsParams>{
+    const input = <ICronFields>{
       second: [1, 1],
       minute: [1],
       hour: [1],

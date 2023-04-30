@@ -22,3 +22,5 @@ npm-debug.log
 /yarn.lock
 /lib/
 /testing/
+
+!coverage/*.svg

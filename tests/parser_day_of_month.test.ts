@@ -8,14 +8,14 @@ const testCasesLastWeekdayOfMonth = [
   {expression: '0 0 0 * * 5L', expectedDate: 24},
   {expression: '0 0 0 * * 6L', expectedDate: 25},
   {expression: '0 0 0 * * 0L', expectedDate: 26},
-  {expression: '0 0 0 * * 7L', expectedDate: 26}
+  {expression: '0 0 0 * * 7L', expectedDate: 26},
 ];
 
 describe('CronParser', () => {
   test('parse cron with last day in a month', () => {
     const options = {
       currentDate: new Date(2014, 0, 1),
-      endDate: new Date(2014, 10, 1)
+      endDate: new Date(2014, 10, 1),
     };
 
     const interval = CronParser.parseExpression('0 0 L * *', options);
@@ -30,7 +30,7 @@ describe('CronParser', () => {
   test('parse cron with last day in feb', () => {
     const options = {
       currentDate: new Date(2016, 0, 1),
-      endDate: new Date(2016, 10, 1)
+      endDate: new Date(2016, 10, 1),
     };
 
     const interval = CronParser.parseExpression('0 0 6-20/2,L 2 *', options);
@@ -55,7 +55,7 @@ describe('CronParser', () => {
   test('parse cron with last day in feb', () => {
     const options = {
       currentDate: new Date(2014, 0, 1),
-      endDate: new Date(2014, 10, 1)
+      endDate: new Date(2014, 10, 1),
     };
 
     const interval = CronParser.parseExpression('0 0 1,3,6-10,L 2 *', options);
@@ -76,7 +76,7 @@ describe('CronParser', () => {
   testCasesLastWeekdayOfMonth.forEach(({expression, expectedDate}) => {
     const options = {
       currentDate: new Date(2021, 8, 1),
-      endDate: new Date(2021, 11, 1)
+      endDate: new Date(2021, 11, 1),
     };
 
     test(`parse cron with last weekday of the month: ${expression}`, () => {
@@ -96,7 +96,7 @@ describe('CronParser', () => {
   test('parses expression that runs on both last monday and friday of the month', () => {
     const options = {
       currentDate: new Date(2021, 8, 1),
-      endDate: new Date(2021, 11, 1)
+      endDate: new Date(2021, 11, 1),
     };
     const interval = CronParser.parseExpression('0 0 0 * * 1L,5L', options);
     let next = interval.next();
@@ -114,7 +114,7 @@ describe('CronParser', () => {
   test('parses expression that runs on both every monday and last friday of month', () => {
     const options = {
       currentDate: new Date(2021, 8, 1),
-      endDate: new Date(2021, 8, 30)
+      endDate: new Date(2021, 8, 30),
     };
     const interval = CronParser.parseExpression('0 0 0 * * 1,5L', options);
 

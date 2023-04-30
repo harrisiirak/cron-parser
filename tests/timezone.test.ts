@@ -7,7 +7,7 @@ describe('CronExpression', () => {
     const options: Options = {
       currentDate: '2016-03-27 02:00:01',
       endDate: undefined,
-      tz: 'Europe/Athens'
+      tz: 'Europe/Athens',
     };
 
     let interval: CronExpression;
@@ -180,7 +180,7 @@ describe('CronExpression', () => {
     const options: Options = {
       currentDate: '2016-10-30 02:00:01',
       endDate: undefined,
-      tz: 'Europe/Athens'
+      tz: 'Europe/Athens',
     };
 
     const interval: CronExpression  = CronExpression.parse('0 * * * *', options);
@@ -213,7 +213,7 @@ describe('CronExpression', () => {
     const options: Options = {
       currentDate: '2016-10-30 02:00:01',
       endDate: undefined,
-      tz: 'Europe/Athens'
+      tz: 'Europe/Athens',
     };
 
     const interval: CronExpression = CronExpression.parse('0 3 * * *', options);
@@ -240,7 +240,7 @@ describe('CronExpression', () => {
     const options: Options = {
       currentDate: '2016-10-30 02:00:01',
       endDate: undefined,
-      tz: 'Europe/Athens'
+      tz: 'Europe/Athens',
     };
 
     const interval: CronExpression = CronExpression.parse('*/20 3 * * *', options);
@@ -285,7 +285,7 @@ describe('CronExpression', () => {
     const options: Options = {
       currentDate: '2016-10-30 00:00:01',
       endDate: undefined,
-      tz: 'Europe/Athens'
+      tz: 'Europe/Athens',
     };
 
     const interval: CronExpression = CronExpression.parse('0 * 30 * *', options);
@@ -334,7 +334,7 @@ describe('CronExpression', () => {
     const options: Options = {
       currentDate: '2016-10-30 00:00:01',
       endDate: '2016-10-30T03:00:01+03',
-      tz: 'Europe/Athens'
+      tz: 'Europe/Athens',
     };
 
     let interval: CronExpression = CronExpression.parse('0 * * * *', options);
@@ -595,7 +595,7 @@ describe('CronExpression', () => {
     const options: Options = {
       tz: 'America/New_York',
       currentDate: new Date('10/28/2018'),
-      endDate: undefined
+      endDate: undefined,
     };
 
     const interval = CronExpression.parse('0 12 * * 3', options);

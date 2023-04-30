@@ -1,7 +1,5 @@
-process.env.TZ = 'UTC';
-
 import {CronDate, CronExpression} from '../src';
-import {ICronParserOptions} from '../src/types';
+import {ICronParser} from '../src/types';
 
 const typeCheckCronDateObject = (date: CronDate | { value: CronDate; done: boolean }): date is { value: CronDate; done: boolean } => {
   return typeof date === 'object' && 'value' in date && 'done' in date;
@@ -159,7 +157,7 @@ describe('CronExpression', () => {
 
   test('range test with value and repeat (second)', function () {
     const options = {
-      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
     };
     const interval = CronExpression.parse('0/30 * * * * ?', options);
 
@@ -176,7 +174,7 @@ describe('CronExpression', () => {
 
   test('range test with value and repeat (minute)', function () {
     const options = {
-      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
     };
     const interval = CronExpression.parse('6/23 * * * *', options);
 
@@ -239,10 +237,10 @@ describe('CronExpression', () => {
   });
 
   test('expression limited with start and end date', function () {
-    const options = <ICronParserOptions>{
+    const options = <ICronParser>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
-      endDate: new CronDate('Wed, 26 Dec 2012 16:40:00')
+      endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
     };
 
     const interval = CronExpression.parse('*/20 * * * *', options);
@@ -344,10 +342,10 @@ describe('CronExpression', () => {
   });
 
   test('expression limited with start and end date with prev', function () {
-    const options = <ICronParserOptions>{
+    const options = <ICronParser>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
-      endDate: new CronDate('Wed, 26 Dec 2012 16:40:00')
+      endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
     };
 
     const interval = CronExpression.parse('*/20 * * * *', options);
@@ -389,11 +387,11 @@ describe('CronExpression', () => {
   });
 
   test('iterate', function () {
-    const options = <ICronParserOptions>{
+    const options = <ICronParser>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
       endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
-      tz: 'UTC'
+      tz: 'UTC',
     };
 
     const interval = CronExpression.parse('*/20 * * * *', options);
@@ -422,13 +420,13 @@ describe('CronExpression', () => {
       '@weekdays': '0 0 0 * * 1-5',
       '@weekends': '0 0 0 * * 0,6',
       '@weekly': '0 0 0 * * 0',
-      '@yearly': '0 0 0 1 0 *'
+      '@yearly': '0 0 0 1 0 *',
     });
   });
 
   test('reset to given date', function () {
     const options = {
-      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
     };
 
     const interval = CronExpression.parse('*/20 * * * *', options);
@@ -481,7 +479,7 @@ describe('CronExpression', () => {
 
   test('parse expression as UTC', function () {
     const options = {
-      utc: true
+      utc: true,
     };
 
     let interval = CronExpression.parse('0 0 10 * * *', options);
@@ -527,7 +525,7 @@ describe('CronExpression', () => {
 
   test('expression using mixed days of week strings', function () {
     const options = {
-      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
     };
 
     const interval = CronExpression.parse('15 10 * jAn-FeB mOn-tUE', options);
@@ -556,7 +554,7 @@ describe('CronExpression', () => {
   test('expression using non-standard second field (wildcard)', function () {
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
-      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
     };
 
     const interval = CronExpression.parse('* * * * * *', options);
@@ -577,7 +575,7 @@ describe('CronExpression', () => {
   test('expression using non-standard second field (step)', function () {
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
-      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
     };
 
     const interval = CronExpression.parse('*/20 * * * * *', options);
@@ -599,7 +597,7 @@ describe('CronExpression', () => {
   test('expression using non-standard second field (range)', function () {
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
-      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00')
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
     };
 
     const interval = CronExpression.parse('20-40/10 * * * * *', options);
@@ -618,7 +616,7 @@ describe('CronExpression', () => {
 
   test('expression using explicit month definition and */5 day of month step', function () {
     const firstIterator = CronExpression.parse('0 12 */5 6 *', {
-      currentDate: '2019-06-01T11:00:00.000'
+      currentDate: '2019-06-01T11:00:00.000',
     });
 
     const firstExpectedDates = [
@@ -628,7 +626,7 @@ describe('CronExpression', () => {
       new CronDate('2019-06-16T12:00:00.000'),
       new CronDate('2019-06-21T12:00:00.000'),
       new CronDate('2019-06-26T12:00:00.000'),
-      new CronDate('2020-06-01T12:00:00.000')
+      new CronDate('2020-06-01T12:00:00.000'),
     ];
 
     firstExpectedDates.forEach(function (expectedDate) {
@@ -638,7 +636,7 @@ describe('CronExpression', () => {
     });
 
     const secondIterator = CronExpression.parse('0 15 */5 5 *', {
-      currentDate: '2019-05-01T11:00:00.000'
+      currentDate: '2019-05-01T11:00:00.000',
     });
 
     const secondExpectedDates = [
@@ -649,7 +647,7 @@ describe('CronExpression', () => {
       new CronDate('2019-05-21T15:00:00.000'),
       new CronDate('2019-05-26T15:00:00.000'),
       new CronDate('2019-05-31T15:00:00.000'),
-      new CronDate('2020-05-01T15:00:00.000')
+      new CronDate('2020-05-01T15:00:00.000'),
     ];
 
     secondExpectedDates.forEach(function (expectedDate) {
@@ -703,12 +701,12 @@ describe('CronExpression', () => {
       '2023-06-14T02:10:00.000Z',
       '2023-06-21T02:10:00.000Z',
       '2023-06-28T02:10:00.000Z',
-      '2023-07-05T02:10:00.000Z'
+      '2023-07-05T02:10:00.000Z',
     ];
 
     const options = {
       currentDate: '2023-04-29T00:00:00.000',
-      tz: 'UTC'
+      tz: 'UTC',
     };
     const interval = CronExpression.parse('10 2 ? * 3', options);
 
@@ -803,7 +801,7 @@ describe('CronExpression', () => {
 
   test('day of month is wildcard, month and day of week are both set', function () {
     const options = {
-      currentDate: new CronDate('Mon, 31 May 2021 12:00:00')
+      currentDate: new CronDate('Mon, 31 May 2021 12:00:00'),
     };
     const interval = CronExpression.parse('0 0 * 6 2', options);
     const expectedDayMatches = [1, 8, 15, 22, 29];
@@ -821,7 +819,7 @@ describe('CronExpression', () => {
 
   test('day of month contains multiple ranges and day of week is wildcard', function () {
     const options = {
-      currentDate: new CronDate('Sat, 1 Dec 2012 14:38:53')
+      currentDate: new CronDate('Sat, 1 Dec 2012 14:38:53'),
     };
     const interval = CronExpression.parse('0 0 0 2-4,7-31 * *', options);
     let next = interval.next();
@@ -866,7 +864,7 @@ describe('CronExpression', () => {
 
   test('day of month and week are both set and dow is 6,0', function () {
     const options = {
-      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
     };
     const interval = CronExpression.parse('10 2 12 8 6,0', options);
     let next = interval.next();
@@ -922,7 +920,7 @@ describe('CronExpression', () => {
 
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
-      tz: 'UTC'
+      tz: 'UTC',
     };
     const interval = CronExpression.parse('10 2 12 8 6-7', options);
 
@@ -974,7 +972,7 @@ describe('CronExpression', () => {
 
   test('day of month validation should be ignored when day of month is wildcard and month is set', function () {
     const options = {
-      currentDate: new CronDate('2020-05-01T15:00:00.000')
+      currentDate: new CronDate('2020-05-01T15:00:00.000'),
     };
     const interval = CronExpression.parse('* * * * 2 *', options);
 
@@ -1015,7 +1013,7 @@ describe('CronExpression', () => {
 
   test('should sort ranges and values in ascending order', function () {
     const options = {
-      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53')
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
     };
     const interval = CronExpression.parse('0 12,13,10,1-3 * * *', options);
     const hours = [1, 2, 3, 10, 12, 13];
@@ -1032,7 +1030,7 @@ describe('CronExpression', () => {
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
-      iterator: true
+      iterator: true,
     };
 
     let val: CronDate | { value: CronDate; done: boolean };
@@ -1069,7 +1067,7 @@ describe('CronExpression', () => {
       '30 16 * * 6,7',
       '30 16 * * 6,0',
       '30 16 * * 0,6',
-      '30 16 * * 7,6'
+      '30 16 * * 7,6',
     ];
 
     expressions.forEach(function (expression) {
@@ -1098,7 +1096,7 @@ describe('CronExpression', () => {
 
     const expressions = [
       '0 9,11,1 * * *',
-      '0 1,9,11 * * *'
+      '0 1,9,11 * * *',
     ];
 
     expressions.forEach(function (expression) {
@@ -1127,7 +1125,7 @@ describe('CronExpression', () => {
   test('it will work with #139 issue case', function () {
     const options = {
       currentDate: new Date('2018-11-15T16:15:33.522Z'),
-      tz: 'Europe/Madrid'
+      tz: 'Europe/Madrid',
     };
 
     const interval = CronExpression.parse('0 0 0 1,2 * *', options);
@@ -1142,38 +1140,38 @@ describe('CronExpression', () => {
 
   test('should work for valid first/second/third/fourth/fifth occurrence dayOfWeek (# char)', function () {
     const options = {
-      currentDate: new CronDate('2019-04-30')
+      currentDate: new CronDate('2019-04-30'),
     };
 
     const expectedFirstDates = [
       new CronDate('2019-05-05'),
       new CronDate('2019-06-02'),
       new CronDate('2019-07-07'),
-      new CronDate('2019-08-04')
+      new CronDate('2019-08-04'),
     ];
     const expectedSecondDates = [
       new CronDate('2019-05-12'),
       new CronDate('2019-06-09'),
       new CronDate('2019-07-14'),
-      new CronDate('2019-08-11')
+      new CronDate('2019-08-11'),
     ];
     const expectedThirdDates = [
       new CronDate('2019-05-19'),
       new CronDate('2019-06-16'),
       new CronDate('2019-07-21'),
-      new CronDate('2019-08-18')
+      new CronDate('2019-08-18'),
     ];
     const expectedFourthDates = [
       new CronDate('2019-05-26'),
       new CronDate('2019-06-23'),
       new CronDate('2019-07-28'),
-      new CronDate('2019-08-25')
+      new CronDate('2019-08-25'),
     ];
     const expectedFifthDates = [
       new CronDate('2019-06-30'),
       new CronDate('2019-09-29'),
       new CronDate('2019-12-29'),
-      new CronDate('2020-03-29')
+      new CronDate('2020-03-29'),
     ];
 
     const allExpectedDates = [
@@ -1181,14 +1179,14 @@ describe('CronExpression', () => {
       expectedSecondDates,
       expectedThirdDates,
       expectedFourthDates,
-      expectedFifthDates
+      expectedFifthDates,
     ];
     const expressions = [
       '0 0 0 ? * 0#1',
       '0 0 0 ? * 0#2',
       '0 0 0 ? * 0#3',
       '0 0 0 ? * 0#4',
-      '0 0 0 ? * 0#5'
+      '0 0 0 ? * 0#5',
     ];
     expressions.forEach(function (expression, index) {
       const interval = CronExpression.parse(expression, options);
@@ -1212,7 +1210,7 @@ describe('CronExpression', () => {
   test('should work for valid second sunday in May', function () {
     const options = {
       currentDate: new CronDate('2023-05-06T00:00:00.000Z'),
-      tz: 'UTC'
+      tz: 'UTC',
     };
     const expectedDates = [
       new CronDate('2023-05-14T00:00:00.000Z'),
@@ -1239,7 +1237,7 @@ describe('CronExpression', () => {
 
   test('should work for valid second sunday at noon in May', function () {
     const options = {
-      currentDate: new CronDate('2019-05-12T11:59:00.000')
+      currentDate: new CronDate('2019-05-12T11:59:00.000'),
     };
     const expected = new CronDate('2019-05-12T12:00:00.000');
 
@@ -1250,7 +1248,7 @@ describe('CronExpression', () => {
 
   test('should work for valid second sunday at noon in May (UTC+3)', function () {
     const options = {
-      currentDate: new CronDate('2019-05-12T11:59:00.000', 'Europe/Sofia')
+      currentDate: new CronDate('2019-05-12T11:59:00.000', 'Europe/Sofia'),
     };
     const expected = new CronDate('2019-05-12T12:00:00.000', 'Europe/Sofia');
 
@@ -1261,7 +1259,7 @@ describe('CronExpression', () => {
 
   test('should work with both dayOfMonth and nth occurrence of dayOfWeek', function () {
     const options = {
-      currentDate: new CronDate('2019-04-01')
+      currentDate: new CronDate('2019-04-01'),
     };
 
     const expectedDates = [

@@ -8,15 +8,14 @@ import {
   DayOfTheMonthRange,
   DayOfTheWeekRange,
   HourRange,
-  ICronFieldsParams,
-  ICronParserOptions,
-  IFieldConstraint,
+  ICronFields,
+  ICronParser,
   IIteratorCallback,
   IIteratorFields,
   MonthRange,
-  PredefinedCronExpressionsEnum,
+  PredefinedExpressionsEnum,
   SixtyRange,
-  TimeUnitsEnum
+  TimeUnitsEnum,
 } from './types';
 import {DateTime} from 'luxon';
 import debug from 'debug';
@@ -32,7 +31,7 @@ const LOOP_LIMIT = 10000;
  * Class representing a Cron expression.
  */
 export class CronExpression {
-  #options: ICronParserOptions;
+  #options: ICronParser;
   readonly #utc: boolean;
   readonly #tz: string | undefined;
   #currentDate: CronDate;
@@ -47,10 +46,10 @@ export class CronExpression {
   /**
    * Creates a new CronExpression instance.
    *
-   * @param {CronFields | ICronFieldsParams} fields - Cron fields.
-   * @param {ICronParserOptions} options - Parser options.
+   * @param {CronFields | ICronFields} fields - Cron fields.
+   * @param {ICronParser} options - Parser options.
    */
-  constructor(fields: CronFields | ICronFieldsParams, options: ICronParserOptions) {
+  constructor(fields: CronFields | ICronFields, options: ICronParser) {
     this.#options = options;
     this.#utc = options.utc || false;
     this.#tz = this.#utc ? 'UTC' : options.tz;
@@ -68,10 +67,10 @@ export class CronExpression {
   /**
    * Getter for the predefined cron expressions.
    *
-   * @returns {PredefinedCronExpressionsEnum} Predefined cron expressions.
+   * @returns {PredefinedExpressionsEnum} Predefined cron expressions.
    */
   static get predefined() {
-    return PredefinedCronExpressionsEnum;
+    return PredefinedExpressionsEnum;
   }
 
   /**
@@ -91,7 +90,7 @@ export class CronExpression {
    * @param {CronOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static parse(expression: string, options: ICronParserOptions = {}): CronExpression {
+  static parse(expression: string, options: ICronParser = {}): CronExpression {
     return CronExpressionParser.parse(expression, options);
   }
 
@@ -103,7 +102,7 @@ export class CronExpression {
    * @param {CronOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static fieldsToExpression(fields: CronFields, options?: ICronParserOptions): CronExpression {
+  static fieldsToExpression(fields: CronFields, options?: ICronParser): CronExpression {
     return new CronExpression(fields, options || {});
   }
 
@@ -180,6 +179,8 @@ export class CronExpression {
   prev(): CronDate | { value: CronDate; done: boolean } {
     const schedule = this.#findSchedule(true);
     // Try to return ES6 compatible iterator
+    // TODO: this needs to be refactored into a real iterator
+    /* istanbul ignore next - no idea how to trigger first branch */
     return this.#isIterator ? {value: schedule, done: !this.hasPrev()} : schedule;
   }
 
@@ -463,6 +464,7 @@ export class CronExpression {
    * @returns {CronDate} - The next schedule date.
    */
   toString(): string {
+    /* istanbul ignore next - should be impossiable under normal use to trigger the or branch */
     return this.#expression || this.stringify(true);
   }
 }

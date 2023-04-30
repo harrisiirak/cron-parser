@@ -1,6 +1,7 @@
 export default {
   testMatch: [
-    '**/tests/**/*.test.ts'
+    '**/tests/**/*.test.ts',
+    '**/tests/**/*.test.js',
   ],
   extensionsToTreatAsEsm: [
     '.ts'
@@ -17,19 +18,20 @@ export default {
       }
     ]
   },
+  coverageReporters: ['text', 'lcov', 'json-summary'],
   collectCoverageFrom: [
     'src/**/*.js',
     'src/**/*.ts',
-    '!test/**/*',
-    '!types/**/*',
+    '!src/index.cjs.js',
+    '!src/index.ts',
     '!lib/**/*'
   ],
   coverageThreshold: {
     global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+      branches: 95,
+      functions: 90,
+      lines: 99,
+      statements: 99,
     },
   },
 };

@@ -1,12 +1,12 @@
 import {CronFields} from '../src/';
-import {CronField} from '../src/fields/CronField';
-import {CronDayOfMonth} from '../src/fields/CronDayOfMonth';
-import {CronDayOfTheWeek} from '../src/fields/CronDayOfTheWeek';
-import {CronHour} from '../src/fields/CronHour';
-import {CronMinute} from '../src/fields/CronMinute';
-import {CronMonth} from '../src/fields/CronMonth';
-import {CronSecond} from '../src/fields/CronSecond';
-import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../src/types';
+import {CronField} from '../src';
+import {CronDayOfMonth} from '../src';
+import {CronDayOfTheWeek} from '../src';
+import {CronHour} from '../src';
+import {CronMinute} from '../src';
+import {CronMonth} from '../src';
+import {CronSecond} from '../src';
+import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../src';
 
 describe('CronFields', () => {
   test('stringify() and debug() methods', () => {
@@ -81,7 +81,7 @@ describe('CronFields', () => {
       'max': 31,
       'min': 1,
       'values': [15],
-      'wildcard': false
+      'wildcard': false,
     });
   });
 
@@ -90,4 +90,5 @@ describe('CronFields', () => {
       new CronField([0], 0, 12, [], false);
     }).toThrow('Cannot construct CronField instances directly');
   });
+
 });

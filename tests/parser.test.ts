@@ -32,7 +32,7 @@ describe('CronParser', () => {
   test('no next date', function () {
     const options = {
       currentDate: new Date(2014, 0, 1),
-      endDate: new Date(2014, 0, 1)
+      endDate: new Date(2014, 0, 1),
     };
 
     const interval = CronParser.parseExpression('* * 2 * *', options);

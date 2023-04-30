@@ -3,7 +3,7 @@ import {CronDate, CronExpression} from '../src';
 describe('expression 31 of month', () => {
   test('should correctly iterate through the next 20 occurrences', () => {
     const options = {
-      currentDate: new CronDate('2100-10-31T00:00:00', 'UTC')
+      currentDate: new CronDate('2100-10-31T00:00:00', 'UTC'),
     };
     const expected = (new Date('2103-08-31T00:00:00-0000')).toString();
 

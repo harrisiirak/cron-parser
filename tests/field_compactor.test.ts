@@ -40,7 +40,7 @@ describe('CronFields.compactField', () => {
     expect(result).toEqual([
       {start: 1, count: 1},
       {start: 4, end: 6, count: 3, step: 1},
-      {start: 9, count: 1}
+      {start: 9, count: 1},
     ]);
   });
 
@@ -51,7 +51,7 @@ describe('CronFields.compactField', () => {
     expect(result).toEqual([
       {start: 1, end: 3, count: 3, step: 1},
       {start: 6, count: 1},
-      {start: 9, end: 13, count: 3, step: 2}
+      {start: 9, end: 13, count: 3, step: 2},
     ]);
 
   });
@@ -61,7 +61,7 @@ describe('CronFields.compactField', () => {
     const result = CronFields.compactField(['L', 'W']);
     expect(result).toEqual([
       {start: 'L', count: 1},
-      {start: 'W', count: 1}
+      {start: 'W', count: 1},
     ]);
 
   });
@@ -70,9 +70,9 @@ describe('CronFields.compactField', () => {
 
     const result = CronFields.compactField([1, 'L', 'W']);
     expect(result).toEqual([
-      {start: 1, count: 1,},
+      {start: 1, count: 1},
       {start: 'L', count: 1},
-      {start: 'W', count: 1}
+      {start: 'W', count: 1},
     ]);
 
   });
@@ -80,10 +80,10 @@ describe('CronFields.compactField', () => {
   test('compact field - with chars and range (v2)', function () {
     const result = CronFields.compactField([1, 2, 'L', 'W']);
     expect(result).toEqual([
-      {start: 1, count: 1,},
-      {start: 2, count: 1,},
+      {start: 1, count: 1},
+      {start: 2, count: 1},
       {start: 'L', count: 1},
-      {start: 'W', count: 1}
+      {start: 'W', count: 1},
     ]);
   });
 

@@ -1,14 +1,11 @@
-import {CronChars, CronFieldTypes, CronMax, CronMin} from '../types';
+import {CronChars, CronFieldTypes, CronMax, CronMin, SerializedCronField} from '../types';
 import assert from 'assert';
 
-type SerializedCronField = {
-  wildcard: boolean;
-  values: (number | string)[];
-  min: CronMin;
-  max: CronMax;
-  chars: CronChars[];
-}
-
+/**
+ * Represents a field within a cron expression.
+ * This is a base class and should not be instantiated directly.
+ * @class CronField
+ */
 export class CronField {
   readonly #wildcard: boolean = false;
   readonly #values: (number | string)[] = [];
@@ -16,36 +13,64 @@ export class CronField {
   readonly #max: CronMax = 59;
   readonly #chars: CronChars[] = [];
 
+  /**
+   * Returns the minimum value allowed for this field.
+   * @returns {number}
+   */
   get min(): number {
     return this.#min;
   }
 
+  /**
+   * Returns the maximum value allowed for this field.
+   * @returns {number}
+   */
   get max(): number {
     return this.#max;
   }
 
+  /**
+   * Returns an array of allowed special characters for this field.
+   * @returns {string[]}
+   */
   get chars(): string[] {
     return [...this.#chars];
   }
 
+  /**
+   * Indicates whether this field is a wildcard.
+   * @returns {boolean}
+   */
   get isWildcard(): boolean {
     return this.#wildcard;
   }
 
+  /**
+   * Returns an array of allowed values for this field.
+   * @returns {CronFieldTypes}
+   */
   get values(): CronFieldTypes {
     return [...this.#values] as CronFieldTypes;
   }
 
+  /**
+   * Serializes the field to an object.
+   * @returns {SerializedCronField}
+   */
   serialize(): SerializedCronField {
     return {
       wildcard: this.#wildcard,
       values: this.#values,
       min: this.#min,
       max: this.#max,
-      chars: this.#chars
+      chars: this.#chars,
     };
   }
 
+  /**
+   * Validates the field values against the allowed range and special characters.
+   * @throws {Error} if validation fails
+   */
   validate(): void {
     let badValue: number | string | undefined;
     const charsString = this.chars.length > 0 ? ` or chars ${this.chars.join('')}` : '';
@@ -66,7 +91,17 @@ export class CronField {
     }), `${this.constructor.name} Validation error, duplicate values found: ${badValue}`);
   }
 
-  constructor(values: (number | string)[], min: CronMin, max: CronMax, chars: CronChars[], wildcard = false) {
+  /**
+   * CronField constructor. Initializes the field with the provided values.
+   * @param {number[] | string[]} values - Values for this field
+   * @param {CronMin} min - Minimum allowed value for this field
+   * @param {CronMax} max - Maximum allowed value for this field
+   * @param {CronChars[]} chars - Array of allowed special characters for this field
+   * @param {boolean} [wildcard=false] - Whether this field is a wildcard
+   * @throws {TypeError} if the constructor is called directly
+   * @throws {Error} if validation fails
+   */
+  constructor(values: (number | string)[], min: CronMin, max: CronMax, chars: CronChars[], /* istanbul ignore next - we always pass a value */ wildcard = false) {
     // only child classes can call this constructor
     if (new.target === CronField) {
       throw new TypeError('Cannot construct CronField instances directly');
@@ -83,11 +118,17 @@ export class CronField {
     this.#wildcard = wildcard;
   }
 
+  /**
+   * Helper function to sort values in ascending order.
+   * @param {number | string} a - First value to compare
+   * @param {number | string} b - Second value to compare
+   * @returns {number} - A negative, zero, or positive value, depending on the sort order
+   */
   static sorter(a: number | string, b: number | string): number {
     const aIsNumber = typeof a === 'number';
     const bIsNumber = typeof b === 'number';
     if (aIsNumber && bIsNumber) return (a as number) - (b as number);
     if (!aIsNumber && !bIsNumber) return (a as string).localeCompare(b as string);
-    return aIsNumber ? -1 : 1;
+    return aIsNumber ? /* istanbul ignore next - A will always be a number until L-2 is supported */ -1 : 1;
   }
 }

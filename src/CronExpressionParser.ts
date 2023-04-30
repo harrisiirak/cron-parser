@@ -2,14 +2,18 @@ import {CronConstants} from './CronConstants';
 import {CronDayOfMonth, CronDayOfTheWeek, CronFields, CronHour, CronMinute, CronMonth, CronSecond} from './CronFields';
 import {CronDate} from './CronDate';
 import {CronExpression} from './CronExpression';
-import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from './types';
+import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronExpressionParserOptions, ICronParser, IFieldConstraint, MonthRange, MonthsEnum, SixtyRange} from './types';
 import assert from 'assert';
-import {DayOfWeekEnum, ICronExpressionParserOptions, ICronParserOptions, IFieldConstraint, MonthsEnum} from './types';
 
 const STANDARD_VALID_CHARACTERS = /^[,*\d/-]+$/;
 const DAY_OF_MONTH_VALID_CHARACTERS = /^[?,*\dL/-]+$/;
 const DAY_OF_WEEK_VALID_CHARACTERS = /^[?,*\dL#/-]+$/;
 
+/**
+ * Static class that parses a cron expression and returns a CronExpression object.
+ * @static
+ * @class CronExpressionParser
+ */
 export class CronExpressionParser {
   // FIXME: these are a temporary solution to make the parser work with the current design of the library.
   private static constraints: IFieldConstraint[] = Object.values(CronConstants.constraints);
@@ -22,11 +26,17 @@ export class CronExpressionParser {
     dayOfWeek: DAY_OF_WEEK_VALID_CHARACTERS,
   };
 
-  /* istanbul ignore next */
+  /* istanbul ignore next - this should never be called */
   constructor() {
     throw new Error('This class is not meant to be instantiated.');
   }
 
+  /**
+   * Returns a map of predefined expressions.
+   * @static
+   * @memberof CronExpressionParser
+   * @returns {Record<string, string>} A map of predefined expressions.
+   */
   static get predefined(): Record<string, string> {
     return {
       '@yearly': '0 0 1 1 *',
@@ -38,7 +48,17 @@ export class CronExpressionParser {
     };
   }
 
-  static parse(expression: string, options: ICronParserOptions = {}): CronExpression {
+  /**
+   * Parses a cron expression and returns a CronExpression object.
+   * @param {string} expression - The cron expression to parse.
+   * @param {ICronParser} [options={}] - The options to use when parsing the expression.
+   * @param {boolean} [options.currentDate=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
+   * @param {boolean} [options.strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
+   * @param {CronDate} [options.currentDate=new CronDate(undefined, 'UTC')] - The date to use when calculating the next/previous occurrence.
+   *
+   * @returns {CronExpression} A CronExpression object.
+   */
+  static parse(expression: string, options: ICronParser = {}): CronExpression {
     options.expression = expression;
     options.strict ??= false;
     if (typeof options.currentDate === 'undefined') {
@@ -70,7 +90,14 @@ export class CronExpressionParser {
     return new CronExpression(fields, options);
   }
 
-  static #getRawFields(expression: string, options: ICronParserOptions): { second: string, minute: string, hour: string, dayOfMonth: string, month: string, dayOfWeek: string } {
+  /**
+   * Get the raw fields from a cron expression.
+   * @param {string} expression - The cron expression to parse.
+   * @param {ICronParser} options - The options to use when parsing the expression.
+   * @private
+   * @returns {{ second: string, minute: string, hour: string, dayOfMonth: string, month: string, dayOfWeek: string }} The raw fields.
+   */
+  static #getRawFields(expression: string, options: ICronParser): { second: string, minute: string, hour: string, dayOfMonth: string, month: string, dayOfWeek: string } {
     assert(!options.strict || expression.split(/\s+/).length === 6, 'Invalid cron expression, expected 6 fields in strict mode!');
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);
@@ -83,13 +110,21 @@ export class CronExpressionParser {
     return {second, minute, hour, dayOfMonth, month, dayOfWeek};
   }
 
+  /**
+   * Parse a field from a cron expression.
+   * @param {string} field - The field to parse.
+   * @param {string} value - The value of the field.
+   * @param {IFieldConstraint} constraints - The constraints for the field.
+   * @private
+   * @returns {(number | string)[]} The parsed field.
+   */
   static #parseField(field: string, value: string, constraints: IFieldConstraint): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === 'month' || field === 'dayOfWeek') {
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
         const replacer = MonthsEnum[match as keyof typeof MonthsEnum] || DayOfWeekEnum[match as keyof typeof DayOfWeekEnum];
-        assert(replacer, `Validation error, cannot resolve alias "${match}"`);
+        assert(replacer != null, `Validation error, cannot resolve alias "${match}"`);
         return replacer.toString();
       });
     }
@@ -102,17 +137,27 @@ export class CronExpressionParser {
     return CronExpressionParser.#parseSequence(value, constraints, field);
   }
 
+  /**
+   * Parse a sequence from a cron expression.
+   * @param {string} val - The sequence to parse.
+   * @param {IFieldConstraint} constraints - The constraints for the field.
+   * @param {keyof typeof CronExpressionParser.validCharacters} field - The field to parse.
+   * @private
+   */
   static #parseSequence(val: string, constraints: IFieldConstraint, field: keyof typeof CronExpressionParser.validCharacters): (number | string)[] {
     const stack: (number | string)[] = [];
 
     function handleResult(result: number | string | (number | string)[], constraints: IFieldConstraint) {
       if (Array.isArray(result)) {
         result.forEach((value) => {
-          if (CronExpressionParser.#isValidConstraintChar(constraints, value)) {
-            stack.push(value);
-          } else {
+          /* istanbul ignore else - FIXME no idea how this is triggered or what it's purpose is */
+          if (!CronExpressionParser.#isValidConstraintChar(constraints, value)) {
             const v = parseInt(value.toString(), 10);
             assert(v >= constraints.min && v <= constraints.max, `Constraint error, got value ${value} expected range ${constraints.min}-${constraints.max}`);
+            stack.push(value);
+          }
+          else {
+            /* istanbul ignore next - FIXME no idea how this is triggered or what it's purpose is */
             stack.push(value);
           }
         });
@@ -133,6 +178,14 @@ export class CronExpressionParser {
     return stack;
   }
 
+  /**
+   * Parse repeat from a cron expression.
+   * @param {string} val - The repeat to parse.
+   * @param {IFieldConstraint} constraints - The constraints for the field.
+   * @param {keyof typeof CronExpressionParser.validCharacters} field - The field to parse.
+   * @private
+   * @returns {(number | string)[]} The parsed repeat.
+   */
   static #parseRepeat(val: string, constraints: IFieldConstraint, field: keyof typeof CronExpressionParser.validCharacters): number[] | string[] | number | string {
     const atoms = val.split('/');
     assert(atoms.length <= 2, `Invalid repeat: ${val}`);
@@ -146,15 +199,40 @@ export class CronExpressionParser {
     return CronExpressionParser.#parseRange(val, 1, constraints, field);
   }
 
+  /**
+   * Validate a cron range.
+   * @param {number} min - The minimum value of the range.
+   * @param {number} max - The maximum value of the range.
+   * @param {IFieldConstraint} constraints - The constraints for the field.
+   * @private
+   * @returns {void}
+   * @throws {Error} Throws an error if the range is invalid.
+   */
   static #validateRange(min: number, max: number, constraints: IFieldConstraint): void {
     assert(!isNaN(min) && !isNaN(max) && min >= constraints.min && max <= constraints.max, `Constraint error, got range ${min}-${max} expected range ${constraints.min}-${constraints.max}`);
     assert(min <= max, `Invalid range: ${min}-${max}, min(${min}) > max(${max})`);
   }
 
+  /**
+   * Validate a cron repeat interval.
+   * @param {number} repeatInterval - The repeat interval to validate.
+   * @private
+   * @returns {void}
+   * @throws {Error} Throws an error if the repeat interval is invalid.
+   */
   static #validateRepeatInterval(repeatInterval: number): void {
     assert(!isNaN(repeatInterval) && repeatInterval > 0, `Constraint error, cannot repeat at every ${repeatInterval} time.`);
   }
 
+  /**
+   * Create a range from a cron expression.
+   * @param {number} min - The minimum value of the range.
+   * @param {number} max - The maximum value of the range.
+   * @param {number} repeatInterval - The repeat interval of the range.
+   * @param {keyof typeof CronExpressionParser.validCharacters} field - The field to parse.
+   * @private
+   * @returns {number[]} The created range.
+   */
   static #createRange(min: number, max: number, repeatInterval: number, field: keyof typeof CronExpressionParser.validCharacters): number[] {
     const stack: number[] = [];
     if (field === 'dayOfWeek' && max % 7 === 0) {
@@ -168,6 +246,15 @@ export class CronExpressionParser {
     return stack;
   }
 
+  /**
+   * Parse a range from a cron expression.
+   * @param {string} val - The range to parse.
+   * @param {number} repeatInterval - The repeat interval of the range.
+   * @param {IFieldConstraint} constraints - The constraints for the field.
+   * @param {keyof typeof CronExpressionParser.validCharacters} field - The field to parse.
+   * @private
+   * @returns {number[] | string[] | number | string} The parsed range.
+   */
   static #parseRange(val: string, repeatInterval: number, constraints: IFieldConstraint, field: keyof typeof CronExpressionParser.validCharacters): number[] | string[] | number | string {
     const atoms: string[] = val.split('-');
     if (atoms.length <= 1) {
@@ -181,6 +268,13 @@ export class CronExpressionParser {
     return this.#createRange(min, max, repeatInterval, field);
   }
 
+  /**
+   * Parse a cron expression.
+   * @param {string} val - The cron expression to parse.
+   * @param {ICronExpressionParserOptions} options - The options for the parser.
+   * @private
+   * @returns {string} The parsed cron expression.
+   */
   static #parseNthDay(val: string, options: ICronExpressionParserOptions): string {
     const atoms = val.split('#');
     if (atoms.length <= 1) {
@@ -194,6 +288,13 @@ export class CronExpressionParser {
     return atoms[0];
   }
 
+  /**
+   * Checks if a character is valid for a field.
+   * @param {IFieldConstraint} constraints - The constraints for the field.
+   * @param {string | number} value - The value to check.
+   * @private
+   * @returns {boolean} Whether the character is valid for the field.
+   */
   static #isValidConstraintChar(constraints: IFieldConstraint, value: string | number): boolean {
     return constraints.chars.some((char) => value.toString().includes(char));
   }

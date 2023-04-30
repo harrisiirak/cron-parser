@@ -6,34 +6,28 @@ import {CronDayOfMonth} from './fields/CronDayOfMonth';
 import {CronMonth} from './fields/CronMonth';
 import {CronDayOfTheWeek} from './fields/CronDayOfTheWeek';
 
-
 // TS >= 4.5 tail recursion optimization
-type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc['length']]>
-type IntRange<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>
+// https://dev.to/tylim88/typescript-numeric-range-type-15a5
+export type RangeFrom<LENGTH extends number, ACC extends unknown[] = []> = ACC['length'] extends LENGTH ? ACC : RangeFrom<LENGTH, [...ACC, 1]>
+export type IntRange<FROM extends number[], TO extends number, ACC extends number = never>
+  = FROM['length'] extends TO ? ACC | TO : IntRange<[...FROM, 1], TO, ACC | FROM['length']>
 
-export type SixtyRange = IntRange<0, 60>; // 0-59 - non-inclusive
-export type HourRange = IntRange<0, 24>; // 0-23 - non-inclusive
-export type DayOfTheMonthRange = IntRange<1, 32> | 'L'; // 1-31 - non-inclusive
-export type MonthRange = IntRange<1, 13>; // 1-12 - non-inclusive
-export type DayOfTheWeekRange = IntRange<0, 8>; // 0-7 - non-inclusive
+export type SixtyRange = IntRange<RangeFrom<0>, 59>; // 0-59 - inclusive
+export type HourRange = IntRange<RangeFrom<0>, 23>; // 0-23 - inclusive
+export type DayOfTheMonthRange = IntRange<RangeFrom<1>, 31> | 'L'; // 1-31 - inclusive
+export type MonthRange = IntRange<RangeFrom<1>, 12>; // 1-12 - inclusive
+export type DayOfTheWeekRange = IntRange<RangeFrom<0>, 7>; // 0-7 - inclusive
 export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
 export type CronChars = 'L' | 'W';
 export type CronMin = 0 | 1;
 export type CronMax = 7 | 12 | 23 | 31 | 59;
 
-export interface IFieldConstraint {
+export type SerializedCronField = {
+  wildcard: boolean;
+  values: (number | string)[];
   min: CronMin;
   max: CronMax;
   chars: CronChars[];
-}
-
-export interface IFieldConstraints {
-  second: IFieldConstraint,
-  minute: IFieldConstraint,
-  hour: IFieldConstraint,
-  dayOfMonth: IFieldConstraint,
-  month: IFieldConstraint,
-  dayOfWeek: IFieldConstraint,
 }
 
 export enum MonthsEnum {jan = 1, feb = 2, mar = 3, apr = 4, may = 5, jun = 6, jul = 7, aug = 8, sep = 9, oct = 10, nov = 11, dec = 12}
@@ -47,7 +41,7 @@ export enum TimeUnitsEnum {second = 'second', minute = 'minute', hour = 'hour', 
 
 export enum DateMathOpEnum {add = 'add', subtract = 'subtract'}
 
-export enum PredefinedCronExpressionsEnum {
+export enum PredefinedExpressionsEnum {
   '@yearly' = '0 0 0 1 0 *',
   '@monthly' = '0 0 0 1 * *',
   '@weekly' = '0 0 0 * * 0',
@@ -69,7 +63,7 @@ export interface ICronExpressionParserOptions {
   nthDayOfWeek?: number;
 }
 
-export interface ICronParserOptions {
+export interface ICronParser {
   currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;
@@ -81,13 +75,35 @@ export interface ICronParserOptions {
   strict?: boolean;
 }
 
-export interface ICronFieldsParams {
+export interface IFieldConstraint {
+  min: CronMin;
+  max: CronMax;
+  chars: CronChars[];
+}
+
+export interface IFieldConstraints {
+  second: IFieldConstraint,
+  minute: IFieldConstraint,
+  hour: IFieldConstraint,
+  dayOfMonth: IFieldConstraint,
+  month: IFieldConstraint,
+  dayOfWeek: IFieldConstraint,
+}
+
+export interface ICronFields {
   second: SixtyRange[] | CronSecond;
   minute: SixtyRange[] | CronMinute;
   hour: HourRange[] | CronHour;
   dayOfMonth: DayOfTheMonthRange[] | CronDayOfMonth;
   month: MonthRange[] | CronMonth;
   dayOfWeek: DayOfTheWeekRange[] | CronDayOfTheWeek;
+}
+
+export interface IFieldRange {
+  start: number | CronChars;
+  count: number;
+  end?: number;
+  step?: number;
 }
 
 export type ParseStringResponse = { variables: { [key: string]: number | string }, expressions: CronExpression[], errors: { [key: string]: unknown } }
