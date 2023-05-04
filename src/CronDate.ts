@@ -2,9 +2,9 @@ import {DateTime} from 'luxon';
 import assert from 'assert';
 import {DateMathOpEnum, TimeUnitsEnum} from './types';
 
-interface VerbMap {
-  [key: string]: () => void;
-}
+type VerbMap = {
+    [key in TimeUnitsEnum]: () => void;
+};
 
 /**
  * CronDate class that wraps the Luxon DateTime object to provide
