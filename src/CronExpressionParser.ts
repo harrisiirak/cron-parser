@@ -26,11 +26,6 @@ export class CronExpressionParser {
     dayOfWeek: DAY_OF_WEEK_VALID_CHARACTERS,
   };
 
-  /* istanbul ignore next - this should never be called */
-  constructor() {
-    throw new Error('This class is not meant to be instantiated.');
-  }
-
   /**
    * Returns a map of predefined expressions.
    * @static
