@@ -10,7 +10,7 @@ module.exports = {
     'eslint:recommended'
   ],
   ignorePatterns: [
-    'lib/**',
+    'dist/**',
     '**/*.json',
     'coverage/**',
     'docs/**',

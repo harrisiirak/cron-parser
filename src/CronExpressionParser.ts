@@ -2,7 +2,7 @@ import {CronConstants} from './CronConstants';
 import {CronDayOfMonth, CronDayOfTheWeek, CronFields, CronHour, CronMinute, CronMonth, CronSecond} from './CronFields';
 import {CronDate} from './CronDate';
 import {CronExpression} from './CronExpression';
-import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronExpressionParserOptions, ICronParseOptions, IFieldConstraint, MonthRange, MonthsEnum, PredefinedExpressionsEnum, RawCronFields, SixtyRange} from './types';
+import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronParseOptions, IFieldConstraint, MonthRange, MonthsEnum, PredefinedExpressionsEnum, RawCronFields, SixtyRange} from './types';
 import assert from 'assert';
 
 const STANDARD_VALID_CHARACTERS = /^[,*\d/-]+$/;

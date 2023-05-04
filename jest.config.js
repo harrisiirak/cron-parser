@@ -24,7 +24,7 @@ export default {
     'src/**/*.ts',
     '!src/index.cjs.js',
     '!src/index.ts',
-    '!lib/**/*'
+    '!dist/**/*'
   ],
   coverageThreshold: {
     global: {

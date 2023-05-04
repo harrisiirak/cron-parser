@@ -12,7 +12,7 @@ coverage
 pids
 logs
 results
-lib
+dist
 testing
 
 .run

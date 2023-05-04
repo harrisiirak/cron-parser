@@ -2,15 +2,15 @@
   "name": "cron-parser",
   "version": "4.8.1",
   "description": "Node.js library for parsing crontab instructions",
-  "main": "lib/cjs/index.cjs.js",
-  "module": "lib/esm/index.js",
-  "types": "lib/types/index.d.ts",
+  "main": "dist/cjs/index.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
   "type": "module",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "clean": "rimraf lib",
+    "clean": "rimraf dist",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build": "npm run clean && npm run build:cjs && npm run build:esm",
