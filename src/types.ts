@@ -30,6 +30,24 @@ export type SerializedCronField = {
   chars: CronChars[];
 }
 
+export type SerializedCronFields = {
+  second: SerializedCronField;
+  minute: SerializedCronField;
+  hour: SerializedCronField;
+  dayOfMonth: SerializedCronField;
+  month: SerializedCronField;
+  dayOfWeek: SerializedCronField;
+}
+
+export type RawCronFields = {
+  second: string,
+  minute: string,
+  hour: string,
+  dayOfMonth: string,
+  month: string,
+  dayOfWeek: string
+}
+
 export enum MonthsEnum {jan = 1, feb = 2, mar = 3, apr = 4, may = 5, jun = 6, jul = 7, aug = 8, sep = 9, oct = 10, nov = 11, dec = 12}
 
 export enum DaysInMonthEnum {jan = 31, feb = 29, mar = 31, apr = 30, may = 31, jun = 30, jul = 31, aug = 31, sep = 30, oct = 31, nov = 30, dec = 31}

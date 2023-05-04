@@ -2,7 +2,7 @@ import {CronConstants} from './CronConstants';
 import {CronDayOfMonth, CronDayOfTheWeek, CronFields, CronHour, CronMinute, CronMonth, CronSecond} from './CronFields';
 import {CronDate} from './CronDate';
 import {CronExpression} from './CronExpression';
-import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronExpressionParserOptions, ICronParser, IFieldConstraint, MonthRange, MonthsEnum, PredefinedExpressionsEnum, SixtyRange} from './types';
+import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronExpressionParserOptions, ICronParser, IFieldConstraint, MonthRange, MonthsEnum, PredefinedExpressionsEnum, RawCronFields, SixtyRange} from './types';
 import assert from 'assert';
 
 const STANDARD_VALID_CHARACTERS = /^[,*\d/-]+$/;
@@ -82,9 +82,9 @@ export class CronExpressionParser {
    * @param {string} expression - The cron expression to parse.
    * @param {ICronParser} options - The options to use when parsing the expression.
    * @private
-   * @returns {{ second: string, minute: string, hour: string, dayOfMonth: string, month: string, dayOfWeek: string }} The raw fields.
+   * @returns {RawCronFields} The raw fields.
    */
-  static #getRawFields(expression: string, options: ICronParser): { second: string, minute: string, hour: string, dayOfMonth: string, month: string, dayOfWeek: string } {
+  static #getRawFields(expression: string, options: ICronParser): RawCronFields {
     assert(!options.strict || expression.split(/\s+/).length === 6, 'Invalid cron expression, expected 6 fields in strict mode!');
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);

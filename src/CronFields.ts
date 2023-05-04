@@ -1,6 +1,6 @@
 import {CronConstants} from './CronConstants';
 import assert from 'assert';
-import {CronChars, DayOfTheMonthRange, DayOfTheWeekRange, HourRange, ICronFields, IFieldRange, MonthRange, SixtyRange} from './types';
+import {CronChars, DayOfTheMonthRange, ICronFields, IFieldRange, MonthRange, SerializedCronFields} from './types';
 import {CronSecond} from './fields/CronSecond';
 import {CronMinute} from './fields/CronMinute';
 import {CronHour} from './fields/CronHour';
@@ -289,18 +289,17 @@ export class CronFields {
   }
 
   /**
-   * Returns an object with the cron field values as arrays.
-   * @TODO: Should rename this to serialize and call the child fields serialize method
-   * @returns {Object} An object containing the cron field values
+   * Returns a serialized representation of the cron fields values.
+   * @returns {SerializedCronFields} An object containing the cron field values
    */
-  debug(): { second: SixtyRange[], minute: SixtyRange[], hour: HourRange[], dayOfMonth: DayOfTheMonthRange[], month: MonthRange[], dayOfWeek: DayOfTheWeekRange[] } {
+  serialize(): SerializedCronFields {
     return {
-      second: this.#second.values,
-      minute: this.#minute.values,
-      hour: this.#hour.values,
-      dayOfMonth: this.#dayOfMonth.values,
-      month: this.#month.values,
-      dayOfWeek: this.#dayOfWeek.values,
+      second: this.#second.serialize(),
+      minute: this.#minute.serialize(),
+      hour: this.#hour.serialize(),
+      dayOfMonth: this.#dayOfMonth.serialize(),
+      month: this.#month.serialize(),
+      dayOfWeek: this.#dayOfWeek.serialize(),
     };
   }
 }
