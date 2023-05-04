@@ -152,18 +152,25 @@ export class CronFields {
     if (input.length === 0) {
       return [];
     }
+
+    // Initialize the output array and current IFieldRange
     const output: IFieldRange[] = [];
     let current: IFieldRange | undefined = undefined;
 
     input.forEach((item, i, arr) => {
+      // If the current IFieldRange is undefined, create a new one with the current item as the start.
       if (current === undefined) {
         current = {start: item, count: 1};
         return;
       }
 
+      // Cache the previous and next items in the array.
       const prevItem = arr[i - 1] || current.start;
       const nextItem = arr[i + 1];
 
+      // If the current item is 'L' or 'W', push the current IFieldRange to the output and
+      // create a new IFieldRange with the current item as the start.
+      // 'L' and 'W' characters are special cases that need to be handled separately.
       if (item === 'L' || item === 'W') {
         output.push(current);
         output.push({start: item, count: 1});
@@ -171,10 +178,13 @@ export class CronFields {
         return;
       }
 
+      // If the current step is undefined and there is a next item, update the current IFieldRange.
+      // This block checks if the current step needs to be updated and does so if needed.
       if (current.step === undefined && nextItem !== undefined) {
         const step = item - (prevItem as number);
         const nextStep = (nextItem as number) - item;
 
+        // If the current step is less or equal to the next step, update the current IFieldRange to include the current item.
         if (step <= nextStep) {
           current = {...current, count: 2, end: item, step};
           return;
@@ -182,11 +192,17 @@ export class CronFields {
         current.step = 1;
       }
 
+      // If the difference between the current item and the current end is equal to the current step,
+      // update the current IFieldRange's count and end.
+      // This block checks if the current item is part of the current range and updates the range accordingly.
       if (item - (current.end ?? 0) === current.step) {
         current.count++;
         current.end = item;
       } else {
+        // If the count is 1, push a new IFieldRange with the current start.
+        // This handles the case where the current range has only one element.
         if (current.count === 1) {
+          // If the count is 2, push two separate IFieldRanges, one for each element.
           output.push({start: current.start, count: 1});
         } else if (current.count === 2) {
           output.push({start: current.start, count: 1});
@@ -194,12 +210,15 @@ export class CronFields {
           // this is why we ?? it and then ignore the prevItem in the coverage
           output.push({start: current.end ?? /* istanbul ignore next - see above */ prevItem, count: 1});
         } else {
+          // Otherwise, push the current IFieldRange to the output.
           output.push(current);
         }
+        // Reset the current IFieldRange with the current item as the start.
         current = {start: item, count: 1};
       }
     });
 
+    // Push the final IFieldRange, if any, to the output array.
     if (current) {
       output.push(current);
     }
