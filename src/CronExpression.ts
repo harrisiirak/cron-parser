@@ -358,7 +358,7 @@ export class CronExpression {
       return false;
     }
     if (isDstStart && !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
-      currentDate.handleMathOp(dateMathVerb, TimeUnitsEnum.hour);
+      currentDate.invokeDateOperation(dateMathVerb, TimeUnitsEnum.hour);
       return false;
     }
     if (isDstEnd && !reverse) {

@@ -210,7 +210,7 @@ export class CronDate {
    * @param {DateMathOpEnum} verb - {'add' | 'subtract'}
    * @param {TimeUnitsEnum} unit - {'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'}
    */
-  handleMathOp(verb: DateMathOpEnum, unit: TimeUnitsEnum) {
+  invokeDateOperation(verb: DateMathOpEnum, unit: TimeUnitsEnum) {
     if (verb === DateMathOpEnum.add) {
       this.addUnit(unit);
       return;
@@ -475,11 +475,11 @@ export class CronDate {
    */
   applyDateOperation(op: DateMathOpEnum, unit: TimeUnitsEnum, hoursLength?: number): void {
     if (unit === TimeUnitsEnum.month || unit === TimeUnitsEnum.day) {
-      this.handleMathOp(op, unit);
+      this.invokeDateOperation(op, unit);
     } else {
       assert(hoursLength !== undefined, 'hoursLength must be defined when unit is not month or day');
       const previousHour = this.getHours();
-      this.handleMathOp(op, unit);
+      this.invokeDateOperation(op, unit);
       const currentHour = this.getHours();
       const diff = currentHour - previousHour;
       if (diff === 2) {
