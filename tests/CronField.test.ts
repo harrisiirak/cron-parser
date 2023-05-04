@@ -11,25 +11,61 @@ import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange
 describe('CronFields', () => {
   test('stringify() and debug() methods', () => {
     const expected = {
-      second: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
-      minute: [0, 30],
-      hour: [9, 11, 13, 15, 17],
-      dayOfMonth: [1, 15],
-      month: [1, 3, 5, 7, 9, 11],
-      dayOfWeek: [1, 2, 3, 4, 5],
+      second: {
+        chars: [],
+        max: 59,
+        min: 0,
+        wildcard: false,
+        values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
+      },
+      minute: {
+        chars: [],
+        max: 59,
+        min: 0,
+        wildcard: false,
+        values: [0, 30],
+      },
+      hour: {
+        chars: [],
+        max: 23,
+        min: 0,
+        wildcard: false,
+        values: [9, 11, 13, 15, 17],
+      },
+      dayOfMonth: {
+        chars: ['L'],
+        max: 31,
+        min: 1,
+        wildcard: false,
+        values: [1, 15],
+      },
+      month: {
+        chars: [],
+        max: 12,
+        min: 1,
+        wildcard: false,
+        values: [1, 3, 5, 7, 9, 11],
+      },
+      dayOfWeek: {
+        chars: ['L'],
+        max: 7,
+        min: 0,
+        wildcard: false,
+        values: [1, 2, 3, 4, 5],
+      },
     };
     const cronFields = new CronFields({
-      second: new CronSecond(<SixtyRange[]>expected.second),
-      minute: new CronMinute(<SixtyRange[]>expected.minute),
-      hour: new CronHour(<HourRange[]>expected.hour),
-      dayOfMonth: new CronDayOfMonth(<DayOfTheMonthRange[]>expected.dayOfMonth),
-      month: new CronMonth(<MonthRange[]>expected.month),
-      dayOfWeek: new CronDayOfTheWeek(<DayOfTheWeekRange[]>expected.dayOfWeek),
+      second: new CronSecond(<SixtyRange[]>expected.second.values),
+      minute: new CronMinute(<SixtyRange[]>expected.minute.values),
+      hour: new CronHour(<HourRange[]>expected.hour.values),
+      dayOfMonth: new CronDayOfMonth(<DayOfTheMonthRange[]>expected.dayOfMonth.values),
+      month: new CronMonth(<MonthRange[]>expected.month.values),
+      dayOfWeek: new CronDayOfTheWeek(<DayOfTheWeekRange[]>expected.dayOfWeek.values),
     });
 
     expect(cronFields.stringify()).toEqual('0,30 9-17/2 1,15 */2 1-5');
     expect(cronFields.stringify(true)).toEqual('* 0,30 9-17/2 1,15 */2 1-5');
-    expect(cronFields.debug()).toEqual(expected);
+    expect(cronFields.serialize()).toEqual(expected);
   });
 
   test('invalid constructor parameters', () => {
