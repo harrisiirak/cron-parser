@@ -85,10 +85,11 @@ export class CronExpressionParser {
    * @returns {RawCronFields} The raw fields.
    */
   static #getRawFields(expression: string, options: ICronParser): RawCronFields {
-    assert(!options.strict || expression.split(/\s+/).length === 6, 'Invalid cron expression, expected 6 fields in strict mode!');
+    assert(!options.strict || expression > '', 'Invalid cron expression');
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);
-    assert(atoms.length <= 6, 'Invalid cron expression');
+    assert(!options.strict || atoms.length === 6, 'Invalid cron expression, expected 6 fields');
+    assert(atoms.length <= 6, 'Invalid cron expression, too many fields');
     const defaults = ['*', '*', '*', '*', '*', '0'];
     if (atoms.length < defaults.length) {
       atoms.unshift(...defaults.slice(atoms.length));
