@@ -2,7 +2,7 @@ import {CronConstants} from './CronConstants';
 import {CronDayOfMonth, CronDayOfTheWeek, CronFields, CronHour, CronMinute, CronMonth, CronSecond} from './CronFields';
 import {CronDate} from './CronDate';
 import {CronExpression} from './CronExpression';
-import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronExpressionParserOptions, ICronParser, IFieldConstraint, MonthRange, MonthsEnum, SixtyRange} from './types';
+import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronExpressionParserOptions, ICronParser, IFieldConstraint, MonthRange, MonthsEnum, PredefinedExpressionsEnum, SixtyRange} from './types';
 import assert from 'assert';
 
 const STANDARD_VALID_CHARACTERS = /^[,*\d/-]+$/;
@@ -35,17 +35,10 @@ export class CronExpressionParser {
    * Returns a map of predefined expressions.
    * @static
    * @memberof CronExpressionParser
-   * @returns {Record<string, string>} A map of predefined expressions.
+   * @returns {typeof PredefinedExpressionsEnum} A map of predefined expressions.
    */
-  static get predefined(): Record<string, string> {
-    return {
-      '@yearly': '0 0 1 1 *',
-      '@annually': '0 0 1 1 *',
-      '@monthly': '0 0 1 * *',
-      '@weekly': '0 0 * * 0',
-      '@daily': '0 0 * * *',
-      '@hourly': '0 * * * *',
-    };
+  static get predefined(): typeof PredefinedExpressionsEnum {
+    return PredefinedExpressionsEnum;
   }
 
   /**
@@ -65,8 +58,10 @@ export class CronExpressionParser {
       options.currentDate = new CronDate(undefined, 'UTC');
     }
 
-    const predefinedKey = expression as keyof typeof CronExpressionParser.predefined;
+    const predefinedKey = expression as keyof typeof PredefinedExpressionsEnum;
+    console.log('predefinedKey', predefinedKey);
     expression = CronExpressionParser.predefined[predefinedKey] ? CronExpressionParser.predefined[predefinedKey] : expression;
+    console.log('predefinedKey->expression', predefinedKey, expression);
     const rawFields = CronExpressionParser.#getRawFields(expression, options);
 
     assert(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !options.strict, 'Cannot use both dayOfMonth and dayOfWeek together in strict mode!');

@@ -410,7 +410,7 @@ describe('CronExpression', () => {
     });
   });
 
-  test('predefined expression', () => {
+  test('predefined expression should be valid', () => {
     expect(CronExpression.predefined).toEqual({
       '@daily': '0 0 0 * * *',
       '@hourly': '0 0 * * * *',

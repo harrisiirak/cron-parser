@@ -67,9 +67,9 @@ export class CronExpression {
   /**
    * Getter for the predefined cron expressions.
    *
-   * @returns {PredefinedExpressionsEnum} Predefined cron expressions.
+   * @returns {typeof PredefinedExpressionsEnum} Predefined cron expressions.
    */
-  static get predefined() {
+  static get predefined(): typeof PredefinedExpressionsEnum {
     return PredefinedExpressionsEnum;
   }
 
@@ -87,7 +87,7 @@ export class CronExpression {
    *
    * @public
    * @param {string} expression - The input cron expression string.
-   * @param {CronOptions} [options] - Optional parsing options.
+   * @param {ICronParser} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
   static parse(expression: string, options: ICronParser = {}): CronExpression {
@@ -99,7 +99,7 @@ export class CronExpression {
    *
    * @public
    * @param {Record<string, number[]>} fields - The input cron fields object.
-   * @param {CronOptions} [options] - Optional parsing options.
+   * @param {ICronParser} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
   static fieldsToExpression(fields: CronFields, options?: ICronParser): CronExpression {
