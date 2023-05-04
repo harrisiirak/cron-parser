@@ -354,7 +354,7 @@ export class CronExpression {
 
     if (!isMatch && !isDstStart) {
       currentDate.dstStart = null;
-      currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.hour, this.#fields.hour.values.length);
+      currentDate.applyDateOperation(dateMathVerb, TimeUnitsEnum.hour, this.#fields.hour.values.length);
       return false;
     }
     if (isDstStart && !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
@@ -363,7 +363,7 @@ export class CronExpression {
     }
     if (isDstEnd && !reverse) {
       currentDate.dstEnd = null;
-      currentDate.shiftTimezone(DateMathOpEnum.add, TimeUnitsEnum.hour, this.#fields.hour.values.length);
+      currentDate.applyDateOperation(DateMathOpEnum.add, TimeUnitsEnum.hour, this.#fields.hour.values.length);
       return false;
     }
     return true;
@@ -392,17 +392,17 @@ export class CronExpression {
       debugMatcher(`############## Start Of Match: ${currentDate.toISOString()} ##############`);
 
       if (!this.#matchDayOfMonth(currentDate)) {
-        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchDayOfMonth)');
         continue;
       }
       if (!(this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek)) {
-        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnitsEnum.day, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchNthDayOfWeek)');
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
-        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.month, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnitsEnum.month, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchMonth)');
         continue;
       }
@@ -411,12 +411,12 @@ export class CronExpression {
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
-        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.minute, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnitsEnum.minute, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchMinute)');
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
-        currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchSecond)');
         continue;
       }
@@ -424,7 +424,7 @@ export class CronExpression {
       if (startTimestamp === currentDate.getTime()) {
         debugMatcher(`REJECTED(startTimestamp === currentDate.getTime()) startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
         if ((dateMathVerb === 'add') || (currentDate.getMilliseconds() === 0)) {
-          currentDate.shiftTimezone(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.values.length);
+          currentDate.applyDateOperation(dateMathVerb, TimeUnitsEnum.second, this.#fields.hour.values.length);
         } else {
           currentDate.setMilliseconds(0);
         }

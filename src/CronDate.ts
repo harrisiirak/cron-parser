@@ -471,12 +471,13 @@ export class CronDate {
    * Primarily for internal use.
    * @param {DateMathOpEnum} op - The operation to perform.
    * @param {TimeUnitsEnum} unit - The unit of time to use.
-   * @param {number} [hoursLength] - The length of the hours.
+   * @param {number} [hoursLength] - The length of the hours. Required when unit is not month or day.
    */
-  shiftTimezone(op: DateMathOpEnum, unit: TimeUnitsEnum, hoursLength: number): void {
+  applyDateOperation(op: DateMathOpEnum, unit: TimeUnitsEnum, hoursLength?: number): void {
     if (unit === TimeUnitsEnum.month || unit === TimeUnitsEnum.day) {
       this.handleMathOp(op, unit);
     } else {
+      assert(hoursLength !== undefined, 'hoursLength must be defined when unit is not month or day');
       const previousHour = this.getHours();
       this.handleMathOp(op, unit);
       const currentHour = this.getHours();
