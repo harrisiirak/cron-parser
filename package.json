@@ -6,13 +6,6 @@
   "module": "lib/esm/index.js",
   "types": "lib/types/index.d.ts",
   "type": "module",
-  "old_typesVersions": {
-    "<4.1": {
-      "*": [
-        "types/ts3/*"
-      ]
-    }
-  },
   "directories": {
     "test": "test"
   },
