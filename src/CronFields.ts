@@ -234,9 +234,15 @@ export class CronFields {
    */
   static #handleSingleRange(range: IFieldRange, min: number, max: number): string | null {
     const step = range.step;
-    if (step === 1 && range.start === min && range.end && range.end >= max) return '*';
-    if (!step) return null;
-    if (step !== 1 && range.start === min && range.end && range.end >= max - step + 1) return `*/${step}`;
+    if (!step) {
+      return null;
+    }
+    if (step === 1 && range.start === min && range.end && range.end >= max) {
+      return '*';
+    }
+    if (step !== 1 && range.start === min && range.end && range.end >= max - step + 1) {
+      return `*/${step}`;
+    }
     return null;
   }
 
@@ -249,7 +255,9 @@ export class CronFields {
    */
   static #handleMultipleRanges(range: IFieldRange, max: number): string {
     const step = range.step;
-    if (step === 1) return `${range.start}-${range.end}`;
+    if (step === 1) {
+      return `${range.start}-${range.end}`;
+    }
 
     const multiplier = range.start === 0 ? range.count - 1 : range.count;
     assert(step, 'Unexpected range step');
