@@ -9,42 +9,38 @@ module.exports = {
   extends: [
     'eslint:recommended'
   ],
-  "ignorePatterns": [
-    "lib/**",
-    "**/*.json",
-    "coverage/**",
-    "docs/**",
-    "src/index.cjs.js",
+  ignorePatterns: [
+    'lib/**',
+    '**/*.json',
+    'coverage/**',
+    'docs/**',
+    'src/index.cjs.js',
   ],
-  "parserOptions": {
-    // "ecmaFeatures": { "jsx": true },
-    "ecmaVersion": 2022,
-    "sourceType": "module",
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module',
   },
-  "overrides": [
+  overrides: [
     {
-      "files": ["**/*.ts", "**/*.tsx"],
-      "env": { "browser": false, "es6": true, "node": true },
-      "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended"
+      files: ['**/*.ts'],
+      env: { 'browser': false, 'es6': true, 'node': true },
+      extends: [
+        'eslint:recommended',
+        'plugin:@typescript-eslint/eslint-recommended',
+        'plugin:@typescript-eslint/recommended'
       ],
-      "parser": "@typescript-eslint/parser",
-      "parserOptions": {
-        // "ecmaFeatures": { "jsx": true },
-        "ecmaVersion": 2022,
-        "sourceType": "module",
-        // "project": "./tsconfig.esm.json"
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
       },
-      "plugins": ["@typescript-eslint"],
-      "rules": {
-        "indent": ["error", 2, { "SwitchCase": 1 }],
-        // "linebreak-style": ["error", "unix"],
-        "quotes": ["error", "single"],
-        "semi": ["error", "always"],
-        "comma-dangle": ["error", "always-multiline"],
-        "@typescript-eslint/no-explicit-any": 0
+      plugins: ['@typescript-eslint'],
+      rules: {
+        indent: ['error', 2, { SwitchCase: 1 }],
+        quotes: ['error', 'single'],
+        semi: ['error', 'always'],
+        'comma-dangle': ['error', 'always-multiline'],
+        '@typescript-eslint/no-explicit-any': 0
       }
     }
   ]
