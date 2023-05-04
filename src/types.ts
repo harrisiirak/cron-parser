@@ -79,11 +79,21 @@ export interface ICronExpressionParserOptions {
   iterator?: boolean;
   utc?: boolean;
   tz?: string;
+}
+
+export interface ICronExpression {
+  expression?: string;
+  currentDate?: Date | string | number | CronDate;
+  endDate?: Date | string | number | CronDate;
+  startDate?: Date | string | number | CronDate;
+  iterator?: boolean;
+  utc?: boolean;
+  tz?: string;
   nthDayOfWeek?: number;
 }
 
-export interface ICronParser {
-  currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
+export interface ICronParseOptions {
+  currentDate?: Date | string | number | CronDate;
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;
   iterator?: boolean;

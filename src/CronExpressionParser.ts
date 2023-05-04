@@ -2,7 +2,7 @@ import {CronConstants} from './CronConstants';
 import {CronDayOfMonth, CronDayOfTheWeek, CronFields, CronHour, CronMinute, CronMonth, CronSecond} from './CronFields';
 import {CronDate} from './CronDate';
 import {CronExpression} from './CronExpression';
-import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronExpressionParserOptions, ICronParser, IFieldConstraint, MonthRange, MonthsEnum, PredefinedExpressionsEnum, RawCronFields, SixtyRange} from './types';
+import {DayOfTheMonthRange, DayOfTheWeekRange, DayOfWeekEnum, HourRange, ICronExpressionParserOptions, ICronParseOptions, IFieldConstraint, MonthRange, MonthsEnum, PredefinedExpressionsEnum, RawCronFields, SixtyRange} from './types';
 import assert from 'assert';
 
 const STANDARD_VALID_CHARACTERS = /^[,*\d/-]+$/;
@@ -39,32 +39,28 @@ export class CronExpressionParser {
   /**
    * Parses a cron expression and returns a CronExpression object.
    * @param {string} expression - The cron expression to parse.
-   * @param {ICronParser} [options={}] - The options to use when parsing the expression.
+   * @param {ICronParseOptions} [options={}] - The options to use when parsing the expression.
    * @param {boolean} [options.currentDate=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @param {boolean} [options.strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @param {CronDate} [options.currentDate=new CronDate(undefined, 'UTC')] - The date to use when calculating the next/previous occurrence.
    *
    * @returns {CronExpression} A CronExpression object.
    */
-  static parse(expression: string, options: ICronParser = {}): CronExpression {
-    options.expression = expression;
-    options.strict ??= false;
-    if (typeof options.currentDate === 'undefined') {
-      options.currentDate = new CronDate(undefined, 'UTC');
-    }
+  static parse(expression: string, options: ICronParseOptions = {}): CronExpression {
+    const {strict = false} = options;
+    const currentDate = options.currentDate || new CronDate(undefined, 'UTC');
 
     expression = PredefinedExpressionsEnum[expression as keyof typeof PredefinedExpressionsEnum] || expression;
-    const rawFields = CronExpressionParser.#getRawFields(expression, options);
-
-    assert(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !options.strict, 'Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
+    const rawFields = CronExpressionParser.#getRawFields(expression, strict);
+    assert(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict, 'Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
 
     const second = CronExpressionParser.#parseField('second', rawFields.second, CronExpressionParser.constraints[0]) as SixtyRange[];
     const minute = CronExpressionParser.#parseField('minute', rawFields.minute, CronExpressionParser.constraints[1]) as SixtyRange[];
     const hour = CronExpressionParser.#parseField('hour', rawFields.hour, CronExpressionParser.constraints[2]) as HourRange[];
     const month = CronExpressionParser.#parseField('month', rawFields.month, CronExpressionParser.constraints[4]) as MonthRange[];
     const dayOfMonth = CronExpressionParser.#parseField('dayOfMonth', rawFields.dayOfMonth, CronExpressionParser.constraints[3]) as DayOfTheMonthRange[];
-    rawFields.dayOfWeek = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek, options);
-    const dayOfWeek = CronExpressionParser.#parseField('dayOfWeek', rawFields.dayOfWeek, CronExpressionParser.constraints[5]) as DayOfTheWeekRange[];
+    const {dayOfWeek: _dayOfWeek, nthDayOfWeek} = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
+    const dayOfWeek = CronExpressionParser.#parseField('dayOfWeek', _dayOfWeek, CronExpressionParser.constraints[5]) as DayOfTheWeekRange[];
 
     const fields = new CronFields({
       second: new CronSecond(second, ['*', '?'].includes(rawFields.second)),
@@ -74,21 +70,21 @@ export class CronExpressionParser {
       month: new CronMonth(month, ['*', '?'].includes(rawFields.month)),
       dayOfWeek: new CronDayOfTheWeek(dayOfWeek, ['*', '?'].includes(rawFields.dayOfWeek)),
     });
-    return new CronExpression(fields, options);
+    return new CronExpression(fields, {...options, expression, currentDate, nthDayOfWeek});
   }
 
   /**
    * Get the raw fields from a cron expression.
    * @param {string} expression - The cron expression to parse.
-   * @param {ICronParser} options - The options to use when parsing the expression.
+   * @param {boolean} [strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @private
    * @returns {RawCronFields} The raw fields.
    */
-  static #getRawFields(expression: string, options: ICronParser): RawCronFields {
-    assert(!options.strict || expression > '', 'Invalid cron expression');
+  static #getRawFields(expression: string, strict = false): RawCronFields {
+    assert(!strict || expression > '', 'Invalid cron expression');
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);
-    assert(!options.strict || atoms.length === 6, 'Invalid cron expression, expected 6 fields');
+    assert(!strict || atoms.length === 6, 'Invalid cron expression, expected 6 fields');
     assert(atoms.length <= 6, 'Invalid cron expression, too many fields');
     const defaults = ['*', '*', '*', '*', '*', '0'];
     if (atoms.length < defaults.length) {
@@ -143,8 +139,7 @@ export class CronExpressionParser {
             const v = parseInt(value.toString(), 10);
             assert(v >= constraints.min && v <= constraints.max, `Constraint error, got value ${value} expected range ${constraints.min}-${constraints.max}`);
             stack.push(value);
-          }
-          else {
+          } else {
             /* istanbul ignore next - FIXME no idea how this is triggered or what it's purpose is */
             stack.push(value);
           }
@@ -259,21 +254,19 @@ export class CronExpressionParser {
   /**
    * Parse a cron expression.
    * @param {string} val - The cron expression to parse.
-   * @param {ICronExpressionParserOptions} options - The options for the parser.
    * @private
    * @returns {string} The parsed cron expression.
    */
-  static #parseNthDay(val: string, options: ICronExpressionParserOptions): string {
+  static #parseNthDay(val: string): {dayOfWeek: string, nthDayOfWeek?: number} {
     const atoms = val.split('#');
     if (atoms.length <= 1) {
-      return val;
+      return {dayOfWeek: atoms[0]};
     }
     const nthValue = +atoms[atoms.length - 1];
     const matches = val.match(/([,-/])/);
     assert(matches === null, `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`);
     assert(atoms.length <= 2 && !isNaN(nthValue) && (nthValue >= 1 && nthValue <= 5), 'Constraint error, invalid dayOfWeek occurrence number (#)');
-    options.nthDayOfWeek = nthValue;
-    return atoms[0];
+    return {dayOfWeek: atoms[0], nthDayOfWeek: nthValue};
   }
 
   /**

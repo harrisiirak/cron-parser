@@ -90,11 +90,5 @@ describe('CronExpressionParser', () => {
       expect(CronExpressionParser.predefined).toEqual(predefined);
     });
   });
-
-  describe('constructor', () => {
-    it('should throw an error when attempting to instantiate', () => {
-      expect(() => new CronExpressionParser()).toThrow('This class is not meant to be instantiated.');
-    });
-  });
 });
 

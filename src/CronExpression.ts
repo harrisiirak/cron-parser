@@ -7,9 +7,9 @@ import {
   DateMathOpEnum,
   DayOfTheMonthRange,
   DayOfTheWeekRange,
-  HourRange,
+  HourRange, ICronExpression,
   ICronFields,
-  ICronParser,
+  ICronParseOptions,
   IIteratorCallback,
   IIteratorFields,
   MonthRange,
@@ -31,7 +31,7 @@ const LOOP_LIMIT = 10000;
  * Class representing a Cron expression.
  */
 export class CronExpression {
-  #options: ICronParser;
+  #options: ICronParseOptions;
   readonly #utc: boolean;
   readonly #tz: string | undefined;
   #currentDate: CronDate;
@@ -47,9 +47,9 @@ export class CronExpression {
    * Creates a new CronExpression instance.
    *
    * @param {CronFields | ICronFields} fields - Cron fields.
-   * @param {ICronParser} options - Parser options.
+   * @param {ICronExpression} options - Parser options.
    */
-  constructor(fields: CronFields | ICronFields, options: ICronParser) {
+  constructor(fields: CronFields | ICronFields, options: ICronExpression) {
     this.#options = options;
     this.#utc = options.utc || false;
     this.#tz = this.#utc ? 'UTC' : options.tz;
@@ -87,10 +87,10 @@ export class CronExpression {
    *
    * @public
    * @param {string} expression - The input cron expression string.
-   * @param {ICronParser} [options] - Optional parsing options.
+   * @param {ICronParseOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static parse(expression: string, options: ICronParser = {}): CronExpression {
+  static parse(expression: string, options: ICronParseOptions = {}): CronExpression {
     return CronExpressionParser.parse(expression, options);
   }
 
@@ -99,10 +99,10 @@ export class CronExpression {
    *
    * @public
    * @param {Record<string, number[]>} fields - The input cron fields object.
-   * @param {ICronParser} [options] - Optional parsing options.
+   * @param {ICronParseOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static fieldsToExpression(fields: CronFields, options?: ICronParser): CronExpression {
+  static fieldsToExpression(fields: CronFields, options?: ICronExpression): CronExpression {
     return new CronExpression(fields, options || {});
   }
 

@@ -26,7 +26,8 @@ export {
 
   // Interfaces
   ICronFields,
-  ICronParser,
+  ICronExpression,
+  ICronParseOptions,
   IFieldConstraint,
   IFieldConstraints,
   IFieldRange,
