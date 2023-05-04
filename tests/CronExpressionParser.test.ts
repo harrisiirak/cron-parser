@@ -14,7 +14,7 @@ describe('CronExpressionParser', () => {
     it('should parse predefined expressions correctly', () => {
       Object.entries(CronExpressionParser.predefined).forEach(([key, value]) => {
         const cronExpression = CronExpressionParser.parse(key);
-        expect(cronExpression.stringify()).toBe(value);
+        expect(cronExpression.stringify(true)).toBe(value);
       });
     });
 

@@ -58,10 +58,7 @@ export class CronExpressionParser {
       options.currentDate = new CronDate(undefined, 'UTC');
     }
 
-    const predefinedKey = expression as keyof typeof PredefinedExpressionsEnum;
-    console.log('predefinedKey', predefinedKey);
-    expression = CronExpressionParser.predefined[predefinedKey] ? CronExpressionParser.predefined[predefinedKey] : expression;
-    console.log('predefinedKey->expression', predefinedKey, expression);
+    expression = PredefinedExpressionsEnum[expression as keyof typeof PredefinedExpressionsEnum] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, options);
 
     assert(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !options.strict, 'Cannot use both dayOfMonth and dayOfWeek together in strict mode!');

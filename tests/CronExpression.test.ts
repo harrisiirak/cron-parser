@@ -420,7 +420,8 @@ describe('CronExpression', () => {
       '@weekdays': '0 0 0 * * 1-5',
       '@weekends': '0 0 0 * * 0,6',
       '@weekly': '0 0 0 * * 0',
-      '@yearly': '0 0 0 1 0 *',
+      '@yearly': '0 0 0 1 1 *',
+      '@annually': '0 0 0 1 1 *',
     });
   });
 

@@ -42,7 +42,8 @@ export enum TimeUnitsEnum {second = 'second', minute = 'minute', hour = 'hour', 
 export enum DateMathOpEnum {add = 'add', subtract = 'subtract'}
 
 export enum PredefinedExpressionsEnum {
-  '@yearly' = '0 0 0 1 0 *',
+  '@yearly' = '0 0 0 1 1 *',
+  '@annually' = '0 0 0 1 1 *',
   '@monthly' = '0 0 0 1 * *',
   '@weekly' = '0 0 0 * * 0',
   '@daily' = '0 0 0 * * *',

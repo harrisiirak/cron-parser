@@ -67,9 +67,9 @@ export class CronExpression {
   /**
    * Getter for the predefined cron expressions.
    *
-   * @returns {typeof PredefinedExpressionsEnum} Predefined cron expressions.
+   * @returns {PredefinedExpressionsEnum} Predefined cron expressions.
    */
-  static get predefined(): typeof PredefinedExpressionsEnum {
+  static get predefined() {
     return PredefinedExpressionsEnum;
   }
 
