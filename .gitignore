@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 lib-cov
 coverage
 *.seed
@@ -12,15 +12,14 @@ coverage
 pids
 logs
 results
+lib
+testing
 
-npm-debug.log
-
+.run
 .idea
 .history
 .vscode
 .nyc_output
-/yarn.lock
-/lib/
-/testing/
+yarn.lock
 
 !coverage/*.svg
