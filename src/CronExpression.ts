@@ -53,12 +53,8 @@ export class CronExpression {
     this.#utc = options.utc || false;
     this.#tz = this.#utc ? 'UTC' : options.tz;
     this.#currentDate = new CronDate(options.currentDate, this.#tz);
-    this.#startDate = options.startDate
-      ? new CronDate(options.startDate, this.#tz)
-      : null;
-    this.#endDate = options.endDate
-      ? new CronDate(options.endDate, this.#tz)
-      : null;
+    this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
+    this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
     this.#isIterator = options.iterator || false;
     this.#hasIterated = false;
     this.#nthDayOfWeek = options.nthDayOfWeek || 0;
@@ -90,10 +86,7 @@ export class CronExpression {
    * @param {ICronParseOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static parse(
-    expression: string,
-    options: ICronParseOptions = {},
-  ): CronExpression {
+  static parse(expression: string, options: ICronParseOptions = {}): CronExpression {
     return CronExpressionParser.parse(expression, options);
   }
 
@@ -105,10 +98,7 @@ export class CronExpression {
    * @param {ICronParseOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static fieldsToExpression(
-    fields: CronFields,
-    options?: ICronExpression,
-  ): CronExpression {
+  static fieldsToExpression(fields: CronFields, options?: ICronExpression): CronExpression {
     return new CronExpression(fields, options || {});
   }
 
@@ -151,10 +141,7 @@ export class CronExpression {
    * @memberof CronExpression
    * @private
    */
-  static #isLastWeekdayOfMonthMatch(
-    expressions: (number | string)[],
-    currentDate: CronDate,
-  ): boolean {
+  static #isLastWeekdayOfMonthMatch(expressions: (number | string)[], currentDate: CronDate): boolean {
     return expressions.some((expression: number | string) => {
       // There might be multiple expressions and not all of them will contain the "L".
       if (!CronExpression.#isLInExpressions([expression])) {
@@ -163,15 +150,10 @@ export class CronExpression {
 
       // The first character represents the weekday
       const weekday = parseInt(expression.toString().charAt(0), 10) % 7;
-      assert(
-        !Number.isNaN(weekday),
-        `Invalid last weekday of the month expression: ${expression}`,
-      );
+      assert(!Number.isNaN(weekday), `Invalid last weekday of the month expression: ${expression}`);
 
       // Check if the current date matches the last specified weekday of the month
-      return (
-        currentDate.getDay() === weekday && currentDate.isLastWeekdayOfMonth()
-      );
+      return currentDate.getDay() === weekday && currentDate.isLastWeekdayOfMonth();
     });
   }
 
@@ -184,9 +166,7 @@ export class CronExpression {
   next(): CronDate | { value: CronDate; done: boolean } {
     const schedule = this.#findSchedule();
     // Try to return ES6 compatible iterator
-    return this.#isIterator
-      ? { value: schedule, done: !this.hasNext() }
-      : schedule;
+    return this.#isIterator ? { value: schedule, done: !this.hasNext() } : schedule;
   }
 
   /**
@@ -200,9 +180,7 @@ export class CronExpression {
     // Try to return ES6 compatible iterator
     // TODO: this needs to be refactored into a real iterator
     /* istanbul ignore next - no idea how to trigger first branch */
-    return this.#isIterator
-      ? { value: schedule, done: !this.hasPrev() }
-      : schedule;
+    return this.#isIterator ? { value: schedule, done: !this.hasPrev() } : schedule;
   }
 
   /**
@@ -255,10 +233,7 @@ export class CronExpression {
    * @memberof CronExpression
    * @public
    */
-  iterate(
-    steps: number,
-    callback?: IIteratorCallback,
-  ): (IIteratorFields | CronDate)[] {
+  iterate(steps: number, callback?: IIteratorCallback): (IIteratorFields | CronDate)[] {
     const dates: (IIteratorFields | CronDate)[] = [];
 
     /**
@@ -266,10 +241,7 @@ export class CronExpression {
      * @param {number} step - The current step number.
      * @param {() => IIteratorFields | CronDate} action - The action function to be executed for the current step.
      */
-    const processStep = (
-      step: number,
-      action: () => IIteratorFields | CronDate,
-    ) => {
+    const processStep = (step: number, action: () => IIteratorFields | CronDate) => {
       try {
         const item: IIteratorFields | CronDate = action();
         dates.push(item);
@@ -369,51 +341,33 @@ export class CronExpression {
 
     // Calculate if the current date matches the day of month and day of week fields.
     const matchedDOM =
-      CronExpression.#matchSchedule(
-        currentDate.getDate(),
-        this.#fields.dayOfMonth.values,
-      ) ||
-      (CronExpression.#isLInExpressions(this.#fields.dayOfMonth.values) &&
-        currentDate.isLastDayOfMonth());
+      CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth.values) ||
+      (CronExpression.#isLInExpressions(this.#fields.dayOfMonth.values) && currentDate.isLastDayOfMonth());
     const matchedDOW =
-      CronExpression.#matchSchedule(
-        currentDate.getDay(),
-        this.#fields.dayOfWeek.values,
-      ) ||
+      CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek.values) ||
       (CronExpression.#isLInExpressions(this.#fields.dayOfWeek.values) &&
-        CronExpression.#isLastWeekdayOfMonthMatch(
-          this.#fields.dayOfWeek.values,
-          currentDate,
-        ));
+        CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek.values, currentDate));
 
     // Rule 1: Both "day of month" and "day of week" are restricted; one or both must match the current day.
     if (isRestrictedDOM && isRestrictedDOW && (matchedDOM || matchedDOW)) {
-      debugMatcher(
-        `ACCEPTED(matchDayOfMonth) - Rule 1: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`,
-      );
+      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 1: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
       return true;
     }
 
     // Rule 2: "day of month" restricted and "day of week" not restricted; "day of month" must match the current day.
     if (matchedDOM && !isRestrictedDOW) {
-      debugMatcher(
-        `ACCEPTED(matchDayOfMonth) - Rule 2: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`,
-      );
+      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 2: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
       return true;
     }
 
     // Rule 3: "day of month" is a wildcard, "day of week" is not a wildcard, and "day of week" matches the current day.
     if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && matchedDOW) {
-      debugMatcher(
-        `ACCEPTED(matchDayOfMonth) - Rule 3: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`,
-      );
+      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 3: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
       return true;
     }
 
     // If none of the rules match, the match is rejected.
-    debugMatcher(
-      `REJECTED(matchDayOfMonth) - No Rule Matched: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`,
-    );
+    debugMatcher(`REJECTED(matchDayOfMonth) - No Rule Matched: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
     return false;
   }
 
@@ -425,42 +379,24 @@ export class CronExpression {
    * @param {boolean} reverse - A flag indicating whether the matching should be done in reverse order.
    * @returns {boolean} - True if the current hour matches the cron expression; otherwise, false.
    */
-  #matchHour(
-    currentDate: CronDate,
-    dateMathVerb: DateMathOp,
-    reverse: boolean,
-  ): boolean {
+  #matchHour(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): boolean {
     const currentHour = currentDate.getHours();
-    const isMatch = CronExpression.#matchSchedule(
-      currentHour,
-      this.#fields.hour.values,
-    );
+    const isMatch = CronExpression.#matchSchedule(currentHour, this.#fields.hour.values);
     const isDstStart = currentDate.dstStart === currentHour;
     const isDstEnd = currentDate.dstEnd === currentHour;
 
     if (!isMatch && !isDstStart) {
       currentDate.dstStart = null;
-      currentDate.applyDateOperation(
-        dateMathVerb,
-        TimeUnits.hour,
-        this.#fields.hour.values.length,
-      );
+      currentDate.applyDateOperation(dateMathVerb, TimeUnits.hour, this.#fields.hour.values.length);
       return false;
     }
-    if (
-      isDstStart &&
-      !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)
-    ) {
+    if (isDstStart && !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
       currentDate.invokeDateOperation(dateMathVerb, TimeUnits.hour);
       return false;
     }
     if (isDstEnd && !reverse) {
       currentDate.dstEnd = null;
-      currentDate.applyDateOperation(
-        DateMathOp.add,
-        TimeUnits.hour,
-        this.#fields.hour.values.length,
-      );
+      currentDate.applyDateOperation(DateMathOp.add, TimeUnits.hour, this.#fields.hour.values.length);
       return false;
     }
     return true;
@@ -474,9 +410,7 @@ export class CronExpression {
    * @private
    */
   #findSchedule(reverse = false): CronDate {
-    const dateMathVerb: DateMathOp = reverse
-      ? DateMathOp.subtract
-      : DateMathOp.add;
+    const dateMathVerb: DateMathOp = reverse ? DateMathOp.subtract : DateMathOp.add;
     const currentDate = new CronDate(this.#currentDate, this.#tz);
     const startDate = this.#startDate;
     const endDate = this.#endDate;
@@ -485,52 +419,22 @@ export class CronExpression {
 
     while (stepCount++ < LOOP_LIMIT) {
       assert(stepCount < LOOP_LIMIT, 'Invalid expression, loop limit exceeded');
-      assert(
-        !reverse || !(startDate && startDate.getTime() > currentDate.getTime()),
-        'Out of the timespan range',
-      );
-      assert(
-        reverse || !(endDate && currentDate.getTime() > endDate.getTime()),
-        'Out of the timespan range',
-      );
-      debugMatcher(
-        `############## Start Of Match: ${currentDate.toISOString()} ##############`,
-      );
+      assert(!reverse || !(startDate && startDate.getTime() > currentDate.getTime()), 'Out of the timespan range');
+      assert(reverse || !(endDate && currentDate.getTime() > endDate.getTime()), 'Out of the timespan range');
+      debugMatcher(`############## Start Of Match: ${currentDate.toISOString()} ##############`);
 
       if (!this.#matchDayOfMonth(currentDate)) {
-        currentDate.applyDateOperation(
-          dateMathVerb,
-          TimeUnits.day,
-          this.#fields.hour.values.length,
-        );
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.day, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchDayOfMonth)');
         continue;
       }
-      if (
-        !(
-          this.#nthDayOfWeek <= 0 ||
-          Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek
-        )
-      ) {
-        currentDate.applyDateOperation(
-          dateMathVerb,
-          TimeUnits.day,
-          this.#fields.hour.values.length,
-        );
+      if (!(this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek)) {
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.day, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchNthDayOfWeek)');
         continue;
       }
-      if (
-        !CronExpression.#matchSchedule(
-          currentDate.getMonth() + 1,
-          this.#fields.month.values,
-        )
-      ) {
-        currentDate.applyDateOperation(
-          dateMathVerb,
-          TimeUnits.month,
-          this.#fields.hour.values.length,
-        );
+      if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.month, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchMonth)');
         continue;
       }
@@ -538,45 +442,21 @@ export class CronExpression {
         debugMatcher('REJECTED(matchHour)');
         continue;
       }
-      if (
-        !CronExpression.#matchSchedule(
-          currentDate.getMinutes(),
-          this.#fields.minute.values,
-        )
-      ) {
-        currentDate.applyDateOperation(
-          dateMathVerb,
-          TimeUnits.minute,
-          this.#fields.hour.values.length,
-        );
+      if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.minute, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchMinute)');
         continue;
       }
-      if (
-        !CronExpression.#matchSchedule(
-          currentDate.getSeconds(),
-          this.#fields.second.values,
-        )
-      ) {
-        currentDate.applyDateOperation(
-          dateMathVerb,
-          TimeUnits.second,
-          this.#fields.hour.values.length,
-        );
+      if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.second, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchSecond)');
         continue;
       }
 
       if (startTimestamp === currentDate.getTime()) {
-        debugMatcher(
-          `REJECTED(startTimestamp === currentDate.getTime()) startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`,
-        );
+        debugMatcher(`REJECTED(startTimestamp === currentDate.getTime()) startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
         if (dateMathVerb === 'add' || currentDate.getMilliseconds() === 0) {
-          currentDate.applyDateOperation(
-            dateMathVerb,
-            TimeUnits.second,
-            this.#fields.hour.values.length,
-          );
+          currentDate.applyDateOperation(dateMathVerb, TimeUnits.second, this.#fields.hour.values.length);
         } else {
           currentDate.setMilliseconds(0);
         }
@@ -587,9 +467,7 @@ export class CronExpression {
 
     this.#currentDate = new CronDate(currentDate, this.#tz);
     this.#hasIterated = true;
-    debugMatcher(
-      `************** MATCHED: ${this.#currentDate.toISOString()} **************`,
-    );
+    debugMatcher(`************** MATCHED: ${this.#currentDate.toISOString()} **************`);
     return currentDate;
   }
 }

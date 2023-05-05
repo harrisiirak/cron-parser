@@ -1,4 +1,4 @@
-import {CronDate, CronParser} from '../src';
+import { CronDate, CronParser } from '../src';
 
 describe('CronParser', () => {
   test('load crontab file', function () {

@@ -1,5 +1,5 @@
-import {CronDate} from '../src';
-import {DateTime} from 'luxon';
+import { CronDate } from '../src';
+import { DateTime } from 'luxon';
 
 describe('parse cron date formats with local timezone', () => {
   const offset = new Date().getTimezoneOffset();

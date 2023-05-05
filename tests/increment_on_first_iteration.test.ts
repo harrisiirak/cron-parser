@@ -1,4 +1,4 @@
-import {CronDate, CronExpression} from '../src';
+import { CronDate, CronExpression } from '../src';
 
 describe('CronExpression', () => {
   beforeEach(() => {

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { CronExpression, CronFields } from '../src';
 import { CronParser } from '../src';
 import ErrnoException = NodeJS.ErrnoException;
-import {ParseStringResponse} from '../src/types';
+import { ParseStringResponse } from '../src/types';
 
 describe('CronParser', () => {
   describe('parseExpression', () => {

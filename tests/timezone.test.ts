@@ -1,4 +1,4 @@
-import {CronDate, CronExpression} from '../src';
+import { CronDate, CronExpression } from '../src';
 
 type Options = {currentDate: string | Date, endDate?: string | undefined, tz?: string | undefined};
 

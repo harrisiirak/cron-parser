@@ -1,9 +1,11 @@
 import { CronField } from './CronField';
-import { CronChars, MonthRange } from '../types';
+import { CronChars, CronMax, CronMin, DaysInMonth, MonthRange } from '../types';
 
 const MIN_MONTH = 1;
 const MAX_MONTH = 12;
 const MONTH_CHARS = [] as CronChars[];
+
+const DAYS_IN_MONTH = Object.values(DaysInMonth).map((days: string | DaysInMonth) => parseInt(days as string));
 
 /**
  * Represents the "day of the month" field within a cron expression.
@@ -11,13 +13,28 @@ const MONTH_CHARS = [] as CronChars[];
  * @extends CronField
  */
 export class CronMonth extends CronField {
+  static get min(): CronMin {
+    return MIN_MONTH;
+  }
+
+  static get max(): CronMax {
+    return MAX_MONTH;
+  }
+
+  static get chars(): CronChars[] {
+    return MONTH_CHARS;
+  }
+
+  static get daysInMonth(): number[] {
+    return DAYS_IN_MONTH;
+  }
   /**
    * CronDayOfMonth constructor. Initializes the "day of the month" field with the provided values.
    * @param {DayOfTheMonthRange[]} values - Values for the "day of the month" field
    * @param {boolean} [wildcard=false] - Whether this field is a wildcard
    */
   constructor(values: MonthRange[], wildcard = false) {
-    super(values, MIN_MONTH, MAX_MONTH, MONTH_CHARS, wildcard);
+    super(values, wildcard);
     this.validate();
   }
 

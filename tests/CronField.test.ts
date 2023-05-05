@@ -1,55 +1,39 @@
-import {CronFields} from '../src/';
-import {CronField} from '../src';
-import {CronDayOfMonth} from '../src';
-import {CronDayOfTheWeek} from '../src';
-import {CronHour} from '../src';
-import {CronMinute} from '../src';
-import {CronMonth} from '../src';
-import {CronSecond} from '../src';
-import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../src';
+import { CronFields } from '../src/';
+import { CronField } from '../src';
+import { CronDayOfMonth } from '../src';
+import { CronDayOfTheWeek } from '../src';
+import { CronHour } from '../src';
+import { CronMinute } from '../src';
+import { CronMonth } from '../src';
+import { CronSecond } from '../src';
+import { DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange } from '../src';
 
 describe('CronFields', () => {
+  // an array of numbers from 0 to 59
+  const sixtyRange: number[] = Array.from(Array(60).keys());
   test('stringify() and debug() methods', () => {
     const expected = {
       second: {
-        chars: [],
-        max: 59,
-        min: 0,
         wildcard: false,
-        values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
+        values: sixtyRange,
       },
       minute: {
-        chars: [],
-        max: 59,
-        min: 0,
         wildcard: false,
         values: [0, 30],
       },
       hour: {
-        chars: [],
-        max: 23,
-        min: 0,
         wildcard: false,
         values: [9, 11, 13, 15, 17],
       },
       dayOfMonth: {
-        chars: ['L'],
-        max: 31,
-        min: 1,
         wildcard: false,
         values: [1, 15],
       },
       month: {
-        chars: [],
-        max: 12,
-        min: 1,
         wildcard: false,
         values: [1, 3, 5, 7, 9, 11],
       },
       dayOfWeek: {
-        chars: ['L'],
-        max: 7,
-        min: 0,
         wildcard: false,
         values: [1, 2, 3, 4, 5],
       },
@@ -113,9 +97,6 @@ describe('CronFields', () => {
     });
 
     expect(cronFields.dayOfMonth.serialize()).toEqual({
-      'chars': ['L'],
-      'max': 31,
-      'min': 1,
       'values': [15],
       'wildcard': false,
     });
@@ -123,7 +104,7 @@ describe('CronFields', () => {
 
   test('CronField constructor', () => {
     expect(() => {
-      new CronField([0], 0, 12, [], false);
+      new CronField([0], false);
     }).toThrow('Cannot construct CronField instances directly');
   });
 

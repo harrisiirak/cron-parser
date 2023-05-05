@@ -1,4 +1,4 @@
-import {CronDate, CronExpression} from '../src';
+import { CronDate, CronExpression } from '../src';
 
 describe('expression 31 of month', () => {
   test('should correctly iterate through the next 20 occurrences', () => {

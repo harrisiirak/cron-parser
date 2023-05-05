@@ -26,10 +26,7 @@ class CronParser {
    * @param {object} [options] Parsing options
    * @return {object}
    */
-  static fieldsToExpression(
-    fields: CronFields,
-    options?: object,
-  ): CronExpression {
+  static fieldsToExpression(fields: CronFields, options?: object): CronExpression {
     return CronExpression.fieldsToExpression(fields, options);
   }
 
@@ -84,10 +81,7 @@ class CronParser {
    * @param {string} filePath Path to file
    * @param {function} callback
    */
-  static parseFile(
-    filePath: string,
-    callback: (error: ErrnoException | null, data?: ParseStringResponse) => void,
-  ) {
+  static parseFile(filePath: string, callback: (error: ErrnoException | null, data?: ParseStringResponse) => void) {
     fs.readFile(filePath, (err, data) => {
       if (err) {
         return void callback(err);
@@ -119,5 +113,3 @@ class CronParser {
 }
 
 export { CronParser };
-
-

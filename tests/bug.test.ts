@@ -1,9 +1,9 @@
-import {CronExpression, CronDate} from '../src';
+import { CronExpression, CronDate } from '../src';
 
 describe('parse expression as UTC', () => {
   test('UTC parse test', () => {
     try {
-      const options = {utc: true};
+      const options = { utc: true };
 
       const interval = CronExpression.parse('0 0 10 * * *', options);
 

@@ -1,5 +1,4 @@
 /* istanbul ignore file */
-export { CronConstants } from './CronConstants';
 export { CronFields } from './CronFields';
 export { CronParser } from './CronParser';
 export { CronDate } from './CronDate';
@@ -28,7 +27,6 @@ export {
   ICronFields,
   ICronExpression,
   ICronParseOptions,
-  IFieldConstraint,
   IFieldConstraints,
   IFieldRange,
   IIteratorCallback,
@@ -36,6 +34,7 @@ export {
 
   // Types
   CronChars,
+  CronConstraints,
   CronFieldTypes,
   CronMax,
   CronMin,
@@ -47,5 +46,6 @@ export {
   ParseStringResponse,
   RangeFrom,
   SerializedCronField,
+  SerializedCronFields,
   SixtyRange,
 } from './types';

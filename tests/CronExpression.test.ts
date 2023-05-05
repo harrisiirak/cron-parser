@@ -734,7 +734,8 @@ describe('CronExpression', () => {
     next = interval.next();
 
     expect(next).toBeTruthy();
-    cronDateTypedTest(next, (date) => expect((date.getDate() === 3 || date.getDate() === 6) && date.getDate() !== prevDate).toBeTruthy()); // 'date matches and is not previous date'
+    // 'date matches and is not previous date'
+    cronDateTypedTest(next, (date) => expect((date.getDate() === 3 || date.getDate() === 6) && date.getDate() !== prevDate).toBeTruthy());
 
     if (!(next instanceof CronDate)) {
       throw new Error('next is not a CronDate');
@@ -744,7 +745,8 @@ describe('CronExpression', () => {
 
     next = interval.next();
     expect(next).toBeTruthy();
-    cronDateTypedTest(next, (date) => expect((date.getDate() === 3 || date.getDate() === 6) && date.getDate() !== prevDate).toBeTruthy()); // 'date matches and is not previous date'
+    // 'date matches and is not previous date'
+    cronDateTypedTest(next, (date) => expect((date.getDate() === 3 || date.getDate() === 6) && date.getDate() !== prevDate).toBeTruthy());
 
     if (!(next instanceof CronDate)) {
       throw new Error('next is not a CronDate');
@@ -754,7 +756,8 @@ describe('CronExpression', () => {
 
     next = interval.next();
     expect(next).toBeTruthy();
-    cronDateTypedTest(next, (date) => expect((date.getDate() === 3 || date.getDate() === 6) && date.getDate() !== prevDate).toBeTruthy()); // 'date matches and is not previous date'
+    // 'date matches and is not previous date'
+    cronDateTypedTest(next, (date) => expect((date.getDate() === 3 || date.getDate() === 6) && date.getDate() !== prevDate).toBeTruthy());
   });
 
   test('Summertime bug test', function () {
@@ -1300,7 +1303,8 @@ describe('CronExpression', () => {
 
   });
 
-  // The Quartz documentation says that if the # character is used then no other expression can be used in the dayOfWeek term: http://www.quartz-scheduler.org/api/2.3.0/index.html
+  // The Quartz documentation says that if the # character is used then no other expression can be used in the dayOfWeek term:
+  // http://www.quartz-scheduler.org/api/2.3.0/index.html
   test('cannot combine `-` range and # occurrence special characters', function () {
     const expression = '0 0 0 ? * 2-4#2';
     expect(() => CronExpression.parse(expression)).toThrow('Constraint error, invalid dayOfWeek `#` and `-` special characters are incompatible');

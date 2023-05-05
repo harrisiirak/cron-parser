@@ -1,5 +1,5 @@
-import {CronFields, CronParser} from '../src';
-import {ICronFields} from '../src/types';
+import { CronFields, CronParser } from '../src';
+import { ICronFields } from '../src/types';
 
 describe('CronParser', () => {
   it('should stringify cron expression all stars no seconds 0 * * * * *', function () {

@@ -1,13 +1,5 @@
-import { CronConstants } from './CronConstants';
 import assert from 'assert';
-import {
-  CronChars,
-  DayOfTheMonthRange,
-  ICronFields,
-  IFieldRange,
-  MonthRange,
-  SerializedCronFields,
-} from './types';
+import { CronChars, DayOfTheMonthRange, ICronFields, IFieldRange, MonthRange, SerializedCronFields } from './types';
 import { CronSecond } from './fields/CronSecond';
 import { CronMinute } from './fields/CronMinute';
 import { CronHour } from './fields/CronHour';
@@ -16,14 +8,7 @@ import { CronMonth } from './fields/CronMonth';
 import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
 import { CronField } from './fields/CronField';
 
-export {
-  CronSecond,
-  CronMinute,
-  CronHour,
-  CronDayOfMonth,
-  CronMonth,
-  CronDayOfTheWeek,
-};
+export { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfTheWeek };
 
 /**
  * Represents a complete set of cron fields.
@@ -42,31 +27,20 @@ export class CronFields {
    * @param {ICronFields} param0 - The cron fields values
    * @throws {Error} if validation fails
    */
-  constructor({
-    second,
-    minute,
-    hour,
-    dayOfMonth,
-    month,
-    dayOfWeek,
-  }: ICronFields) {
+  constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: ICronFields) {
     // FIXME: this is ugly need to separate the logic in #handleMaxDaysInMonth
     if (!(dayOfMonth instanceof CronDayOfMonth)) {
       /* istanbul ignore next - needs to be refactored */
       if (month instanceof CronMonth) {
         /* istanbul ignore next - needs to be refactored */
-        throw new Error(
-          'Validation error, month must not be an instance of CronMonth when dayOfMonth is not an instance of CronDayOfMonth',
-        );
+        throw new Error('Validation error, month must not be an instance of CronMonth when dayOfMonth is not an instance of CronDayOfMonth');
       }
       dayOfMonth = CronFields.#handleMaxDaysInMonth(month, dayOfMonth);
     } else {
       if (month instanceof CronMonth) {
         CronFields.#handleMaxDaysInMonth(month.values, dayOfMonth.values);
       } else {
-        throw new Error(
-          'Validation error, month must be an instance of CronMonth when dayOfMonth is an instance of CronDayOfMonth',
-        );
+        throw new Error('Validation error, month must be an instance of CronMonth when dayOfMonth is an instance of CronDayOfMonth');
       }
     }
     assert(second, 'Validation error, Field second is missing');
@@ -76,20 +50,12 @@ export class CronFields {
     assert(month, 'Validation error, Field month is missing');
     assert(dayOfWeek, 'Validation error, Field dayOfWeek is missing');
 
-    this.#second =
-      second instanceof CronSecond ? second : new CronSecond(second);
-    this.#minute =
-      minute instanceof CronMinute ? minute : new CronMinute(minute);
+    this.#second = second instanceof CronSecond ? second : new CronSecond(second);
+    this.#minute = minute instanceof CronMinute ? minute : new CronMinute(minute);
     this.#hour = hour instanceof CronHour ? hour : new CronHour(hour);
-    this.#dayOfMonth =
-      dayOfMonth instanceof CronDayOfMonth
-        ? dayOfMonth
-        : new CronDayOfMonth(dayOfMonth);
+    this.#dayOfMonth = dayOfMonth instanceof CronDayOfMonth ? dayOfMonth : new CronDayOfMonth(dayOfMonth);
     this.#month = month instanceof CronMonth ? month : new CronMonth(month);
-    this.#dayOfWeek =
-      dayOfWeek instanceof CronDayOfTheWeek
-        ? dayOfWeek
-        : new CronDayOfTheWeek(dayOfWeek);
+    this.#dayOfWeek = dayOfWeek instanceof CronDayOfTheWeek ? dayOfWeek : new CronDayOfTheWeek(dayOfWeek);
   }
 
   /**
@@ -207,8 +173,7 @@ export class CronFields {
           // current.end can never be undefined here but typescript doesn't know that
           // this is why we ?? it and then ignore the prevItem in the coverage
           output.push({
-            start:
-              current.end ?? /* istanbul ignore next - see above */ prevItem,
+            start: current.end ?? /* istanbul ignore next - see above */ prevItem,
             count: 1,
           });
         } else {
@@ -234,18 +199,13 @@ export class CronFields {
    * @returns {DayOfTheMonthRange[]} The day of the month range.
    * @private
    */
-  static #handleMaxDaysInMonth(
-    month: MonthRange[],
-    dayOfMonth: DayOfTheMonthRange[],
-  ): DayOfTheMonthRange[] {
+  static #handleMaxDaysInMonth(month: MonthRange[], dayOfMonth: DayOfTheMonthRange[]): DayOfTheMonthRange[] {
     if (month.length === 1) {
-      const daysInMonth = CronConstants.daysInMonth[month[0] - 1];
+      const daysInMonth = CronMonth.daysInMonth[month[0] - 1];
       const v = parseInt(dayOfMonth[0] as string, 10);
       assert(v <= daysInMonth, 'Invalid explicit day of month definition');
 
-      return dayOfMonth.filter((dayOfMonth: number | string) =>
-        dayOfMonth === 'L' ? true : (dayOfMonth as number) <= daysInMonth,
-      );
+      return dayOfMonth.filter((dayOfMonth: number | string) => (dayOfMonth === 'L' ? true : (dayOfMonth as number) <= daysInMonth));
     }
     return dayOfMonth;
   }
@@ -258,11 +218,7 @@ export class CronFields {
    * @returns {string | null} The stringified range or null if it cannot be stringified.
    * @private
    */
-  static #handleSingleRange(
-    range: IFieldRange,
-    min: number,
-    max: number,
-  ): string | null {
+  static #handleSingleRange(range: IFieldRange, min: number, max: number): string | null {
     const step = range.step;
     if (!step) {
       return null;
@@ -270,12 +226,7 @@ export class CronFields {
     if (step === 1 && range.start === min && range.end && range.end >= max) {
       return '*';
     }
-    if (
-      step !== 1 &&
-      range.start === min &&
-      range.end &&
-      range.end >= max - step + 1
-    ) {
+    if (step !== 1 && range.start === min && range.end && range.end >= max - step + 1) {
       return `*/${step}`;
     }
     return null;
@@ -309,9 +260,7 @@ export class CronFields {
         .join(',');
     }
 
-    return range.end === max - step + 1
-      ? `${range.start}/${step}`
-      : `${range.start}-${range.end}/${step}`;
+    return range.end === max - step + 1 ? `${range.start}/${step}` : `${range.start}-${range.end}/${step}`;
   }
 
   /**
@@ -326,36 +275,20 @@ export class CronFields {
     if (field instanceof CronDayOfTheWeek) {
       max = 6;
       const dayOfWeek = this.#dayOfWeek.values;
-      values =
-        dayOfWeek[dayOfWeek.length - 1] === 7
-          ? dayOfWeek.slice(0, -1)
-          : dayOfWeek;
+      values = dayOfWeek[dayOfWeek.length - 1] === 7 ? dayOfWeek.slice(0, -1) : dayOfWeek;
     }
     if (field instanceof CronDayOfMonth) {
-      max =
-        this.#month.values.length === 1
-          ? CronConstants.daysInMonth[this.#month.values[0] - 1]
-          : field.max;
+      max = this.#month.values.length === 1 ? CronMonth.daysInMonth[this.#month.values[0] - 1] : field.max;
     }
     const ranges = CronFields.compactField(values);
 
     if (ranges.length === 1) {
-      const singleRangeResult = CronFields.#handleSingleRange(
-        ranges[0],
-        field.min,
-        max,
-      );
+      const singleRangeResult = CronFields.#handleSingleRange(ranges[0], field.min, max);
       if (singleRangeResult) {
         return singleRangeResult;
       }
     }
-    return ranges
-      .map((range) =>
-        range.count === 1
-          ? range.start.toString()
-          : CronFields.#handleMultipleRanges(range, max),
-      )
-      .join(',');
+    return ranges.map((range) => (range.count === 1 ? range.start.toString() : CronFields.#handleMultipleRanges(range, max))).join(',');
   }
 
   /**

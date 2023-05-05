@@ -8,15 +8,8 @@ import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
 
 // TS >= 4.5 tail recursion optimization
 // https://dev.to/tylim88/typescript-numeric-range-type-15a5
-export type RangeFrom<
-  LENGTH extends number,
-  ACC extends unknown[] = []
-> = ACC['length'] extends LENGTH ? ACC : RangeFrom<LENGTH, [...ACC, 1]>;
-export type IntRange<
-  FROM extends number[],
-  TO extends number,
-  ACC extends number = never
-> = FROM['length'] extends TO
+export type RangeFrom<LENGTH extends number, ACC extends unknown[] = []> = ACC['length'] extends LENGTH ? ACC : RangeFrom<LENGTH, [...ACC, 1]>;
+export type IntRange<FROM extends number[], TO extends number, ACC extends number = never> = FROM['length'] extends TO
   ? ACC | TO
   : IntRange<[...FROM, 1], TO, ACC | FROM['length']>;
 
@@ -25,23 +18,23 @@ export type HourRange = IntRange<RangeFrom<0>, 23>; // 0-23 - inclusive
 export type DayOfTheMonthRange = IntRange<RangeFrom<1>, 31> | 'L'; // 1-31 - inclusive
 export type MonthRange = IntRange<RangeFrom<1>, 12>; // 1-12 - inclusive
 export type DayOfTheWeekRange = IntRange<RangeFrom<0>, 7>; // 0-7 - inclusive
-export type CronFieldTypes =
-  | SixtyRange[]
-  | HourRange[]
-  | DayOfTheMonthRange[]
-  | MonthRange[]
-  | DayOfTheWeekRange[];
+export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfTheMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
 export type CronChars = 'L' | 'W';
 export type CronMin = 0 | 1;
 export type CronMax = 7 | 12 | 23 | 31 | 59;
+export type ParseRageResponse = number[] | string[] | number | string;
 
 export type SerializedCronField = {
   wildcard: boolean;
   values: (number | string)[];
+};
+
+export type CronConstraints = {
   min: CronMin;
   max: CronMax;
   chars: CronChars[];
-};
+  validChars: RegExp;
+}
 
 export type SerializedCronFields = {
   second: SerializedCronField;
@@ -76,19 +69,21 @@ export enum Months {
   dec = 12,
 }
 
+// TODO TypeScript enum's are weird when you have the same number value for multiple keys which is why we have to do this as strings
+//   Really don't like this and would like to find a better way to do this
 export enum DaysInMonth {
-  jan = 31,
-  feb = 29,
-  mar = 31,
-  apr = 30,
-  may = 31,
-  jun = 30,
-  jul = 31,
-  aug = 31,
-  sep = 30,
-  oct = 31,
-  nov = 30,
-  dec = 31,
+  jan = '31',
+  feb = '29',
+  mar = '31',
+  apr = '30',
+  may = '31',
+  jun = '30',
+  jul = '31',
+  aug = '31',
+  sep = '30',
+  oct = '31',
+  nov = '30',
+  dec = '31',
 }
 
 export enum DayOfWeek {
@@ -99,6 +94,15 @@ export enum DayOfWeek {
   thu = 4,
   fri = 5,
   sat = 6,
+}
+
+export enum CronUnits {
+  second = 'second',
+  minute = 'minute',
+  hour = 'hour',
+  dayOfMonth = 'dayOfMonth',
+  month = 'month',
+  dayOfWeek = 'dayOfWeek',
 }
 
 export enum TimeUnits {
@@ -160,19 +164,13 @@ export interface ICronParseOptions {
   strict?: boolean;
 }
 
-export interface IFieldConstraint {
-  min: CronMin;
-  max: CronMax;
-  chars: CronChars[];
-}
-
 export interface IFieldConstraints {
-  second: IFieldConstraint;
-  minute: IFieldConstraint;
-  hour: IFieldConstraint;
-  dayOfMonth: IFieldConstraint;
-  month: IFieldConstraint;
-  dayOfWeek: IFieldConstraint;
+  second: CronConstraints;
+  minute: CronConstraints;
+  hour: CronConstraints;
+  dayOfMonth: CronConstraints;
+  month: CronConstraints;
+  dayOfWeek: CronConstraints;
 }
 
 export interface ICronFields {
@@ -202,7 +200,4 @@ export interface IIteratorFields {
   done: boolean;
 }
 
-export type IIteratorCallback = (
-  item: IIteratorFields | CronDate,
-  index: number
-) => void;
+export type IIteratorCallback = (item: IIteratorFields | CronDate, index: number) => void;

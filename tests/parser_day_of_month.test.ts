@@ -1,14 +1,14 @@
-import {CronDate, CronParser} from '../src';
+import { CronDate, CronParser } from '../src';
 
 const testCasesLastWeekdayOfMonth = [
-  {expression: '0 0 0 * * 1L', expectedDate: 27},
-  {expression: '0 0 0 * * 2L', expectedDate: 28},
-  {expression: '0 0 0 * * 3L', expectedDate: 29},
-  {expression: '0 0 0 * * 4L', expectedDate: 30},
-  {expression: '0 0 0 * * 5L', expectedDate: 24},
-  {expression: '0 0 0 * * 6L', expectedDate: 25},
-  {expression: '0 0 0 * * 0L', expectedDate: 26},
-  {expression: '0 0 0 * * 7L', expectedDate: 26},
+  { expression: '0 0 0 * * 1L', expectedDate: 27 },
+  { expression: '0 0 0 * * 2L', expectedDate: 28 },
+  { expression: '0 0 0 * * 3L', expectedDate: 29 },
+  { expression: '0 0 0 * * 4L', expectedDate: 30 },
+  { expression: '0 0 0 * * 5L', expectedDate: 24 },
+  { expression: '0 0 0 * * 6L', expectedDate: 25 },
+  { expression: '0 0 0 * * 0L', expectedDate: 26 },
+  { expression: '0 0 0 * * 7L', expectedDate: 26 },
 ];
 
 describe('CronParser', () => {
@@ -73,7 +73,7 @@ describe('CronParser', () => {
   });
 
 
-  testCasesLastWeekdayOfMonth.forEach(({expression, expectedDate}) => {
+  testCasesLastWeekdayOfMonth.forEach(({ expression, expectedDate }) => {
     const options = {
       currentDate: new Date(2021, 8, 1),
       endDate: new Date(2021, 11, 1),

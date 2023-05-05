@@ -1,4 +1,4 @@
-import { CronChars, SixtyRange } from '../types';
+import { CronChars, CronMax, CronMin, SixtyRange } from '../types';
 import { CronField } from './CronField';
 
 const MIN_SECOND = 0;
@@ -11,13 +11,23 @@ const SECOND_CHARS = [] as CronChars[];
  * @extends CronField
  */
 export class CronSecond extends CronField {
+  static get min(): CronMin {
+    return MIN_SECOND;
+  }
+  static get max(): CronMax {
+    return MAX_SECOND;
+  }
+  static get chars(): CronChars[] {
+    return SECOND_CHARS;
+  }
+
   /**
    * CronSecond constructor. Initializes the "second" field with the provided values.
    * @param {SixtyRange[]} values - Values for the "second" field
    * @param {boolean} [wildcard=false] - Whether this field is a wildcard
    */
   constructor(values: SixtyRange[], wildcard = false) {
-    super(values, MIN_SECOND, MAX_SECOND, SECOND_CHARS, wildcard);
+    super(values, wildcard);
     this.validate();
   }
 

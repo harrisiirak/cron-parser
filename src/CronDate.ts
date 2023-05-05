@@ -37,23 +37,13 @@ export class CronDate {
     } else {
       // redundant typeof check: 'timestamp' always has type 'string'
       this.#date = DateTime.fromISO(timestamp, dateOpts);
-      this.#date.isValid ||
-        (this.#date = DateTime.fromRFC2822(timestamp, dateOpts));
-      this.#date.isValid ||
-        (this.#date = DateTime.fromSQL(timestamp, dateOpts));
-      this.#date.isValid ||
-        (this.#date = DateTime.fromFormat(
-          timestamp,
-          'EEE, d MMM yyyy HH:mm:ss',
-          dateOpts,
-        ));
+      this.#date.isValid || (this.#date = DateTime.fromRFC2822(timestamp, dateOpts));
+      this.#date.isValid || (this.#date = DateTime.fromSQL(timestamp, dateOpts));
+      this.#date.isValid || (this.#date = DateTime.fromFormat(timestamp, 'EEE, d MMM yyyy HH:mm:ss', dateOpts));
     }
 
     // Check for valid DateTime and throw an error if not valid.
-    assert(
-      this.#date && this.#date.isValid,
-      `CronDate: unhandled timestamp: ${JSON.stringify(timestamp)}`,
-    );
+    assert(this.#date && this.#date.isValid, `CronDate: unhandled timestamp: ${JSON.stringify(timestamp)}`);
 
     // Set the timezone if it is provided and different from the current zone.
     if (tz && tz !== this.#date.zoneName) {
@@ -147,10 +137,7 @@ export class CronDate {
    * If the month is 1, it will subtract one year instead.
    */
   subtractMonth(): void {
-    this.#date = this.#date
-      .minus({ months: 1 })
-      .endOf('month')
-      .startOf('second');
+    this.#date = this.#date.minus({ months: 1 }).endOf('month').startOf('second');
   }
 
   /**
@@ -174,10 +161,7 @@ export class CronDate {
    * If the minute is 0, it will subtract one hour instead.
    */
   subtractMinute(): void {
-    this.#date = this.#date
-      .minus({ minutes: 1 })
-      .endOf('minute')
-      .startOf('second');
+    this.#date = this.#date.minus({ minutes: 1 }).endOf('minute').startOf('second');
   }
 
   /**
@@ -490,18 +474,11 @@ export class CronDate {
    * @param {TimeUnits} unit - The unit of time to use.
    * @param {number} [hoursLength] - The length of the hours. Required when unit is not month or day.
    */
-  applyDateOperation(
-    op: DateMathOp,
-    unit: TimeUnits,
-    hoursLength?: number,
-  ): void {
+  applyDateOperation(op: DateMathOp, unit: TimeUnits, hoursLength?: number): void {
     if (unit === TimeUnits.month || unit === TimeUnits.day) {
       this.invokeDateOperation(op, unit);
     } else {
-      assert(
-        hoursLength !== undefined,
-        'hoursLength must be defined when unit is not month or day',
-      );
+      assert(hoursLength !== undefined, 'hoursLength must be defined when unit is not month or day');
       const previousHour = this.getHours();
       this.invokeDateOperation(op, unit);
       const currentHour = this.getHours();
@@ -510,11 +487,7 @@ export class CronDate {
         if (hoursLength !== 24) {
           this.dstStart = currentHour;
         }
-      } else if (
-        diff === 0 &&
-        this.getMinutes() === 0 &&
-        this.getSeconds() === 0
-      ) {
+      } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
         if (hoursLength !== 24) {
           this.dstEnd = currentHour;
         }
