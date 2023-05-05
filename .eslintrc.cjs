@@ -42,6 +42,7 @@ module.exports = {
         'comma-dangle': ['error', 'always-multiline'],
         '@typescript-eslint/no-explicit-any': 0,
         'object-curly-spacing': ['warn', 'always'],
+        'max-len': ['error', { code: 160 }],
       }
     }
   ]
