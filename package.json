@@ -23,7 +23,7 @@
     "test:unit": "cross-env TZ=UTC jest",
     "test:coverage": "cross-env TZ=UTC jest --coverage",
     "generate-badges": "jest-coverage-badges",
-    "test:types": "tsd",
+    "test:types": "npm run build && tsd",
     "test": "cross-env TZ=UTC npm run lint && npm run test:types && npm run test:coverage && npm run generate-badges",
     "docs": "typedoc --out docs --readme none --name 'CronParser' src"
   },

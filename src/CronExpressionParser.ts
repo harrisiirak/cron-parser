@@ -27,16 +27,6 @@ export class CronExpressionParser {
   };
 
   /**
-   * Returns a map of predefined expressions.
-   * @static
-   * @memberof CronExpressionParser
-   * @returns {typeof PredefinedExpressionsEnum} A map of predefined expressions.
-   */
-  static get predefined(): typeof PredefinedExpressionsEnum {
-    return PredefinedExpressionsEnum;
-  }
-
-  /**
    * Parses a cron expression and returns a CronExpression object.
    * @param {string} expression - The cron expression to parse.
    * @param {ICronParseOptions} [options={}] - The options to use when parsing the expression.

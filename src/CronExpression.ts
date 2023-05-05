@@ -13,7 +13,6 @@ import {
   IIteratorCallback,
   IIteratorFields,
   MonthRange,
-  PredefinedExpressionsEnum,
   SixtyRange,
   TimeUnitsEnum,
 } from './types';
@@ -33,7 +32,7 @@ const LOOP_LIMIT = 10000;
 export class CronExpression {
   #options: ICronParseOptions;
   readonly #utc: boolean;
-  readonly #tz: string | undefined;
+  readonly #tz?: string;
   #currentDate: CronDate;
   readonly #startDate: CronDate | null;
   readonly #endDate: CronDate | null;
@@ -41,7 +40,6 @@ export class CronExpression {
   #hasIterated: boolean;
   readonly #nthDayOfWeek: number;
   readonly #fields: CronFields;
-  readonly #expression?: string;
 
   /**
    * Creates a new CronExpression instance.
@@ -61,16 +59,6 @@ export class CronExpression {
     this.#nthDayOfWeek = options.nthDayOfWeek || 0;
     const {second, minute, hour, dayOfMonth, month, dayOfWeek} = fields;
     this.#fields = new CronFields({second, minute, hour, dayOfMonth, month, dayOfWeek});
-    this.#expression = options.expression;
-  }
-
-  /**
-   * Getter for the predefined cron expressions.
-   *
-   * @returns {PredefinedExpressionsEnum} Predefined cron expressions.
-   */
-  static get predefined() {
-    return PredefinedExpressionsEnum;
   }
 
   /**
@@ -464,8 +452,8 @@ export class CronExpression {
    * @returns {CronDate} - The next schedule date.
    */
   toString(): string {
-    /* istanbul ignore next - should be impossiable under normal use to trigger the or branch */
-    return this.#expression || this.stringify(true);
+    /* istanbul ignore next - should be impossible under normal use to trigger the or branch */
+    return this.#options.expression || this.stringify(true);
   }
 }
 

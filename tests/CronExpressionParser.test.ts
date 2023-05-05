@@ -1,7 +1,5 @@
-import {CronExpression} from '../src';
+import {CronExpression, PredefinedExpressionsEnum} from '../src';
 import {CronExpressionParser} from '../src/CronExpressionParser';
-
-const {predefined} = CronExpressionParser;
 
 describe('CronExpressionParser', () => {
   describe('parse', () => {
@@ -12,7 +10,7 @@ describe('CronExpressionParser', () => {
     });
 
     it('should parse predefined expressions correctly', () => {
-      Object.entries(CronExpressionParser.predefined).forEach(([key, value]) => {
+      Object.entries(PredefinedExpressionsEnum).forEach(([key, value]) => {
         const cronExpression = CronExpressionParser.parse(key);
         expect(cronExpression.stringify(true)).toBe(value);
       });
@@ -82,12 +80,6 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse('* * 32 * *')).toThrow();
       expect(() => CronExpressionParser.parse('* * * 14 *')).toThrow();
       expect(() => CronExpressionParser.parse('* * * * 8')).toThrow();
-    });
-  });
-
-  describe('predefined expressions', () => {
-    it('should return the correct predefined expressions', () => {
-      expect(CronExpressionParser.predefined).toEqual(predefined);
     });
   });
 });

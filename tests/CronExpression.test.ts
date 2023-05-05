@@ -1,4 +1,4 @@
-import {CronDate, CronExpression} from '../src';
+import {CronDate, CronExpression, PredefinedExpressionsEnum} from '../src';
 import {ICronParseOptions} from '../src/types';
 
 const typeCheckCronDateObject = (date: CronDate | { value: CronDate; done: boolean }): date is { value: CronDate; done: boolean } => {
@@ -411,7 +411,7 @@ describe('CronExpression', () => {
   });
 
   test('predefined expression should be valid', () => {
-    expect(CronExpression.predefined).toEqual({
+    expect(PredefinedExpressionsEnum).toEqual({
       '@daily': '0 0 0 * * *',
       '@hourly': '0 0 * * * *',
       '@minutely': '0 * * * * *',
