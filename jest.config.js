@@ -20,9 +20,7 @@ export default {
   },
   coverageReporters: ['text', 'lcov', 'json-summary'],
   collectCoverageFrom: [
-    'src/**/*.js',
     'src/**/*.ts',
-    '!src/index.cjs.js',
     '!src/index.ts',
     '!dist/**/*'
   ],
