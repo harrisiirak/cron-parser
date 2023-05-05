@@ -1,13 +1,20 @@
-import {CronConstants} from './CronConstants';
+import { CronConstants } from './CronConstants';
 import assert from 'assert';
-import {CronChars, DayOfTheMonthRange, ICronFields, IFieldRange, MonthRange, SerializedCronFields} from './types';
-import {CronSecond} from './fields/CronSecond';
-import {CronMinute} from './fields/CronMinute';
-import {CronHour} from './fields/CronHour';
-import {CronDayOfMonth} from './fields/CronDayOfMonth';
-import {CronMonth} from './fields/CronMonth';
-import {CronDayOfTheWeek} from './fields/CronDayOfTheWeek';
-import {CronField} from './fields/CronField';
+import {
+  CronChars,
+  DayOfTheMonthRange,
+  ICronFields,
+  IFieldRange,
+  MonthRange,
+  SerializedCronFields,
+} from './types';
+import { CronSecond } from './fields/CronSecond';
+import { CronMinute } from './fields/CronMinute';
+import { CronHour } from './fields/CronHour';
+import { CronDayOfMonth } from './fields/CronDayOfMonth';
+import { CronMonth } from './fields/CronMonth';
+import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
+import { CronField } from './fields/CronField';
 
 export {
   CronSecond,
@@ -35,20 +42,31 @@ export class CronFields {
    * @param {ICronFields} param0 - The cron fields values
    * @throws {Error} if validation fails
    */
-  constructor({second, minute, hour, dayOfMonth, month, dayOfWeek}: ICronFields) {
+  constructor({
+    second,
+    minute,
+    hour,
+    dayOfMonth,
+    month,
+    dayOfWeek,
+  }: ICronFields) {
     // FIXME: this is ugly need to separate the logic in #handleMaxDaysInMonth
     if (!(dayOfMonth instanceof CronDayOfMonth)) {
       /* istanbul ignore next - needs to be refactored */
       if (month instanceof CronMonth) {
         /* istanbul ignore next - needs to be refactored */
-        throw new Error('Validation error, month must not be an instance of CronMonth when dayOfMonth is not an instance of CronDayOfMonth');
+        throw new Error(
+          'Validation error, month must not be an instance of CronMonth when dayOfMonth is not an instance of CronDayOfMonth',
+        );
       }
       dayOfMonth = CronFields.#handleMaxDaysInMonth(month, dayOfMonth);
     } else {
       if (month instanceof CronMonth) {
         CronFields.#handleMaxDaysInMonth(month.values, dayOfMonth.values);
       } else {
-        throw new Error('Validation error, month must be an instance of CronMonth when dayOfMonth is an instance of CronDayOfMonth');
+        throw new Error(
+          'Validation error, month must be an instance of CronMonth when dayOfMonth is an instance of CronDayOfMonth',
+        );
       }
     }
     assert(second, 'Validation error, Field second is missing');
@@ -58,12 +76,20 @@ export class CronFields {
     assert(month, 'Validation error, Field month is missing');
     assert(dayOfWeek, 'Validation error, Field dayOfWeek is missing');
 
-    this.#second = second instanceof CronSecond ? second : new CronSecond(second);
-    this.#minute = minute instanceof CronMinute ? minute : new CronMinute(minute);
+    this.#second =
+      second instanceof CronSecond ? second : new CronSecond(second);
+    this.#minute =
+      minute instanceof CronMinute ? minute : new CronMinute(minute);
     this.#hour = hour instanceof CronHour ? hour : new CronHour(hour);
-    this.#dayOfMonth = dayOfMonth instanceof CronDayOfMonth ? dayOfMonth : new CronDayOfMonth(dayOfMonth);
+    this.#dayOfMonth =
+      dayOfMonth instanceof CronDayOfMonth
+        ? dayOfMonth
+        : new CronDayOfMonth(dayOfMonth);
     this.#month = month instanceof CronMonth ? month : new CronMonth(month);
-    this.#dayOfWeek = dayOfWeek instanceof CronDayOfTheWeek ? dayOfWeek : new CronDayOfTheWeek(dayOfWeek);
+    this.#dayOfWeek =
+      dayOfWeek instanceof CronDayOfTheWeek
+        ? dayOfWeek
+        : new CronDayOfTheWeek(dayOfWeek);
   }
 
   /**
@@ -116,34 +142,6 @@ export class CronFields {
 
   /**
    * Returns a string representation of the cron fields.
-   * @param {CronField} field - The cron field to stringify
-   * @static
-   * @returns {string} - The stringified cron field
-   */
-  stringifyField(field: CronField): string {
-    let max = field.max;
-    let values = field.values;
-    if (field instanceof CronDayOfTheWeek) {
-      max = 6;
-      const dayOfWeek = this.#dayOfWeek.values;
-      values = (dayOfWeek[dayOfWeek.length - 1] === 7 ? dayOfWeek.slice(0, -1) : dayOfWeek);
-    }
-    if (field instanceof CronDayOfMonth) {
-      max = this.#month.values.length === 1 ? CronConstants.daysInMonth[this.#month.values[0] - 1] : field.max;
-    }
-    const ranges = CronFields.compactField(values);
-
-    if (ranges.length === 1) {
-      const singleRangeResult = CronFields.#handleSingleRange(ranges[0], field.min, max);
-      if (singleRangeResult) {
-        return singleRangeResult;
-      }
-    }
-    return ranges.map(range => range.count === 1 ? range.start.toString() : CronFields.#handleMultipleRanges(range, max)).join(',');
-  }
-
-  /**
-   * Returns a string representation of the cron fields.
    * @param {(number | CronChars)[]} input - The cron fields values
    * @static
    * @returns {IFieldRange[]} - The compacted cron fields
@@ -160,7 +158,7 @@ export class CronFields {
     input.forEach((item, i, arr) => {
       // If the current IFieldRange is undefined, create a new one with the current item as the start.
       if (current === undefined) {
-        current = {start: item, count: 1};
+        current = { start: item, count: 1 };
         return;
       }
 
@@ -173,7 +171,7 @@ export class CronFields {
       // 'L' and 'W' characters are special cases that need to be handled separately.
       if (item === 'L' || item === 'W') {
         output.push(current);
-        output.push({start: item, count: 1});
+        output.push({ start: item, count: 1 });
         current = undefined;
         return;
       }
@@ -186,7 +184,7 @@ export class CronFields {
 
         // If the current step is less or equal to the next step, update the current IFieldRange to include the current item.
         if (step <= nextStep) {
-          current = {...current, count: 2, end: item, step};
+          current = { ...current, count: 2, end: item, step };
           return;
         }
         current.step = 1;
@@ -203,18 +201,22 @@ export class CronFields {
         // This handles the case where the current range has only one element.
         if (current.count === 1) {
           // If the count is 2, push two separate IFieldRanges, one for each element.
-          output.push({start: current.start, count: 1});
+          output.push({ start: current.start, count: 1 });
         } else if (current.count === 2) {
-          output.push({start: current.start, count: 1});
+          output.push({ start: current.start, count: 1 });
           // current.end can never be undefined here but typescript doesn't know that
           // this is why we ?? it and then ignore the prevItem in the coverage
-          output.push({start: current.end ?? /* istanbul ignore next - see above */ prevItem, count: 1});
+          output.push({
+            start:
+              current.end ?? /* istanbul ignore next - see above */ prevItem,
+            count: 1,
+          });
         } else {
           // Otherwise, push the current IFieldRange to the output.
           output.push(current);
         }
         // Reset the current IFieldRange with the current item as the start.
-        current = {start: item, count: 1};
+        current = { start: item, count: 1 };
       }
     });
 
@@ -232,13 +234,18 @@ export class CronFields {
    * @returns {DayOfTheMonthRange[]} The day of the month range.
    * @private
    */
-  static #handleMaxDaysInMonth(month: MonthRange[], dayOfMonth: DayOfTheMonthRange[]): DayOfTheMonthRange[] {
+  static #handleMaxDaysInMonth(
+    month: MonthRange[],
+    dayOfMonth: DayOfTheMonthRange[],
+  ): DayOfTheMonthRange[] {
     if (month.length === 1) {
       const daysInMonth = CronConstants.daysInMonth[month[0] - 1];
       const v = parseInt(dayOfMonth[0] as string, 10);
       assert(v <= daysInMonth, 'Invalid explicit day of month definition');
 
-      return dayOfMonth.filter((dayOfMonth: number | string) => dayOfMonth === 'L' ? true : (dayOfMonth as number) <= daysInMonth);
+      return dayOfMonth.filter((dayOfMonth: number | string) =>
+        dayOfMonth === 'L' ? true : (dayOfMonth as number) <= daysInMonth,
+      );
     }
     return dayOfMonth;
   }
@@ -251,7 +258,11 @@ export class CronFields {
    * @returns {string | null} The stringified range or null if it cannot be stringified.
    * @private
    */
-  static #handleSingleRange(range: IFieldRange, min: number, max: number): string | null {
+  static #handleSingleRange(
+    range: IFieldRange,
+    min: number,
+    max: number,
+  ): string | null {
     const step = range.step;
     if (!step) {
       return null;
@@ -259,7 +270,12 @@ export class CronFields {
     if (step === 1 && range.start === min && range.end && range.end >= max) {
       return '*';
     }
-    if (step !== 1 && range.start === min && range.end && range.end >= max - step + 1) {
+    if (
+      step !== 1 &&
+      range.start === min &&
+      range.end &&
+      range.end >= max - step + 1
+    ) {
       return `*/${step}`;
     }
     return null;
@@ -287,11 +303,59 @@ export class CronFields {
         return index % step === 0 ? range.start + index : null;
       };
       assert(typeof range.start === 'number', 'Unexpected range start');
-      const seed = {length: range.end - range.start + 1};
-      return Array.from(seed, mapFn).filter(value => value !== null).join(',');
+      const seed = { length: range.end - range.start + 1 };
+      return Array.from(seed, mapFn)
+        .filter((value) => value !== null)
+        .join(',');
     }
 
-    return range.end === max - step + 1 ? `${range.start}/${step}` : `${range.start}-${range.end}/${step}`;
+    return range.end === max - step + 1
+      ? `${range.start}/${step}`
+      : `${range.start}-${range.end}/${step}`;
+  }
+
+  /**
+   * Returns a string representation of the cron fields.
+   * @param {CronField} field - The cron field to stringify
+   * @static
+   * @returns {string} - The stringified cron field
+   */
+  stringifyField(field: CronField): string {
+    let max = field.max;
+    let values = field.values;
+    if (field instanceof CronDayOfTheWeek) {
+      max = 6;
+      const dayOfWeek = this.#dayOfWeek.values;
+      values =
+        dayOfWeek[dayOfWeek.length - 1] === 7
+          ? dayOfWeek.slice(0, -1)
+          : dayOfWeek;
+    }
+    if (field instanceof CronDayOfMonth) {
+      max =
+        this.#month.values.length === 1
+          ? CronConstants.daysInMonth[this.#month.values[0] - 1]
+          : field.max;
+    }
+    const ranges = CronFields.compactField(values);
+
+    if (ranges.length === 1) {
+      const singleRangeResult = CronFields.#handleSingleRange(
+        ranges[0],
+        field.min,
+        max,
+      );
+      if (singleRangeResult) {
+        return singleRangeResult;
+      }
+    }
+    return ranges
+      .map((range) =>
+        range.count === 1
+          ? range.start.toString()
+          : CronFields.#handleMultipleRanges(range, max),
+      )
+      .join(',');
   }
 
   /**
@@ -306,10 +370,10 @@ export class CronFields {
     }
 
     arr.push(
-      this.stringifyField(this.#minute),    // minute
-      this.stringifyField(this.#hour),      // hour
-      this.stringifyField(this.#dayOfMonth),// dayOfMonth
-      this.stringifyField(this.#month),     // month
+      this.stringifyField(this.#minute), // minute
+      this.stringifyField(this.#hour), // hour
+      this.stringifyField(this.#dayOfMonth), // dayOfMonth
+      this.stringifyField(this.#month), // month
       this.stringifyField(this.#dayOfWeek), // dayOfWeek
     );
     return arr.join(' ');

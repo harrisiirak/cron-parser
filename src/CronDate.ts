@@ -1,9 +1,9 @@
-import {DateTime} from 'luxon';
+import { DateTime } from 'luxon';
 import assert from 'assert';
-import {DateMathOpEnum, TimeUnitsEnum} from './types';
+import { DateMathOpEnum, TimeUnitsEnum } from './types';
 
 type VerbMap = {
-    [key in TimeUnitsEnum]: () => void;
+  [key in TimeUnitsEnum]: () => void;
 };
 
 /**
@@ -21,7 +21,7 @@ export class CronDate {
    * @param {string} [tz] - The timezone to use for the CronDate.
    */
   constructor(timestamp?: CronDate | Date | number | string, tz?: string) {
-    const dateOpts = {zone: tz};
+    const dateOpts = { zone: tz };
 
     // Initialize the internal DateTime object based on the type of timestamp provided.
     if (!timestamp) {
@@ -34,15 +34,26 @@ export class CronDate {
       this.#date = DateTime.fromJSDate(timestamp, dateOpts);
     } else if (typeof timestamp === 'number') {
       this.#date = DateTime.fromMillis(timestamp, dateOpts);
-    } else { // redundant typeof check: 'timestamp' always has type 'string'
+    } else {
+      // redundant typeof check: 'timestamp' always has type 'string'
       this.#date = DateTime.fromISO(timestamp, dateOpts);
-      this.#date.isValid || (this.#date = DateTime.fromRFC2822(timestamp, dateOpts));
-      this.#date.isValid || (this.#date = DateTime.fromSQL(timestamp, dateOpts));
-      this.#date.isValid || (this.#date = DateTime.fromFormat(timestamp, 'EEE, d MMM yyyy HH:mm:ss', dateOpts));
+      this.#date.isValid ||
+        (this.#date = DateTime.fromRFC2822(timestamp, dateOpts));
+      this.#date.isValid ||
+        (this.#date = DateTime.fromSQL(timestamp, dateOpts));
+      this.#date.isValid ||
+        (this.#date = DateTime.fromFormat(
+          timestamp,
+          'EEE, d MMM yyyy HH:mm:ss',
+          dateOpts,
+        ));
     }
 
     // Check for valid DateTime and throw an error if not valid.
-    assert(this.#date && this.#date.isValid, `CronDate: unhandled timestamp: ${JSON.stringify(timestamp)}`);
+    assert(
+      this.#date && this.#date.isValid,
+      `CronDate: unhandled timestamp: ${JSON.stringify(timestamp)}`,
+    );
 
     // Set the timezone if it is provided and different from the current zone.
     if (tz && tz !== this.#date.zoneName) {
@@ -86,49 +97,49 @@ export class CronDate {
    * Adds one year to the current CronDate.
    */
   addYear(): void {
-    this.#date = this.#date.plus({years: 1});
+    this.#date = this.#date.plus({ years: 1 });
   }
 
   /**
    * Adds one month to the current CronDate.
    */
   addMonth(): void {
-    this.#date = this.#date.plus({months: 1}).startOf('month');
+    this.#date = this.#date.plus({ months: 1 }).startOf('month');
   }
 
   /**
    * Adds one day to the current CronDate.
    */
   addDay(): void {
-    this.#date = this.#date.plus({days: 1}).startOf('day');
+    this.#date = this.#date.plus({ days: 1 }).startOf('day');
   }
 
   /**
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    this.#date = this.#date.plus({hours: 1}).startOf('hour');
+    this.#date = this.#date.plus({ hours: 1 }).startOf('hour');
   }
 
   /**
    * Adds one minute to the current CronDate.
    */
   addMinute(): void {
-    this.#date = this.#date.plus({minutes: 1}).startOf('minute');
+    this.#date = this.#date.plus({ minutes: 1 }).startOf('minute');
   }
 
   /**
    * Adds one second to the current CronDate.
    */
   addSecond(): void {
-    this.#date = this.#date.plus({seconds: 1}).startOf('second');
+    this.#date = this.#date.plus({ seconds: 1 }).startOf('second');
   }
 
   /**
    * Subtracts one year from the current CronDate.
    */
   subtractYear(): void {
-    this.#date = this.#date.minus({years: 1});
+    this.#date = this.#date.minus({ years: 1 });
   }
 
   /**
@@ -136,7 +147,10 @@ export class CronDate {
    * If the month is 1, it will subtract one year instead.
    */
   subtractMonth(): void {
-    this.#date = this.#date.minus({months: 1}).endOf('month').startOf('second');
+    this.#date = this.#date
+      .minus({ months: 1 })
+      .endOf('month')
+      .startOf('second');
   }
 
   /**
@@ -144,7 +158,7 @@ export class CronDate {
    * If the day is 1, it will subtract one month instead.
    */
   subtractDay(): void {
-    this.#date = this.#date.minus({days: 1}).endOf('day').startOf('second');
+    this.#date = this.#date.minus({ days: 1 }).endOf('day').startOf('second');
   }
 
   /**
@@ -152,7 +166,7 @@ export class CronDate {
    * If the hour is 0, it will subtract one day instead.
    */
   subtractHour(): void {
-    this.#date = this.#date.minus({hours: 1}).endOf('hour').startOf('second');
+    this.#date = this.#date.minus({ hours: 1 }).endOf('hour').startOf('second');
   }
 
   /**
@@ -160,7 +174,10 @@ export class CronDate {
    * If the minute is 0, it will subtract one hour instead.
    */
   subtractMinute(): void {
-    this.#date = this.#date.minus({minutes: 1}).endOf('minute').startOf('second');
+    this.#date = this.#date
+      .minus({ minutes: 1 })
+      .endOf('minute')
+      .startOf('second');
   }
 
   /**
@@ -168,7 +185,7 @@ export class CronDate {
    * If the second is 0, it will subtract one minute instead.
    */
   subtractSecond(): void {
-    this.#date = this.#date.minus({seconds: 1}).startOf('second');
+    this.#date = this.#date.minus({ seconds: 1 }).startOf('second');
   }
 
   /**
@@ -374,7 +391,7 @@ export class CronDate {
    * @param d
    */
   setDate(d: number): void {
-    this.#date = this.#date.set({day: d});
+    this.#date = this.#date.set({ day: d });
   }
 
   /**
@@ -382,7 +399,7 @@ export class CronDate {
    * @param y
    */
   setFullYear(y: number): void {
-    this.#date = this.#date.set({year: y});
+    this.#date = this.#date.set({ year: y });
   }
 
   /**
@@ -390,7 +407,7 @@ export class CronDate {
    * @param d
    */
   setDay(d: number): void {
-    this.#date = this.#date.set({weekday: d});
+    this.#date = this.#date.set({ weekday: d });
   }
 
   /**
@@ -398,7 +415,7 @@ export class CronDate {
    * @param m
    */
   setMonth(m: number): void {
-    this.#date = this.#date.set({month: m + 1});
+    this.#date = this.#date.set({ month: m + 1 });
   }
 
   /**
@@ -406,7 +423,7 @@ export class CronDate {
    * @param h
    */
   setHours(h: number): void {
-    this.#date = this.#date.set({hour: h});
+    this.#date = this.#date.set({ hour: h });
   }
 
   /**
@@ -414,7 +431,7 @@ export class CronDate {
    * @param m
    */
   setMinutes(m: number): void {
-    this.#date = this.#date.set({minute: m});
+    this.#date = this.#date.set({ minute: m });
   }
 
   /**
@@ -422,7 +439,7 @@ export class CronDate {
    * @param s
    */
   setSeconds(s: number): void {
-    this.#date = this.#date.set({second: s});
+    this.#date = this.#date.set({ second: s });
   }
 
   /**
@@ -430,7 +447,7 @@ export class CronDate {
    * @param s
    */
   setMilliseconds(s: number): void {
-    this.#date = this.#date.set({millisecond: s});
+    this.#date = this.#date.set({ millisecond: s });
   }
 
   /**
@@ -454,7 +471,7 @@ export class CronDate {
    * @returns {boolean}
    */
   isLastDayOfMonth(): boolean {
-    const newDate = this.#date.plus({days: 1}).startOf('day');
+    const newDate = this.#date.plus({ days: 1 }).startOf('day');
     return this.#date.month !== newDate.month;
   }
 
@@ -463,7 +480,7 @@ export class CronDate {
    * @returns {boolean}
    */
   isLastWeekdayOfMonth(): boolean {
-    const newDate = this.#date.plus({days: 7}).startOf('day');
+    const newDate = this.#date.plus({ days: 7 }).startOf('day');
     return this.#date.month !== newDate.month;
   }
 
@@ -473,11 +490,18 @@ export class CronDate {
    * @param {TimeUnitsEnum} unit - The unit of time to use.
    * @param {number} [hoursLength] - The length of the hours. Required when unit is not month or day.
    */
-  applyDateOperation(op: DateMathOpEnum, unit: TimeUnitsEnum, hoursLength?: number): void {
+  applyDateOperation(
+    op: DateMathOpEnum,
+    unit: TimeUnitsEnum,
+    hoursLength?: number,
+  ): void {
     if (unit === TimeUnitsEnum.month || unit === TimeUnitsEnum.day) {
       this.invokeDateOperation(op, unit);
     } else {
-      assert(hoursLength !== undefined, 'hoursLength must be defined when unit is not month or day');
+      assert(
+        hoursLength !== undefined,
+        'hoursLength must be defined when unit is not month or day',
+      );
       const previousHour = this.getHours();
       this.invokeDateOperation(op, unit);
       const currentHour = this.getHours();
@@ -486,7 +510,11 @@ export class CronDate {
         if (hoursLength !== 24) {
           this.dstStart = currentHour;
         }
-      } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
+      } else if (
+        diff === 0 &&
+        this.getMinutes() === 0 &&
+        this.getSeconds() === 0
+      ) {
         if (hoursLength !== 24) {
           this.dstEnd = currentHour;
         }
@@ -502,7 +530,6 @@ export class CronDate {
   #getUTC(): DateTime {
     return this.#date.toUTC();
   }
-
 }
 
 export default CronDate;

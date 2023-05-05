@@ -1,10 +1,8 @@
 import fs from 'fs';
-import {ParseStringResponse} from './types';
-import {CronExpression, CronFields} from './';
+import { ParseStringResponse } from './types';
+import { CronExpression, CronFields } from './';
 import assert from 'assert';
 import ErrnoException = NodeJS.ErrnoException;
-
-
 
 // noinspection JSUnusedGlobalSymbols
 class CronParser {
@@ -28,7 +26,10 @@ class CronParser {
    * @param {object} [options] Parsing options
    * @return {object}
    */
-  static fieldsToExpression(fields: CronFields, options?: object): CronExpression {
+  static fieldsToExpression(
+    fields: CronFields,
+    options?: object,
+  ): CronExpression {
     return CronExpression.fieldsToExpression(fields, options);
   }
 
@@ -42,8 +43,11 @@ class CronParser {
   static parseString(data: string) {
     const blocks = data.split('\n');
 
-
-    const response: ParseStringResponse = {variables: {}, expressions: [], errors: {}};
+    const response: ParseStringResponse = {
+      variables: {},
+      expressions: [],
+      errors: {},
+    };
 
     for (const block of blocks) {
       const entry = block.trim(); // Remove surrounding spaces
@@ -56,7 +60,7 @@ class CronParser {
           // Variable
           const matches = entry.match(/^(.*)=(.*)$/);
           assert(matches !== null, 'parseString: matches is null');
-          const [/* unused */, key, value] = matches;
+          const [, /* unused */ key, value] = matches;
           response.variables[key] = value;
         } else {
           // Expression?
@@ -80,7 +84,10 @@ class CronParser {
    * @param {string} filePath Path to file
    * @param {function} callback
    */
-  static parseFile(filePath: string, callback: (error: ErrnoException | null, data?: ParseStringResponse) => void) {
+  static parseFile(
+    filePath: string,
+    callback: (error: ErrnoException | null, data?: ParseStringResponse) => void,
+  ) {
     fs.readFile(filePath, (err, data) => {
       if (err) {
         return void callback(err);
@@ -99,15 +106,18 @@ class CronParser {
     const atoms = entry.split(' ');
 
     if (atoms.length === 6) {
-      return {interval: CronExpression.parse(entry)};
+      return { interval: CronExpression.parse(entry) };
     } else if (atoms.length > 6) {
-      return {interval: CronExpression.parse(atoms.slice(0, 6).join(' ')), command: atoms.slice(6, atoms.length)};
+      return {
+        interval: CronExpression.parse(atoms.slice(0, 6).join(' ')),
+        command: atoms.slice(6, atoms.length),
+      };
     } else {
       throw new Error(`Invalid entry: ${entry}`);
     }
   }
 }
 
-export {CronParser};
+export { CronParser };
 
 

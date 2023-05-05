@@ -40,7 +40,8 @@ module.exports = {
         quotes: ['error', 'single'],
         semi: ['error', 'always'],
         'comma-dangle': ['error', 'always-multiline'],
-        '@typescript-eslint/no-explicit-any': 0
+        '@typescript-eslint/no-explicit-any': 0,
+        'object-curly-spacing': ['warn', 'always'],
       }
     }
   ]

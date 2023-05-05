@@ -1,5 +1,5 @@
-import {CronField} from './CronField';
-import {CronChars, DayOfTheWeekRange} from '../types';
+import { CronField } from './CronField';
+import { CronChars, DayOfTheWeekRange } from '../types';
 
 const MIN_DAY = 0;
 const MAX_DAY = 7;
@@ -12,14 +12,6 @@ const DAY_CHARS = ['L'] as CronChars[];
  */
 export class CronDayOfTheWeek extends CronField {
   /**
-   * Returns an array of allowed values for the "day of the week" field.
-   * @returns {DayOfTheWeekRange[]}
-   */
-  get values(): DayOfTheWeekRange[] {
-    return super.values as DayOfTheWeekRange[];
-  }
-
-  /**
    * CronDayOfTheWeek constructor. Initializes the "day of the week" field with the provided values.
    * @param {DayOfTheWeekRange[]} values - Values for the "day of the week" field
    * @param {boolean} [wildcard=false] - Whether this field is a wildcard
@@ -27,5 +19,13 @@ export class CronDayOfTheWeek extends CronField {
   constructor(values: DayOfTheWeekRange[], wildcard = false) {
     super(values, MIN_DAY, MAX_DAY, DAY_CHARS, wildcard);
     this.validate();
+  }
+
+  /**
+   * Returns an array of allowed values for the "day of the week" field.
+   * @returns {DayOfTheWeekRange[]}
+   */
+  get values(): DayOfTheWeekRange[] {
+    return super.values as DayOfTheWeekRange[];
   }
 }

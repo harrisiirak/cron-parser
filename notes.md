@@ -11,6 +11,7 @@
 - [ ] Should use Enums instead of constants
 - [ ] Should likely remove .editorconfig in favor of eslint
 - [ ] Should remove archive folder
+- [ ] Call pettier as part of pre-commit hook? 
 
 ## Changes
  * Complete refactor of code into Typescript, should not be any breaking changes based on documented API. Users should be able to use the library as before. If they were using undocumented features, they will very likely need to update their code.
