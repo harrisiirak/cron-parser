@@ -74,7 +74,7 @@ export class CronField {
   validate(): void {
     let badValue: number | string | undefined;
     const charsString = this.chars.length > 0 ? ` or chars ${this.chars.join('')}` : '';
-    assert(this.#values.every(value => {
+    const isValid = this.#values.every(value => {
       badValue = value;
       if (typeof value === 'number') {
         return value >= this.min && value <= this.max;
@@ -83,7 +83,8 @@ export class CronField {
         const regex = new RegExp(`^\\d{0,2}${char}$`);
         return regex.test(value);
       });
-    }), `${this.constructor.name} Validation error, got value ${badValue} expected range ${this.min}-${this.max}${charsString}`);
+    });
+    assert(isValid, `${this.constructor.name} Validation error, got value ${badValue} expected range ${this.min}-${this.max}${charsString}`);
     // check for duplicates
     assert(this.#values.every((value, index) => {
       badValue = value;
