@@ -13,13 +13,13 @@ import { CronExpression } from './CronExpression';
 import {
   DayOfTheMonthRange,
   DayOfTheWeekRange,
-  DayOfWeekEnum,
+  DayOfWeek,
   HourRange,
   ICronParseOptions,
   IFieldConstraint,
   MonthRange,
-  MonthsEnum,
-  PredefinedExpressionsEnum,
+  Months,
+  PredefinedExpressions,
   RawCronFields,
   SixtyRange,
 } from './types';
@@ -66,8 +66,8 @@ export class CronExpressionParser {
     const currentDate = options.currentDate || new CronDate(undefined, 'UTC');
 
     expression =
-      PredefinedExpressionsEnum[
-        expression as keyof typeof PredefinedExpressionsEnum
+      PredefinedExpressions[
+        expression as keyof typeof PredefinedExpressions
       ] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
     assert(
@@ -172,8 +172,8 @@ export class CronExpressionParser {
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
         const replacer =
-          MonthsEnum[match as keyof typeof MonthsEnum] ||
-          DayOfWeekEnum[match as keyof typeof DayOfWeekEnum];
+          Months[match as keyof typeof Months] ||
+          DayOfWeek[match as keyof typeof DayOfWeek];
         assert(
           replacer != null,
           `Validation error, cannot resolve alias "${match}"`,

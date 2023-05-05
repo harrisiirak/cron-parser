@@ -1,5 +1,5 @@
-import {CronExpression, PredefinedExpressionsEnum} from '../src';
-import {CronExpressionParser} from '../src/CronExpressionParser';
+import { CronExpression, PredefinedExpressions } from '../src';
+import { CronExpressionParser } from '../src/CronExpressionParser';
 
 describe('CronExpressionParser', () => {
   describe('parse', () => {
@@ -10,7 +10,7 @@ describe('CronExpressionParser', () => {
     });
 
     it('should parse predefined expressions correctly', () => {
-      Object.entries(PredefinedExpressionsEnum).forEach(([key, value]) => {
+      Object.entries(PredefinedExpressions).forEach(([key, value]) => {
         const cronExpression = CronExpressionParser.parse(key);
         expect(cronExpression.stringify(true)).toBe(value);
       });
@@ -18,7 +18,7 @@ describe('CronExpressionParser', () => {
 
     it('should throw an error when using both dayOfMonth and dayOfWeek together in strict mode', () => {
       const expression = '0 0 * * 1-5';
-      expect(() => CronExpressionParser.parse(expression, {strict: true})).toThrow();
+      expect(() => CronExpressionParser.parse(expression, { strict: true })).toThrow();
     });
 
     it('should parse expressions with aliases correctly', () => {

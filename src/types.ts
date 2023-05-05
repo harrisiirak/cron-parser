@@ -61,7 +61,7 @@ export type RawCronFields = {
   dayOfWeek: string;
 };
 
-export enum MonthsEnum {
+export enum Months {
   jan = 1,
   feb = 2,
   mar = 3,
@@ -76,7 +76,7 @@ export enum MonthsEnum {
   dec = 12,
 }
 
-export enum DaysInMonthEnum {
+export enum DaysInMonth {
   jan = 31,
   feb = 29,
   mar = 31,
@@ -91,7 +91,7 @@ export enum DaysInMonthEnum {
   dec = 31,
 }
 
-export enum DayOfWeekEnum {
+export enum DayOfWeek {
   sun = 0,
   mon = 1,
   tue = 2,
@@ -101,7 +101,7 @@ export enum DayOfWeekEnum {
   sat = 6,
 }
 
-export enum TimeUnitsEnum {
+export enum TimeUnits {
   second = 'second',
   minute = 'minute',
   hour = 'hour',
@@ -110,12 +110,12 @@ export enum TimeUnitsEnum {
   year = 'year',
 }
 
-export enum DateMathOpEnum {
+export enum DateMathOp {
   add = 'add',
   subtract = 'subtract',
 }
 
-export enum PredefinedExpressionsEnum {
+export enum PredefinedExpressions {
   '@yearly' = '0 0 0 1 1 *',
   '@annually' = '0 0 0 1 1 *',
   '@monthly' = '0 0 0 1 * *',

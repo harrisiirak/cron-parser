@@ -1,6 +1,6 @@
-import {expectAssignable, expectNotAssignable} from 'tsd';
-import {DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange} from '../src';
-import {MonthsEnum} from '../src/types';
+import { expectAssignable, expectNotAssignable } from 'tsd';
+import { DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange } from '../src';
+import { Months } from '../src/types';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -73,4 +73,4 @@ expectNotAssignable<DayOfTheWeekRange>(0.5);
 expectNotAssignable<DayOfTheWeekRange>(6.5);
 
 // Assert the MonthsEnum
-expectAssignable<keyof typeof MonthsEnum>('jan');
+expectAssignable<keyof typeof Months>('jan');

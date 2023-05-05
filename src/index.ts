@@ -18,11 +18,11 @@ export default CronExpression;
 // Exported types
 export {
   // Enums
-  DaysInMonthEnum,
-  DateMathOpEnum,
-  TimeUnitsEnum,
-  DayOfWeekEnum,
-  PredefinedExpressionsEnum,
+  DaysInMonth,
+  DateMathOp,
+  TimeUnits,
+  DayOfWeek,
+  PredefinedExpressions,
 
   // Interfaces
   ICronFields,

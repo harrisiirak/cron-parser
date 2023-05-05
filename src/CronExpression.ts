@@ -4,7 +4,7 @@ import { CronFields } from './CronFields';
 import assert from 'assert';
 import {
   CronFieldTypes,
-  DateMathOpEnum,
+  DateMathOp,
   DayOfTheMonthRange,
   DayOfTheWeekRange,
   HourRange,
@@ -15,7 +15,7 @@ import {
   IIteratorFields,
   MonthRange,
   SixtyRange,
-  TimeUnitsEnum,
+  TimeUnits,
 } from './types';
 import { DateTime } from 'luxon';
 import debug from 'debug';
@@ -421,13 +421,13 @@ export class CronExpression {
    * Determines if the current hour matches the cron expression.
    *
    * @param {CronDate} currentDate - The current date object.
-   * @param {DateMathOpEnum} dateMathVerb - The date math operation enumeration value.
+   * @param {DateMathOp} dateMathVerb - The date math operation enumeration value.
    * @param {boolean} reverse - A flag indicating whether the matching should be done in reverse order.
    * @returns {boolean} - True if the current hour matches the cron expression; otherwise, false.
    */
   #matchHour(
     currentDate: CronDate,
-    dateMathVerb: DateMathOpEnum,
+    dateMathVerb: DateMathOp,
     reverse: boolean,
   ): boolean {
     const currentHour = currentDate.getHours();
@@ -442,7 +442,7 @@ export class CronExpression {
       currentDate.dstStart = null;
       currentDate.applyDateOperation(
         dateMathVerb,
-        TimeUnitsEnum.hour,
+        TimeUnits.hour,
         this.#fields.hour.values.length,
       );
       return false;
@@ -451,14 +451,14 @@ export class CronExpression {
       isDstStart &&
       !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)
     ) {
-      currentDate.invokeDateOperation(dateMathVerb, TimeUnitsEnum.hour);
+      currentDate.invokeDateOperation(dateMathVerb, TimeUnits.hour);
       return false;
     }
     if (isDstEnd && !reverse) {
       currentDate.dstEnd = null;
       currentDate.applyDateOperation(
-        DateMathOpEnum.add,
-        TimeUnitsEnum.hour,
+        DateMathOp.add,
+        TimeUnits.hour,
         this.#fields.hour.values.length,
       );
       return false;
@@ -474,9 +474,9 @@ export class CronExpression {
    * @private
    */
   #findSchedule(reverse = false): CronDate {
-    const dateMathVerb: DateMathOpEnum = reverse
-      ? DateMathOpEnum.subtract
-      : DateMathOpEnum.add;
+    const dateMathVerb: DateMathOp = reverse
+      ? DateMathOp.subtract
+      : DateMathOp.add;
     const currentDate = new CronDate(this.#currentDate, this.#tz);
     const startDate = this.#startDate;
     const endDate = this.#endDate;
@@ -500,7 +500,7 @@ export class CronExpression {
       if (!this.#matchDayOfMonth(currentDate)) {
         currentDate.applyDateOperation(
           dateMathVerb,
-          TimeUnitsEnum.day,
+          TimeUnits.day,
           this.#fields.hour.values.length,
         );
         debugMatcher('REJECTED(matchDayOfMonth)');
@@ -514,7 +514,7 @@ export class CronExpression {
       ) {
         currentDate.applyDateOperation(
           dateMathVerb,
-          TimeUnitsEnum.day,
+          TimeUnits.day,
           this.#fields.hour.values.length,
         );
         debugMatcher('REJECTED(matchNthDayOfWeek)');
@@ -528,7 +528,7 @@ export class CronExpression {
       ) {
         currentDate.applyDateOperation(
           dateMathVerb,
-          TimeUnitsEnum.month,
+          TimeUnits.month,
           this.#fields.hour.values.length,
         );
         debugMatcher('REJECTED(matchMonth)');
@@ -546,7 +546,7 @@ export class CronExpression {
       ) {
         currentDate.applyDateOperation(
           dateMathVerb,
-          TimeUnitsEnum.minute,
+          TimeUnits.minute,
           this.#fields.hour.values.length,
         );
         debugMatcher('REJECTED(matchMinute)');
@@ -560,7 +560,7 @@ export class CronExpression {
       ) {
         currentDate.applyDateOperation(
           dateMathVerb,
-          TimeUnitsEnum.second,
+          TimeUnits.second,
           this.#fields.hour.values.length,
         );
         debugMatcher('REJECTED(matchSecond)');
@@ -574,7 +574,7 @@ export class CronExpression {
         if (dateMathVerb === 'add' || currentDate.getMilliseconds() === 0) {
           currentDate.applyDateOperation(
             dateMathVerb,
-            TimeUnitsEnum.second,
+            TimeUnits.second,
             this.#fields.hour.values.length,
           );
         } else {
