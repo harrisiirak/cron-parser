@@ -39,7 +39,7 @@ describe('CronExpressionParser', () => {
     //   expect(cronExpression.stringify()).toBe('0 0 28-29W 2 2#3');
     // });
 
-    // FIXME: current behavior is not correct
+    // FIXME: this is broken in the current implementation
     // it('should parse expressions with # correctly', () => {
     //   const expression = '0 0 2 2 2#3';
     //   const cronExpression = CronExpressionParser.parse(expression);
