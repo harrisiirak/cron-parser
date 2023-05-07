@@ -1,10 +1,10 @@
 import { CronDate, CronExpression } from './';
-import { CronSecond } from './fields/CronSecond';
-import { CronMinute } from './fields/CronMinute';
-import { CronHour } from './fields/CronHour';
-import { CronDayOfMonth } from './fields/CronDayOfMonth';
-import { CronMonth } from './fields/CronMonth';
-import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
+import { CronSecond } from './fields/CronSecond.js';
+import { CronMinute } from './fields/CronMinute.js';
+import { CronHour } from './fields/CronHour.js';
+import { CronDayOfMonth } from './fields/CronDayOfMonth.js';
+import { CronMonth } from './fields/CronMonth.js';
+import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek.js';
 
 // TS >= 4.5 tail recursion optimization
 // https://dev.to/tylim88/typescript-numeric-range-type-15a5
@@ -132,14 +132,14 @@ export enum PredefinedExpressions {
   '@weekends' = '0 0 0 * * 0,6',
 }
 
-export interface ICronExpressionParserOptions {
-  currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
-  endDate?: Date | string | number | CronDate;
-  startDate?: Date | string | number | CronDate;
-  iterator?: boolean;
-  utc?: boolean;
-  tz?: string;
-}
+// export interface ICronExpressionParserOptions {
+//   currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
+//   endDate?: Date | string | number | CronDate;
+//   startDate?: Date | string | number | CronDate;
+//   iterator?: boolean;
+//   utc?: boolean;
+//   tz?: string;
+// }
 
 export interface ICronExpression {
   expression?: string;

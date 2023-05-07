@@ -1,5 +1,5 @@
-import { CronField } from './CronField';
-import { CronChars, CronMax, CronMin, DayOfTheWeekRange } from '../types';
+import { CronField } from './CronField.js';
+import { CronChars, CronMax, CronMin, DayOfTheWeekRange } from '../types.js';
 
 const MIN_DAY = 0;
 const MAX_DAY = 7;

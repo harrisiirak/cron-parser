@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { CronDate, CronExpression } from '../src';
 
 describe('CronExpression', () => {

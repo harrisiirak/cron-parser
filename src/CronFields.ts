@@ -1,12 +1,12 @@
 import assert from 'assert';
-import { CronChars, DayOfTheMonthRange, ICronFields, IFieldRange, MonthRange, SerializedCronFields } from './types';
-import { CronSecond } from './fields/CronSecond';
-import { CronMinute } from './fields/CronMinute';
-import { CronHour } from './fields/CronHour';
-import { CronDayOfMonth } from './fields/CronDayOfMonth';
-import { CronMonth } from './fields/CronMonth';
-import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
-import { CronField } from './fields/CronField';
+import { CronChars, DayOfTheMonthRange, ICronFields, IFieldRange, MonthRange, SerializedCronFields } from './types.js';
+import { CronSecond } from './fields/CronSecond.js';
+import { CronMinute } from './fields/CronMinute.js';
+import { CronHour } from './fields/CronHour.js';
+import { CronDayOfMonth } from './fields/CronDayOfMonth.js';
+import { CronMonth } from './fields/CronMonth.js';
+import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek.js';
+import { CronField } from './fields/CronField.js';
 
 export { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfTheWeek };
 

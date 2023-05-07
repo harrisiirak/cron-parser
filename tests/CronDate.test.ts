@@ -1,5 +1,5 @@
-import { CronDate } from '../src';
-import { TimeUnits } from '../src/types';
+import { CronDate } from '../src/index.js';
+import { TimeUnits } from '../src/types.js';
 
 describe('CronDate tests', () => {
   test('is the last weekday of the month', () => {

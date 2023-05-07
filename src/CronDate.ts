@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import assert from 'assert';
-import { DateMathOp, TimeUnits } from './types';
+import { DateMathOp, TimeUnits } from './types.js';
 
 type VerbMap = {
   [key in TimeUnits]: () => void;

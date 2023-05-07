@@ -1,4 +1,4 @@
-import { CronExpression, CronDate } from '../src';
+import { CronExpression, CronDate } from '../src/index.js';
 
 describe('parse expression as UTC', () => {
   test('UTC parse test', () => {

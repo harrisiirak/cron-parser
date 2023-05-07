@@ -1,6 +1,6 @@
-import { CronExpressionParser } from './CronExpressionParser';
-import { CronDate } from './CronDate';
-import { CronFields } from './CronFields';
+import { CronExpressionParser } from './CronExpressionParser.js';
+import { CronDate } from './CronDate.js';
+import { CronFields } from './CronFields.js';
 import assert from 'assert';
 import {
   CronFieldTypes,
@@ -16,7 +16,7 @@ import {
   MonthRange,
   SixtyRange,
   TimeUnits,
-} from './types';
+} from './types.js';
 import { DateTime } from 'luxon';
 import debug from 'debug';
 

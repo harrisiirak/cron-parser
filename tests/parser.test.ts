@@ -1,8 +1,12 @@
 import { CronDate, CronParser } from '../src';
+import * as path from 'path';
+
+const crontabExamplePath = path.join(process.cwd(), 'tests/crontab.example');
 
 describe('CronParser', () => {
   test('load crontab file', function () {
-    CronParser.parseFile(__dirname + '/crontab.example', (err, result) => {
+
+    CronParser.parseFile(crontabExamplePath, (err, result) => {
       if (err) {
         err.message = 'File read error: ' + err.message;
         throw err;

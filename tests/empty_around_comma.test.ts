@@ -1,4 +1,4 @@
-import { CronExpression } from '../src';
+import { CronExpression } from '../src/index.js';
 
 const options = {
   utc: true,
