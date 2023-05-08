@@ -26,7 +26,6 @@
     "docs": "rimraf docs && typedoc --out docs --readme none --name 'CronParser' src"
   },
   "dependencies": {
-    "debug": "^4.3.4",
     "luxon": "^3.2.1"
   },
   "devDependencies": {

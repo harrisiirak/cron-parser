@@ -18,9 +18,7 @@ import {
   TimeUnits,
 } from './types.js';
 import { DateTime } from 'luxon';
-import debug from 'debug';
 
-const debugMatcher = debug('cron-parser:CronExpression:matcher');
 
 /**
  * Cron iteration loop safety limit
@@ -350,24 +348,20 @@ export class CronExpression {
 
     // Rule 1: Both "day of month" and "day of week" are restricted; one or both must match the current day.
     if (isRestrictedDOM && isRestrictedDOW && (matchedDOM || matchedDOW)) {
-      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 1: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
       return true;
     }
 
     // Rule 2: "day of month" restricted and "day of week" not restricted; "day of month" must match the current day.
     if (matchedDOM && !isRestrictedDOW) {
-      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 2: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
       return true;
     }
 
     // Rule 3: "day of month" is a wildcard, "day of week" is not a wildcard, and "day of week" matches the current day.
     if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && matchedDOW) {
-      debugMatcher(`ACCEPTED(matchDayOfMonth) - Rule 3: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
       return true;
     }
 
     // If none of the rules match, the match is rejected.
-    debugMatcher(`REJECTED(matchDayOfMonth) - No Rule Matched: ${currentDate.toISOString()} - matchedDOM: ${matchedDOM}, matchedDOW: ${matchedDOW}`);
     return false;
   }
 
@@ -421,40 +415,32 @@ export class CronExpression {
       assert(stepCount < LOOP_LIMIT, 'Invalid expression, loop limit exceeded');
       assert(!reverse || !(startDate && startDate.getTime() > currentDate.getTime()), 'Out of the timespan range');
       assert(reverse || !(endDate && currentDate.getTime() > endDate.getTime()), 'Out of the timespan range');
-      debugMatcher(`############## Start Of Match: ${currentDate.toISOString()} ##############`);
 
       if (!this.#matchDayOfMonth(currentDate)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnits.Day, this.#fields.hour.values.length);
-        debugMatcher('REJECTED(matchDayOfMonth)');
         continue;
       }
       if (!(this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnits.Day, this.#fields.hour.values.length);
-        debugMatcher('REJECTED(matchNthDayOfWeek)');
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnits.Month, this.#fields.hour.values.length);
-        debugMatcher('REJECTED(matchMonth)');
         continue;
       }
       if (!this.#matchHour(currentDate, dateMathVerb, reverse)) {
-        debugMatcher('REJECTED(matchHour)');
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnits.Minute, this.#fields.hour.values.length);
-        debugMatcher('REJECTED(matchMinute)');
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnits.Second, this.#fields.hour.values.length);
-        debugMatcher('REJECTED(matchSecond)');
         continue;
       }
 
       if (startTimestamp === currentDate.getTime()) {
-        debugMatcher(`REJECTED(startTimestamp === currentDate.getTime()) startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
         if (dateMathVerb === 'Add' || currentDate.getMilliseconds() === 0) {
           currentDate.applyDateOperation(dateMathVerb, TimeUnits.Second, this.#fields.hour.values.length);
         } else {
@@ -467,7 +453,6 @@ export class CronExpression {
 
     this.#currentDate = new CronDate(currentDate, this.#tz);
     this.#hasIterated = true;
-    debugMatcher(`************** MATCHED: ${this.#currentDate.toISOString()} **************`);
     return currentDate;
   }
 }
