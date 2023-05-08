@@ -243,43 +243,43 @@ describe('CronDate tests', () => {
 
   test('CronDate should handle addUnit correctly', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date1.addUnit(TimeUnits.year);
+    date1.addUnit(TimeUnits.Year);
     expect(date1.getFullYear()).toEqual(2021);
     const date2 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date2.addUnit(TimeUnits.month);
+    date2.addUnit(TimeUnits.Month);
     expect(date2.getMonth()).toEqual(11);
     const date3 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date3.addUnit(TimeUnits.day);
+    date3.addUnit(TimeUnits.Day);
     expect(date3.getDate()).toEqual(1);
     const date4 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date4.addUnit(TimeUnits.hour);
+    date4.addUnit(TimeUnits.Hour);
     expect(date4.getHours()).toEqual(2);
     const date5 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date5.addUnit(TimeUnits.minute);
+    date5.addUnit(TimeUnits.Minute);
     expect(date5.getMinutes()).toEqual(2);
     const date6 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date6.addUnit(TimeUnits.second);
+    date6.addUnit(TimeUnits.Second);
     expect(date6.getSeconds()).toEqual(2);
   });
 
   test('CronDate should handle subtractUnit correctly', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date1.subtractUnit(TimeUnits.year);
+    date1.subtractUnit(TimeUnits.Year);
     expect(date1.getFullYear()).toEqual(2019);
     const date2 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date2.subtractUnit(TimeUnits.month);
+    date2.subtractUnit(TimeUnits.Month);
     expect(date2.getMonth()).toEqual(9);
     const date3 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date3.subtractUnit(TimeUnits.day);
+    date3.subtractUnit(TimeUnits.Day);
     expect(date3.getDate()).toEqual(29);
     const date4 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date4.subtractUnit(TimeUnits.hour);
+    date4.subtractUnit(TimeUnits.Hour);
     expect(date4.getHours()).toEqual(0);
     const date5 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date5.subtractUnit(TimeUnits.minute);
+    date5.subtractUnit(TimeUnits.Minute);
     expect(date5.getMinutes()).toEqual(0);
     const date6 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    date6.subtractUnit(TimeUnits.second);
+    date6.subtractUnit(TimeUnits.Second);
     expect(date6.getSeconds()).toEqual(0);
   });
 

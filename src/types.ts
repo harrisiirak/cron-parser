@@ -54,6 +54,7 @@ export type RawCronFields = {
   dayOfWeek: string;
 };
 
+// these need to be lowercase for the parser to work
 export enum Months {
   jan = 1,
   feb = 2,
@@ -69,23 +70,7 @@ export enum Months {
   dec = 12,
 }
 
-// TODO TypeScript enum's are weird when you have the same number value for multiple keys which is why we have to do this as strings
-//   Really don't like this and would like to find a better way to do this
-export enum DaysInMonth {
-  jan = '31',
-  feb = '29',
-  mar = '31',
-  apr = '30',
-  may = '31',
-  jun = '30',
-  jul = '31',
-  aug = '31',
-  sep = '30',
-  oct = '31',
-  nov = '30',
-  dec = '31',
-}
-
+// these need to be lowercase for the parser to work
 export enum DayOfWeek {
   sun = 0,
   mon = 1,
@@ -96,27 +81,44 @@ export enum DayOfWeek {
   sat = 6,
 }
 
+// TODO TypeScript enum's are weird when you have the same number value for multiple keys which is why we have to do this as strings
+//   Really don't like this and would like to find a better way to do this
+export enum DaysInMonth {
+  Jan = '31',
+  Feb = '29',
+  Mar = '31',
+  Apr = '30',
+  May = '31',
+  Jun = '30',
+  Jul = '31',
+  Aug = '31',
+  Sep = '30',
+  Oct = '31',
+  Nov = '30',
+  Dec = '31',
+}
+
 export enum CronUnits {
-  second = 'second',
-  minute = 'minute',
-  hour = 'hour',
-  dayOfMonth = 'dayOfMonth',
-  month = 'month',
-  dayOfWeek = 'dayOfWeek',
+  Second = 'Second',
+  Minute = 'Minute',
+  Hour = 'Hour',
+  DayOfMonth = 'DayOfMonth',
+  Month = 'Month',
+  DayOfWeek = 'DayOfWeek',
 }
 
 export enum TimeUnits {
-  second = 'second',
-  minute = 'minute',
-  hour = 'hour',
-  day = 'day',
-  month = 'month',
-  year = 'year',
+  Second = 'Second',
+  Minute = 'Minute',
+  Hour = 'Hour',
+  Day = 'Day',
+  Month = 'Month',
+  Year = 'Year',
 }
 
 export enum DateMathOp {
-  add = 'add',
-  subtract = 'subtract',
+  Add = 'Add',
+  Subtract = 'Subtract',
 }
 
 export enum PredefinedExpressions {
@@ -131,15 +133,6 @@ export enum PredefinedExpressions {
   '@weekdays' = '0 0 0 * * 1-5',
   '@weekends' = '0 0 0 * * 0,6',
 }
-
-// export interface ICronExpressionParserOptions {
-//   currentDate?: Date | string | number | CronDate; // FIXME: Should date be one of the types?
-//   endDate?: Date | string | number | CronDate;
-//   startDate?: Date | string | number | CronDate;
-//   iterator?: boolean;
-//   utc?: boolean;
-//   tz?: string;
-// }
 
 export interface ICronExpression {
   expression?: string;

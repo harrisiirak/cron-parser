@@ -42,13 +42,13 @@ export class CronExpressionParser {
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
     assert(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict, 'Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
 
-    const second = CronExpressionParser.#parseField('second', rawFields.second, CronSecond.constraints) as SixtyRange[];
-    const minute = CronExpressionParser.#parseField('minute', rawFields.minute, CronMinute.constraints) as SixtyRange[];
-    const hour = CronExpressionParser.#parseField('hour', rawFields.hour, CronHour.constraints) as HourRange[];
-    const month = CronExpressionParser.#parseField('month', rawFields.month, CronMonth.constraints) as MonthRange[];
-    const dayOfMonth = CronExpressionParser.#parseField('dayOfMonth', rawFields.dayOfMonth, CronDayOfMonth.constraints) as DayOfTheMonthRange[];
+    const second = CronExpressionParser.#parseField('Second', rawFields.second, CronSecond.constraints) as SixtyRange[];
+    const minute = CronExpressionParser.#parseField('Minute', rawFields.minute, CronMinute.constraints) as SixtyRange[];
+    const hour = CronExpressionParser.#parseField('Hour', rawFields.hour, CronHour.constraints) as HourRange[];
+    const month = CronExpressionParser.#parseField('Month', rawFields.month, CronMonth.constraints) as MonthRange[];
+    const dayOfMonth = CronExpressionParser.#parseField('DayOfMonth', rawFields.dayOfMonth, CronDayOfMonth.constraints) as DayOfTheMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
-    const dayOfWeek = CronExpressionParser.#parseField('dayOfWeek', _dayOfWeek, CronDayOfTheWeek.constraints) as DayOfTheWeekRange[];
+    const dayOfWeek = CronExpressionParser.#parseField('DayOfWeek', _dayOfWeek, CronDayOfTheWeek.constraints) as DayOfTheWeekRange[];
 
     const fields = new CronFields({
       second: new CronSecond(second, ['*', '?'].includes(rawFields.second)),
@@ -92,7 +92,7 @@ export class CronExpressionParser {
    */
   static #parseField(field: keyof typeof CronUnits, value: string, constraints: CronConstraints): (number | string)[] {
     // Replace aliases for month and dayOfWeek
-    if (field === 'month' || field === 'dayOfWeek') {
+    if (field === 'Month' || field === 'DayOfWeek') {
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
         const replacer = Months[ match as keyof typeof Months ] || DayOfWeek[ match as keyof typeof DayOfWeek ];
@@ -140,7 +140,7 @@ export class CronExpressionParser {
           const v = parseInt(result.toString(), 10);
           const isValid = v >= constraints.min && v <= constraints.max;
           assert(isValid, `Constraint error, got value ${result} expected range ${constraints.min}-${constraints.max}`);
-          stack.push(field === 'dayOfWeek' ? v % 7 : result);
+          stack.push(field === 'DayOfWeek' ? v % 7 : result);
         }
       }
     }
@@ -209,7 +209,7 @@ export class CronExpressionParser {
    */
   static #createRange(min: number, max: number, repeatInterval: number, field: keyof typeof CronUnits): number[] {
     const stack: number[] = [];
-    if (field === 'dayOfWeek' && max % 7 === 0) {
+    if (field === 'DayOfWeek' && max % 7 === 0) {
       stack.push(0);
     }
     for (let index = min; index <= max; index += repeatInterval) {

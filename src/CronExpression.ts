@@ -387,16 +387,16 @@ export class CronExpression {
 
     if (!isMatch && !isDstStart) {
       currentDate.dstStart = null;
-      currentDate.applyDateOperation(dateMathVerb, TimeUnits.hour, this.#fields.hour.values.length);
+      currentDate.applyDateOperation(dateMathVerb, TimeUnits.Hour, this.#fields.hour.values.length);
       return false;
     }
     if (isDstStart && !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
-      currentDate.invokeDateOperation(dateMathVerb, TimeUnits.hour);
+      currentDate.invokeDateOperation(dateMathVerb, TimeUnits.Hour);
       return false;
     }
     if (isDstEnd && !reverse) {
       currentDate.dstEnd = null;
-      currentDate.applyDateOperation(DateMathOp.add, TimeUnits.hour, this.#fields.hour.values.length);
+      currentDate.applyDateOperation(DateMathOp.Add, TimeUnits.Hour, this.#fields.hour.values.length);
       return false;
     }
     return true;
@@ -410,7 +410,7 @@ export class CronExpression {
    * @private
    */
   #findSchedule(reverse = false): CronDate {
-    const dateMathVerb: DateMathOp = reverse ? DateMathOp.subtract : DateMathOp.add;
+    const dateMathVerb: DateMathOp = reverse ? DateMathOp.Subtract : DateMathOp.Add;
     const currentDate = new CronDate(this.#currentDate, this.#tz);
     const startDate = this.#startDate;
     const endDate = this.#endDate;
@@ -424,17 +424,17 @@ export class CronExpression {
       debugMatcher(`############## Start Of Match: ${currentDate.toISOString()} ##############`);
 
       if (!this.#matchDayOfMonth(currentDate)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.day, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Day, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchDayOfMonth)');
         continue;
       }
       if (!(this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.day, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Day, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchNthDayOfWeek)');
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.month, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Month, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchMonth)');
         continue;
       }
@@ -443,20 +443,20 @@ export class CronExpression {
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.minute, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Minute, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchMinute)');
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.second, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Second, this.#fields.hour.values.length);
         debugMatcher('REJECTED(matchSecond)');
         continue;
       }
 
       if (startTimestamp === currentDate.getTime()) {
         debugMatcher(`REJECTED(startTimestamp === currentDate.getTime()) startTimestamp=${startTimestamp} currentDate=${currentDate.getTime()}`);
-        if (dateMathVerb === 'add' || currentDate.getMilliseconds() === 0) {
-          currentDate.applyDateOperation(dateMathVerb, TimeUnits.second, this.#fields.hour.values.length);
+        if (dateMathVerb === 'Add' || currentDate.getMilliseconds() === 0) {
+          currentDate.applyDateOperation(dateMathVerb, TimeUnits.Second, this.#fields.hour.values.length);
         } else {
           currentDate.setMilliseconds(0);
         }
