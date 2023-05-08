@@ -8,7 +8,7 @@ import {
   DayOfTheWeekRange,
   DayOfWeek,
   HourRange,
-  ICronParseOptions,
+  CronParseOptions,
   MonthRange,
   Months,
   ParseRageResponse,
@@ -27,14 +27,14 @@ export class CronExpressionParser {
   /**
    * Parses a cron expression and returns a CronExpression object.
    * @param {string} expression - The cron expression to parse.
-   * @param {ICronParseOptions} [options={}] - The options to use when parsing the expression.
+   * @param {CronParseOptions} [options={}] - The options to use when parsing the expression.
    * @param {boolean} [options.currentDate=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @param {boolean} [options.strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @param {CronDate} [options.currentDate=new CronDate(undefined, 'UTC')] - The date to use when calculating the next/previous occurrence.
    *
    * @returns {CronExpression} A CronExpression object.
    */
-  static parse(expression: string, options: ICronParseOptions = {}): CronExpression {
+  static parse(expression: string, options: CronParseOptions = {}): CronExpression {
     const { strict = false } = options;
     const currentDate = options.currentDate || new CronDate(undefined, 'UTC');
 

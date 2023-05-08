@@ -8,11 +8,11 @@ import {
   DayOfTheMonthRange,
   DayOfTheWeekRange,
   HourRange,
-  ICronExpression,
-  ICronFields,
-  ICronParseOptions,
-  IIteratorCallback,
-  IIteratorFields,
+  CronExpressionOptions,
+  CronFieldsOptions,
+  CronParseOptions,
+  CronExpressionIteratorCallback,
+  CronExpressionIterator,
   MonthRange,
   SixtyRange,
   TimeUnits,
@@ -29,7 +29,7 @@ const LOOP_LIMIT = 10000;
  * Class representing a Cron expression.
  */
 export class CronExpression {
-  #options: ICronParseOptions;
+  #options: CronParseOptions;
   readonly #utc: boolean;
   readonly #tz?: string;
   #currentDate: CronDate;
@@ -43,10 +43,10 @@ export class CronExpression {
   /**
    * Creates a new CronExpression instance.
    *
-   * @param {CronFields | ICronFields} fields - Cron fields.
-   * @param {ICronExpression} options - Parser options.
+   * @param {CronFields | CronFieldsOptions} fields - Cron fields.
+   * @param {CronExpressionOptions} options - Parser options.
    */
-  constructor(fields: CronFields | ICronFields, options: ICronExpression) {
+  constructor(fields: CronFields | CronFieldsOptions, options: CronExpressionOptions) {
     this.#options = options;
     this.#utc = options.utc || false;
     this.#tz = this.#utc ? 'UTC' : options.tz;
@@ -81,10 +81,10 @@ export class CronExpression {
    *
    * @public
    * @param {string} expression - The input cron expression string.
-   * @param {ICronParseOptions} [options] - Optional parsing options.
+   * @param {CronParseOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static parse(expression: string, options: ICronParseOptions = {}): CronExpression {
+  static parse(expression: string, options: CronParseOptions = {}): CronExpression {
     return CronExpressionParser.parse(expression, options);
   }
 
@@ -93,10 +93,10 @@ export class CronExpression {
    *
    * @public
    * @param {Record<string, number[]>} fields - The input cron fields object.
-   * @param {ICronParseOptions} [options] - Optional parsing options.
+   * @param {CronParseOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static fieldsToExpression(fields: CronFields, options?: ICronExpression): CronExpression {
+  static fieldsToExpression(fields: CronFields, options?: CronExpressionOptions): CronExpression {
     return new CronExpression(fields, options || {});
   }
 
@@ -226,22 +226,22 @@ export class CronExpression {
   /**
    * Iterate over a specified number of steps and optionally execute a callback function for each step.
    * @param {number} steps - The number of steps to iterate. Positive value iterates forward, negative value iterates backward.
-   * @param {IIteratorCallback} [callback] - Optional callback function to be executed for each step.
-   * @returns {(IIteratorFields | CronDate)[]} - An array of iterator fields or CronDate objects.
+   * @param {CronExpressionIteratorCallback} [callback] - Optional callback function to be executed for each step.
+   * @returns {(CronExpressionIterator | CronDate)[]} - An array of iterator fields or CronDate objects.
    * @memberof CronExpression
    * @public
    */
-  iterate(steps: number, callback?: IIteratorCallback): (IIteratorFields | CronDate)[] {
-    const dates: (IIteratorFields | CronDate)[] = [];
+  iterate(steps: number, callback?: CronExpressionIteratorCallback): (CronExpressionIterator | CronDate)[] {
+    const dates: (CronExpressionIterator | CronDate)[] = [];
 
     /**
      * Process each step and execute the action function.
      * @param {number} step - The current step number.
-     * @param {() => IIteratorFields | CronDate} action - The action function to be executed for the current step.
+     * @param {() => CronExpressionIterator | CronDate} action - The action function to be executed for the current step.
      */
-    const processStep = (step: number, action: () => IIteratorFields | CronDate) => {
+    const processStep = (step: number, action: () => CronExpressionIterator | CronDate) => {
       try {
-        const item: IIteratorFields | CronDate = action();
+        const item: CronExpressionIterator | CronDate = action();
         dates.push(item);
 
         // Fire the callback

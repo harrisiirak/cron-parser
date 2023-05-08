@@ -1,5 +1,4 @@
 import { CronFields } from '../src/';
-import { CronField } from '../src';
 import { CronDayOfMonth } from '../src';
 import { CronDayOfTheWeek } from '../src';
 import { CronHour } from '../src';
@@ -101,11 +100,4 @@ describe('CronFields', () => {
       'wildcard': false,
     });
   });
-
-  test('CronField constructor', () => {
-    expect(() => {
-      new CronField([0], false);
-    }).toThrow('Cannot construct CronField instances directly');
-  });
-
 });

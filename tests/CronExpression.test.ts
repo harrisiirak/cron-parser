@@ -1,5 +1,5 @@
 import { CronDate, CronExpression, PredefinedExpressions } from '../src/index.js';
-import { ICronParseOptions } from '../src/types.js';
+import { CronParseOptions } from '../src/types.js';
 
 const typeCheckCronDateObject = (date: CronDate | { value: CronDate; done: boolean }): date is { value: CronDate; done: boolean } => {
   return typeof date === 'object' && 'value' in date && 'done' in date;
@@ -237,7 +237,7 @@ describe('CronExpression', () => {
   });
 
   test('expression limited with start and end date', function () {
-    const options = <ICronParseOptions>{
+    const options = <CronParseOptions>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
       endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
@@ -342,7 +342,7 @@ describe('CronExpression', () => {
   });
 
   test('expression limited with start and end date with prev', function () {
-    const options = <ICronParseOptions>{
+    const options = <CronParseOptions>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
       endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
@@ -387,7 +387,7 @@ describe('CronExpression', () => {
   });
 
   test('iterate', function () {
-    const options = <ICronParseOptions>{
+    const options = <CronParseOptions>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
       endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),

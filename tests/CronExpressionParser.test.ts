@@ -62,12 +62,6 @@ describe('CronExpressionParser', () => {
     //   const expression = '0 0 * * */8';
     //   expect(() => CronExpressionParser.parse(expression)).toThrow();
     // });
-    // an array of numbers from 1-31
-    const daysOfMonth = Array.from({ length: 31 }, (_, i) => i + 1);
-    // an array of numbers from n to m
-    const range = (n: number, m: number) => Array.from({ length: m - n + 1 }, (_, i) => i + n);
-    // an array of numbers from from n to m with a step of s
-    const rangeWithStep = (n: number, m: number, s: number) => Array.from({ length: m/s - n + 1 }, (_, i) => i * s + n);
   });
 
   describe('stringify and debug', () => {

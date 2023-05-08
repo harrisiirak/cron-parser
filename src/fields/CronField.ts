@@ -6,27 +6,41 @@ import assert from 'assert';
  * This is a base class and should not be instantiated directly.
  * @class CronField
  */
-export class CronField {
+export abstract class CronField {
   readonly #wildcard: boolean = false;
   readonly #values: (number | string)[] = [];
 
+  /**
+   * Returns the minimum value allowed for this field.
+   */
   static get min(): CronMin {
     throw new Error('min must be overridden');
   }
 
+  /**
+   * Returns the maximum value allowed for this field.
+   */
   static get max(): CronMax {
     throw new Error('max must be overridden');
   }
 
+  /**
+   * Returns the allowed characters for this field.
+   */
   static get chars(): CronChars[] {
     return [];
   }
 
+  /**
+   * Returns the regular expression used to validate this field.
+   */
   static get validChars(): RegExp {
     return /^[,*\d/-]+$/;
   }
 
-
+  /**
+   * Returns the constraints for this field.
+   */
   static get constraints(): CronConstraints {
     return { min: this.min, max: this.max, chars: this.chars, validChars: this.validChars };
   }
@@ -39,11 +53,7 @@ export class CronField {
    * @throws {TypeError} if the constructor is called directly
    * @throws {Error} if validation fails
    */
-  constructor(values: (number | string)[], /* istanbul ignore next - we always pass a value */ wildcard = false) {
-    // only child classes can call this constructor
-    if (new.target === CronField) {
-      throw new TypeError('Cannot construct CronField instances directly');
-    }
+  protected constructor(values: (number | string)[], /* istanbul ignore next - we always pass a value */ wildcard = false) {
     assert(Array.isArray(values), `${this.constructor.name} Validation error, values is not an array`);
     assert(values.length > 0, `${this.constructor.name} Validation error, values contains no values`);
     this.#values = values.sort(CronField.sorter);

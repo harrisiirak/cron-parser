@@ -24,13 +24,12 @@ export {
   PredefinedExpressions,
 
   // Interfaces
-  ICronFields,
-  ICronExpression,
-  ICronParseOptions,
-  IFieldConstraints,
-  IFieldRange,
-  IIteratorCallback,
-  IIteratorFields,
+  CronFieldsOptions,
+  CronExpressionOptions,
+  CronParseOptions,
+  FieldRange,
+  CronExpressionIteratorCallback,
+  CronExpressionIterator,
 
   // Types
   CronChars,

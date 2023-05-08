@@ -134,7 +134,7 @@ export enum PredefinedExpressions {
   '@weekends' = '0 0 0 * * 0,6',
 }
 
-export interface ICronExpression {
+export interface CronExpressionOptions {
   expression?: string;
   currentDate?: Date | string | number | CronDate;
   endDate?: Date | string | number | CronDate;
@@ -145,7 +145,7 @@ export interface ICronExpression {
   nthDayOfWeek?: number;
 }
 
-export interface ICronParseOptions {
+export interface CronParseOptions {
   currentDate?: Date | string | number | CronDate;
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;
@@ -157,16 +157,7 @@ export interface ICronParseOptions {
   strict?: boolean;
 }
 
-export interface IFieldConstraints {
-  second: CronConstraints;
-  minute: CronConstraints;
-  hour: CronConstraints;
-  dayOfMonth: CronConstraints;
-  month: CronConstraints;
-  dayOfWeek: CronConstraints;
-}
-
-export interface ICronFields {
+export interface CronFieldsOptions {
   second: SixtyRange[] | CronSecond;
   minute: SixtyRange[] | CronMinute;
   hour: HourRange[] | CronHour;
@@ -175,7 +166,7 @@ export interface ICronFields {
   dayOfWeek: DayOfTheWeekRange[] | CronDayOfTheWeek;
 }
 
-export interface IFieldRange {
+export interface FieldRange {
   start: number | CronChars;
   count: number;
   end?: number;
@@ -188,9 +179,9 @@ export type ParseStringResponse = {
   errors: { [key: string]: unknown };
 };
 
-export interface IIteratorFields {
+export interface CronExpressionIterator {
   value: CronDate;
   done: boolean;
 }
 
-export type IIteratorCallback = (item: IIteratorFields | CronDate, index: number) => void;
+export type CronExpressionIteratorCallback = (item: CronExpressionIterator | CronDate, index: number) => void;

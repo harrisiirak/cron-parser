@@ -1,5 +1,5 @@
 import { CronFields, CronParser } from '../src';
-import { ICronFields } from '../src/types';
+import { CronFieldsOptions } from '../src/types';
 
 describe('CronParser', () => {
   it('should stringify cron expression all stars no seconds 0 * * * * *', function () {
@@ -256,7 +256,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing seconds', function () {
-    const input = <ICronFields>{
+    const input = <CronFieldsOptions>{
       minute: [1],
       hour: [1],
       dayOfMonth: [1],
@@ -267,7 +267,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - empty seconds', function () {
-    const input = <ICronFields>{
+    const input = <CronFieldsOptions>{
       second: [],
       minute: [1],
       hour: [1],
@@ -279,7 +279,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing values - empty array', function () {
-    const input = <ICronFields>{
+    const input = <CronFieldsOptions>{
       second: [1],
       minute: [],
       hour: [1],
@@ -291,7 +291,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - missing values', function () {
-    const input = <ICronFields>{
+    const input = <CronFieldsOptions>{
       second: [1],
       hour: [1],
       dayOfMonth: [1],
@@ -302,7 +302,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - range error', function () {
-    const input = <ICronFields>{
+    const input = <CronFieldsOptions>{
       second: [-1, 1, 0],
       minute: [1],
       hour: [1],
@@ -314,7 +314,7 @@ describe('CronParser', () => {
   });
 
   it('should throw validation error - bad chars error', function () {
-    const input = <ICronFields>{
+    const input = <CronFieldsOptions>{
       second: [0, 'R'],
       minute: [1],
       hour: [1],
@@ -327,7 +327,7 @@ describe('CronParser', () => {
 
 
   it('should throw validation error - duplicates', function () {
-    const input = <ICronFields>{
+    const input = <CronFieldsOptions>{
       second: [1, 1],
       minute: [1],
       hour: [1],

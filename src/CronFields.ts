@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { CronChars, DayOfTheMonthRange, ICronFields, IFieldRange, MonthRange, SerializedCronFields } from './types.js';
+import { CronChars, DayOfTheMonthRange, CronFieldsOptions, FieldRange, MonthRange, SerializedCronFields } from './types.js';
 import { CronSecond } from './fields/CronSecond.js';
 import { CronMinute } from './fields/CronMinute.js';
 import { CronHour } from './fields/CronHour.js';
@@ -24,10 +24,10 @@ export class CronFields {
 
   /**
    * CronFields constructor. Initializes the cron fields with the provided values.
-   * @param {ICronFields} param0 - The cron fields values
+   * @param {CronFieldsOptions} param0 - The cron fields values
    * @throws {Error} if validation fails
    */
-  constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: ICronFields) {
+  constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: CronFieldsOptions) {
     // FIXME: this is ugly need to separate the logic in #handleMaxDaysInMonth
     if (!(dayOfMonth instanceof CronDayOfMonth)) {
       /* istanbul ignore next - needs to be refactored */
@@ -110,16 +110,16 @@ export class CronFields {
    * Returns a string representation of the cron fields.
    * @param {(number | CronChars)[]} input - The cron fields values
    * @static
-   * @returns {IFieldRange[]} - The compacted cron fields
+   * @returns {FieldRange[]} - The compacted cron fields
    */
-  static compactField(input: (number | CronChars)[]): IFieldRange[] {
+  static compactField(input: (number | CronChars)[]): FieldRange[] {
     if (input.length === 0) {
       return [];
     }
 
     // Initialize the output array and current IFieldRange
-    const output: IFieldRange[] = [];
-    let current: IFieldRange | undefined = undefined;
+    const output: FieldRange[] = [];
+    let current: FieldRange | undefined = undefined;
 
     input.forEach((item, i, arr) => {
       // If the current IFieldRange is undefined, create a new one with the current item as the start.
@@ -212,13 +212,13 @@ export class CronFields {
 
   /**
    * Handles a single range.
-   * @param {IFieldRange} range {start: number, end: number, step: number, count: number} The range to handle.
+   * @param {FieldRange} range {start: number, end: number, step: number, count: number} The range to handle.
    * @param {number} min The minimum value for the field.
    * @param {number} max The maximum value for the field.
    * @returns {string | null} The stringified range or null if it cannot be stringified.
    * @private
    */
-  static #handleSingleRange(range: IFieldRange, min: number, max: number): string | null {
+  static #handleSingleRange(range: FieldRange, min: number, max: number): string | null {
     const step = range.step;
     if (!step) {
       return null;
@@ -234,12 +234,12 @@ export class CronFields {
 
   /**
    * Handles multiple ranges.
-   * @param {IFieldRange} range {start: number, end: number, step: number, count: number} The range to handle.
+   * @param {FieldRange} range {start: number, end: number, step: number, count: number} The range to handle.
    * @param {number} max The maximum value for the field.
    * @returns {string} The stringified range.
    * @private
    */
-  static #handleMultipleRanges(range: IFieldRange, max: number): string {
+  static #handleMultipleRanges(range: FieldRange, max: number): string {
     const step = range.step;
     if (step === 1) {
       return `${range.start}-${range.end}`;
