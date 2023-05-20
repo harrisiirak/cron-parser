@@ -333,9 +333,9 @@ export class CronExpression {
   #matchDayOfMonth(currentDate: CronDate): boolean {
     // Check if day of month and day of week fields are wildcards or restricted (not wildcard).
     const isDayOfMonthWildcardMatch = this.#fields.dayOfMonth.isWildcard;
-    const isRestrictedDOM = !isDayOfMonthWildcardMatch;
+    const isRestrictedDayOfMonth = !isDayOfMonthWildcardMatch;
     const isDayOfWeekWildcardMatch = this.#fields.dayOfWeek.isWildcard;
-    const isRestrictedDOW = !isDayOfWeekWildcardMatch;
+    const isRestrictedDayOfWeek = !isDayOfWeekWildcardMatch;
 
     // Calculate if the current date matches the day of month and day of week fields.
     const matchedDOM =
@@ -347,12 +347,12 @@ export class CronExpression {
         CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek.values, currentDate));
 
     // Rule 1: Both "day of month" and "day of week" are restricted; one or both must match the current day.
-    if (isRestrictedDOM && isRestrictedDOW && (matchedDOM || matchedDOW)) {
+    if (isRestrictedDayOfMonth && isRestrictedDayOfWeek && (matchedDOM || matchedDOW)) {
       return true;
     }
 
     // Rule 2: "day of month" restricted and "day of week" not restricted; "day of month" must match the current day.
-    if (matchedDOM && !isRestrictedDOW) {
+    if (matchedDOM && !isRestrictedDayOfWeek) {
       return true;
     }
 
