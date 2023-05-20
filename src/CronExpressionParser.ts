@@ -3,7 +3,7 @@ import { CronDate } from './CronDate.js';
 import { CronExpression } from './CronExpression.js';
 import {
   CronConstraints,
-  CronUnits,
+  CronUnit,
   DayOfTheMonthRange,
   DayOfTheWeekRange,
   DayOfWeek,
@@ -90,7 +90,7 @@ export class CronExpressionParser {
    * @private
    * @returns {(number | string)[]} The parsed field.
    */
-  static #parseField(field: keyof typeof CronUnits, value: string, constraints: CronConstraints): (number | string)[] {
+  static #parseField(field: keyof typeof CronUnit, value: string, constraints: CronConstraints): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === 'Month' || field === 'DayOfWeek') {
       value = value.replace(/[a-z]{3}/gi, (match) => {
@@ -113,10 +113,10 @@ export class CronExpressionParser {
    * Parse a sequence from a cron expression.
    * @param {string} val - The sequence to parse.
    * @param {CronConstraints} constraints - The constraints for the field.
-   * @param {keyof typeof CronUnits} field - The field to parse.
+   * @param {keyof typeof CronUnit} field - The field to parse.
    * @private
    */
-  static #parseSequence(val: string, constraints: CronConstraints, field: keyof typeof CronUnits): (number | string)[] {
+  static #parseSequence(val: string, constraints: CronConstraints, field: keyof typeof CronUnit): (number | string)[] {
     const stack: (number | string)[] = [];
 
     function handleResult(result: number | string | (number | string)[], constraints: CronConstraints) {
@@ -155,11 +155,11 @@ export class CronExpressionParser {
    * Parse repeat from a cron expression.
    * @param {string} val - The repeat to parse.
    * @param {CronConstraints} constraints - The constraints for the field.
-   * @param {keyof typeof CronUnits} field - The field to parse.
+   * @param {keyof typeof CronUnit} field - The field to parse.
    * @private
    * @returns {(number | string)[]} The parsed repeat.
    */
-  static #parseRepeat(val: string, constraints: CronConstraints, field: keyof typeof CronUnits): ParseRageResponse {
+  static #parseRepeat(val: string, constraints: CronConstraints, field: keyof typeof CronUnit): ParseRageResponse {
     const atoms = val.split('/');
     assert(atoms.length <= 2, `Invalid repeat: ${val}`);
     if (atoms.length === 2) {
@@ -203,11 +203,11 @@ export class CronExpressionParser {
    * @param {number} min - The minimum value of the range.
    * @param {number} max - The maximum value of the range.
    * @param {number} repeatInterval - The repeat interval of the range.
-   * @param {keyof typeof CronUnits} field - The field to parse.
+   * @param {keyof typeof CronUnit} field - The field to parse.
    * @private
    * @returns {number[]} The created range.
    */
-  static #createRange(min: number, max: number, repeatInterval: number, field: keyof typeof CronUnits): number[] {
+  static #createRange(min: number, max: number, repeatInterval: number, field: keyof typeof CronUnit): number[] {
     const stack: number[] = [];
     if (field === 'DayOfWeek' && max % 7 === 0) {
       stack.push(0);
@@ -225,11 +225,11 @@ export class CronExpressionParser {
    * @param {string} val - The range to parse.
    * @param {number} repeatInterval - The repeat interval of the range.
    * @param {CronConstraints} constraints - The constraints for the field.
-   * @param {keyof typeof CronUnits} field - The field to parse.
+   * @param {keyof typeof CronUnit} field - The field to parse.
    * @private
    * @returns {number[] | string[] | number | string} The parsed range.
    */
-  static #parseRange(val: string, repeatInterval: number, constraints: CronConstraints, field: keyof typeof CronUnits): ParseRageResponse {
+  static #parseRange(val: string, repeatInterval: number, constraints: CronConstraints, field: keyof typeof CronUnit): ParseRageResponse {
     const atoms: string[] = val.split('-');
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;

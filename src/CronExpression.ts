@@ -15,7 +15,7 @@ import {
   CronExpressionIterator,
   MonthRange,
   SixtyRange,
-  TimeUnits,
+  TimeUnit,
 } from './types.js';
 import { DateTime } from 'luxon';
 
@@ -381,16 +381,16 @@ export class CronExpression {
 
     if (!isMatch && !isDstStart) {
       currentDate.dstStart = null;
-      currentDate.applyDateOperation(dateMathVerb, TimeUnits.Hour, this.#fields.hour.values.length);
+      currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
       return false;
     }
     if (isDstStart && !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
-      currentDate.invokeDateOperation(dateMathVerb, TimeUnits.Hour);
+      currentDate.invokeDateOperation(dateMathVerb, TimeUnit.Hour);
       return false;
     }
     if (isDstEnd && !reverse) {
       currentDate.dstEnd = null;
-      currentDate.applyDateOperation(DateMathOp.Add, TimeUnits.Hour, this.#fields.hour.values.length);
+      currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, this.#fields.hour.values.length);
       return false;
     }
     return true;
@@ -417,32 +417,32 @@ export class CronExpression {
       assert(reverse || !(endDate && currentDate.getTime() > endDate.getTime()), 'Out of the timespan range');
 
       if (!this.#matchDayOfMonth(currentDate)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Day, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
         continue;
       }
       if (!(this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Day, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Month, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Month, this.#fields.hour.values.length);
         continue;
       }
       if (!this.#matchHour(currentDate, dateMathVerb, reverse)) {
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Minute, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnits.Second, this.#fields.hour.values.length);
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
         continue;
       }
 
       if (startTimestamp === currentDate.getTime()) {
         if (dateMathVerb === 'Add' || currentDate.getMilliseconds() === 0) {
-          currentDate.applyDateOperation(dateMathVerb, TimeUnits.Second, this.#fields.hour.values.length);
+          currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
         } else {
           currentDate.setMilliseconds(0);
         }

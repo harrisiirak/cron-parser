@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
 import assert from 'assert';
-import { DateMathOp, TimeUnits } from './types.js';
+import { DateMathOp, TimeUnit } from './types.js';
 
 type VerbMap = {
-  [key in TimeUnits]: () => void;
+  [key in TimeUnit]: () => void;
 };
 
 /**
@@ -174,16 +174,16 @@ export class CronDate {
 
   /**
    * Adds a unit of time to the current CronDate.
-   * @param {TimeUnits} unit
+   * @param {TimeUnit} unit
    */
-  addUnit(unit: TimeUnits): void {
+  addUnit(unit: TimeUnit): void {
     const unitMap: VerbMap = {
-      [TimeUnits.Year]: () => this.addYear(),
-      [TimeUnits.Month]: () => this.addMonth(),
-      [TimeUnits.Day]: () => this.addDay(),
-      [TimeUnits.Hour]: () => this.addHour(),
-      [TimeUnits.Minute]: () => this.addMinute(),
-      [TimeUnits.Second]: () => this.addSecond(),
+      [TimeUnit.Year]: () => this.addYear(),
+      [TimeUnit.Month]: () => this.addMonth(),
+      [TimeUnit.Day]: () => this.addDay(),
+      [TimeUnit.Hour]: () => this.addHour(),
+      [TimeUnit.Minute]: () => this.addMinute(),
+      [TimeUnit.Second]: () => this.addSecond(),
     };
     assert(unit in unitMap, `Invalid unit: ${unit}`);
     unitMap[unit]();
@@ -191,16 +191,16 @@ export class CronDate {
 
   /**
    * Subtracts a unit of time from the current CronDate.
-   * @param {TimeUnits} unit
+   * @param {TimeUnit} unit
    */
-  subtractUnit(unit: TimeUnits): void {
+  subtractUnit(unit: TimeUnit): void {
     const unitMap: VerbMap = {
-      [TimeUnits.Year]: () => this.subtractYear(),
-      [TimeUnits.Month]: () => this.subtractMonth(),
-      [TimeUnits.Day]: () => this.subtractDay(),
-      [TimeUnits.Hour]: () => this.subtractHour(),
-      [TimeUnits.Minute]: () => this.subtractMinute(),
-      [TimeUnits.Second]: () => this.subtractSecond(),
+      [TimeUnit.Year]: () => this.subtractYear(),
+      [TimeUnit.Month]: () => this.subtractMonth(),
+      [TimeUnit.Day]: () => this.subtractDay(),
+      [TimeUnit.Hour]: () => this.subtractHour(),
+      [TimeUnit.Minute]: () => this.subtractMinute(),
+      [TimeUnit.Second]: () => this.subtractSecond(),
     };
     assert(unit in unitMap, `Invalid unit: ${unit}`);
     unitMap[unit]();
@@ -209,9 +209,9 @@ export class CronDate {
   /**
    * Handles a math operation.
    * @param {DateMathOp} verb - {'add' | 'subtract'}
-   * @param {TimeUnits} unit - {'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'}
+   * @param {TimeUnit} unit - {'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'}
    */
-  invokeDateOperation(verb: DateMathOp, unit: TimeUnits) {
+  invokeDateOperation(verb: DateMathOp, unit: TimeUnit) {
     if (verb === DateMathOp.Add) {
       this.addUnit(unit);
       return;
@@ -471,11 +471,11 @@ export class CronDate {
   /**
    * Primarily for internal use.
    * @param {DateMathOp} op - The operation to perform.
-   * @param {TimeUnits} unit - The unit of time to use.
+   * @param {TimeUnit} unit - The unit of time to use.
    * @param {number} [hoursLength] - The length of the hours. Required when unit is not month or day.
    */
-  applyDateOperation(op: DateMathOp, unit: TimeUnits, hoursLength?: number): void {
-    if (unit === TimeUnits.Month || unit === TimeUnits.Day) {
+  applyDateOperation(op: DateMathOp, unit: TimeUnit, hoursLength?: number): void {
+    if (unit === TimeUnit.Month || unit === TimeUnit.Day) {
       return void this.invokeDateOperation(op, unit);
     }
     assert(hoursLength !== undefined, 'hoursLength must be defined when unit is not month or day');

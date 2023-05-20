@@ -81,7 +81,7 @@ export enum DayOfWeek {
   sat = 6,
 }
 
-export enum CronUnits {
+export enum CronUnit {
   Second = 'Second',
   Minute = 'Minute',
   Hour = 'Hour',
@@ -90,7 +90,7 @@ export enum CronUnits {
   DayOfWeek = 'DayOfWeek',
 }
 
-export enum TimeUnits {
+export enum TimeUnit {
   Second = 'Second',
   Minute = 'Minute',
   Hour = 'Hour',

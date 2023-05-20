@@ -18,7 +18,7 @@ export default CronParser;
 export {
   // Enums
   DateMathOp,
-  TimeUnits,
+  TimeUnit,
   DayOfWeek,
   PredefinedExpressions,
 
