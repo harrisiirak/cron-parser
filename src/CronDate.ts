@@ -476,21 +476,20 @@ export class CronDate {
    */
   applyDateOperation(op: DateMathOp, unit: TimeUnits, hoursLength?: number): void {
     if (unit === TimeUnits.Month || unit === TimeUnits.Day) {
-      this.invokeDateOperation(op, unit);
-    } else {
-      assert(hoursLength !== undefined, 'hoursLength must be defined when unit is not month or day');
-      const previousHour = this.getHours();
-      this.invokeDateOperation(op, unit);
-      const currentHour = this.getHours();
-      const diff = currentHour - previousHour;
-      if (diff === 2) {
-        if (hoursLength !== 24) {
-          this.dstStart = currentHour;
-        }
-      } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
-        if (hoursLength !== 24) {
-          this.dstEnd = currentHour;
-        }
+      return void this.invokeDateOperation(op, unit);
+    }
+    assert(hoursLength !== undefined, 'hoursLength must be defined when unit is not month or day');
+    const previousHour = this.getHours();
+    this.invokeDateOperation(op, unit);
+    const currentHour = this.getHours();
+    const diff = currentHour - previousHour;
+    if (diff === 2) {
+      if (hoursLength !== 24) {
+        this.dstStart = currentHour;
+      }
+    } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
+      if (hoursLength !== 24) {
+        this.dstEnd = currentHour;
       }
     }
   }
