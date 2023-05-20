@@ -1,11 +1,13 @@
 import { CronField } from './CronField.js';
-import { CronChars, CronMax, CronMin, DaysInMonth, MonthRange } from '../types.js';
+import { CronChars, CronMax, CronMin, MonthRange } from '../types.js';
 
 const MIN_MONTH = 1;
 const MAX_MONTH = 12;
 const MONTH_CHARS = [] as CronChars[];
 
-const DAYS_IN_MONTH = Object.values(DaysInMonth).map((days: string | DaysInMonth) => parseInt(days as string));
+// TODO: remove when finalized - const DAYS_IN_MONTH = Object.values(DaysInMonth).map((days: string | DaysInMonth) => parseInt(days as string));
+// const DAYS_IN_MONTH = Object.values(DaysInMonth).filter((v) => !isNaN(Number(v))).map((days: string | DaysInMonth) => parseInt(days as string));
+const DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 /**
  * Represents the "day of the month" field within a cron expression.
@@ -28,6 +30,7 @@ export class CronMonth extends CronField {
   static get daysInMonth(): number[] {
     return DAYS_IN_MONTH;
   }
+
   /**
    * CronDayOfMonth constructor. Initializes the "day of the month" field with the provided values.
    * @param {DayOfTheMonthRange[]} values - Values for the "day of the month" field
