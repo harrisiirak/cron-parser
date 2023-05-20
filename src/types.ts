@@ -81,37 +81,6 @@ export enum DayOfWeek {
   sat = 6,
 }
 
-// TODO TypeScript enum's are weird when you have the same number value for multiple keys which is why we have to do this as strings
-//   Really don't like this and would like to find a better way to do this
-// export enum DaysInMonth {
-//   Jan = '31',
-//   Feb = '29',
-//   Mar = '31',
-//   Apr = '30',
-//   May = '31',
-//   Jun = '30',
-//   Jul = '31',
-//   Aug = '31',
-//   Sep = '30',
-//   Oct = '31',
-//   Nov = '30',
-//   Dec = '31',
-// }
-// export enum DaysInMonth {
-//   Jan = 31,
-//   Feb = 29,
-//   Mar = 31,
-//   Apr = 30,
-//   May = 31,
-//   Jun = 30,
-//   Jul = 31,
-//   Aug = 31,
-//   Sep = 30,
-//   Oct = 31,
-//   Nov = 30,
-//   Dec = 31,
-// }
-
 export enum CronUnits {
   Second = 'Second',
   Minute = 'Minute',

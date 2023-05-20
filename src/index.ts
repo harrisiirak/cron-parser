@@ -17,7 +17,6 @@ export default CronParser;
 // Exported types
 export {
   // Enums
-  // DaysInMonth,
   DateMathOp,
   TimeUnits,
   DayOfWeek,
