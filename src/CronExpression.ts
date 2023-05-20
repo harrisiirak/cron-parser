@@ -73,7 +73,7 @@ export class CronExpression {
    * @returns {CronFieldCollection} Cron fields.
    */
   get fields(): CronFieldCollection {
-    return new CronFieldCollection(this.#fields);
+    return this.#fields;
   }
 
   /**
