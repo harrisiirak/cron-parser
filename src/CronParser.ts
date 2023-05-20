@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { ParseStringResponse } from './types.js';
 import { CronExpression } from './CronExpression.js';
-import { CronFields } from './CronFields.js';
+import { CronFieldCollection } from './CronFieldCollection.js';
 import assert from 'assert';
 import ErrnoException = NodeJS.ErrnoException;
 
@@ -27,7 +27,7 @@ class CronParser {
    * @param {object} [options] Parsing options
    * @return {object}
    */
-  static fieldsToExpression(fields: CronFields, options?: object): CronExpression {
+  static fieldsToExpression(fields: CronFieldCollection, options?: object): CronExpression {
     return CronExpression.fieldsToExpression(fields, options);
   }
 

@@ -1,5 +1,5 @@
 import { CronExpression } from '../src';
-import { CronFields } from '../src';
+import { CronFieldCollection } from '../src';
 
 describe('CronExpression', () => {
   test('Fields are exposed', () => {
@@ -13,7 +13,7 @@ describe('CronExpression', () => {
     //   });
     //
     //
-    //   const key = field as keyof CronFields;
+    //   const key = field as keyof CronFieldCollection;
     //   const expected = Array.from(interval.fields[key] as number[]);
     //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //   // @ts-ignore
@@ -23,8 +23,8 @@ describe('CronExpression', () => {
     //   expect(interval.fields[key]).toEqual(expected);
     // });
 
-    // interval.fields['dummy' as keyof CronFields] = [];
-    expect(interval.fields['dummy' as keyof CronFields]).toBeUndefined();
+    // interval.fields['dummy' as keyof CronFieldCollection] = [];
+    expect(interval.fields['dummy' as keyof CronFieldCollection]).toBeUndefined();
     expect(interval.fields.second.values).toEqual([0]);
     expect(interval.fields.minute.values).toEqual([1]);
     expect(interval.fields.hour.values).toEqual([2]);

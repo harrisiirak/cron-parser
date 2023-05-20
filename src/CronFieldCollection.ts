@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { CronChars, DayOfTheMonthRange, CronFieldsOptions, FieldRange, MonthRange, SerializedCronFields } from './types.js';
+import { CronChars, DayOfTheMonthRange, CronFieldCollectionOptions, FieldRange, MonthRange, SerializedCronFields } from './types.js';
 import { CronSecond } from './fields/CronSecond.js';
 import { CronMinute } from './fields/CronMinute.js';
 import { CronHour } from './fields/CronHour.js';
@@ -12,9 +12,9 @@ export { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfT
 
 /**
  * Represents a complete set of cron fields.
- * @class CronFields
+ * @class CronFieldCollection
  */
-export class CronFields {
+export class CronFieldCollection {
   readonly #second: CronSecond;
   readonly #minute: CronMinute;
   readonly #hour: CronHour;
@@ -23,11 +23,11 @@ export class CronFields {
   readonly #dayOfWeek: CronDayOfTheWeek;
 
   /**
-   * CronFields constructor. Initializes the cron fields with the provided values.
-   * @param {CronFieldsOptions} param0 - The cron fields values
+   * CronFieldCollection constructor. Initializes the cron fields with the provided values.
+   * @param {CronFieldCollectionOptions} param0 - The cron fields values
    * @throws {Error} if validation fails
    */
-  constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: CronFieldsOptions) {
+  constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: CronFieldCollectionOptions) {
     // FIXME: this is ugly need to separate the logic in #handleMaxDaysInMonth
     if (!(dayOfMonth instanceof CronDayOfMonth)) {
       /* istanbul ignore next - needs to be refactored */
@@ -35,10 +35,10 @@ export class CronFields {
         /* istanbul ignore next - needs to be refactored */
         throw new Error('Validation error, month must not be an instance of CronMonth when dayOfMonth is not an instance of CronDayOfMonth');
       }
-      dayOfMonth = CronFields.#handleMaxDaysInMonth(month, dayOfMonth);
+      dayOfMonth = CronFieldCollection.#handleMaxDaysInMonth(month, dayOfMonth);
     } else {
       if (month instanceof CronMonth) {
-        CronFields.#handleMaxDaysInMonth(month.values, dayOfMonth.values);
+        CronFieldCollection.#handleMaxDaysInMonth(month.values, dayOfMonth.values);
       } else {
         throw new Error('Validation error, month must be an instance of CronMonth when dayOfMonth is an instance of CronDayOfMonth');
       }
@@ -280,15 +280,15 @@ export class CronFields {
     if (field instanceof CronDayOfMonth) {
       max = this.#month.values.length === 1 ? CronMonth.daysInMonth[this.#month.values[0] - 1] : field.max;
     }
-    const ranges = CronFields.compactField(values);
+    const ranges = CronFieldCollection.compactField(values);
 
     if (ranges.length === 1) {
-      const singleRangeResult = CronFields.#handleSingleRange(ranges[0], field.min, max);
+      const singleRangeResult = CronFieldCollection.#handleSingleRange(ranges[0], field.min, max);
       if (singleRangeResult) {
         return singleRangeResult;
       }
     }
-    return ranges.map((range) => (range.count === 1 ? range.start.toString() : CronFields.#handleMultipleRanges(range, max))).join(',');
+    return ranges.map((range) => (range.count === 1 ? range.start.toString() : CronFieldCollection.#handleMultipleRanges(range, max))).join(',');
   }
 
   /**

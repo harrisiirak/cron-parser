@@ -1,6 +1,6 @@
 import { CronExpressionParser } from './CronExpressionParser.js';
 import { CronDate } from './CronDate.js';
-import { CronFields } from './CronFields.js';
+import { CronFieldCollection } from './CronFieldCollection.js';
 import assert from 'assert';
 import {
   CronFieldTypes,
@@ -9,7 +9,7 @@ import {
   DayOfTheWeekRange,
   HourRange,
   CronExpressionOptions,
-  CronFieldsOptions,
+  CronFieldCollectionOptions,
   CronParseOptions,
   CronExpressionIteratorCallback,
   CronExpressionIterator,
@@ -38,15 +38,15 @@ export class CronExpression {
   readonly #isIterator: boolean;
   #hasIterated: boolean;
   readonly #nthDayOfWeek: number;
-  readonly #fields: CronFields;
+  readonly #fields: CronFieldCollection;
 
   /**
    * Creates a new CronExpression instance.
    *
-   * @param {CronFields | CronFieldsOptions} fields - Cron fields.
+   * @param {CronFieldCollection | CronFieldCollectionOptions} fields - Cron fields.
    * @param {CronExpressionOptions} options - Parser options.
    */
-  constructor(fields: CronFields | CronFieldsOptions, options: CronExpressionOptions) {
+  constructor(fields: CronFieldCollection | CronFieldCollectionOptions, options: CronExpressionOptions) {
     this.#options = options;
     this.#utc = options.utc || false;
     this.#tz = this.#utc ? 'UTC' : options.tz;
@@ -57,7 +57,7 @@ export class CronExpression {
     this.#hasIterated = false;
     this.#nthDayOfWeek = options.nthDayOfWeek || 0;
     const { second, minute, hour, dayOfMonth, month, dayOfWeek } = fields;
-    this.#fields = new CronFields({
+    this.#fields = new CronFieldCollection({
       second,
       minute,
       hour,
@@ -70,10 +70,10 @@ export class CronExpression {
   /**
    * Getter for the cron fields.
    *
-   * @returns {CronFields} Cron fields.
+   * @returns {CronFieldCollection} Cron fields.
    */
-  get fields(): CronFields {
-    return new CronFields(this.#fields);
+  get fields(): CronFieldCollection {
+    return new CronFieldCollection(this.#fields);
   }
 
   /**
@@ -96,7 +96,7 @@ export class CronExpression {
    * @param {CronParseOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static fieldsToExpression(fields: CronFields, options?: CronExpressionOptions): CronExpression {
+  static fieldsToExpression(fields: CronFieldCollection, options?: CronExpressionOptions): CronExpression {
     return new CronExpression(fields, options || {});
   }
 

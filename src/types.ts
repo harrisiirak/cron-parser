@@ -157,7 +157,7 @@ export interface CronParseOptions {
   strict?: boolean;
 }
 
-export interface CronFieldsOptions {
+export interface CronFieldCollectionOptions {
   second: SixtyRange[] | CronSecond;
   minute: SixtyRange[] | CronMinute;
   hour: HourRange[] | CronHour;

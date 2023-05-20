@@ -1,4 +1,4 @@
-import { CronFields } from '../src/';
+import { CronFieldCollection } from '../src/';
 import { CronDayOfMonth } from '../src';
 import { CronDayOfTheWeek } from '../src';
 import { CronHour } from '../src';
@@ -37,7 +37,7 @@ describe('CronFields', () => {
         values: [1, 2, 3, 4, 5],
       },
     };
-    const cronFields = new CronFields({
+    const cronFields = new CronFieldCollection({
       second: new CronSecond(<SixtyRange[]>expected.second.values),
       minute: new CronMinute(<SixtyRange[]>expected.minute.values),
       hour: new CronHour(<HourRange[]>expected.hour.values),
@@ -54,7 +54,7 @@ describe('CronFields', () => {
   test('invalid constructor parameters', () => {
     expect(() => {
 
-      new CronFields({
+      new CronFieldCollection({
         second: new CronSecond([0]),
         minute: new CronMinute([0, 30]),
         hour: new CronHour([9]),
@@ -68,7 +68,7 @@ describe('CronFields', () => {
   });
 
   test('getters', () => {
-    const cronFields = new CronFields({
+    const cronFields = new CronFieldCollection({
       second: new CronSecond([0]),
       minute: new CronMinute([0, 30]),
       hour: new CronHour([9]),
@@ -86,7 +86,7 @@ describe('CronFields', () => {
   });
 
   test('serialize', () => {
-    const cronFields = new CronFields({
+    const cronFields = new CronFieldCollection({
       second: new CronSecond([0]),
       minute: new CronMinute([0, 30]),
       hour: new CronHour([9]),

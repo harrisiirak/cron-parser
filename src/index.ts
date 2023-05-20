@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-export { CronFields } from './CronFields.js';
+export { CronFieldCollection } from './CronFieldCollection.js';
 export { CronParser } from './CronParser.js';
 export { CronDate } from './CronDate.js';
 export { CronDayOfMonth } from './fields/CronDayOfMonth.js';
@@ -24,7 +24,7 @@ export {
   PredefinedExpressions,
 
   // Interfaces
-  CronFieldsOptions,
+  CronFieldCollectionOptions,
   CronExpressionOptions,
   CronParseOptions,
   FieldRange,

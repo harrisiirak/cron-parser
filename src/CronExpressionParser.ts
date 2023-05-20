@@ -1,4 +1,4 @@
-import { CronDayOfMonth, CronDayOfTheWeek, CronFields, CronHour, CronMinute, CronMonth, CronSecond } from './CronFields.js';
+import { CronDayOfMonth, CronDayOfTheWeek, CronFieldCollection, CronHour, CronMinute, CronMonth, CronSecond } from './CronFieldCollection.js';
 import { CronDate } from './CronDate.js';
 import { CronExpression } from './CronExpression.js';
 import {
@@ -50,7 +50,7 @@ export class CronExpressionParser {
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
     const dayOfWeek = CronExpressionParser.#parseField('DayOfWeek', _dayOfWeek, CronDayOfTheWeek.constraints) as DayOfTheWeekRange[];
 
-    const fields = new CronFields({
+    const fields = new CronFieldCollection({
       second: new CronSecond(second, ['*', '?'].includes(rawFields.second)),
       minute: new CronMinute(minute, ['*', '?'].includes(rawFields.minute)),
       hour: new CronHour(hour, ['*', '?'].includes(rawFields.hour)),

@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { CronExpression, CronFields } from '../src';
+import { CronExpression, CronFieldCollection } from '../src';
 import { CronParser } from '../src';
 import ErrnoException = NodeJS.ErrnoException;
 import { ParseStringResponse } from '../src/types';
@@ -20,7 +20,7 @@ describe('CronParser', () => {
 
   describe('fieldsToExpression', () => {
     it('should create a CronExpression from fields', () => {
-      const fields = new CronFields({
+      const fields = new CronFieldCollection({
         second: [0],
         minute: [0],
         hour: [0],

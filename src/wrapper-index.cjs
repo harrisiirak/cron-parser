@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-const {CronFields} = require('./CronFields.js');
+const {CronFieldCollection} = require('./CronFieldCollection.ts');
 const {CronParser} = require('./CronParser.js');
 const {CronDate} = require('./CronDate.js');
 const {CronDayOfMonth} = require('./fields/CronDayOfMonth.js');
@@ -12,7 +12,7 @@ const {CronSecond} = require('./fields/CronSecond.js');
 const {CronExpression} = require('./CronExpression.js');
 
 module.exports = CronParser;
-exports.CronFields = CronFields;
+exports.CronFields = CronFieldCollection;
 exports.CronParser = CronParser;
 exports.CronDate = CronDate;
 exports.CronDayOfMonth = CronDayOfMonth;
