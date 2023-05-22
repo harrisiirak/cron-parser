@@ -76,7 +76,6 @@ describe('CronDate', () => {
     date1.addDay();
     expect(date1.getMonth()).toEqual(11);
     expect(date1.getDate()).toEqual(31);
-    // todo: the addDay function sets the seconds, minutes, and hour to 0?
     expect(date1.getHours()).toEqual(0);
     expect(date1.getMinutes()).toEqual(0);
     expect(date1.getSeconds()).toEqual(0);
@@ -86,7 +85,6 @@ describe('CronDate', () => {
     expect(date2.getFullYear()).toEqual(2022);
     expect(date2.getMonth()).toEqual(0);
     expect(date2.getDate()).toEqual(1);
-    // todo: the addDay function sets the seconds, minutes, and hour to 0?
     expect(date2.getHours()).toEqual(0);
     expect(date2.getMinutes()).toEqual(0);
     expect(date2.getSeconds()).toEqual(0);
