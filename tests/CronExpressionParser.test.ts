@@ -32,20 +32,6 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse(expression)).toThrow();
     });
 
-    // TODO: not supported yet
-    // it('should parse expressions with W correctly', () => {
-    //   const expression = '0 0 2W 2 2';
-    //   const cronExpression = CronExpressionParser.parse(expression);
-    //   expect(cronExpression.stringify()).toBe('0 0 28-29W 2 2#3');
-    // });
-
-    // FIXME: this is broken in the current implementation
-    // it('should parse expressions with # correctly', () => {
-    //   const expression = '0 0 2 2 2#3';
-    //   const cronExpression = CronExpressionParser.parse(expression);
-    //   expect(cronExpression.stringify()).toBe('0 0 2 2 2#3');
-    // });
-
     it('should parse expressions with L correctly', () => {
       const expression = '0 0 L * *';
       const cronExpression = CronExpressionParser.parse(expression);
@@ -56,12 +42,6 @@ describe('CronExpressionParser', () => {
       const expression = '0 0 32 * *';
       expect(() => CronExpressionParser.parse(expression)).toThrow();
     });
-
-    // FIXME: current behavior is not correct
-    // it('should throw an error when an invalid repeat is encountered', () => {
-    //   const expression = '0 0 * * */8';
-    //   expect(() => CronExpressionParser.parse(expression)).toThrow();
-    // });
   });
 
   describe('stringify and debug', () => {
