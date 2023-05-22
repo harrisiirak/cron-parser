@@ -3,7 +3,7 @@ import { CronChars, CronMax, CronMin, HourRange } from '../types.js';
 
 const MIN_HOUR = 0;
 const MAX_HOUR = 23;
-const HOUR_CHARS = [] as CronChars[];
+const HOUR_CHARS: readonly CronChars[] = Object.freeze([]);
 
 /**
  * Represents the "hour" field within a cron expression.
@@ -19,7 +19,7 @@ export class CronHour extends CronField {
     return MAX_HOUR;
   }
 
-  static get chars(): CronChars[] {
+  static get chars(): readonly CronChars[] {
     return HOUR_CHARS;
   }
 

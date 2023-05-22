@@ -3,7 +3,7 @@ import { CronField } from './CronField.js';
 
 const MIN_SECOND = 0;
 const MAX_SECOND = 59;
-const SECOND_CHARS = [] as CronChars[];
+const SECOND_CHARS: readonly CronChars[] = Object.freeze([]);
 
 /**
  * Represents the "second" field within a cron expression.
@@ -17,7 +17,7 @@ export class CronSecond extends CronField {
   static get max(): CronMax {
     return MAX_SECOND;
   }
-  static get chars(): CronChars[] {
+  static get chars(): readonly CronChars[] {
     return SECOND_CHARS;
   }
 

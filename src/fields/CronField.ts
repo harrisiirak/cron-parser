@@ -13,22 +13,25 @@ export abstract class CronField {
   /**
    * Returns the minimum value allowed for this field.
    */
-  static get min(): CronMin {
+  /* istanbul ignore next */static get min(): CronMin {
+    /* istanbul ignore next */
     throw new Error('min must be overridden');
   }
 
   /**
    * Returns the maximum value allowed for this field.
    */
-  static get max(): CronMax {
+  /* istanbul ignore next */static get max(): CronMax {
+    /* istanbul ignore next */
     throw new Error('max must be overridden');
   }
 
   /**
    * Returns the allowed characters for this field.
    */
-  static get chars(): CronChars[] {
-    return [];
+  /* istanbul ignore next */static get chars(): readonly CronChars[] {
+    /* istanbul ignore next - this is overridden */
+    return Object.freeze([]);
   }
 
   /**
@@ -83,14 +86,9 @@ export abstract class CronField {
    * Returns an array of allowed special characters for this field.
    * @returns {string[]}
    */
-  get chars(): string[] {
-    // return the static value from the child class as a copy, so it can't be mutated
-    return [...(this.constructor as typeof CronField).chars];
-  }
-
-  get validChars(): RegExp {
-    // return the static value from the child class
-    return (this.constructor as typeof CronField).validChars;
+  get chars(): readonly string[] {
+    // return the frozen static value from the child class
+    return (this.constructor as typeof CronField).chars;
   }
 
   /**

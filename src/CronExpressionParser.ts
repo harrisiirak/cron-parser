@@ -64,11 +64,11 @@ export class CronExpressionParser {
   /**
    * Get the raw fields from a cron expression.
    * @param {string} expression - The cron expression to parse.
-   * @param {boolean} [strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
+   * @param {boolean} strict - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @private
    * @returns {RawCronFields} The raw fields.
    */
-  static #getRawFields(expression: string, strict = false): RawCronFields {
+  static #getRawFields(expression: string, strict: boolean): RawCronFields {
     assert(!strict || expression > '', 'Invalid cron expression');
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);

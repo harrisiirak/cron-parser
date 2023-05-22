@@ -3,7 +3,7 @@ import { CronChars, CronMax, CronMin, DayOfTheMonthRange } from '../types.js';
 
 const MIN_DAY = 1;
 const MAX_DAY = 31;
-const DAY_CHARS = ['L'] as CronChars[];
+const DAY_CHARS = Object.freeze(['L']) as CronChars[];
 
 /**
  * Represents the "day of the month" field within a cron expression.

@@ -1,4 +1,5 @@
-import { CronDate, CronExpression } from './';
+import { CronDate } from './CronDate.js';
+import { CronExpression } from './CronExpression.js';
 import { CronSecond } from './fields/CronSecond.js';
 import { CronMinute } from './fields/CronMinute.js';
 import { CronHour } from './fields/CronHour.js';
@@ -32,7 +33,7 @@ export type SerializedCronField = {
 export type CronConstraints = {
   min: CronMin;
   max: CronMax;
-  chars: CronChars[];
+  chars: readonly CronChars[];
   validChars: RegExp;
 }
 

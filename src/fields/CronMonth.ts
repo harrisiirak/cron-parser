@@ -3,9 +3,9 @@ import { CronChars, CronMax, CronMin, MonthRange } from '../types.js';
 
 const MIN_MONTH = 1;
 const MAX_MONTH = 12;
-const MONTH_CHARS = [] as CronChars[];
+const MONTH_CHARS: readonly CronChars[] = Object.freeze([]);
 
-const DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const DAYS_IN_MONTH: readonly number[] =  Object.freeze([31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
 
 /**
  * Represents the "day of the month" field within a cron expression.
@@ -21,11 +21,11 @@ export class CronMonth extends CronField {
     return MAX_MONTH;
   }
 
-  static get chars(): CronChars[] {
+  static get chars(): readonly CronChars[] {
     return MONTH_CHARS;
   }
 
-  static get daysInMonth(): number[] {
+  static get daysInMonth(): readonly number[] {
     return DAYS_IN_MONTH;
   }
 
