@@ -1462,7 +1462,6 @@ describe('CronExpression', () => {
     };
     //                               1 2 3   4   5 6
     const expression = '0 0 12 1-31 * 1';
-    // const interval = CronExpression.parse(expression, options);
     expect(() => CronExpression.parse(expression, options)).toThrow('Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
   });
 

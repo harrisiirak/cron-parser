@@ -134,6 +134,27 @@ var cronString = modifiedInterval.stringify();
 console.log(cronString); // "29 8 * * 1,3-7"
 ```
 
+Strict Mode
+
+In several implementations of CRON, it's ambiguous to specify both the Day Of Month and Day Of Week parameters simultaneously, as it's unclear which one should take precedence. Despite this ambiguity, this library allows both parameters to be set by default, although the resultant behavior might not align with your expectations.
+
+To resolve this ambiguity, you can activate the strict mode of the library. In strict mode, the library prevents the simultaneous setting of both Day Of Month and Day Of Week, effectively serving as a validation method for user inputs. To enable strict mode, set the `options.strict` flag to true.
+
+Consider the example below:
+
+```javascript
+// Specifies a schedule that occurs at 12:00 on every day-of-month from 1 through 31 and on Monday.
+const options = {
+  currentDate: new CronDate('Mon, 12 Sep 2022 14:00:00', 'UTC'),
+  strict: true,
+};
+const expression = '0 0 12 1-31 * 1';
+// With strict mode enabled, the parser throws an error as both dayOfMonth and dayOfWeek are used together.
+CronExpression.parse(expression, options); // throws: Cannot use both dayOfMonth and dayOfWeek together in strict mode!
+```
+
+In this example, the CRON expression is meant to trigger an event at 12:00 on every day from the 1st through the 31st and on every Monday. However, since strict mode is enabled in the options, an error is thrown, indicating that both the dayOfMonth and dayOfWeek parameters cannot be used together.
+
 Options
 ========
 
