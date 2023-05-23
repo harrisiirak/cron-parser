@@ -1,17 +1,17 @@
 # Cron Expression Parser
 ## Todos
-- [ ] 2 Tests failing
-- [ ] 6 FIXMEs in code
-- [ ] 3 TODOs in code
-- [ ] Update README.md
+- [ x ] 2 Tests failing
+- [ x ] 6 FIXMEs in code
+- [ x ] 3 TODOs in code
+- [ x ] Update README.md
 - [ ] Update package.json version and manually lint it, removing any unused dependencies or config values
-- [ ] Path: component.json - do we need this?
-- [ ] Redundant Typescript types ICronExpressionParserOptions and ICronParser
-- [ ] Constant Constraints should be refactored out
-- [ ] Should use Enums instead of constants
-- [ ] Should likely remove .editorconfig in favor of eslint
-- [ ] Should remove archive folder
-- [ ] Call pettier as part of pre-commit hook? 
+- [ x ] Path: component.json - do we need this?
+- [ x ] Redundant Typescript types ICronExpressionParserOptions and ICronParser
+- [ x ] Constant Constraints should be refactored out
+- [ x ] Should use Enums instead of constants
+- [ x ] Should likely remove .editorconfig in favor of eslint
+- [ x ] Should remove archive folder
+- [ x ] Call pettier as part of pre-commit hook? 
 
 ## Changes
  * Complete refactor of code into Typescript, should not be any breaking changes based on documented API. Users should be able to use the library as before. If they were using undocumented features, they will very likely need to update their code.

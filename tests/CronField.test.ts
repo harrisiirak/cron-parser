@@ -1,11 +1,18 @@
-import { CronFieldCollection } from '../src/';
-import { CronDayOfMonth } from '../src';
-import { CronDayOfTheWeek } from '../src';
-import { CronHour } from '../src';
-import { CronMinute } from '../src';
-import { CronMonth } from '../src';
-import { CronSecond } from '../src';
-import { DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange } from '../src';
+import {
+  CronDayOfMonth,
+  CronDayOfTheWeek,
+  CronFieldCollection,
+  CronHour,
+  CronMinute,
+  CronMonth,
+  CronSecond,
+  DayOfTheMonthRange,
+  DayOfTheWeekRange,
+  HourRange,
+  MonthRange,
+  SixtyRange,
+} from '../src/index.js';
+
 
 describe('CronFields', () => {
   // an array of numbers from 0 to 59

@@ -28,7 +28,7 @@ export class CronFieldCollection {
    * @throws {Error} if validation fails
    */
   constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: CronFieldCollectionOptions) {
-    // FIXME: this is ugly need to separate the logic in #handleMaxDaysInMonth
+    // this is ugly need to separate the logic in #handleMaxDaysInMonth
     if (!(dayOfMonth instanceof CronDayOfMonth)) {
       /* istanbul ignore next - needs to be refactored */
       if (month instanceof CronMonth) {

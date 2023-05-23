@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import { CronDate, CronExpression, CronFieldCollection, CronFieldCollectionOptions } from '../src';
-import { CronParser } from '../src';
+import { CronParser, CronExpression, CronFieldCollection, CronFieldCollectionOptions } from '../src/index.js';
+import { CronDate } from '../src/CronDate.js';
 import ErrnoException = NodeJS.ErrnoException;
 import { ParseStringResponse } from '../src/types';
 import * as path from 'path';
@@ -489,16 +489,6 @@ describe('CronParser', () => {
       const str = interval.stringify();
       expect(str).toEqual(expected);
     });
-
-    // TODO: not supported yet
-    // it('should stringify cron expression with on last day of month range', function () {
-    //   const expected = '* * L-1 * *';
-    //   const interval = CronParser.parseExpression(expected, {});
-    //   const str = interval.stringify();
-    //   expect(str).toEqual(expected);
-    // });
-
-
 
     it('should stringify from fields out of order', function () {
       const expected = '1-5 1 1 1 1 1';

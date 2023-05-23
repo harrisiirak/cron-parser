@@ -36,7 +36,6 @@ describe('CronDate', () => {
     expect(date1.getMonth()).toBe(11);
     expect(date1.getDate()).toBe(30);
     expect(date1.getMinutes()).toBe(59);
-    // todo: the addMinute function sets the seconds to 0?
     expect(date1.getSeconds()).toBe(0);
 
     const date2 = new CronDate(new Date('2021-12-31T23:59:59.000-00:00'), 'UTC');
@@ -45,7 +44,6 @@ describe('CronDate', () => {
     expect(date2.getMonth()).toBe(0);
     expect(date2.getDate()).toBe(1);
     expect(date2.getMinutes()).toBe(0);
-    // todo: the addMinute function sets the seconds to 0?
     expect(date2.getSeconds()).toBe(0);
   });
 
@@ -54,7 +52,6 @@ describe('CronDate', () => {
     date1.addHour();
     expect(date1.getMonth()).toBe(11);
     expect(date1.getDate()).toBe(30);
-    // todo: the addHour function sets the seconds and minutes to 0?
     expect(date1.getHours()).toBe(1);
     expect(date1.getMinutes()).toBe(0);
     expect(date1.getSeconds()).toBe(0);
@@ -65,7 +62,6 @@ describe('CronDate', () => {
     expect(date2.getMonth()).toBe(0);
     expect(date2.getDate()).toBe(1);
     expect(date2.getHours()).toBe(0);
-    // todo: the addHour function sets the seconds and minutes to 0?
     expect(date2.getMinutes()).toBe(0);
     expect(date2.getSeconds()).toBe(0);
   });
@@ -94,7 +90,6 @@ describe('CronDate', () => {
     const date1 = new CronDate(new Date('2021-11-30T00:58:58.000-00:00'), 'UTC');
     date1.addMonth();
     expect(date1.getMonth()).toEqual(11);
-    // todo: the addDay function sets the seconds, minutes, hour, day(0) to 0?
     expect(date1.getDate()).toEqual(1);
     expect(date1.getHours()).toEqual(0);
     expect(date1.getMinutes()).toEqual(0);
@@ -104,7 +99,6 @@ describe('CronDate', () => {
     date2.addMonth();
     expect(date2.getFullYear()).toEqual(2022);
     expect(date2.getMonth()).toEqual(0);
-    // todo: the addDay function sets the seconds, minutes, hour, day(1) to 0?
     expect(date2.getDate()).toEqual(1);
     expect(date2.getHours()).toEqual(0);
     expect(date2.getMinutes()).toEqual(0);
@@ -116,7 +110,6 @@ describe('CronDate', () => {
     const date1 = new CronDate(new Date('2021-11-30T00:58:58.000-00:00'), 'UTC');
     date1.addYear();
     expect(date1.getFullYear()).toEqual(2022);
-    // todo: the addYear function does not sets the seconds, minutes, hour, day(0), month to 0?
     expect(date1.getMonth()).toEqual(10);
     expect(date1.getDate()).toEqual(30);
     expect(date1.getHours()).toEqual(0);
@@ -126,7 +119,6 @@ describe('CronDate', () => {
     const date2 = new CronDate(new Date('2020-02-29T23:59:59.000-00:00'), 'UTC');
     date2.addYear();
     expect(date2.getFullYear()).toEqual(2021);
-    // todo: the addYear function does not sets the seconds, minutes, hour, day(0), month to 0?
     expect(date2.getMonth()).toEqual(1);
     expect(date2.getDate()).toEqual(28);
     expect(date2.getHours()).toEqual(23);
@@ -159,7 +151,6 @@ describe('CronDate', () => {
     expect(date1.getMonth()).toEqual(11);
     expect(date1.getDate()).toEqual(30);
     expect(date1.getMinutes()).toEqual(58);
-    // todo: the subtractMinute function does not sets the seconds to 0? This is different from the add function
     expect(date1.getSeconds()).toEqual(59);
 
     const date2 = new CronDate(new Date('2020-01-01T00:00:00.000-00:00'), 'UTC');
@@ -168,7 +159,6 @@ describe('CronDate', () => {
     expect(date2.getMonth()).toEqual(11);
     expect(date2.getDate()).toEqual(31);
     expect(date2.getMinutes()).toEqual(59);
-    // todo: the subtractMinute function does not sets the seconds to 0? This is different from the add function
     expect(date2.getSeconds()).toEqual(59);
   });
 
@@ -179,7 +169,6 @@ describe('CronDate', () => {
     expect(date1.getMonth()).toEqual(11);
     expect(date1.getDate()).toEqual(30);
     expect(date1.getHours()).toEqual(0);
-    // todo: the subtractHour function does not sets the seconds, minutes to 0? This is different from the add function
     expect(date1.getMinutes()).toEqual(59);
     expect(date1.getSeconds()).toEqual(59);
 
@@ -189,7 +178,6 @@ describe('CronDate', () => {
     expect(date2.getMonth()).toEqual(11);
     expect(date2.getDate()).toEqual(31);
     expect(date2.getHours()).toEqual(23);
-    // todo: the subtractHour function does not sets the seconds, minutes to 0? This is different from the add function
     expect(date2.getMinutes()).toEqual(59);
     expect(date2.getSeconds()).toEqual(59);
 
@@ -201,7 +189,6 @@ describe('CronDate', () => {
     expect(date1.getFullYear()).toEqual(2020);
     expect(date1.getMonth()).toEqual(11);
     expect(date1.getDate()).toEqual(29);
-    // todo: the subtractDay function differently than the add functions or other subtract functions
     expect(date1.getHours()).toEqual(23);
     expect(date1.getMinutes()).toEqual(59);
     expect(date1.getSeconds()).toEqual(59);
@@ -211,7 +198,6 @@ describe('CronDate', () => {
     expect(date2.getFullYear()).toEqual(2019);
     expect(date2.getMonth()).toEqual(11);
     expect(date2.getDate()).toEqual(31);
-    // todo: the subtractDay function differently than the add functions or other subtract functions
     expect(date2.getHours()).toEqual(23);
     expect(date2.getMinutes()).toEqual(59);
     expect(date2.getSeconds()).toEqual(59);
@@ -391,7 +377,6 @@ describe('CronDate', () => {
     };
 
     test('undefined date', () => {
-      // FIXME: this test can fail sometimes due to being off by 1 second
       const realDate = new Date();
       const d = new CronDate();
       typeCheckCronDate(d);
@@ -414,7 +399,6 @@ describe('CronDate', () => {
       expect(d.toDate().toString()).toBe(expectedTime);
     });
 
-    // FIXME? THIS TEST MUST BE RAN WITH TZ=UTC!!!
     test('RFC2822', () => {
       const offsetString = offsetSign + String(offsetHours).padStart(2, '0') + String(offsetMinutes).padStart(2, '0');
       const d = new CronDate('Mon, 4 Jan 2021 10:00:00 ' + offsetString);

@@ -1440,6 +1440,7 @@ describe('CronExpression', () => {
   it('should correctly handle 10/2 * * ? * * (#156)', () => {
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 01:00:00'),
+      strict: false, // this is for coverage
     };
     const expression = '10/2 * * ? * *';
     const interval = CronExpression.parse(expression, options);
