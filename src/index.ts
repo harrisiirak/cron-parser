@@ -33,7 +33,7 @@ export {
   // Types
   CronChars,
   CronConstraints,
-  CronFieldTypes,
+  CronFieldType,
   CronMax,
   CronMin,
   DayOfMonthRange,

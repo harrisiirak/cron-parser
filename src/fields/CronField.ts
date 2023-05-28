@@ -1,4 +1,4 @@
-import { CronChars, CronConstraints, CronFieldTypes, CronMax, CronMin, SerializedCronField } from '../types.js';
+import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin, SerializedCronField } from '../types.js';
 import assert from 'assert';
 
 /**
@@ -101,11 +101,11 @@ export abstract class CronField {
 
   /**
    * Returns an array of allowed values for this field.
-   * @returns {CronFieldTypes}
+   * @returns {CronFieldType}
    */
-  get values(): CronFieldTypes {
+  get values(): CronFieldType {
     // return a copy of the values, so they can't be mutated
-    return this.#values as CronFieldTypes;
+    return this.#values as CronFieldType;
   }
 
   /**

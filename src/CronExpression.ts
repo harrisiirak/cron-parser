@@ -3,7 +3,7 @@ import { CronDate } from './CronDate.js';
 import { CronFieldCollection } from './CronFieldCollection.js';
 import assert from 'assert';
 import {
-  CronFieldTypes,
+  CronFieldType,
   DateMathOp,
   DayOfMonthRange,
   DayOfWeekRange,
@@ -107,7 +107,7 @@ export class CronExpression {
    * @memberof CronExpression
    * @private
    */
-  static #matchSchedule(value: number, sequence: CronFieldTypes): boolean {
+  static #matchSchedule(value: number, sequence: CronFieldType): boolean {
     return sequence.some((element) => element === value);
   }
 
