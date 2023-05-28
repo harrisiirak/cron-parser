@@ -12,7 +12,7 @@ const {CronSecond} = require('./fields/CronSecond.js');
 const {CronExpression} = require('./CronExpression.js');
 
 module.exports = CronParser;
-exports.CronFields = CronFieldCollection;
+exports.CronFieldCollection = CronFieldCollection;
 exports.CronParser = CronParser;
 exports.CronDate = CronDate;
 exports.CronDayOfMonth = CronDayOfMonth;
