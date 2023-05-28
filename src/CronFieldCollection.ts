@@ -122,7 +122,7 @@ export class CronFieldCollection {
     let current: FieldRange | undefined = undefined;
 
     input.forEach((item, i, arr) => {
-      // If the current IFieldRange is undefined, create a new one with the current item as the start.
+      // If the current FieldRange is undefined, create a new one with the current item as the start.
       if (current === undefined) {
         current = { start: item, count: 1 };
         return;
@@ -132,8 +132,8 @@ export class CronFieldCollection {
       const prevItem = arr[i - 1] || current.start;
       const nextItem = arr[i + 1];
 
-      // If the current item is 'L' or 'W', push the current IFieldRange to the output and
-      // create a new IFieldRange with the current item as the start.
+      // If the current item is 'L' or 'W', push the current FieldRange to the output and
+      // create a new FieldRange with the current item as the start.
       // 'L' and 'W' characters are special cases that need to be handled separately.
       if (item === 'L' || item === 'W') {
         output.push(current);
@@ -148,7 +148,7 @@ export class CronFieldCollection {
         const step = item - (prevItem as number);
         const nextStep = (nextItem as number) - item;
 
-        // If the current step is less or equal to the next step, update the current IFieldRange to include the current item.
+        // If the current step is less or equal to the next step, update the current FieldRange to include the current item.
         if (step <= nextStep) {
           current = { ...current, count: 2, end: item, step };
           return;
@@ -163,7 +163,7 @@ export class CronFieldCollection {
         current.count++;
         current.end = item;
       } else {
-        // If the count is 1, push a new IFieldRange with the current start.
+        // If the count is 1, push a new FieldRange with the current start.
         // This handles the case where the current range has only one element.
         if (current.count === 1) {
           // If the count is 2, push two separate IFieldRanges, one for each element.
@@ -177,10 +177,10 @@ export class CronFieldCollection {
             count: 1,
           });
         } else {
-          // Otherwise, push the current IFieldRange to the output.
+          // Otherwise, push the current FieldRange to the output.
           output.push(current);
         }
-        // Reset the current IFieldRange with the current item as the start.
+        // Reset the current FieldRange with the current item as the start.
         current = { start: item, count: 1 };
       }
     });
