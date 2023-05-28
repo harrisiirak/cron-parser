@@ -134,7 +134,6 @@ export interface CronParseOptions {
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;
   iterator?: boolean;
-  utc?: boolean;
   tz?: string;
   nthDayOfWeek?: number;
   expression?: string;

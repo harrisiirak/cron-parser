@@ -30,7 +30,6 @@ const LOOP_LIMIT = 10000;
  */
 export class CronExpression {
   #options: CronParseOptions;
-  readonly #utc: boolean;
   readonly #tz?: string;
   #currentDate: CronDate;
   readonly #startDate: CronDate | null;
@@ -48,8 +47,7 @@ export class CronExpression {
    */
   constructor(fields: CronFieldCollection | CronFieldCollectionOptions, options: CronExpressionOptions) {
     this.#options = options;
-    this.#utc = options.utc || false;
-    this.#tz = this.#utc ? 'UTC' : options.tz;
+    this.#tz = options.tz;
     this.#currentDate = new CronDate(options.currentDate, this.#tz);
     this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
     this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;

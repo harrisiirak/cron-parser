@@ -480,7 +480,7 @@ describe('CronExpression', () => {
 
   test('parse expression as UTC', function () {
     const options = {
-      utc: true,
+
     };
 
     let interval = CronExpression.parse('0 0 10 * * *', options);
@@ -935,43 +935,6 @@ describe('CronExpression', () => {
       });
       next = interval.next();
     });
-
-    // cronDateTypedTest(next, (next) => {
-    //   console.log(next.toISOString());
-    //   expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
-    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
-    // });
-    //
-    // next = interval.next();
-    // cronDateTypedTest(next, (next) => {
-    //   expect(next.getDay() === 0).toBeTruthy(); // 'Day of week matches'
-    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
-    // });
-    //
-    // next = interval.next();
-    // cronDateTypedTest(next, (next) => {
-    //   expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
-    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
-    // });
-    //
-    // next = interval.next();
-    // cronDateTypedTest(next, (next) => {
-    //   expect(next.getDay() === 0).toBeTruthy(); // 'Day of week matches'
-    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
-    // });
-    //
-    // next = interval.next();
-    // cronDateTypedTest(next, (next) => {
-    //   expect(next.getDate()).toEqual(12); // 'Day of month matches'
-    //   expect(next.getDay() === 1).toBeTruthy(); // 'Day of week matches'
-    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
-    // });
-    //
-    // next = interval.next();
-    // cronDateTypedTest(next, (next) => {
-    //   expect(next.getDay() === 6).toBeTruthy(); // 'Day of week matches'
-    //   expect(next.getMonth()).toEqual(7); // 'Month matches'
-    // });
   });
 
   test('day of month validation should be ignored when day of month is wildcard and month is set', function () {
@@ -1496,7 +1459,7 @@ describe('CronExpression', () => {
 
   describe('CronExpression - empty around comma tests', () => {
     const options = {
-      utc: true,
+      tz: 'UTC',
     };
 
     test('both empty around comma', () => {
@@ -1516,25 +1479,6 @@ describe('CronExpression', () => {
     test('Fields are exposed', () => {
       const interval = CronExpression.parse('0 1 2 3 * 1-3,5');
       expect(interval).toBeTruthy();
-
-      // CronExpression.map.forEach((field) => {
-      //   Object.defineProperty(interval.fields, field, {
-      //     value: [],
-      //     writable: false,
-      //   });
-      //
-      //
-      //   const key = field as keyof CronFieldCollection;
-      //   const expected = Array.from(interval.fields[key] as number[]);
-      //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //   // @ts-ignore
-      //   interval.fields[key].push(-1);
-      //   expect(interval.fields[key]).toEqual(expected);
-      //   delete interval.fields[key];
-      //   expect(interval.fields[key]).toEqual(expected);
-      // });
-
-      // interval.fields['dummy' as keyof CronFieldCollection] = [];
       expect(interval.fields['dummy' as keyof CronFieldCollection]).toBeUndefined();
       expect(interval.fields.second.values).toEqual([0]);
       expect(interval.fields.minute.values).toEqual([1]);
@@ -2239,7 +2183,7 @@ describe('CronExpression', () => {
   describe('bugs', () => {
     test('bug # ? - parse expression as UTC', () => {
       try {
-        const options = { utc: true };
+        const options = { tz: 'UTC' };
 
         const interval = CronExpression.parse('0 0 10 * * *', options);
 
