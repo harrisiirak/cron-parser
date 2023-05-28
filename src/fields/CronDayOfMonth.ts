@@ -1,5 +1,5 @@
 import { CronField } from './CronField.js';
-import { CronChars, CronMax, CronMin, DayOfTheMonthRange } from '../types.js';
+import { CronChars, CronMax, CronMin, DayOfMonthRange } from '../types.js';
 
 const MIN_DAY = 1;
 const MAX_DAY = 31;
@@ -27,20 +27,20 @@ export class CronDayOfMonth extends CronField {
   }
   /**
    * CronDayOfMonth constructor. Initializes the "day of the month" field with the provided values.
-   * @param {DayOfTheMonthRange[]} values - Values for the "day of the month" field
+   * @param {DayOfMonthRange[]} values - Values for the "day of the month" field
    * @param {boolean} [wildcard=false] - Whether this field is a wildcard
    * @throws {Error} if validation fails
    */
-  constructor(values: DayOfTheMonthRange[], wildcard = false) {
+  constructor(values: DayOfMonthRange[], wildcard = false) {
     super(values, wildcard);
     this.validate();
   }
 
   /**
    * Returns an array of allowed values for the "day of the month" field.
-   * @returns {DayOfTheMonthRange[]}
+   * @returns {DayOfMonthRange[]}
    */
-  get values(): DayOfTheMonthRange[] {
-    return super.values as DayOfTheMonthRange[];
+  get values(): DayOfMonthRange[] {
+    return super.values as DayOfMonthRange[];
   }
 }

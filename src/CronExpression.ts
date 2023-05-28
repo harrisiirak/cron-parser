@@ -5,7 +5,7 @@ import assert from 'assert';
 import {
   CronFieldTypes,
   DateMathOp,
-  DayOfTheMonthRange,
+  DayOfMonthRange,
   DayOfTheWeekRange,
   HourRange,
   CronExpressionOptions,
@@ -296,7 +296,7 @@ export class CronExpression {
     assert(dtStr != null, 'Invalid date');
     const dt = DateTime.fromISO(dtStr, { zone: this.#tz });
     return (
-      dayOfMonth.values.includes(<DayOfTheMonthRange>dt.day) &&
+      dayOfMonth.values.includes(<DayOfMonthRange>dt.day) &&
       dayOfWeek.values.includes(<DayOfTheWeekRange>dt.weekday) &&
       month.values.includes(<MonthRange>dt.month) &&
       hour.values.includes(<HourRange>dt.hour) &&

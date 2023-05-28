@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { CronChars, DayOfTheMonthRange, CronFieldCollectionOptions, FieldRange, MonthRange, SerializedCronFields } from './types.js';
+import { CronChars, DayOfMonthRange, CronFieldCollectionOptions, FieldRange, MonthRange, SerializedCronFields } from './types.js';
 import { CronSecond } from './fields/CronSecond.js';
 import { CronMinute } from './fields/CronMinute.js';
 import { CronHour } from './fields/CronHour.js';
@@ -195,11 +195,11 @@ export class CronFieldCollection {
   /**
    * Handles a single range.
    * @param {MonthRange[]} month The month range.
-   * @param {DayOfTheMonthRange[]} dayOfMonth The day of the month range.
-   * @returns {DayOfTheMonthRange[]} The day of the month range.
+   * @param {DayOfMonthRange[]} dayOfMonth The day of the month range.
+   * @returns {DayOfMonthRange[]} The day of the month range.
    * @private
    */
-  static #handleMaxDaysInMonth(month: MonthRange[], dayOfMonth: DayOfTheMonthRange[]): DayOfTheMonthRange[] {
+  static #handleMaxDaysInMonth(month: MonthRange[], dayOfMonth: DayOfMonthRange[]): DayOfMonthRange[] {
     if (month.length === 1) {
       const daysInMonth = CronMonth.daysInMonth[month[0] - 1];
       const v = parseInt(dayOfMonth[0] as string, 10);

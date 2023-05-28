@@ -1,5 +1,5 @@
 import { expectAssignable, expectNotAssignable } from 'tsd';
-import { DayOfTheMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange } from '../src';
+import { DayOfMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange } from '../src';
 import { Months } from '../src/types';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -32,21 +32,21 @@ expectNotAssignable<HourRange>(24);
 expectNotAssignable<HourRange>(0.5);
 expectNotAssignable<HourRange>(22.5);
 
-// Assert that DayOfTheMonthRange includes 1, 31, and 'L'
-expectAssignable<DayOfTheMonthRange>(1);
-expectAssignable<DayOfTheMonthRange>(31);
-expectAssignable<DayOfTheMonthRange>('L');
+// Assert that DayOfMonthRange includes 1, 31, and 'L'
+expectAssignable<DayOfMonthRange>(1);
+expectAssignable<DayOfMonthRange>(31);
+expectAssignable<DayOfMonthRange>('L');
 
-// Assert that DayOfTheMonthRange does not include 0 and 32
-expectNotAssignable<DayOfTheMonthRange>(0);
-expectNotAssignable<DayOfTheMonthRange>(32);
+// Assert that DayOfMonthRange does not include 0 and 32
+expectNotAssignable<DayOfMonthRange>(0);
+expectNotAssignable<DayOfMonthRange>(32);
 
-// Assert that DayOfTheMonthRange does not include 0.5 and 30.5
-expectNotAssignable<DayOfTheMonthRange>(0.5);
-expectNotAssignable<DayOfTheMonthRange>(30.5);
+// Assert that DayOfMonthRange does not include 0.5 and 30.5
+expectNotAssignable<DayOfMonthRange>(0.5);
+expectNotAssignable<DayOfMonthRange>(30.5);
 
-// Assert that DayOfTheMonthRange does not include 'l'
-expectNotAssignable<DayOfTheMonthRange>('l');
+// Assert that DayOfMonthRange does not include 'l'
+expectNotAssignable<DayOfMonthRange>('l');
 
 // Assert that MonthRange includes 1 and 12
 expectAssignable<MonthRange>(1);

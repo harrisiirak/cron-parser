@@ -6,7 +6,7 @@ import {
   CronMinute,
   CronMonth,
   CronSecond,
-  DayOfTheMonthRange,
+  DayOfMonthRange,
   DayOfTheWeekRange,
   HourRange,
   MonthRange,
@@ -48,7 +48,7 @@ describe('CronFields', () => {
       second: new CronSecond(<SixtyRange[]>expected.second.values),
       minute: new CronMinute(<SixtyRange[]>expected.minute.values),
       hour: new CronHour(<HourRange[]>expected.hour.values),
-      dayOfMonth: new CronDayOfMonth(<DayOfTheMonthRange[]>expected.dayOfMonth.values),
+      dayOfMonth: new CronDayOfMonth(<DayOfMonthRange[]>expected.dayOfMonth.values),
       month: new CronMonth(<MonthRange[]>expected.month.values),
       dayOfWeek: new CronDayOfTheWeek(<DayOfTheWeekRange[]>expected.dayOfWeek.values),
     });

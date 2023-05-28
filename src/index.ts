@@ -36,7 +36,7 @@ export {
   CronFieldTypes,
   CronMax,
   CronMin,
-  DayOfTheMonthRange,
+  DayOfMonthRange,
   DayOfTheWeekRange,
   HourRange,
   IntRange,
