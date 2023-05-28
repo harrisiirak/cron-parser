@@ -1,5 +1,5 @@
 import { expectAssignable, expectNotAssignable } from 'tsd';
-import { DayOfMonthRange, DayOfTheWeekRange, HourRange, MonthRange, SixtyRange } from '../src';
+import { DayOfMonthRange, DayOfWeekRange, HourRange, MonthRange, SixtyRange } from '../src';
 import { Months } from '../src/types';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -60,17 +60,17 @@ expectNotAssignable<MonthRange>(13);
 expectNotAssignable<MonthRange>(0.5);
 expectNotAssignable<MonthRange>(11.5);
 
-// Assert that DayOfTheWeekRange includes 0 and 7
-expectAssignable<DayOfTheWeekRange>(0);
-expectAssignable<DayOfTheWeekRange>(7);
+// Assert that DayOfWeekRange includes 0 and 7
+expectAssignable<DayOfWeekRange>(0);
+expectAssignable<DayOfWeekRange>(7);
 
-// Assert that DayOfTheWeekRange does not include -1 and 8
-expectNotAssignable<DayOfTheWeekRange>(-1);
-expectNotAssignable<DayOfTheWeekRange>(8);
+// Assert that DayOfWeekRange does not include -1 and 8
+expectNotAssignable<DayOfWeekRange>(-1);
+expectNotAssignable<DayOfWeekRange>(8);
 
-// Assert that DayOfTheWeekRange does not include 0.5 and 6.5
-expectNotAssignable<DayOfTheWeekRange>(0.5);
-expectNotAssignable<DayOfTheWeekRange>(6.5);
+// Assert that DayOfWeekRange does not include 0.5 and 6.5
+expectNotAssignable<DayOfWeekRange>(0.5);
+expectNotAssignable<DayOfWeekRange>(6.5);
 
 // Assert the MonthsEnum
 expectAssignable<keyof typeof Months>('jan');

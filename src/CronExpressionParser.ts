@@ -5,7 +5,7 @@ import {
   CronConstraints,
   CronUnit,
   DayOfMonthRange,
-  DayOfTheWeekRange,
+  DayOfWeekRange,
   DayOfWeek,
   HourRange,
   CronParseOptions,
@@ -48,7 +48,7 @@ export class CronExpressionParser {
     const month = CronExpressionParser.#parseField('Month', rawFields.month, CronMonth.constraints) as MonthRange[];
     const dayOfMonth = CronExpressionParser.#parseField('DayOfMonth', rawFields.dayOfMonth, CronDayOfMonth.constraints) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
-    const dayOfWeek = CronExpressionParser.#parseField('DayOfWeek', _dayOfWeek, CronDayOfTheWeek.constraints) as DayOfTheWeekRange[];
+    const dayOfWeek = CronExpressionParser.#parseField('DayOfWeek', _dayOfWeek, CronDayOfTheWeek.constraints) as DayOfWeekRange[];
 
     const fields = new CronFieldCollection({
       second: new CronSecond(second, ['*', '?'].includes(rawFields.second)),

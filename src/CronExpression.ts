@@ -6,7 +6,7 @@ import {
   CronFieldTypes,
   DateMathOp,
   DayOfMonthRange,
-  DayOfTheWeekRange,
+  DayOfWeekRange,
   HourRange,
   CronExpressionOptions,
   CronFieldCollectionOptions,
@@ -297,7 +297,7 @@ export class CronExpression {
     const dt = DateTime.fromISO(dtStr, { zone: this.#tz });
     return (
       dayOfMonth.values.includes(<DayOfMonthRange>dt.day) &&
-      dayOfWeek.values.includes(<DayOfTheWeekRange>dt.weekday) &&
+      dayOfWeek.values.includes(<DayOfWeekRange>dt.weekday) &&
       month.values.includes(<MonthRange>dt.month) &&
       hour.values.includes(<HourRange>dt.hour) &&
       minute.values.includes(<SixtyRange>dt.minute) &&

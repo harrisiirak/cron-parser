@@ -18,8 +18,8 @@ export type SixtyRange = IntRange<RangeFrom<0>, 59>; // 0-59 - inclusive
 export type HourRange = IntRange<RangeFrom<0>, 23>; // 0-23 - inclusive
 export type DayOfMonthRange = IntRange<RangeFrom<1>, 31> | 'L'; // 1-31 - inclusive
 export type MonthRange = IntRange<RangeFrom<1>, 12>; // 1-12 - inclusive
-export type DayOfTheWeekRange = IntRange<RangeFrom<0>, 7>; // 0-7 - inclusive
-export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfMonthRange[] | MonthRange[] | DayOfTheWeekRange[];
+export type DayOfWeekRange = IntRange<RangeFrom<0>, 7>; // 0-7 - inclusive
+export type CronFieldTypes = SixtyRange[] | HourRange[] | DayOfMonthRange[] | MonthRange[] | DayOfWeekRange[];
 export type CronChars = 'L' | 'W';
 export type CronMin = 0 | 1;
 export type CronMax = 7 | 12 | 23 | 31 | 59;
@@ -146,7 +146,7 @@ export interface CronFieldCollectionOptions {
   hour: HourRange[] | CronHour;
   dayOfMonth: DayOfMonthRange[] | CronDayOfMonth;
   month: MonthRange[] | CronMonth;
-  dayOfWeek: DayOfTheWeekRange[] | CronDayOfTheWeek;
+  dayOfWeek: DayOfWeekRange[] | CronDayOfTheWeek;
 }
 
 export interface FieldRange {
