@@ -4,8 +4,6 @@
 .nyc_output
 node_modules
 src
-tsconfig.cjs.json
-tsconfig.esm.json
 tsconfig.json
 package-lock.json
 yarn.lock
@@ -19,5 +17,3 @@ tests
 .gitignore
 component.json
 jest.config.js
-notes.md
-

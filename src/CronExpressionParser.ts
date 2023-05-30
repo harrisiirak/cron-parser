@@ -1,6 +1,6 @@
-import { CronDayOfMonth, CronDayOfTheWeek, CronFieldCollection, CronHour, CronMinute, CronMonth, CronSecond } from './CronFieldCollection.js';
-import { CronDate } from './CronDate.js';
-import { CronExpression } from './CronExpression.js';
+import { CronDayOfMonth, CronDayOfTheWeek, CronFieldCollection, CronHour, CronMinute, CronMonth, CronSecond } from './CronFieldCollection';
+import { CronDate } from './CronDate';
+import { CronExpression } from './CronExpression';
 import {
   CronConstraints,
   CronUnit,
@@ -15,7 +15,7 @@ import {
   PredefinedExpressions,
   RawCronFields,
   SixtyRange,
-} from './types.js';
+} from './types';
 import assert from 'assert';
 
 /**

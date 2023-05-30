@@ -1,5 +1,5 @@
-import { CronDate, CronExpression, CronFieldCollection, PredefinedExpressions } from '../src/index.js';
-import { CronParseOptions } from '../src/types.js';
+import { CronDate, CronExpression, CronFieldCollection, PredefinedExpressions } from '../src/index';
+import { CronParseOptions } from '../src/types';
 
 const typeCheckCronDateObject = (date: CronDate | { value: CronDate; done: boolean }): date is { value: CronDate; done: boolean } => {
   return typeof date === 'object' && 'value' in date && 'done' in date;

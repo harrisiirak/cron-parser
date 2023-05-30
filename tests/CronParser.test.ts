@@ -1,9 +1,8 @@
 import * as fs from 'fs';
-import { CronParser, CronExpression, CronFieldCollection, CronFieldCollectionOptions } from '../src/index.js';
-import { CronDate } from '../src/CronDate.js';
-import ErrnoException = NodeJS.ErrnoException;
-import { ParseStringResponse } from '../src/types';
 import * as path from 'path';
+import { CronParser, CronExpression, CronFieldCollection, CronFieldCollectionOptions, ParseStringResponse } from '../src';
+import { CronDate } from '../src/CronDate';
+import ErrnoException = NodeJS.ErrnoException;
 
 describe('CronParser', () => {
   describe('parseExpression', () => {

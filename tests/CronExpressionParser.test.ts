@@ -1,5 +1,5 @@
-import { CronExpression, PredefinedExpressions } from '../src/index.js';
-import { CronExpressionParser } from '../src/CronExpressionParser.js';
+import { CronExpression, PredefinedExpressions } from '../src/index';
+import { CronExpressionParser } from '../src/CronExpressionParser';
 
 describe('CronExpressionParser', () => {
   describe('parse', () => {

@@ -1,12 +1,12 @@
 import assert from 'assert';
-import { CronChars, DayOfMonthRange, CronFieldCollectionOptions, FieldRange, MonthRange, SerializedCronFields } from './types.js';
-import { CronSecond } from './fields/CronSecond.js';
-import { CronMinute } from './fields/CronMinute.js';
-import { CronHour } from './fields/CronHour.js';
-import { CronDayOfMonth } from './fields/CronDayOfMonth.js';
-import { CronMonth } from './fields/CronMonth.js';
-import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek.js';
-import { CronField } from './fields/CronField.js';
+import { CronChars, DayOfMonthRange, CronFieldCollectionOptions, FieldRange, MonthRange, SerializedCronFields } from './types';
+import { CronSecond } from './fields/CronSecond';
+import { CronMinute } from './fields/CronMinute';
+import { CronHour } from './fields/CronHour';
+import { CronDayOfMonth } from './fields/CronDayOfMonth';
+import { CronMonth } from './fields/CronMonth';
+import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
+import { CronField } from './fields/CronField';
 
 export { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfTheWeek };
 
@@ -26,6 +26,22 @@ export class CronFieldCollection {
    * CronFieldCollection constructor. Initializes the cron fields with the provided values.
    * @param {CronFieldCollectionOptions} param0 - The cron fields values
    * @throws {Error} if validation fails
+   * @example
+   * const cronFields = new CronFieldCollection({
+   *   second: new CronSecond([0]),
+   *   minute: new CronMinute([0, 30]),
+   *   hour: new CronHour([9]),
+   *   dayOfMonth: new CronDayOfMonth([15]),
+   *   month: new CronMonth([1]),
+   *   dayOfWeek: new CronDayOfTheWeek([1, 2, 3, 4, 5]),
+   * })
+   *
+   * console.log(cronFields.second.values); // [0]
+   * console.log(cronFields.minute.values); // [0, 30]
+   * console.log(cronFields.hour.values); // [9]
+   * console.log(cronFields.dayOfMonth.values); // [15]
+   * console.log(cronFields.month.values); // [1]
+   * console.log(cronFields.dayOfWeek.values); // [1, 2, 3, 4, 5]
    */
   constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: CronFieldCollectionOptions) {
     // this is ugly need to separate the logic in #handleMaxDaysInMonth

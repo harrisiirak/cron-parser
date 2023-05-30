@@ -1,4 +1,4 @@
-import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin, SerializedCronField } from '../types.js';
+import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin, SerializedCronField } from '../types';
 import assert from 'assert';
 
 /**

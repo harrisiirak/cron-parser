@@ -1,25 +1,11 @@
-export default {
+module.exports = {
   testMatch: [
     '**/tests/**/*.test.ts'
   ],
-  extensionsToTreatAsEsm: [
-    '.ts'
-  ],
   verbose: false,
   testEnvironment: 'node',
-  preset: 'ts-jest/presets/default-esm',
-  // required for jest to resolve esm modules
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
   transform: {
-    '^.+\\.ts$': [
-      'ts-jest',
-      {
-        useESM: true,
-        // tsconfig: 'tsconfig.esm.json'
-      }
-    ]
+    '^.+\\.ts$': 'ts-jest',
   },
   coverageReporters: ['text', 'lcov', 'json-summary'],
   collectCoverageFrom: [

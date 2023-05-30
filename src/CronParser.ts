@@ -1,7 +1,7 @@
 import fs from 'fs';
-import { ParseStringResponse } from './types.js';
-import { CronExpression } from './CronExpression.js';
-import { CronFieldCollection } from './CronFieldCollection.js';
+import { ParseStringResponse } from './types';
+import { CronExpression } from './CronExpression';
+import { CronFieldCollection } from './CronFieldCollection';
 import assert from 'assert';
 import ErrnoException = NodeJS.ErrnoException;
 

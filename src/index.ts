@@ -1,16 +1,16 @@
 /* istanbul ignore file */
-export { CronFieldCollection } from './CronFieldCollection.js';
-export { CronParser } from './CronParser.js';
-export { CronDate } from './CronDate.js';
-export { CronDayOfMonth } from './fields/CronDayOfMonth.js';
-export { CronDayOfTheWeek } from './fields/CronDayOfTheWeek.js';
-export { CronField } from './fields/CronField.js';
-export { CronHour } from './fields/CronHour.js';
-export { CronMinute } from './fields/CronMinute.js';
-export { CronMonth } from './fields/CronMonth.js';
-export { CronSecond } from './fields/CronSecond.js';
-export { CronExpression } from './CronExpression.js';
-import { CronParser } from './CronParser.js';
+export { CronFieldCollection } from './CronFieldCollection';
+export { CronParser } from './CronParser';
+export { CronDate } from './CronDate';
+export { CronDayOfMonth } from './fields/CronDayOfMonth';
+export { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
+export { CronField } from './fields/CronField';
+export { CronHour } from './fields/CronHour';
+export { CronMinute } from './fields/CronMinute';
+export { CronMonth } from './fields/CronMonth';
+export { CronSecond } from './fields/CronSecond';
+export { CronExpression } from './CronExpression';
+import { CronParser } from './CronParser';
 
 export default CronParser;
 
@@ -46,4 +46,4 @@ export {
   SerializedCronField,
   SerializedCronFields,
   SixtyRange,
-} from './types.js';
+} from './types';

@@ -1,11 +1,11 @@
-import { CronDate } from './CronDate.js';
-import { CronExpression } from './CronExpression.js';
-import { CronSecond } from './fields/CronSecond.js';
-import { CronMinute } from './fields/CronMinute.js';
-import { CronHour } from './fields/CronHour.js';
-import { CronDayOfMonth } from './fields/CronDayOfMonth.js';
-import { CronMonth } from './fields/CronMonth.js';
-import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek.js';
+import { CronDate } from './CronDate';
+import { CronExpression } from './CronExpression';
+import { CronSecond } from './fields/CronSecond';
+import { CronMinute } from './fields/CronMinute';
+import { CronHour } from './fields/CronHour';
+import { CronDayOfMonth } from './fields/CronDayOfMonth';
+import { CronMonth } from './fields/CronMonth';
+import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
 
 // TS >= 4.5 tail recursion optimization
 // https://dev.to/tylim88/typescript-numeric-range-type-15a5

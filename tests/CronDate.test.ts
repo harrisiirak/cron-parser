@@ -1,5 +1,5 @@
-import { CronDate } from '../src/index.js';
-import { TimeUnit } from '../src/types.js';
+import { CronDate } from '../src/index';
+import { TimeUnit } from '../src/types';
 import { DateTime } from 'luxon';
 
 describe('CronDate', () => {

@@ -11,8 +11,51 @@ import {
   HourRange,
   MonthRange,
   SixtyRange,
-} from '../src/index.js';
+} from '../src';
 
+// var a = {
+//   'second': {
+//     'wildcard': false,
+//     'values': [
+//       0
+//     ]
+//   },
+//   'minute': {
+//     'wildcard': false,
+//     'values': [
+//       0,
+//       30
+//     ]
+//   },
+//   'hour': {
+//     'wildcard': false,
+//     'values': [
+//       9
+//     ]
+//   },
+//   'dayOfMonth': {
+//     'wildcard': false,
+//     'values': [
+//       15
+//     ]
+//   },
+//   'month': {
+//     'wildcard': false,
+//     'values': [
+//       1
+//     ]
+//   },
+//   'dayOfWeek': {
+//     'wildcard': false,
+//     'values': [
+//       1,
+//       2,
+//       3,
+//       4,
+//       5
+//     ]
+//   }
+// };
 
 describe('CronFields', () => {
   // an array of numbers from 0 to 59
