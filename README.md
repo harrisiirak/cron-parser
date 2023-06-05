@@ -2,7 +2,15 @@ cron-parser
 ================
 
 [![Build Status](https://github.com/harrisiirak/cron-parser/actions/workflows/push.yml/badge.svg?branch=master)](https://github.com/harrisiirak/cron-parser/actions/workflows/push.yml)
-[![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)
+[![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)![Statements](./coverage/badge-statements.svg)
+
+[//]: # (![Branches]&#40;./coverage/badge-branches.svg&#41;)
+
+[//]: # (![Functions]&#40;./coverage/badge-functions.svg&#41;)
+
+[//]: # (![Lines]&#40;./coverage/badge-lines.svg&#41;)
+
+
 
 Node.js library for parsing and manipulating crontab instructions. It includes support for timezones and DST transitions.
 
@@ -111,20 +119,41 @@ try {
 }
 ```
 
-Manipulation 
+Manipulation
 
 ```javascript
 var parser = require('cron-parser');
 
 var interval = parser.parseExpression('0 7 * * 0-4');
-var fields = JSON.parse(JSON.stringify(interval.fields)); // Fields is immutable
+var fields = JSON.parse(JSON.stringify(interval.#fields)); // Fields is immutable
 fields.hour = [8];
 fields.minute = [29];
-fields.dayOfWeek = [1,3,4,5,6,7];
+fields.dayOfWeek = [1, 3, 4, 5, 6, 7];
 var modifiedInterval = parser.fieldsToExpression(fields);
 var cronString = modifiedInterval.stringify();
 console.log(cronString); // "29 8 * * 1,3-7"
 ```
+
+Strict Mode
+
+In several implementations of CRON, it's ambiguous to specify both the Day Of Month and Day Of Week parameters simultaneously, as it's unclear which one should take precedence. Despite this ambiguity, this library allows both parameters to be set by default, although the resultant behavior might not align with your expectations.
+
+To resolve this ambiguity, you can activate the strict mode of the library. In strict mode, the library prevents the simultaneous setting of both Day Of Month and Day Of Week, effectively serving as a validation method for user inputs. To enable strict mode, set the `options.strict` flag to true.
+
+Consider the example below:
+
+```javascript
+// Specifies a schedule that occurs at 12:00 on every day-of-month from 1 through 31 and on Monday.
+const options = {
+  currentDate: new CronDate('Mon, 12 Sep 2022 14:00:00', 'UTC'),
+  strict: true,
+};
+const expression = '0 0 12 1-31 * 1';
+// With strict mode enabled, the parser throws an error as both dayOfMonth and dayOfWeek are used together.
+CronExpression.parse(expression, options); // throws: Cannot use both dayOfMonth and dayOfWeek together in strict mode!
+```
+
+In this example, the CRON expression is meant to trigger an event at 12:00 on every day from the 1st through the 31st and on every Monday. However, since strict mode is enabled in the options, an error is thrown, indicating that both the dayOfMonth and dayOfWeek parameters cannot be used together.
 
 Options
 ========
@@ -145,7 +174,7 @@ The reason being that those are the formats accepted by the
 [`luxon`](https://moment.github.io/luxon/) library which is being used to handle dates.
 
 Using `Date` as an input can be problematic specially when using the `tz` option. The issue being that, when creating a new `Date` object without
-any timezone information, it will be created in the timezone of the system that is running the code. This (most of times) won't be what the user
+any timezone information, it will be created in the timezone of the system that is running the code. This (most of the times) won't be what the user
 will be expecting. Using one of the supported `string` formats will solve the issue(see timezone example).
 
 * *iterator* - Return ES6 compatible iterator object 
