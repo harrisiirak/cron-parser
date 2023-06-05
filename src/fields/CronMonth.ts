@@ -31,7 +31,7 @@ export class CronMonth extends CronField {
 
   /**
    * CronDayOfMonth constructor. Initializes the "day of the month" field with the provided values.
-   * @param {DayOfTheMonthRange[]} values - Values for the "day of the month" field
+   * @param {MonthRange[]} values - Values for the "day of the month" field
    * @param {boolean} [wildcard=false] - Whether this field is a wildcard
    */
   constructor(values: MonthRange[], wildcard = false) {
