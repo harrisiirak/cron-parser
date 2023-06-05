@@ -41,7 +41,7 @@ export class CronMonth extends CronField {
 
   /**
    * Returns an array of allowed values for the "day of the month" field.
-   * @returns {DayOfTheMonthRange[]}
+   * @returns {MonthRange[]}
    */
   get values(): MonthRange[] {
     return super.values as MonthRange[];
