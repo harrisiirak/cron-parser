@@ -8,7 +8,7 @@ import {
     parseString,
     fieldsToExpression,
     StringResult
-} from '../index';
+} from '../types';
 
 const interval = parseExpression('0 1 2 3 * 1-3,5');
 const intervalIterator = parseExpression('0 1 2 3 * 1-3,5', {iterator: true});
