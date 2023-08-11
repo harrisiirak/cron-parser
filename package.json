@@ -21,6 +21,12 @@
     "test": "cross-env TZ=UTC npm run lint && npm run test:types && npm run test:coverage && npm run generate-badges",
     "docs": "rimraf docs && typedoc --out docs --readme none --name 'CronParser' src"
   },
+  "files": [
+    "lib",
+    "types",
+    "LICENSE",
+    "README.md"
+  ],
   "dependencies": {
     "luxon": "^3.2.1"
   },
