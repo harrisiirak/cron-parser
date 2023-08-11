@@ -3,7 +3,7 @@
   "version": "4.8.1",
   "description": "Node.js library for parsing crontab instructions",
   "main": "lib/parser.js",
-  "types": "index.d.ts",
+  "types": "types/index.d.ts",
   "typesVersions": {
     "<4.1": {
       "*": [
@@ -81,5 +81,11 @@
         "dom"
       ]
     }
-  }
+  },
+  "files": [
+    "lib",
+    "types",
+    "LICENSE",
+    "README.md"
+  ]
 }
