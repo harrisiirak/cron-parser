@@ -22,8 +22,7 @@
     "docs": "rimraf docs && typedoc --out docs --readme none --name 'CronParser' src"
   },
   "files": [
-    "lib",
-    "types",
+    "dist",
     "LICENSE",
     "README.md"
   ],
