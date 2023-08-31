@@ -10,7 +10,7 @@ const DAY_CHARS: readonly CronChars[] = Object.freeze(['L']) ;
  * @class CronDayOfTheWeek
  * @extends CronField
  */
-export class CronDayOfTheWeek extends CronField {
+export class CronDayOfWeek extends CronField {
   static get min(): CronMin {
     return MIN_DAY;
   }

@@ -5,10 +5,10 @@ import { CronMinute } from './fields/CronMinute';
 import { CronHour } from './fields/CronHour';
 import { CronDayOfMonth } from './fields/CronDayOfMonth';
 import { CronMonth } from './fields/CronMonth';
-import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
+import { CronDayOfWeek } from './fields/CronDayOfWeek';
 import { CronField } from './fields/CronField';
 
-export { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfTheWeek };
+export { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfWeek as CronDayOfTheWeek };
 
 /**
  * Represents a complete set of cron fields.
@@ -20,7 +20,7 @@ export class CronFieldCollection {
   readonly #hour: CronHour;
   readonly #dayOfMonth: CronDayOfMonth;
   readonly #month: CronMonth;
-  readonly #dayOfWeek: CronDayOfTheWeek;
+  readonly #dayOfWeek: CronDayOfWeek;
 
   /**
    * CronFieldCollection constructor. Initializes the cron fields with the provided values.
@@ -71,7 +71,7 @@ export class CronFieldCollection {
     this.#hour = hour instanceof CronHour ? hour : new CronHour(hour);
     this.#dayOfMonth = dayOfMonth instanceof CronDayOfMonth ? dayOfMonth : new CronDayOfMonth(dayOfMonth);
     this.#month = month instanceof CronMonth ? month : new CronMonth(month);
-    this.#dayOfWeek = dayOfWeek instanceof CronDayOfTheWeek ? dayOfWeek : new CronDayOfTheWeek(dayOfWeek);
+    this.#dayOfWeek = dayOfWeek instanceof CronDayOfWeek ? dayOfWeek : new CronDayOfWeek(dayOfWeek);
   }
 
   /**
@@ -116,9 +116,9 @@ export class CronFieldCollection {
 
   /**
    * Returns the day of the week field.
-   * @returns {CronDayOfTheWeek}
+   * @returns {CronDayOfWeek}
    */
-  get dayOfWeek(): CronDayOfTheWeek {
+  get dayOfWeek(): CronDayOfWeek {
     return this.#dayOfWeek;
   }
 
@@ -288,7 +288,7 @@ export class CronFieldCollection {
   stringifyField(field: CronField): string {
     let max = field.max;
     let values = field.values;
-    if (field instanceof CronDayOfTheWeek) {
+    if (field instanceof CronDayOfWeek) {
       max = 6;
       const dayOfWeek = this.#dayOfWeek.values;
       values = dayOfWeek[dayOfWeek.length - 1] === 7 ? dayOfWeek.slice(0, -1) : dayOfWeek;

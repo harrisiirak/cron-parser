@@ -3,7 +3,7 @@ export { CronFieldCollection } from './CronFieldCollection';
 export { CronParser } from './CronParser';
 export { CronDate } from './CronDate';
 export { CronDayOfMonth } from './fields/CronDayOfMonth';
-export { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
+export { CronDayOfWeek as CronDayOfTheWeek } from './fields/CronDayOfWeek';
 export { CronField } from './fields/CronField';
 export { CronHour } from './fields/CronHour';
 export { CronMinute } from './fields/CronMinute';

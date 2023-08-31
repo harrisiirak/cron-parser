@@ -5,7 +5,7 @@ import { CronMinute } from './fields/CronMinute';
 import { CronHour } from './fields/CronHour';
 import { CronDayOfMonth } from './fields/CronDayOfMonth';
 import { CronMonth } from './fields/CronMonth';
-import { CronDayOfTheWeek } from './fields/CronDayOfTheWeek';
+import { CronDayOfWeek } from './fields/CronDayOfWeek';
 
 // TS >= 4.5 tail recursion optimization
 // https://dev.to/tylim88/typescript-numeric-range-type-15a5
@@ -146,7 +146,7 @@ export interface CronFieldCollectionOptions {
   hour: HourRange[] | CronHour;
   dayOfMonth: DayOfMonthRange[] | CronDayOfMonth;
   month: MonthRange[] | CronMonth;
-  dayOfWeek: DayOfWeekRange[] | CronDayOfTheWeek;
+  dayOfWeek: DayOfWeekRange[] | CronDayOfWeek;
 }
 
 export interface FieldRange {
