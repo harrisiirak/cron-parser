@@ -146,8 +146,10 @@ export class CronExpressionParser {
     }
 
     const atoms = val.split(',');
-    assert(atoms.every((atom) => atom.length > 0), 'Invalid list value format');
-    atoms.forEach((atom) => handleResult(CronExpressionParser.#parseRepeat(field, atom, constraints), constraints));
+    atoms.forEach((atom) => {
+      assert(atom.length > 0, 'Invalid list value format');
+      handleResult(CronExpressionParser.#parseRepeat(field, atom, constraints), constraints);
+    });
     return stack;
   }
 
