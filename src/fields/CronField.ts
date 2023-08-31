@@ -60,7 +60,6 @@ export abstract class CronField {
     assert(Array.isArray(values), `${this.constructor.name} Validation error, values is not an array`);
     assert(values.length > 0, `${this.constructor.name} Validation error, values contains no values`);
     this.#values = values.sort(CronField.sorter);
-    Object.freeze(this.#values);
     this.#wildcard = wildcard;
   }
 
@@ -104,7 +103,6 @@ export abstract class CronField {
    * @returns {CronFieldType}
    */
   get values(): CronFieldType {
-    // return a copy of the values, so they can't be mutated
     return this.#values as CronFieldType;
   }
 
