@@ -163,10 +163,10 @@ export class CronExpressionParser {
     const atoms = val.split('/');
     assert(atoms.length <= 2, `Invalid repeat: ${val}`);
     if (atoms.length === 2) {
-      if (!isNaN(parseInt(atoms[ 0 ]))) {
-        atoms[ 0 ] = `${atoms[ 0 ]}-${constraints.max}`;
+      if (!isNaN(parseInt(atoms[0], 10))) {
+        atoms[0] = `${atoms[0]}-${constraints.max}`;
       }
-      return CronExpressionParser.#parseRange(field, atoms[0], parseInt(atoms[1]), constraints);
+      return CronExpressionParser.#parseRange(field, atoms[0], parseInt(atoms[1], 10), constraints);
     }
 
     return CronExpressionParser.#parseRange(field, val, 1, constraints);
