@@ -38,7 +38,7 @@ export class CronExpressionParser {
     const { strict = false } = options;
     const currentDate = options.currentDate || new CronDate(undefined, 'UTC');
 
-    expression = PredefinedExpressions[ expression as keyof typeof PredefinedExpressions ] || expression;
+    expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
     assert(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict, 'Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
 
@@ -95,7 +95,7 @@ export class CronExpressionParser {
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
-        const replacer = Months[ match as keyof typeof Months ] || DayOfWeek[ match as keyof typeof DayOfWeek ];
+        const replacer = Months[match as keyof typeof Months] || DayOfWeek[match as keyof typeof DayOfWeek];
         assert(replacer != null, `Validation error, cannot resolve alias "${match}"`);
         return replacer.toString();
       });
@@ -234,7 +234,7 @@ export class CronExpressionParser {
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;
     }
-    const [min, max] = atoms.map((num) => parseInt(num));
+    const [min, max] = atoms.map((num) => parseInt(num, 10));
     this.#validateRange(min, max, constraints);
     this.#validateRepeatInterval(repeatInterval);
 
@@ -251,13 +251,13 @@ export class CronExpressionParser {
   static #parseNthDay(val: string): { dayOfWeek: string; nthDayOfWeek?: number; } {
     const atoms = val.split('#');
     if (atoms.length <= 1) {
-      return { dayOfWeek: atoms[ 0 ] };
+      return { dayOfWeek: atoms[0] };
     }
-    const nthValue = +atoms[ atoms.length - 1 ];
+    const nthValue = +atoms[atoms.length - 1];
     const matches = val.match(/([,-/])/);
-    assert(matches === null, `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[ 0 ]}\` special characters are incompatible`);
+    assert(matches === null, `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`);
     assert(atoms.length <= 2 && !isNaN(nthValue) && nthValue >= 1 && nthValue <= 5, 'Constraint error, invalid dayOfWeek occurrence number (#)');
-    return { dayOfWeek: atoms[ 0 ], nthDayOfWeek: nthValue };
+    return { dayOfWeek: atoms[0], nthDayOfWeek: nthValue };
   }
 
   /**
