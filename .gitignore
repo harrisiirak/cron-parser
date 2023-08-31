@@ -14,6 +14,7 @@ logs
 results
 dist
 testing
+docs
 
 .run
 .idea
