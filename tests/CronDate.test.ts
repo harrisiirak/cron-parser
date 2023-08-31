@@ -13,7 +13,7 @@ describe('CronDate', () => {
     expect(date2.isLastWeekdayOfMonth()).toBe(false);
   });
 
-  test('CronDate should handle addSecond correctly', () => {
+  test('addSecond should succeed', () => {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.addSecond();
     expect(date1.getMonth()).toBe(11);
@@ -30,7 +30,7 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toBe(0);
   });
 
-  test('CronDate should handle addMinute correctly', () => {
+  test('addMinute should succeed', () => {
     const date1 = new CronDate(new Date('2021-12-30T00:58:58.000-00:00'), 'UTC');
     date1.addMinute();
     expect(date1.getMonth()).toBe(11);
@@ -47,7 +47,7 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toBe(0);
   });
 
-  test('CronDate should handle addHour correctly', () => {
+  test('addHour should succeed', () => {
     const date1 = new CronDate(new Date('2021-12-30T00:58:58.000-00:00'), 'UTC');
     date1.addHour();
     expect(date1.getMonth()).toBe(11);
@@ -67,7 +67,7 @@ describe('CronDate', () => {
   });
 
 
-  test('CronDate should handle addDay correctly', ()=> {
+  test('addDay should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:58:58.000-00:00'), 'UTC');
     date1.addDay();
     expect(date1.getMonth()).toEqual(11);
@@ -86,7 +86,7 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toEqual(0);
   });
 
-  test('CronDate should handle addMonth correctly', ()=> {
+  test('addMonth should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-11-30T00:58:58.000-00:00'), 'UTC');
     date1.addMonth();
     expect(date1.getMonth()).toEqual(11);
@@ -106,7 +106,7 @@ describe('CronDate', () => {
   });
 
 
-  test('CronDate should handle addYear correctly', ()=> {
+  test('addYear should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-11-30T00:58:58.000-00:00'), 'UTC');
     date1.addYear();
     expect(date1.getFullYear()).toEqual(2022);
@@ -126,7 +126,7 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toEqual(59);
   });
 
-  test('CronDate should handle subtractSecond correctly', ()=> {
+  test('subtractSecond should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-12-30T00:59:59.000-00:00'), 'UTC');
     date1.subtractSecond();
     expect(date1.getFullYear()).toEqual(2020);
@@ -144,7 +144,7 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toEqual(59);
   });
 
-  test('CronDate should handle subtractMinute correctly', ()=> {
+  test('subtractMinute should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-12-30T00:59:59.000-00:00'), 'UTC');
     date1.subtractMinute();
     expect(date1.getFullYear()).toEqual(2020);
@@ -162,7 +162,7 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toEqual(59);
   });
 
-  test('CronDate should handle subtractHour correctly', ()=> {
+  test('subtractHour should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-12-30T01:59:59.000-00:00'), 'UTC');
     date1.subtractHour();
     expect(date1.getFullYear()).toEqual(2020);
@@ -183,7 +183,7 @@ describe('CronDate', () => {
 
   });
 
-  test('CronDate should handle subtractDay correctly', ()=> {
+  test('subtractDay should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-12-30T01:59:59.000-00:00'), 'UTC');
     date1.subtractDay();
     expect(date1.getFullYear()).toEqual(2020);
@@ -204,7 +204,7 @@ describe('CronDate', () => {
 
   });
 
-  test('CronDate should handle subtractYear correctly', ()=> {
+  test('subtractYear should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-12-30T01:59:59.000-00:00'), 'UTC');
     date1.subtractYear();
     expect(date1.getFullYear()).toEqual(2019);
@@ -226,7 +226,7 @@ describe('CronDate', () => {
   });
 
 
-  test('CronDate should handle addUnit correctly', ()=> {
+  test('addUnit should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     date1.addUnit(TimeUnit.Year);
     expect(date1.getFullYear()).toEqual(2021);
@@ -247,7 +247,7 @@ describe('CronDate', () => {
     expect(date6.getSeconds()).toEqual(2);
   });
 
-  test('CronDate should handle subtractUnit correctly', ()=> {
+  test('subtractUnit should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     date1.subtractUnit(TimeUnit.Year);
     expect(date1.getFullYear()).toEqual(2019);
@@ -268,12 +268,12 @@ describe('CronDate', () => {
     expect(date6.getSeconds()).toEqual(0);
   });
 
-  test('CronDate should handle getUTCDate correctly', ()=> {
+  test('getUTCDate should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCDate()).toEqual(30);
   });
 
-  test('CronDate should handle getUTCDay correctly', ()=> {
+  test('getUTCDay should succeed', ()=> {
     // Day of week starts at 0 for Sunday
     const date1 = new CronDate(new Date('2020-11-28T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCDay()).toEqual(6);
@@ -284,81 +284,81 @@ describe('CronDate', () => {
   });
 
 
-  test('CronDate should handle getUTCFullYear correctly', ()=> {
+  test('getUTCFullYear should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCFullYear()).toEqual(2020);
   });
 
-  test('CronDate should handle getUTCMonth correctly', ()=> {
+  test('getUTCMonth should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCMonth()).toEqual(10);
   });
 
-  test('CronDate should handle getUTCHours correctly', ()=> {
+  test('getUTCHours should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCHours()).toEqual(1);
   });
 
-  test('CronDate should handle getUTCMinutes correctly', ()=> {
+  test('getUTCMinutes should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCMinutes()).toEqual(1);
   });
 
-  test('CronDate should handle getUTCSeconds correctly', ()=> {
+  test('getUTCSeconds should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCSeconds()).toEqual(1);
   });
 
-  test('CronDate should handle toJSON correctly', ()=> {
+  test('toJSON should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     // not sure how this is JSON?
     expect(date1.toJSON()).toEqual('2020-11-30T01:01:01.000Z');
   });
 
-  test('CronDate should handle toString correctly', ()=> {
+  test('toString should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     const expected = new Date('2020-11-30T01:01:01.000-00:00').toString();
     expect(date1.toString()).toEqual(expected);
   });
 
 
-  test('CronDate should handle setDate correctly', ()=> {
+  test('setDate should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.setDate(1);
     expect(date1.getDate()).toEqual(1);
   });
 
-  test('CronDate should handle setFullYear correctly', ()=> {
+  test('setFullYear should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.setFullYear(2222);
     expect(date1.getFullYear()).toEqual(2222);
   });
 
-  test('CronDate should handle setDay correctly', ()=> {
+  test('setDay should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.setDay(3);
     expect(date1.getDay()).toEqual(3);
   });
 
-  test('CronDate should handle setMonth correctly', ()=> {
+  test('setMonth should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.setMonth(3);
     expect(date1.getMonth()).toEqual(3);
   });
 
-  test('CronDate should handle setHours correctly', ()=> {
+  test('setHours should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.setHours(3);
     expect(date1.getHours()).toEqual(3);
   });
 
-  test('CronDate should handle setMinutes correctly', ()=> {
+  test('setMinutes should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.setMinutes(30);
     expect(date1.getMinutes()).toEqual(30);
   });
 
-  test('CronDate should handle setSeconds correctly', ()=> {
+  test('setSeconds should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.setSeconds(30);
     expect(date1.getSeconds()).toEqual(30);
