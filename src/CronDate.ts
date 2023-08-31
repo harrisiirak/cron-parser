@@ -43,7 +43,7 @@ export class CronDate {
     }
 
     // Check for valid DateTime and throw an error if not valid.
-    assert(this.#date && this.#date.isValid, `CronDate: unhandled timestamp: ${JSON.stringify(timestamp)}`);
+    assert(this.#date && this.#date.isValid, `CronDate: unhandled timestamp: ${timestamp}`);
 
     // Set the timezone if it is provided and different from the current zone.
     if (tz && tz !== this.#date.zoneName) {
@@ -185,7 +185,6 @@ export class CronDate {
       [TimeUnit.Minute]: () => this.addMinute(),
       [TimeUnit.Second]: () => this.addSecond(),
     };
-    assert(unit in unitMap, `Invalid unit: ${unit}`);
     unitMap[unit]();
   }
 
@@ -202,7 +201,6 @@ export class CronDate {
       [TimeUnit.Minute]: () => this.subtractMinute(),
       [TimeUnit.Second]: () => this.subtractSecond(),
     };
-    assert(unit in unitMap, `Invalid unit: ${unit}`);
     unitMap[unit]();
   }
 
