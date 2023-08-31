@@ -122,14 +122,10 @@ export class CronExpressionParser {
     function handleResult(result: number | string | (number | string)[], constraints: CronConstraints) {
       if (Array.isArray(result)) {
         result.forEach((value) => {
-          /* istanbul ignore else - FIXME no idea how this is triggered or what it's purpose is */
           if (!CronExpressionParser.#isValidConstraintChar(constraints, value)) {
             const v = parseInt(value.toString(), 10);
             const isValid = v >= constraints.min && v <= constraints.max;
             assert(isValid, `Constraint error, got value ${value} expected range ${constraints.min}-${constraints.max}`);
-            stack.push(value);
-          } else {
-            /* istanbul ignore next - FIXME no idea how this is triggered or what it's purpose is */
             stack.push(value);
           }
         });
@@ -140,7 +136,7 @@ export class CronExpressionParser {
           const v = parseInt(result.toString(), 10);
           const isValid = v >= constraints.min && v <= constraints.max;
           assert(isValid, `Constraint error, got value ${result} expected range ${constraints.min}-${constraints.max}`);
-          stack.push(field === 'DayOfWeek' ? v % 7 : result);
+          stack.push(field === CronUnit.DayOfWeek ? v % 7 : result);
         }
       }
     }
