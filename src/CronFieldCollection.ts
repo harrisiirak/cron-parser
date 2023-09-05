@@ -8,8 +8,6 @@ import { CronMonth } from './fields/CronMonth';
 import { CronDayOfWeek } from './fields/CronDayOfWeek';
 import { CronField } from './fields/CronField';
 
-export { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfWeek as CronDayOfTheWeek };
-
 /**
  * Represents a complete set of cron fields.
  * @class CronFieldCollection

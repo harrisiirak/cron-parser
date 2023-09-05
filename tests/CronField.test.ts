@@ -1,6 +1,6 @@
 import {
   CronDayOfMonth,
-  CronDayOfTheWeek,
+  CronDayOfWeek,
   CronFieldCollection,
   CronHour,
   CronMinute,
@@ -49,7 +49,7 @@ describe('CronFields', () => {
       hour: new CronHour(<HourRange[]>expected.hour.values),
       dayOfMonth: new CronDayOfMonth(<DayOfMonthRange[]>expected.dayOfMonth.values),
       month: new CronMonth(<MonthRange[]>expected.month.values),
-      dayOfWeek: new CronDayOfTheWeek(<DayOfWeekRange[]>expected.dayOfWeek.values),
+      dayOfWeek: new CronDayOfWeek(<DayOfWeekRange[]>expected.dayOfWeek.values),
     });
 
     expect(cronFields.stringify()).toEqual('0,30 9-17/2 1,15 */2 1-5');
@@ -68,7 +68,7 @@ describe('CronFields', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         month: '*/2', // Should be an instance of CronMonth
-        dayOfWeek: new CronDayOfTheWeek([1, 2, 3, 4, 5]),
+        dayOfWeek: new CronDayOfWeek([1, 2, 3, 4, 5]),
       });
     }).toThrow('Validation error, month must be an instance of CronMonth when dayOfMonth is an instance of CronDayOfMonth');
   });
@@ -80,7 +80,7 @@ describe('CronFields', () => {
       hour: new CronHour([9]),
       dayOfMonth: new CronDayOfMonth([15]),
       month: new CronMonth([1]),
-      dayOfWeek: new CronDayOfTheWeek([1, 2, 3, 4, 5]),
+      dayOfWeek: new CronDayOfWeek([1, 2, 3, 4, 5]),
     });
 
     expect(cronFields.second).toBeInstanceOf(CronSecond);
@@ -88,7 +88,7 @@ describe('CronFields', () => {
     expect(cronFields.hour).toBeInstanceOf(CronHour);
     expect(cronFields.dayOfMonth).toBeInstanceOf(CronDayOfMonth);
     expect(cronFields.month).toBeInstanceOf(CronMonth);
-    expect(cronFields.dayOfWeek).toBeInstanceOf(CronDayOfTheWeek);
+    expect(cronFields.dayOfWeek).toBeInstanceOf(CronDayOfWeek);
   });
 
   test('serialize', () => {
@@ -98,7 +98,7 @@ describe('CronFields', () => {
       hour: new CronHour([9]),
       dayOfMonth: new CronDayOfMonth([15]),
       month: new CronMonth([1]),
-      dayOfWeek: new CronDayOfTheWeek([1, 2, 3, 4, 5]),
+      dayOfWeek: new CronDayOfWeek([1, 2, 3, 4, 5]),
     });
 
     expect(cronFields.dayOfMonth.serialize()).toEqual({

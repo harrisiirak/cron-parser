@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { CronDayOfMonth, CronDayOfTheWeek, CronFieldCollection, CronHour, CronMinute, CronMonth, CronSecond } from './CronFieldCollection';
+import { CronFieldCollection } from './CronFieldCollection';
 import { CronDate } from './CronDate';
 import { CronExpression } from './CronExpression';
 import {
@@ -18,6 +18,12 @@ import {
   RawCronFields,
   SixtyRange,
 } from './types';
+import { CronSecond } from './fields/CronSecond';
+import { CronMinute } from './fields/CronMinute';
+import { CronHour } from './fields/CronHour';
+import { CronMonth } from './fields/CronMonth';
+import { CronDayOfMonth } from './fields/CronDayOfMonth';
+import { CronDayOfWeek } from './fields/CronDayOfWeek';
 
 /**
  * Static class that parses a cron expression and returns a CronExpression object.
@@ -49,7 +55,7 @@ export class CronExpressionParser {
     const month = CronExpressionParser.#parseField(CronUnit.Month, rawFields.month, CronMonth.constraints) as MonthRange[];
     const dayOfMonth = CronExpressionParser.#parseField(CronUnit.DayOfMonth, rawFields.dayOfMonth, CronDayOfMonth.constraints) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
-    const dayOfWeek = CronExpressionParser.#parseField(CronUnit.DayOfWeek, _dayOfWeek, CronDayOfTheWeek.constraints) as DayOfWeekRange[];
+    const dayOfWeek = CronExpressionParser.#parseField(CronUnit.DayOfWeek, _dayOfWeek, CronDayOfWeek.constraints) as DayOfWeekRange[];
 
     const fields = new CronFieldCollection({
       second: new CronSecond(second, ['*', '?'].includes(rawFields.second)),
@@ -57,7 +63,7 @@ export class CronExpressionParser {
       hour: new CronHour(hour, ['*', '?'].includes(rawFields.hour)),
       dayOfMonth: new CronDayOfMonth(dayOfMonth, ['*', '?'].includes(rawFields.dayOfMonth)),
       month: new CronMonth(month, ['*', '?'].includes(rawFields.month)),
-      dayOfWeek: new CronDayOfTheWeek(dayOfWeek, ['*', '?'].includes(rawFields.dayOfWeek)),
+      dayOfWeek: new CronDayOfWeek(dayOfWeek, ['*', '?'].includes(rawFields.dayOfWeek)),
     });
     return new CronExpression(fields, { ...options, expression, currentDate, nthDayOfWeek });
   }
