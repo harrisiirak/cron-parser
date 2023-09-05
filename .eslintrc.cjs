@@ -41,6 +41,7 @@ module.exports = {
         semi: ['error', 'always'],
         'comma-dangle': ['error', 'always-multiline'],
         '@typescript-eslint/no-explicit-any': 0,
+        '@typescript-eslint/no-duplicate-enum-values': 0,
         'object-curly-spacing': ['warn', 'always'],
         'max-len': ['error', { code: 160 }],
       }
