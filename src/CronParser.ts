@@ -1,8 +1,9 @@
 import fs from 'fs';
+import assert from 'assert';
+
 import { ParseStringResponse } from './types';
 import { CronExpression } from './CronExpression';
 import { CronFieldCollection } from './CronFieldCollection';
-import assert from 'assert';
 import ErrnoException = NodeJS.ErrnoException;
 
 // noinspection JSUnusedGlobalSymbols

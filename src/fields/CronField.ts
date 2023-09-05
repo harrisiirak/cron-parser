@@ -1,5 +1,5 @@
-import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin, SerializedCronField } from '../types';
 import assert from 'assert';
+import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin, SerializedCronField } from '../types';
 
 /**
  * Represents a field within a cron expression.

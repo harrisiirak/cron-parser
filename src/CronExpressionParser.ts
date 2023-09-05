@@ -1,3 +1,5 @@
+import assert from 'assert';
+
 import { CronDayOfMonth, CronDayOfTheWeek, CronFieldCollection, CronHour, CronMinute, CronMonth, CronSecond } from './CronFieldCollection';
 import { CronDate } from './CronDate';
 import { CronExpression } from './CronExpression';
@@ -16,7 +18,6 @@ import {
   RawCronFields,
   SixtyRange,
 } from './types';
-import assert from 'assert';
 
 /**
  * Static class that parses a cron expression and returns a CronExpression object.

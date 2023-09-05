@@ -1,7 +1,9 @@
+import assert from 'assert';
+import { DateTime } from 'luxon';
+
 import { CronExpressionParser } from './CronExpressionParser';
 import { CronDate } from './CronDate';
 import { CronFieldCollection } from './CronFieldCollection';
-import assert from 'assert';
 import {
   CronFieldType,
   DateMathOp,
@@ -17,8 +19,6 @@ import {
   SixtyRange,
   TimeUnit,
 } from './types';
-import { DateTime } from 'luxon';
-
 
 /**
  * Cron iteration loop safety limit

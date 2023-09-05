@@ -1,5 +1,6 @@
-import { DateTime } from 'luxon';
 import assert from 'assert';
+import { DateTime } from 'luxon';
+
 import { DateMathOp, TimeUnit } from './types';
 
 type VerbMap = {
