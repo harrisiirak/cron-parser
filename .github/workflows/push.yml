@@ -2,18 +2,17 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [15.14.x, 16.x, 17.x, 18.x, 19.x]
+        node-version: [15.14.x, 16.x, 17.x, 18.x, 19.x, 20.x]
 
     steps:
       - uses: actions/checkout@v3
