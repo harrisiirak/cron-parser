@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
-    "allowJs": true,
+    "allowJs": false,
     "declaration": true,
     "strict": true,
     "resolveJsonModule": true,
