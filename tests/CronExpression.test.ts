@@ -1,5 +1,5 @@
 import { CronDate, CronExpression, CronFieldCollection, PredefinedExpressions } from '../src/index';
-import { CronParseOptions } from '../src/types';
+import { CronOptions } from '../src/types';
 
 const typeCheckCronDateObject = (date: CronDate | { value: CronDate; done: boolean }): date is { value: CronDate; done: boolean } => {
   return typeof date === 'object' && 'value' in date && 'done' in date;
@@ -237,7 +237,7 @@ describe('CronExpression', () => {
   });
 
   test('expression limited with start and end date', function () {
-    const options = <CronParseOptions>{
+    const options = <CronOptions>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
       endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
@@ -342,7 +342,7 @@ describe('CronExpression', () => {
   });
 
   test('expression limited with start and end date with prev', function () {
-    const options = <CronParseOptions>{
+    const options = <CronOptions>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
       endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
@@ -387,7 +387,7 @@ describe('CronExpression', () => {
   });
 
   test('iterate', function () {
-    const options = <CronParseOptions>{
+    const options = <CronOptions>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
       endDate: new CronDate('Wed, 26 Dec 2012 16:40:00'),
@@ -1555,7 +1555,7 @@ describe('CronExpression', () => {
 
   describe('timezones and DST tests', () => {
     test('It works on DST start', () => {
-      const options: CronParseOptions = {
+      const options: CronOptions = {
         currentDate: '2016-03-27 02:00:01',
         endDate: undefined,
         tz: 'Europe/Athens',
@@ -1728,7 +1728,7 @@ describe('CronExpression', () => {
     });
 
     test('It works on DST end 2016-10-30 02:00:01 - 0 * * * *', function () {
-      const options: CronParseOptions = {
+      const options: CronOptions = {
         currentDate: '2016-10-30 02:00:01',
         endDate: undefined,
         tz: 'Europe/Athens',
@@ -1761,7 +1761,7 @@ describe('CronExpression', () => {
     });
 
     test('It works on DST end 2016-10-30 02:00:01 - 0 3 * * *', function () {
-      const options: CronParseOptions = {
+      const options: CronOptions = {
         currentDate: '2016-10-30 02:00:01',
         endDate: undefined,
         tz: 'Europe/Athens',
@@ -1788,7 +1788,7 @@ describe('CronExpression', () => {
     });
 
     test('It works on DST end 2016-10-30 02:00:01 - */20 3 * * *', function () {
-      const options: CronParseOptions = {
+      const options: CronOptions = {
         currentDate: '2016-10-30 02:00:01',
         endDate: undefined,
         tz: 'Europe/Athens',
@@ -1833,7 +1833,7 @@ describe('CronExpression', () => {
     });
 
     test('It works on DST end 2016-10-30 00:00:01 - 0 * 30 * *', function () {
-      const options: CronParseOptions = {
+      const options: CronOptions = {
         currentDate: '2016-10-30 00:00:01',
         endDate: undefined,
         tz: 'Europe/Athens',
@@ -1882,7 +1882,7 @@ describe('CronExpression', () => {
 
     test('It works on DST end 2016-10-30 00:00:01 - 0 * * * *  DST offset via ISO 8601 format', function () {
       // specify the DST offset via ISO 8601 format, as 3am is repeated
-      const options: CronParseOptions = {
+      const options: CronOptions = {
         currentDate: '2016-10-30 00:00:01',
         endDate: '2016-10-30T03:00:01+03',
         tz: 'Europe/Athens',
@@ -2109,7 +2109,7 @@ describe('CronExpression', () => {
     }, 10000);
 
     test('it will work with #131 issue case', function () {
-      const options: CronParseOptions = {
+      const options: CronOptions = {
         tz: 'America/Sao_Paulo',
         currentDate: new Date('Sun Oct 30 2018 02:59:00 GMT+0200'),
         endDate: undefined,
@@ -2143,7 +2143,7 @@ describe('CronExpression', () => {
     }, 10000);
 
     test('it will work with #137 issue case', function () {
-      const options: CronParseOptions = {
+      const options: CronOptions = {
         tz: 'America/New_York',
         currentDate: new Date('10/28/2018'),
         endDate: undefined,

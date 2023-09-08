@@ -118,18 +118,7 @@ export enum PredefinedExpressions {
   '@weekends' = '0 0 0 * * 0,6',
 }
 
-export interface CronExpressionOptions {
-  expression?: string;
-  currentDate?: Date | string | number | CronDate;
-  endDate?: Date | string | number | CronDate;
-  startDate?: Date | string | number | CronDate;
-  iterator?: boolean;
-  utc?: boolean;
-  tz?: string;
-  nthDayOfWeek?: number;
-}
-
-export interface CronParseOptions {
+export interface CronOptions {
   currentDate?: Date | string | number | CronDate;
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;

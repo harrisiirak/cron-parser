@@ -10,9 +10,7 @@ import {
   DayOfMonthRange,
   DayOfWeekRange,
   HourRange,
-  CronExpressionOptions,
-  CronFieldCollectionOptions,
-  CronParseOptions,
+  CronOptions,
   CronExpressionIteratorCallback,
   CronExpressionIterator,
   MonthRange,
@@ -29,7 +27,7 @@ const LOOP_LIMIT = 10000;
  * Class representing a Cron expression.
  */
 export class CronExpression {
-  #options: CronParseOptions;
+  #options: CronOptions;
   readonly #tz?: string;
   #currentDate: CronDate;
   readonly #startDate: CronDate | null;
@@ -43,9 +41,9 @@ export class CronExpression {
    * Creates a new CronExpression instance.
    *
    * @param {CronFieldCollection | CronFieldCollectionOptions} fields - Cron fields.
-   * @param {CronExpressionOptions} options - Parser options.
+   * @param {CronOptions} options - Parser options.
    */
-  constructor(fields: CronFieldCollection | CronFieldCollectionOptions, options: CronExpressionOptions) {
+  constructor(fields: CronFieldCollection, options: CronOptions) {
     this.#options = options;
     this.#tz = options.tz;
     this.#currentDate = new CronDate(options.currentDate, this.#tz);
@@ -79,10 +77,10 @@ export class CronExpression {
    *
    * @public
    * @param {string} expression - The input cron expression string.
-   * @param {CronParseOptions} [options] - Optional parsing options.
+   * @param {CronOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static parse(expression: string, options: CronParseOptions = {}): CronExpression {
+  static parse(expression: string, options: CronOptions = {}): CronExpression {
     return CronExpressionParser.parse(expression, options);
   }
 
@@ -91,10 +89,10 @@ export class CronExpression {
    *
    * @public
    * @param {Record<string, number[]>} fields - The input cron fields object.
-   * @param {CronParseOptions} [options] - Optional parsing options.
+   * @param {CronOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static fieldsToExpression(fields: CronFieldCollection, options?: CronExpressionOptions): CronExpression {
+  static fieldsToExpression(fields: CronFieldCollection, options?: CronOptions): CronExpression {
     return new CronExpression(fields, options || {});
   }
 

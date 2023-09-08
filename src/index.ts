@@ -24,8 +24,7 @@ export {
 
   // Interfaces
   CronFieldCollectionOptions,
-  CronExpressionOptions,
-  CronParseOptions,
+  CronOptions,
   FieldRange,
   CronExpressionIteratorCallback,
   CronExpressionIterator,
