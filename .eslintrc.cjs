@@ -14,7 +14,6 @@ module.exports = {
     '**/*.json',
     'coverage/**',
     'docs/**',
-    'src/index.cjs.js',
   ],
   parserOptions: {
     ecmaVersion: 2022,
