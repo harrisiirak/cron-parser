@@ -129,13 +129,13 @@ export interface CronOptions {
   strict?: boolean;
 }
 
-export interface CronFieldCollectionOptions {
-  second: SixtyRange[] | CronSecond;
-  minute: SixtyRange[] | CronMinute;
-  hour: HourRange[] | CronHour;
-  dayOfMonth: DayOfMonthRange[] | CronDayOfMonth;
-  month: MonthRange[] | CronMonth;
-  dayOfWeek: DayOfWeekRange[] | CronDayOfWeek;
+export interface CronFields {
+  second: CronSecond;
+  minute: CronMinute;
+  hour: CronHour;
+  dayOfMonth: CronDayOfMonth;
+  month: CronMonth;
+  dayOfWeek: CronDayOfWeek;
 }
 
 export interface FieldRange {

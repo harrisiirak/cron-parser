@@ -57,22 +57,6 @@ describe('CronFields', () => {
     expect(cronFields.serialize()).toEqual(expected);
   });
 
-  test('invalid constructor parameters', () => {
-    expect(() => {
-
-      new CronFieldCollection({
-        second: new CronSecond([0]),
-        minute: new CronMinute([0, 30]),
-        hour: new CronHour([9]),
-        dayOfMonth: new CronDayOfMonth([15]),
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        month: '*/2', // Should be an instance of CronMonth
-        dayOfWeek: new CronDayOfWeek([1, 2, 3, 4, 5]),
-      });
-    }).toThrow('Validation error, month must be an instance of CronMonth when dayOfMonth is an instance of CronDayOfMonth');
-  });
-
   test('getters', () => {
     const cronFields = new CronFieldCollection({
       second: new CronSecond([0]),

@@ -23,7 +23,7 @@ export {
   PredefinedExpressions,
 
   // Interfaces
-  CronFieldCollectionOptions,
+  CronFields,
   CronOptions,
   FieldRange,
   CronExpressionIteratorCallback,

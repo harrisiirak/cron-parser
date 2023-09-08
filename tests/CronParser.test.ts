@@ -1,6 +1,18 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { CronParser, CronExpression, CronFieldCollection, CronFieldCollectionOptions, ParseStringResponse } from '../src';
+import {
+  CronParser,
+  CronExpression,
+  CronFieldCollection,
+  CronFields,
+  ParseStringResponse,
+  CronSecond,
+  CronMinute,
+  CronDayOfMonth,
+  CronHour,
+  CronDayOfWeek,
+  CronMonth,
+} from '../src';
 import { CronDate } from '../src/CronDate';
 import ErrnoException = NodeJS.ErrnoException;
 
@@ -21,12 +33,12 @@ describe('CronParser', () => {
   describe('fieldsToExpression', () => {
     it('should create a CronExpression from fields', () => {
       const fields = new CronFieldCollection({
-        second: [0],
-        minute: [0],
-        hour: [0],
-        dayOfMonth: [1],
-        month: [1],
-        dayOfWeek: [1],
+        second: new CronSecond([0]),
+        minute: new CronMinute([0]),
+        hour: new CronHour([0]),
+        dayOfMonth: new CronDayOfMonth([1]),
+        month: new CronMonth([1]),
+        dayOfWeek: new CronDayOfWeek([1]),
       });
       const result = CronParser.fieldsToExpression(fields);
       expect(result).toBeInstanceOf(CronExpression);
@@ -492,12 +504,12 @@ describe('CronParser', () => {
     it('should stringify from fields out of order', function () {
       const expected = '1-5 1 1 1 1 1';
       const str = CronParser.fieldsToExpression(new CronFieldCollection({
-        second: [5, 2, 1, 4, 3],
-        minute: [1],
-        hour: [1],
-        month: [1],
-        dayOfMonth: [1],
-        dayOfWeek: [1],
+        second: new CronSecond([5, 2, 1, 4, 3]),
+        minute: new CronMinute([1]),
+        hour: new CronHour([1]),
+        month: new CronMonth([1]),
+        dayOfMonth: new CronDayOfMonth([1]),
+        dayOfWeek: new CronDayOfWeek([1]),
       })).stringify(true);
       expect(str).toEqual(expected);
     });
@@ -505,12 +517,12 @@ describe('CronParser', () => {
     it('should stringify from fields out of order (discard seconds)', function () {
       const expected = '1 1 1 1 1';
       const str = CronParser.fieldsToExpression(new CronFieldCollection({
-        second: [5, 2, 1, 4, 3],
-        minute: [1],
-        hour: [1],
-        month: [1],
-        dayOfMonth: [1],
-        dayOfWeek: [1],
+        second: new CronSecond([5, 2, 1, 4, 3]),
+        minute: new CronMinute([1]),
+        hour: new CronHour([1]),
+        month: new CronMonth([1]),
+        dayOfMonth: new CronDayOfMonth([1]),
+        dayOfWeek: new CronDayOfWeek([1]),
       })).stringify();
       expect(str).toEqual(expected);
     });
@@ -525,7 +537,7 @@ describe('CronParser', () => {
         hour: interval.fields.hour,
         month: interval.fields.month,
         dayOfMonth: interval.fields.dayOfMonth,
-        dayOfWeek: [0, 1, 2, 3, 4, 5, 6],
+        dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6]),
       })).stringify();
       expect(str).toEqual(expected);
 
@@ -535,92 +547,20 @@ describe('CronParser', () => {
         hour: interval.fields.hour,
         month: interval.fields.month,
         dayOfMonth: interval.fields.dayOfMonth,
-        dayOfWeek: [0, 1, 2, 3, 4, 5, 6, 7],
+        dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6, 7]),
       })).stringify();
       expect(str).toEqual(expected);
     });
 
-    it('should throw validation error - missing seconds', function () {
-      const input = <CronFieldCollectionOptions>{
-        minute: [1],
-        hour: [1],
-        dayOfMonth: [1],
-        month: [1],
-        dayOfWeek: [1],
+    it('should throw validation error - missing field (seconds)', function () {
+      const input = <CronFields>{
+        minute: new CronMinute([1]),
+        hour: new CronHour([1]),
+        month: new CronMonth([1]),
+        dayOfMonth: new CronDayOfMonth([1]),
+        dayOfWeek: new CronDayOfWeek([1]),
       };
       expect(() => CronParser.fieldsToExpression(new CronFieldCollection(input))).toThrowError('Validation error, Field second is missing');
-    });
-
-    it('should throw validation error - empty seconds', function () {
-      const input = <CronFieldCollectionOptions>{
-        second: [],
-        minute: [1],
-        hour: [1],
-        dayOfMonth: [1],
-        month: [1],
-        dayOfWeek: [1],
-      };
-      expect(() => CronParser.fieldsToExpression(new CronFieldCollection(input))).toThrowError('CronSecond Validation error, values contains no values');
-    });
-
-    it('should throw validation error - missing values - empty array', function () {
-      const input = <CronFieldCollectionOptions>{
-        second: [1],
-        minute: [],
-        hour: [1],
-        dayOfMonth: [1],
-        month: [1],
-        dayOfWeek: [1],
-      };
-      expect(() => CronParser.fieldsToExpression(new CronFieldCollection(input))).toThrowError('CronMinute Validation error, values contains no values');
-    });
-
-    it('should throw validation error - missing values', function () {
-      const input = <CronFieldCollectionOptions>{
-        second: [1],
-        hour: [1],
-        dayOfMonth: [1],
-        month: [1],
-        dayOfWeek: [1],
-      };
-      expect(() => CronParser.fieldsToExpression(new CronFieldCollection(input))).toThrowError('Validation error, Field minute is missing');
-    });
-
-    it('should throw validation error - range error', function () {
-      const input = <CronFieldCollectionOptions>{
-        second: [-1, 1, 0],
-        minute: [1],
-        hour: [1],
-        dayOfMonth: [1],
-        month: [1],
-        dayOfWeek: [1],
-      };
-      expect(() => CronParser.fieldsToExpression(new CronFieldCollection(input))).toThrowError('CronSecond Validation error, got value -1 expected range 0-59');
-    });
-
-    it('should throw validation error - bad chars error', function () {
-      const input = <CronFieldCollectionOptions>{
-        second: [0, 'R'],
-        minute: [1],
-        hour: [1],
-        dayOfMonth: [1],
-        month: [1],
-        dayOfWeek: [1],
-      };
-      expect(() => CronParser.fieldsToExpression(new CronFieldCollection(input))).toThrowError('CronSecond Validation error, got value R expected range 0-59');
-    });
-
-
-    it('should throw validation error - duplicates', function () {
-      const input = <CronFieldCollectionOptions>{
-        second: [1, 1],
-        minute: [1],
-        hour: [1],
-        dayOfMonth: [1],
-        month: [1],
-        dayOfWeek: [1],
-      };
-      expect(() => CronParser.fieldsToExpression(new CronFieldCollection(input))).toThrowError('CronSecond Validation error, duplicate values found: 1');
     });
   });
 });

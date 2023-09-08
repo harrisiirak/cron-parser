@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { CronChars, DayOfMonthRange, CronFieldCollectionOptions, FieldRange, MonthRange, SerializedCronFields } from './types';
+import { CronChars, CronFields, FieldRange, SerializedCronFields } from './types';
 import { CronSecond } from './fields/CronSecond';
 import { CronMinute } from './fields/CronMinute';
 import { CronHour } from './fields/CronHour';
@@ -22,7 +22,7 @@ export class CronFieldCollection {
 
   /**
    * CronFieldCollection constructor. Initializes the cron fields with the provided values.
-   * @param {CronFieldCollectionOptions} param0 - The cron fields values
+   * @param {CronFields} param0 - The cron fields values
    * @throws {Error} if validation fails
    * @example
    * const cronFields = new CronFieldCollection({
@@ -41,22 +41,7 @@ export class CronFieldCollection {
    * console.log(cronFields.month.values); // [1]
    * console.log(cronFields.dayOfWeek.values); // [1, 2, 3, 4, 5]
    */
-  constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: CronFieldCollectionOptions) {
-    // this is ugly need to separate the logic in #handleMaxDaysInMonth
-    if (!(dayOfMonth instanceof CronDayOfMonth)) {
-      /* istanbul ignore next - needs to be refactored */
-      if (month instanceof CronMonth) {
-        /* istanbul ignore next - needs to be refactored */
-        throw new Error('Validation error, month must not be an instance of CronMonth when dayOfMonth is not an instance of CronDayOfMonth');
-      }
-      dayOfMonth = CronFieldCollection.#handleMaxDaysInMonth(month, dayOfMonth);
-    } else {
-      if (month instanceof CronMonth) {
-        CronFieldCollection.#handleMaxDaysInMonth(month.values, dayOfMonth.values);
-      } else {
-        throw new Error('Validation error, month must be an instance of CronMonth when dayOfMonth is an instance of CronDayOfMonth');
-      }
-    }
+  constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: CronFields) {
     assert(second, 'Validation error, Field second is missing');
     assert(minute, 'Validation error, Field minute is missing');
     assert(hour, 'Validation error, Field hour is missing');
@@ -64,12 +49,19 @@ export class CronFieldCollection {
     assert(month, 'Validation error, Field month is missing');
     assert(dayOfWeek, 'Validation error, Field dayOfWeek is missing');
 
-    this.#second = second instanceof CronSecond ? second : new CronSecond(second);
-    this.#minute = minute instanceof CronMinute ? minute : new CronMinute(minute);
-    this.#hour = hour instanceof CronHour ? hour : new CronHour(hour);
-    this.#dayOfMonth = dayOfMonth instanceof CronDayOfMonth ? dayOfMonth : new CronDayOfMonth(dayOfMonth);
-    this.#month = month instanceof CronMonth ? month : new CronMonth(month);
-    this.#dayOfWeek = dayOfWeek instanceof CronDayOfWeek ? dayOfWeek : new CronDayOfWeek(dayOfWeek);
+    if (month.values.length === 1) {
+      assert(
+        parseInt(dayOfMonth.values[0] as string, 10) <= CronMonth.daysInMonth[month.values[0] - 1],
+        'Invalid explicit day of month definition',
+      );
+    }
+
+    this.#second = second;
+    this.#minute = minute;
+    this.#hour = hour;
+    this.#month = month;
+    this.#dayOfWeek = dayOfWeek;
+    this.#dayOfMonth = dayOfMonth;
   }
 
   /**
@@ -204,24 +196,6 @@ export class CronFieldCollection {
       output.push(current);
     }
     return output;
-  }
-
-  /**
-   * Handles a single range.
-   * @param {MonthRange[]} month The month range.
-   * @param {DayOfMonthRange[]} dayOfMonth The day of the month range.
-   * @returns {DayOfMonthRange[]} The day of the month range.
-   * @private
-   */
-  static #handleMaxDaysInMonth(month: MonthRange[], dayOfMonth: DayOfMonthRange[]): DayOfMonthRange[] {
-    if (month.length === 1) {
-      const daysInMonth = CronMonth.daysInMonth[month[0] - 1];
-      const v = parseInt(dayOfMonth[0] as string, 10);
-      assert(v <= daysInMonth, 'Invalid explicit day of month definition');
-
-      return dayOfMonth.filter((dayOfMonth: number | string) => (dayOfMonth === 'L' ? true : (dayOfMonth as number) <= daysInMonth));
-    }
-    return dayOfMonth;
   }
 
   /**

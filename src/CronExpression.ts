@@ -40,7 +40,7 @@ export class CronExpression {
   /**
    * Creates a new CronExpression instance.
    *
-   * @param {CronFieldCollection | CronFieldCollectionOptions} fields - Cron fields.
+   * @param {CronFieldCollection | CronFields} fields - Cron fields.
    * @param {CronOptions} options - Parser options.
    */
   constructor(fields: CronFieldCollection, options: CronOptions) {
@@ -52,15 +52,7 @@ export class CronExpression {
     this.#isIterator = options.iterator || false;
     this.#hasIterated = false;
     this.#nthDayOfWeek = options.nthDayOfWeek || 0;
-    const { second, minute, hour, dayOfMonth, month, dayOfWeek } = fields;
-    this.#fields = new CronFieldCollection({
-      second,
-      minute,
-      hour,
-      dayOfMonth,
-      month,
-      dayOfWeek,
-    });
+    this.#fields = fields;
   }
 
   /**
