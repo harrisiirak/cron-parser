@@ -122,7 +122,6 @@ export interface CronOptions {
   currentDate?: Date | string | number | CronDate;
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;
-  iterator?: boolean;
   tz?: string;
   nthDayOfWeek?: number;
   expression?: string;
@@ -150,10 +149,3 @@ export type ParseStringResponse = {
   expressions: CronExpression[];
   errors: { [key: string]: unknown };
 };
-
-export interface CronExpressionIterator {
-  value: CronDate;
-  done: boolean;
-}
-
-export type CronExpressionIteratorCallback = (item: CronExpressionIterator | CronDate, index: number) => void;

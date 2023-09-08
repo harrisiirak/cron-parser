@@ -26,8 +26,6 @@ export {
   CronFields,
   CronOptions,
   FieldRange,
-  CronExpressionIteratorCallback,
-  CronExpressionIterator,
 
   // Types
   CronChars,

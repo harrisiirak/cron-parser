@@ -11,8 +11,6 @@ import {
   DayOfWeekRange,
   HourRange,
   CronOptions,
-  CronExpressionIteratorCallback,
-  CronExpressionIterator,
   MonthRange,
   SixtyRange,
   TimeUnit,
@@ -32,8 +30,6 @@ export class CronExpression {
   #currentDate: CronDate;
   readonly #startDate: CronDate | null;
   readonly #endDate: CronDate | null;
-  readonly #isIterator: boolean;
-  #hasIterated: boolean;
   readonly #nthDayOfWeek: number;
   readonly #fields: CronFieldCollection;
 
@@ -49,8 +45,6 @@ export class CronExpression {
     this.#currentDate = new CronDate(options.currentDate, this.#tz);
     this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
     this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
-    this.#isIterator = options.iterator || false;
-    this.#hasIterated = false;
     this.#nthDayOfWeek = options.nthDayOfWeek || 0;
     this.#fields = fields;
   }
@@ -145,28 +139,22 @@ export class CronExpression {
 
   /**
    * Find the next scheduled date based on the cron expression.
-   * @returns {CronDate | { value: CronDate; done: boolean }} - The next scheduled date or an ES6 compatible iterator object.
+   * @returns {CronDate} - The next scheduled date or an ES6 compatible iterator object.
    * @memberof CronExpression
    * @public
    */
-  next(): CronDate | { value: CronDate; done: boolean } {
-    const schedule = this.#findSchedule();
-    // Try to return ES6 compatible iterator
-    return this.#isIterator ? { value: schedule, done: !this.hasNext() } : schedule;
+  next(): CronDate {
+    return this.#findSchedule();
   }
 
   /**
    * Find the previous scheduled date based on the cron expression.
-   * @returns {CronDate | { value: CronDate; done: boolean }} - The previous scheduled date or an ES6 compatible iterator object.
+   * @returns {CronDate} - The previous scheduled date or an ES6 compatible iterator object.
    * @memberof CronExpression
    * @public
    */
-  prev(): CronDate | { value: CronDate; done: boolean } {
-    const schedule = this.#findSchedule(true);
-    // Try to return ES6 compatible iterator
-    // TODO: this needs to be refactored into a real iterator
-    /* istanbul ignore next - no idea how to trigger first branch */
-    return this.#isIterator ? { value: schedule, done: !this.hasPrev() } : schedule;
+  prev(): CronDate {
+    return this.#findSchedule(true);
   }
 
   /**
@@ -177,7 +165,6 @@ export class CronExpression {
    */
   hasNext(): boolean {
     const current = this.#currentDate;
-    const hasIterated = this.#hasIterated;
 
     try {
       this.#findSchedule();
@@ -186,7 +173,6 @@ export class CronExpression {
       return false;
     } finally {
       this.#currentDate = current;
-      this.#hasIterated = hasIterated;
     }
   }
 
@@ -198,7 +184,6 @@ export class CronExpression {
    */
   hasPrev(): boolean {
     const current = this.#currentDate;
-    const hasIterated = this.#hasIterated;
 
     try {
       this.#findSchedule(true);
@@ -207,51 +192,36 @@ export class CronExpression {
       return false;
     } finally {
       this.#currentDate = current;
-      this.#hasIterated = hasIterated;
     }
   }
 
   /**
    * Iterate over a specified number of steps and optionally execute a callback function for each step.
    * @param {number} steps - The number of steps to iterate. Positive value iterates forward, negative value iterates backward.
-   * @param {CronExpressionIteratorCallback} [callback] - Optional callback function to be executed for each step.
-   * @returns {(CronExpressionIterator | CronDate)[]} - An array of iterator fields or CronDate objects.
+   * @returns {CronDate[]} - An array of iterator fields or CronDate objects.
    * @memberof CronExpression
    * @public
    */
-  iterate(steps: number, callback?: CronExpressionIteratorCallback): (CronExpressionIterator | CronDate)[] {
-    const dates: (CronExpressionIterator | CronDate)[] = [];
-
-    /**
-     * Process each step and execute the action function.
-     * @param {number} step - The current step number.
-     * @param {() => CronExpressionIterator | CronDate} action - The action function to be executed for the current step.
-     */
-    const processStep = (step: number, action: () => CronExpressionIterator | CronDate) => {
-      try {
-        const item: CronExpressionIterator | CronDate = action();
-        dates.push(item);
-
-        // Fire the callback
-        if (callback) {
-          callback(item, step);
+  take(limit: number): CronDate[] {
+    const items: CronDate[] = [];
+    if (limit >= 0) {
+      for (let i = 0; i < limit; i++) {
+        try {
+          items.push(this.next());
+        } catch (err) {
+          return items;
         }
-      } catch (err) {
-        // Do nothing, as the loop will break on its own
-      }
-    };
-
-    if (steps >= 0) {
-      for (let i = 0; i < steps; i++) {
-        processStep(i, () => this.next());
       }
     } else {
-      for (let i = 0; i > steps; i--) {
-        processStep(i, () => this.prev());
+      for (let i = 0; i > limit; i--) {
+        try {
+          items.push(this.prev());
+        } catch (err) {
+          return items;
+        }
       }
     }
-
-    return dates;
+    return items;
   }
 
   /**
@@ -440,9 +410,25 @@ export class CronExpression {
     }
 
     this.#currentDate = new CronDate(currentDate, this.#tz);
-    this.#hasIterated = true;
     return currentDate;
   }
+
+  /**
+   * Returns an iterator for iterating through future CronDate instances
+   *
+   * @name Symbol.iterator
+   * @memberof CronExpression
+   * @returns {Iterator<CronDate>} An iterator object for CronExpression that returns CronDate values.
+  */
+  [Symbol.iterator](): Iterator<CronDate> {
+    return {
+      next: () => {
+        const schedule = this.#findSchedule();
+        return { value: schedule, done: !this.hasNext() };
+      },
+    };
+  }
+
 }
 
 export default CronExpression;

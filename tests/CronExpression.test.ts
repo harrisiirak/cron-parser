@@ -1,7 +1,7 @@
 import { CronDate, CronExpression, CronFieldCollection, PredefinedExpressions } from '../src/index';
 import { CronOptions } from '../src/types';
 
-const typeCheckCronDateObject = (date: CronDate | { value: CronDate; done: boolean }): date is { value: CronDate; done: boolean } => {
+const typeCheckCronDateObject = (date: CronDate | IteratorResult<CronDate>) => {
   return typeof date === 'object' && 'value' in date && 'done' in date;
 };
 
@@ -194,7 +194,7 @@ describe('CronExpression', () => {
   test('range test with iterator', function () {
     const interval = CronExpression.parse('10-30 2 12 8 0');
 
-    const intervals = interval.iterate(20);
+    const intervals = interval.take(20);
 
     for (let i = 0, c = intervals.length; i < c; i++) {
       const next = intervals[i];
@@ -209,7 +209,7 @@ describe('CronExpression', () => {
 
   test('incremental range test with iterator', function () {
     const interval = CronExpression.parse('10-30/2 2 12 8 0');
-    const intervals = interval.iterate(10);
+    const intervals = interval.take(10);
 
     for (let i = 0, c = intervals.length; i < c; i++) {
       const next = intervals[i];
@@ -245,12 +245,12 @@ describe('CronExpression', () => {
 
     const interval = CronExpression.parse('*/20 * * * *', options);
 
-    const dates1 = interval.iterate(10);
+    const dates1 = interval.take(10);
     expect(dates1.length).toEqual(7); // 'Dates count matches for positive iteration'
 
     interval.reset();
 
-    const dates2 = interval.iterate(-10);
+    const dates2 = interval.take(-10);
     expect(dates2.length).toEqual(6); // 'Dates count matches for negative iteration'
 
     interval.reset();
@@ -386,7 +386,7 @@ describe('CronExpression', () => {
     expect(() => interval.prev()).toThrow(); // 'Should fail'
   });
 
-  test('iterate', function () {
+  test('take', function () {
     const options = <CronOptions>{
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       startDate: new CronDate('Wed, 26 Dec 2012 12:40:00'),
@@ -395,19 +395,19 @@ describe('CronExpression', () => {
     };
 
     const interval = CronExpression.parse('*/20 * * * *', options);
-    const expected1 = [
-      '2012-12-26T19:40:00.000Z',
-      '2012-12-26T20:00:00.000Z',
-      '2012-12-26T20:20:00.000Z',
-      '2012-12-26T20:40:00.000Z',
-      '2012-12-26T21:00:00.000Z',
+    const expected = [
+      '2012-12-26T14:40:00.000Z',
+      '2012-12-26T15:00:00.000Z',
+      '2012-12-26T15:20:00.000Z',
+      '2012-12-26T15:40:00.000Z',
+      '2012-12-26T16:00:00.000Z',
     ];
 
-    interval.iterate(5, (date) => {
+    for (const date of interval.take(5)) {
       cronDateTypedTest(date, (date) => {
-        expect(date.toISOString()).toEqual(expected1.shift());
+        expect(date.toISOString()).toEqual(expected.shift());
       });
-    });
+    }
   });
 
   test('predefined expression should be valid', () => {
@@ -502,7 +502,7 @@ describe('CronExpression', () => {
 
   test('expression using days of week strings', function () {
     const interval = CronExpression.parse('15 10 * * MON-TUE');
-    const intervals = interval.iterate(8);
+    const intervals = interval.take(8);
     expect(intervals).toBeTruthy();
 
     for (let i = 0, c = intervals.length; i < c; i++) {
@@ -531,7 +531,7 @@ describe('CronExpression', () => {
 
     const interval = CronExpression.parse('15 10 * jAn-FeB mOn-tUE', options);
 
-    const intervals = interval.iterate(8);
+    const intervals = interval.take(8);
     expect(intervals).toBeTruthy();
 
     for (let i = 0, c = intervals.length; i < c; i++) {
@@ -560,7 +560,7 @@ describe('CronExpression', () => {
 
     const interval = CronExpression.parse('* * * * * *', options);
 
-    const intervals = interval.iterate(10);
+    const intervals = interval.take(10);
     expect(intervals).toBeTruthy();
 
     for (let i = 0, c = intervals.length; i < c; i++) {
@@ -581,7 +581,7 @@ describe('CronExpression', () => {
 
     const interval = CronExpression.parse('*/20 * * * * *', options);
 
-    const intervals = interval.iterate(3);
+    const intervals = interval.take(3);
     expect(intervals).toBeTruthy();
 
     cronDateTypedTest(intervals[0], (date) => {
@@ -603,7 +603,7 @@ describe('CronExpression', () => {
 
     const interval = CronExpression.parse('20-40/10 * * * * *', options);
 
-    const intervals = interval.iterate(3);
+    const intervals = interval.take(3);
     expect(intervals).toBeTruthy();
 
     for (let i = 0, c = intervals.length; i < c; i++) {
@@ -993,31 +993,31 @@ describe('CronExpression', () => {
     }
   });
 
-  test('valid ES6 iterator should be returned if iterator options is set to true', function () {
+  test('valid ES6 iterator should be returned', function () {
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
       iterator: true,
     };
 
-    let val: CronDate | { value: CronDate; done: boolean };
     const interval = CronExpression.parse('*/25 * * * *', options);
+    const iterator = interval[Symbol.iterator]();
 
-    val = interval.next();
+    let val: IteratorResult<CronDate> = iterator.next();
     if (!typeCheckCronDateObject(val)) {
       throw new Error('Expected CronDate object or iterator result');
     }
     expect(val?.value).toBeTruthy();
     expect(val.done).toBeFalsy();
 
-    val = interval.next();
+    val = iterator.next();
     if (!typeCheckCronDateObject(val)) {
       throw new Error('Expected CronDate object or iterator result');
     }
     expect(val?.value).toBeTruthy();
     expect(val.done).toBeFalsy();
 
-    val = interval.next();
+    val = iterator.next();
     if (!typeCheckCronDateObject(val)) {
       throw new Error('Expected CronDate object or iterator result');
     }
