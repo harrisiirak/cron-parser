@@ -102,30 +102,27 @@ describe('CronFields', () => {
       expect(result).toEqual([{ start: 1, count: 1 }]);
     });
 
-    test('2 elements array', function () {
+    test('2 elements array', () => {
       const result = CronFieldCollection.compactField([1, 2]);
       expect(result).toEqual([{ start: 1, count: 1 }, { start: 2, count: 1 }]);
     });
 
-    test('2 elements array big step', function () {
+    test('2 elements array big step', () => {
       const result = CronFieldCollection.compactField([1, 5]);
       expect(result).toEqual([{ start: 1, count: 1 }, { start: 5, count: 1 }]);
     });
 
-
-    test('3 elements array 1 step', function () {
+    test('3 elements array 1 step', () => {
       const result = CronFieldCollection.compactField([1, 2, 3]);
       expect(result).toEqual([{ start: 1, end: 3, count: 3, step: 1 }]);
     });
 
-
-    test('3 elements array 1 step, dangling extra at end', function () {
+    test('3 elements array 1 step, dangling extra at end', () => {
       const result = CronFieldCollection.compactField([1, 2, 3, 5]);
       expect(result).toEqual([{ start: 1, end: 3, count: 3, step: 1 }, { start: 5, count: 1 }]);
     });
 
-
-    test('3 elements array 1 step, dangling extra at end and beginning', function () {
+    test('3 elements array 1 step, dangling extra at end and beginning', () => {
       const result = CronFieldCollection.compactField([1, 4, 5, 6, 9]);
       expect(result).toEqual([
         { start: 1, count: 1 },
@@ -134,9 +131,7 @@ describe('CronFields', () => {
       ]);
     });
 
-
-    test('2 ranges with dangling in the middle', function () {
-
+    test('2 ranges with dangling in the middle', () => {
       const result = CronFieldCollection.compactField([1, 2, 3, 6, 9, 11, 13]);
       expect(result).toEqual([
         { start: 1, end: 3, count: 3, step: 1 },
@@ -146,8 +141,7 @@ describe('CronFields', () => {
 
     });
 
-    test('with chars', function () {
-
+    test('with chars', () => {
       const result = CronFieldCollection.compactField(['L', 'W']);
       expect(result).toEqual([
         { start: 'L', count: 1 },
@@ -156,8 +150,7 @@ describe('CronFields', () => {
 
     });
 
-    test('with chars and range', function () {
-
+    test('with chars and range', () => {
       const result = CronFieldCollection.compactField([1, 'L', 'W']);
       expect(result).toEqual([
         { start: 1, count: 1 },
@@ -167,7 +160,7 @@ describe('CronFields', () => {
 
     });
 
-    test('with chars and range (v2)', function () {
+    test('with chars and range (v2)', () => {
       const result = CronFieldCollection.compactField([1, 2, 'L', 'W']);
       expect(result).toEqual([
         { start: 1, count: 1 },
