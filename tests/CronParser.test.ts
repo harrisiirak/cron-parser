@@ -242,13 +242,8 @@ describe('CronParser', () => {
 
       test(`parse cron with last weekday of the month: ${expression}`, () => {
         const interval = CronParser.parseExpression(expression, options);
-
         expect(interval.hasNext()).toBe(true);
-
         const next = interval.next();
-        if (!(next instanceof CronDate)) {
-          throw new Error('next is not instance of CronDate');
-        }
         expect(next.getDate()).toBe(expectedDate);
       });
     });

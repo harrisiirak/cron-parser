@@ -905,7 +905,7 @@ describe('CronExpression', () => {
       expectedDates
         .slice(0, expectedDates.length - 1)
         .reverse()
-        .forEach(function (expected) {
+        .forEach((expected) => {
           const date = interval.prev();
           expect(date.toISOString()).toEqual(expected.toISOString());
         });
@@ -1059,9 +1059,6 @@ describe('CronExpression', () => {
 
       const interval = CronExpression.parse('*/5 * * * * *', options);
       const prev = interval.prev();
-      if (!(prev instanceof CronDate)) {
-        throw new Error('Expected prev to be an instance of CronDate');
-      }
       expect(prev.getSeconds()).toEqual(25);
     });
 
@@ -1070,18 +1067,15 @@ describe('CronExpression', () => {
         currentDate: new Date('2012-12-26 14:38:53'),
       });
 
-      [25, 24, 23, 22].forEach(function (date) {
+      for (const date of [25, 24, 23, 22]) {
         const prev = interval.prev();
-        if (!(prev instanceof CronDate)) {
-          throw new Error('Expected prev to be an instance of CronDate');
-        }
         expect(prev.getFullYear()).toEqual(2012);
         expect(prev.getMonth()).toEqual(11);
         expect(prev.getDate()).toEqual(date);
         expect(prev.getHours()).toEqual(23);
         expect(prev.getMinutes()).toEqual(59);
         expect(prev.getSeconds()).toEqual(59);
-      });
+      }
     });
   });
 
