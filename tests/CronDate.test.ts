@@ -1,4 +1,4 @@
-import { CronDate } from '../src/index';
+import { CronDate } from '../src/CronDate';
 import { TimeUnit } from '../src/types';
 import { DateTime } from 'luxon';
 
@@ -66,7 +66,6 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toBe(0);
   });
 
-
   test('addDay should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:58:58.000-00:00'), 'UTC');
     date1.addDay();
@@ -104,7 +103,6 @@ describe('CronDate', () => {
     expect(date2.getMinutes()).toEqual(0);
     expect(date2.getSeconds()).toEqual(0);
   });
-
 
   test('addYear should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-11-30T00:58:58.000-00:00'), 'UTC');
@@ -180,7 +178,6 @@ describe('CronDate', () => {
     expect(date2.getHours()).toEqual(23);
     expect(date2.getMinutes()).toEqual(59);
     expect(date2.getSeconds()).toEqual(59);
-
   });
 
   test('subtractDay should succeed', ()=> {
@@ -201,7 +198,6 @@ describe('CronDate', () => {
     expect(date2.getHours()).toEqual(23);
     expect(date2.getMinutes()).toEqual(59);
     expect(date2.getSeconds()).toEqual(59);
-
   });
 
   test('subtractYear should succeed', ()=> {
@@ -222,9 +218,7 @@ describe('CronDate', () => {
     expect(date2.getHours()).toEqual(0);
     expect(date2.getMinutes()).toEqual(0);
     expect(date2.getSeconds()).toEqual(0);
-
   });
-
 
   test('addUnit should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
@@ -283,7 +277,6 @@ describe('CronDate', () => {
     expect(date3.getUTCDay()).toEqual(0);
   });
 
-
   test('getUTCFullYear should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCFullYear()).toEqual(2020);
@@ -311,7 +304,6 @@ describe('CronDate', () => {
 
   test('toJSON should succeed', ()=> {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
-    // not sure how this is JSON?
     expect(date1.toJSON()).toEqual('2020-11-30T01:01:01.000Z');
   });
 
@@ -320,7 +312,6 @@ describe('CronDate', () => {
     const expected = new Date('2020-11-30T01:01:01.000-00:00').toString();
     expect(date1.toString()).toEqual(expected);
   });
-
 
   test('setDate should succeed', ()=> {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
@@ -370,16 +361,11 @@ describe('CronDate', () => {
     const offsetMinutes = offset % 60;
     const offsetSign = offset < 0 ? '-' : '+';
     const expectedTime = new Date(2021, 0, 4, 10, 0, 0).toString();
-    const typeCheckCronDate = (date: unknown) => {
-      if (!(date instanceof CronDate)) {
-        throw new Error('date is not instance of CronDate');
-      }
-    };
 
     test('undefined date', () => {
       const realDate = new Date();
       const d = new CronDate();
-      typeCheckCronDate(d);
+      expect(d).toBeInstanceOf(CronDate);
       expect(d.toDate().toString()).toBe(realDate.toString());
     });
 
@@ -453,13 +439,13 @@ describe('CronDate', () => {
       expect(d.toISOString()).toBe('2021-01-04T09:00:00.000Z');
     });
 
-    test('CronDate with same timezone', () => {
+    test('with same timezone', () => {
       const date = new CronDate('Mon, 4 Jan 2021 10:00:00', 'Europe/Athens');
       const d = new CronDate(date);
       expect(d.toISOString()).toBe('2021-01-04T08:00:00.000Z');
     });
 
-    test('CronDate with different timezone', () => {
+    test('with different timezone', () => {
       const date = new CronDate('Mon, 4 Jan 2021 10:00:00', 'America/New_York');
       const d = new CronDate(date, 'Europe/Athens');
       expect(d.toISOString()).toBe('2021-01-04T15:00:00.000Z');

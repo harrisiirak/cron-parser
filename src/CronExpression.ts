@@ -36,7 +36,7 @@ export class CronExpression {
   /**
    * Creates a new CronExpression instance.
    *
-   * @param {CronFieldCollection | CronFields} fields - Cron fields.
+   * @param {CronFieldCollection} fields - Cron fields.
    * @param {CronOptions} options - Parser options.
    */
   constructor(fields: CronFieldCollection, options: CronOptions) {
