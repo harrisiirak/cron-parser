@@ -18,20 +18,20 @@ import ErrnoException = NodeJS.ErrnoException;
 
 describe('CronParser', () => {
   describe('parseExpression', () => {
-    it('should parse a valid cron expression', () => {
+    test('parse a valid cron expression', () => {
       const expression = '*/5 * * * *';
       const result = CronParser.parseExpression(expression);
       expect(result).toBeInstanceOf(CronExpression);
     });
 
-    it('should throw an error for an invalid cron expression', () => {
+    test('throw an error for an invalid cron expression', () => {
       const expression = 'invalid_expression';
       expect(() => CronParser.parseExpression(expression)).toThrow();
     });
   });
 
   describe('fieldsToExpression', () => {
-    it('should create a CronExpression from fields', () => {
+    test('create a CronExpression from fields', () => {
       const fields = new CronFieldCollection({
         second: new CronSecond([0]),
         minute: new CronMinute([0]),
@@ -46,7 +46,7 @@ describe('CronParser', () => {
   });
 
   describe('parseString', () => {
-    it('should parse a valid crontab string', () => {
+    test('parse a valid crontab string', () => {
       const data = `
         # This is a comment
         FOO=bar
@@ -60,7 +60,7 @@ describe('CronParser', () => {
       expect(result.errors).toEqual({});
     });
 
-    it('should include errors for invalid expressions', () => {
+    test('should include errors for invalid expressions', () => {
       const data = `
         # This is a comment
         FOO=bar
@@ -93,7 +93,7 @@ describe('CronParser', () => {
       fs.unlinkSync(filePath);
     });
 
-    it('should read and parse a valid crontab file', (done) => {
+    test('read and parse a valid crontab file', (done) => {
       CronParser.parseFile(filePath, (err, data) => {
         if (err) {
           done(err);
@@ -108,7 +108,7 @@ describe('CronParser', () => {
       });
     });
 
-    it('should return an error for a non-existing file', (done) => {
+    test('return an error for a non-existing file', (done) => {
       CronParser.parseFile('./nonexistent.txt', (err: ErrnoException | null, data?: ParseStringResponse | undefined) => {
         if (err) {
           expect(err.code).toBe('ENOENT');
@@ -120,8 +120,7 @@ describe('CronParser', () => {
       });
     });
 
-    test('load crontab file', function () {
-
+    test('load crontab file', () => {
       CronParser.parseFile(crontabExamplePath, (err, result) => {
         if (err) {
           err.message = 'File read error: ' + err.message;
@@ -149,7 +148,7 @@ describe('CronParser', () => {
       });
     });
 
-    test('no next date', function () {
+    test('no next date', () => {
       const options = {
         currentDate: new Date(2014, 0, 1),
         endDate: new Date(2014, 0, 1),
@@ -195,21 +194,23 @@ describe('CronParser', () => {
 
       const interval = CronParser.parseExpression('0 0 6-20/2,L 2 *', options);
       expect(interval.hasNext()).toBe(true);
-      let next = null;
+
       const items = 9;
+      let next;
       let i = 0;
       while (interval.hasNext()) {
         next = interval.next();
         i += 1;
         expect(next).toBeDefined();
       }
-      if (!(next instanceof CronDate)) {
-        throw new Error('next is not instance of CronDate');
-      }
+
       //leap year
+      if (!next) {
+        throw new Error('Invalid date');
+      }
+      expect(next).not.toBeUndefined();
       expect(next.getDate()).toBe(29);
       expect(i).toBe(items);
-
     });
 
     test('parse cron with last day in feb', () => {
@@ -220,18 +221,18 @@ describe('CronParser', () => {
 
       const interval = CronParser.parseExpression('0 0 1,3,6-10,L 2 *', options);
       expect(interval.hasNext()).toBe(true);
-      let next = null;
+
+      let next;
       while (interval.hasNext()) {
         next = interval.next();
         expect(next).toBeDefined();
       }
-      if (!(next instanceof CronDate)) {
-        throw new Error('next is not instance of CronDate');
+      if (!next) {
+        throw new Error('Invalid date');
       }
-      //common year
+      expect(next).not.toBeUndefined();
       expect(next.getDate()).toBe(28);
     });
-
 
     testCasesLastWeekdayOfMonth.forEach(({ expression, expectedDate }) => {
       const options = {
@@ -252,7 +253,6 @@ describe('CronParser', () => {
       });
     });
 
-
     test('parses expression that runs on both last monday and friday of the month', () => {
       const options = {
         currentDate: new Date(2021, 8, 1),
@@ -260,14 +260,10 @@ describe('CronParser', () => {
       };
       const interval = CronParser.parseExpression('0 0 0 * * 1L,5L', options);
       let next = interval.next();
-      if (!(next instanceof CronDate)) {
-        throw new Error('next is not instance of CronDate');
-      }
+
       expect(next.getDate()).toBe(24);
       next = interval.next();
-      if (!(next instanceof CronDate)) {
-        throw new Error('next is not instance of CronDate');
-      }
+
       expect(next.getDate()).toBe(27);
     });
 
@@ -277,16 +273,11 @@ describe('CronParser', () => {
         endDate: new Date(2021, 8, 30),
       };
       const interval = CronParser.parseExpression('0 0 0 * * 1,5L', options);
-
-      const dates = [];
-
+      const dates: number[] = [];
       let isNotDone = true;
       while (isNotDone) {
         try {
           const next = interval.next();
-          if (!(next instanceof CronDate)) {
-            throw new Error('next is not instance of CronDate');
-          }
           dates.push(next.getDate());
         } catch (e) {
           if (e instanceof Error && e.message !== 'Out of the timespan range') {
@@ -296,7 +287,6 @@ describe('CronParser', () => {
           break;
         }
       }
-
       expect(dates).toEqual([6, 13, 20, 24, 27]);
     });
 
@@ -309,7 +299,7 @@ describe('CronParser', () => {
   });
 
   describe('stringify', () => {
-    it('should stringify cron expression all stars no seconds 0 * * * * *', function () {
+    test('stringify cron expression all stars no seconds 0 * * * * *', () => {
       const expected = '0 * * * * *';
       const interval = CronParser.parseExpression('* * * * *', {});
       let str = interval.stringify(true);
@@ -318,8 +308,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected); // `expected: ${expected}, actual: ${str}`;
     });
 
-    it('should stringify cron expression all stars no seconds (discard seconds)', function () {
-
+    test('stringify cron expression all stars no seconds (discard seconds)', () => {
       const expected = '* * * * *';
       const interval = CronParser.parseExpression('* * * * *', {});
       let str = interval.stringify();
@@ -328,7 +317,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression all stars with seconds', function () {
+    test('stringify cron expression all stars with seconds', () => {
       const expected = '* * * * * *';
       const interval = CronParser.parseExpression('* * * * * *', {});
       let str = interval.stringify(true);
@@ -337,7 +326,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression all stars with seconds (discard seconds)', function () {
+    test('stringify cron expression all stars with seconds (discard seconds)', () => {
       const expected = '* * * * *';
       const interval = CronParser.parseExpression('* * * * * *', {});
       let str = interval.stringify();
@@ -346,7 +335,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression', function () {
+    test('stringify cron expression', () => {
       const expected = '0 1,2,4-10,20-35/5,57 * * * *';
       const interval = CronParser.parseExpression('1,2,4-10,20-35/5,57 * * * *', {});
       let str = interval.stringify(true);
@@ -355,7 +344,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression (discard seconds)', function () {
+    test('stringify cron expression (discard seconds)', () => {
       const expected = '1,2,4-10,20-35/5,57 * * * *';
       const interval = CronParser.parseExpression('1,2,4-10,20-35/5,57 * * * *', {});
       let str = interval.stringify();
@@ -364,7 +353,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with star range step', function () {
+    test('stringify cron expression with star range step', () => {
       const expected = '0 */5 */2 * * *';
       const interval = CronParser.parseExpression('*/5 */2 */1 * *', {});
       let str = interval.stringify(true);
@@ -373,7 +362,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with multiple values and retain original value', function () {
+    test('stringify cron expression with multiple values and retain original value', () => {
       const expected = '0 * * * * 1,3,5';
       const interval = CronParser.parseExpression('* * * * 1,3,5', {});
       let str = interval.stringify(true);
@@ -382,7 +371,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should correctly stringify cron expression * * * * 0,2,4 and convert value to range step', function () {
+    test('correctly stringify cron expression * * * * 0,2,4 and convert value to range step', () => {
       const expected = '0 * * * * 0-4/2';
       const interval = CronParser.parseExpression('* * * * 0,2,4', {});
       let str = interval.stringify(true);
@@ -391,7 +380,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should correctly stringify cron expression * * * * 0,2,4,6 convert value to */2 step', function () {
+    test('correctly stringify cron expression * * * * 0,2,4,6 convert value to */2 step', () => {
       const expected = '0 * * * * */2';
       const interval = CronParser.parseExpression('* * * * 0,2,4,6', {});
       let str = interval.stringify(true);
@@ -400,7 +389,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should correctly stringify cron expression * * * * */2', function () {
+    test('correctly stringify cron expression * * * * */2', () => {
       const expected = '0 * * * * */2';
       const interval = CronParser.parseExpression('* * * * */2', {});
       let str = interval.stringify(true);
@@ -409,7 +398,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with star range step (discard seconds)', function () {
+    test('stringify cron expression with star range step (discard seconds)', () => {
       const expected = '*/5 */2 * * *';
       const interval = CronParser.parseExpression('*/5 */2 */1 * *', {});
       let str = interval.stringify();
@@ -418,7 +407,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with semi range step', function () {
+    test('stringify cron expression with semi range step', () => {
       const expected = '0 5/5 * * * *';
       const interval = CronParser.parseExpression('5/5 * * * *', {});
       let str = interval.stringify(true);
@@ -427,7 +416,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with semi range step (discard seconds)', function () {
+    test('stringify cron expression with semi range step (discard seconds)', () => {
       const expected = '5/5 * * * *';
       const interval = CronParser.parseExpression('5/5 * * * *', {});
       let str = interval.stringify();
@@ -436,7 +425,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with L', function () {
+    test('stringify cron expression with L', () => {
       const expected = '0 * * 1,4-10,L * *';
       const interval = CronParser.parseExpression('* * 1,4-10,L * *', {});
       let str = interval.stringify(true);
@@ -445,7 +434,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with L (discard seconds)', function () {
+    test('stringify cron expression with L (discard seconds)', () => {
       const expected = '* * 1,4-10,L * *';
       const interval = CronParser.parseExpression('* * 1,4-10,L * *', {});
       let str = interval.stringify();
@@ -454,7 +443,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with weekday L', function () {
+    test('stringify cron expression with weekday L', () => {
       const expected = '0 0 0 * * 1L';
       const interval = CronParser.parseExpression(expected, {});
       let str = interval.stringify(true);
@@ -463,7 +452,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with multiple weekday, one of them with an L', function () {
+    test('stringify cron expression with multiple weekday, one of them with an L', () => {
       const expected = '0 0 0 * * 4,6L';
       const interval = CronParser.parseExpression(expected, {});
       let str = interval.stringify(true);
@@ -472,7 +461,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with multiple weekday, two of them with an L', function () {
+    test('stringify cron expression with multiple weekday, two of them with an L', () => {
       const expected = '0 0 0 * * 1L,5L';
       const interval = CronParser.parseExpression(expected, {});
       let str = interval.stringify(true);
@@ -481,27 +470,28 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with wildcard day of month and single month value', function () {
+    test('stringify cron expression with wildcard day of month and single month value', () => {
       const expected = '* * * 4 *';
       const interval = CronParser.parseExpression(expected, {});
       const str = interval.stringify();
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with wildcard day of month and month range', function () {
+    test('stringify cron expression with wildcard day of month and month range', () => {
       const expected = '* * * 4-6 *';
       const interval = CronParser.parseExpression(expected, {});
       const str = interval.stringify();
       expect(str).toEqual(expected);
     });
-    it('should stringify cron expression with day of month range and single month value', function () {
+
+    test('stringify cron expression with day of month range and single month value', () => {
       const expected = '* * 1-25 4 *';
       const interval = CronParser.parseExpression(expected, {});
       const str = interval.stringify();
       expect(str).toEqual(expected);
     });
 
-    it('should stringify from fields out of order', function () {
+    test('stringify from fields out of order', () => {
       const expected = '1-5 1 1 1 1 1';
       const str = CronParser.fieldsToExpression(new CronFieldCollection({
         second: new CronSecond([5, 2, 1, 4, 3]),
@@ -514,7 +504,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify from fields out of order (discard seconds)', function () {
+    test('stringify from fields out of order (discard seconds)', () => {
       const expected = '1 1 1 1 1';
       const str = CronParser.fieldsToExpression(new CronFieldCollection({
         second: new CronSecond([5, 2, 1, 4, 3]),
@@ -527,7 +517,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should stringify cron expression with extended day of week range (0,7)', function () {
+    test('stringify cron expression with extended day of week range (0,7)', () => {
       const expected = '* * * * *';
       const interval = CronParser.parseExpression('* * * * *');
 
@@ -552,7 +542,7 @@ describe('CronParser', () => {
       expect(str).toEqual(expected);
     });
 
-    it('should throw validation error - missing field (seconds)', function () {
+    test('throw validation error - missing field (seconds)', () => {
       const input = <CronFields>{
         minute: new CronMinute([1]),
         hour: new CronHour([1]),
