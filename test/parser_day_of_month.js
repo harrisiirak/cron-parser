@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var CronParser = require('../lib/parser');
+var CronParser = require('../lib/parser.node');
 
 test('parse cron with last day in a month', function(t) {
   var options = {
