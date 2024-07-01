@@ -106,7 +106,15 @@ export class CronExpressionParser {
 
     // Replace '*' and '?'
     value = value.replace(/[*?]/g, constraints.min + '-' + constraints.max);
-    return CronExpressionParser.#parseSequence(value, constraints, field);
+    const parsed = CronExpressionParser.#parseSequence(value, constraints, field);
+    if (field === 'DayOfWeek') {
+      if (parsed.includes(0) && !parsed.includes(7)) {
+        parsed.push(7);
+      } else if (parsed.includes(7) && !parsed.includes(0)) {
+        parsed.unshift(0);
+      }
+    }
+    return parsed;
   }
 
   /**
