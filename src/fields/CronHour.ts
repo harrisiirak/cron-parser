@@ -1,5 +1,5 @@
 import { CronField } from './CronField';
-import { CronChars, CronMax, CronMin, HourRange } from '../types';
+import { CronChars, CronMax, CronMin, HourRange } from './types';
 
 const MIN_HOUR = 0;
 const MAX_HOUR = 23;

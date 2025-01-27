@@ -1,6 +1,6 @@
 import { expectAssignable, expectNotAssignable } from 'tsd';
 import { DayOfMonthRange, DayOfWeekRange, HourRange, MonthRange, SixtyRange } from '../src';
-import { Months } from '../src/types';
+import { Months } from '../src/CronExpressionParser';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

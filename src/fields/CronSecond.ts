@@ -1,4 +1,4 @@
-import { CronChars, CronMax, CronMin, SixtyRange } from '../types';
+import { CronChars, CronMax, CronMin, SixtyRange } from './types';
 import { CronField } from './CronField';
 
 const MIN_SECOND = 0;

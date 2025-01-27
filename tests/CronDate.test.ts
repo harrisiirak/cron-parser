@@ -1,5 +1,4 @@
-import { CronDate } from '../src/CronDate';
-import { TimeUnit } from '../src/types';
+import { CronDate, TimeUnit } from '../src/CronDate';
 import { DateTime } from 'luxon';
 
 describe('CronDate', () => {

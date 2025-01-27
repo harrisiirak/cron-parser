@@ -1,6 +1,18 @@
 import { DateTime } from 'luxon';
 
-import { DateMathOp, TimeUnit } from './types';
+export enum TimeUnit {
+  Second = 'Second',
+  Minute = 'Minute',
+  Hour = 'Hour',
+  Day = 'Day',
+  Month = 'Month',
+  Year = 'Year',
+}
+
+export enum DateMathOp {
+  Add = 'Add',
+  Subtract = 'Subtract',
+}
 
 type VerbMap = {
   [key in TimeUnit]: () => void;

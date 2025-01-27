@@ -1,12 +1,30 @@
 import assert from 'assert';
-import { CronChars, CronFields, FieldRange, SerializedCronFields } from './types';
-import { CronSecond } from './fields/CronSecond';
-import { CronMinute } from './fields/CronMinute';
-import { CronHour } from './fields/CronHour';
-import { CronDayOfMonth } from './fields/CronDayOfMonth';
-import { CronMonth } from './fields/CronMonth';
-import { CronDayOfWeek } from './fields/CronDayOfWeek';
-import { CronField } from './fields/CronField';
+import { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfWeek, CronField, SerializedCronField, CronChars } from './fields'; 
+
+export type FieldRange = {
+  start: number | CronChars;
+  count: number;
+  end?: number;
+  step?: number;
+}
+
+export type CronFields = {
+  second: CronSecond;
+  minute: CronMinute;
+  hour: CronHour;
+  dayOfMonth: CronDayOfMonth;
+  month: CronMonth;
+  dayOfWeek: CronDayOfWeek;
+}
+
+export type SerializedCronFields = {
+  second: SerializedCronField;
+  minute: SerializedCronField;
+  hour: SerializedCronField;
+  dayOfMonth: SerializedCronField;
+  month: SerializedCronField;
+  dayOfWeek: SerializedCronField;
+};
 
 /**
  * Represents a complete set of cron fields.

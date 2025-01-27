@@ -1,10 +1,18 @@
 import fs from 'fs';
 import assert from 'assert';
 
-import { ParseStringResponse } from './types';
 import { CronExpression } from './CronExpression';
+import { CronExpressionParser } from './CronExpressionParser';
 import { CronFieldCollection } from './CronFieldCollection';
+
 import ErrnoException = NodeJS.ErrnoException;
+
+export type ParseStringResponse = {
+  variables: { [key: string]: number | string };
+  expressions: CronExpression[];
+  errors: { [key: string]: unknown };
+};
+
 
 // noinspection JSUnusedGlobalSymbols
 class CronParser {
@@ -17,7 +25,7 @@ class CronParser {
    * @return {object}
    */
   static parseExpression(expression: string, options?: object): CronExpression {
-    return CronExpression.parse(expression, options);
+    return CronExpressionParser.parse(expression, options);
   }
 
   /**
@@ -102,10 +110,10 @@ class CronParser {
     const atoms = entry.split(' ');
 
     if (atoms.length === 6) {
-      return { interval: CronExpression.parse(entry) };
+      return { interval: CronExpressionParser.parse(entry) };
     } else if (atoms.length > 6) {
       return {
-        interval: CronExpression.parse(atoms.slice(0, 6).join(' ')),
+        interval: CronExpressionParser.parse(atoms.slice(0, 6).join(' ')),
         command: atoms.slice(6, atoms.length),
       };
     } else {

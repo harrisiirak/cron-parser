@@ -1,20 +1,26 @@
 import assert from 'assert';
 import { DateTime } from 'luxon';
 
-import { CronExpressionParser } from './CronExpressionParser';
-import { CronDate } from './CronDate';
+import { CronDate, DateMathOp, TimeUnit } from './CronDate';
 import { CronFieldCollection } from './CronFieldCollection';
 import {
   CronFieldType,
-  DateMathOp,
   DayOfMonthRange,
   DayOfWeekRange,
   HourRange,
-  CronOptions,
   MonthRange,
   SixtyRange,
-  TimeUnit,
-} from './types';
+} from './fields';
+
+export type CronExpressionOptions = {
+  currentDate?: Date | string | number | CronDate;
+  endDate?: Date | string | number | CronDate;
+  startDate?: Date | string | number | CronDate;
+  tz?: string;
+  nthDayOfWeek?: number;
+  expression?: string;
+  strict?: boolean;
+}
 
 /**
  * Cron iteration loop safety limit
@@ -25,7 +31,7 @@ const LOOP_LIMIT = 10000;
  * Class representing a Cron expression.
  */
 export class CronExpression {
-  #options: CronOptions;
+  #options: CronExpressionOptions;
   readonly #tz?: string;
   #currentDate: CronDate;
   readonly #startDate: CronDate | null;
@@ -37,9 +43,9 @@ export class CronExpression {
    * Creates a new CronExpression instance.
    *
    * @param {CronFieldCollection} fields - Cron fields.
-   * @param {CronOptions} options - Parser options.
+   * @param {CronExpressionOptions} options - Parser options.
    */
-  constructor(fields: CronFieldCollection, options: CronOptions) {
+  constructor(fields: CronFieldCollection, options: CronExpressionOptions) {
     this.#options = options;
     this.#tz = options.tz;
     this.#currentDate = new CronDate(options.currentDate, this.#tz);
@@ -59,26 +65,14 @@ export class CronExpression {
   }
 
   /**
-   * Asynchronously parses the input cron expression string.
-   *
-   * @public
-   * @param {string} expression - The input cron expression string.
-   * @param {CronOptions} [options] - Optional parsing options.
-   * @returns {CronExpression} - A new CronExpression instance.
-   */
-  static parse(expression: string, options: CronOptions = {}): CronExpression {
-    return CronExpressionParser.parse(expression, options);
-  }
-
-  /**
    * Converts cron fields back to a CronExpression instance.
    *
    * @public
    * @param {Record<string, number[]>} fields - The input cron fields object.
-   * @param {CronOptions} [options] - Optional parsing options.
+   * @param {CronExpressionOptions} [options] - Optional parsing options.
    * @returns {CronExpression} - A new CronExpression instance.
    */
-  static fieldsToExpression(fields: CronFieldCollection, options?: CronOptions): CronExpression {
+  static fieldsToExpression(fields: CronFieldCollection, options?: CronExpressionOptions): CronExpression {
     return new CronExpression(fields, options || {});
   }
 

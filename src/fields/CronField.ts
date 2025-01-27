@@ -1,5 +1,10 @@
 import assert from 'assert';
-import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin, SerializedCronField } from '../types';
+import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin } from './types';
+
+export type SerializedCronField = {
+  wildcard: boolean;
+  values: (number | string)[];
+};
 
 /**
  * Represents a field within a cron expression.

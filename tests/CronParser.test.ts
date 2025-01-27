@@ -4,8 +4,6 @@ import {
   CronParser,
   CronExpression,
   CronFieldCollection,
-  CronFields,
-  ParseStringResponse,
   CronSecond,
   CronMinute,
   CronDayOfMonth,
@@ -15,6 +13,8 @@ import {
 } from '../src';
 import { CronDate } from '../src/CronDate';
 import ErrnoException = NodeJS.ErrnoException;
+import { ParseStringResponse } from '../src/CronParser';
+import { CronFields } from '../src/CronFieldCollection';
 
 describe('CronParser', () => {
   describe('parseExpression', () => {

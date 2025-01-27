@@ -2,28 +2,80 @@ import assert from 'assert';
 
 import { CronFieldCollection } from './CronFieldCollection';
 import { CronDate } from './CronDate';
-import { CronExpression } from './CronExpression';
+import { CronExpression, CronExpressionOptions } from './CronExpression';
 import {
+  CronSecond,
+  CronMinute,
+  CronHour,
+  CronMonth,
+  CronDayOfMonth,
+  CronDayOfWeek,
   CronConstraints,
-  CronUnit,
   DayOfMonthRange,
   DayOfWeekRange,
-  DayOfWeek,
   HourRange,
-  CronOptions,
   MonthRange,
-  Months,
   ParseRageResponse,
-  PredefinedExpressions,
-  RawCronFields,
   SixtyRange,
-} from './types';
-import { CronSecond } from './fields/CronSecond';
-import { CronMinute } from './fields/CronMinute';
-import { CronHour } from './fields/CronHour';
-import { CronMonth } from './fields/CronMonth';
-import { CronDayOfMonth } from './fields/CronDayOfMonth';
-import { CronDayOfWeek } from './fields/CronDayOfWeek';
+} from './fields';
+
+export enum PredefinedExpressions {
+  '@yearly' = '0 0 0 1 1 *',
+  '@annually' = '0 0 0 1 1 *',
+  '@monthly' = '0 0 0 1 * *',
+  '@weekly' = '0 0 0 * * 0',
+  '@daily' = '0 0 0 * * *',
+  '@hourly' = '0 0 * * * *',
+  '@minutely' = '0 * * * * *',
+  '@secondly' = '* * * * * *',
+  '@weekdays' = '0 0 0 * * 1-5',
+  '@weekends' = '0 0 0 * * 0,6',
+}
+
+export enum CronUnit {
+  Second = 'Second',
+  Minute = 'Minute',
+  Hour = 'Hour',
+  DayOfMonth = 'DayOfMonth',
+  Month = 'Month',
+  DayOfWeek = 'DayOfWeek',
+}
+
+// these need to be lowercase for the parser to work
+export enum Months {
+  jan = 1,
+  feb = 2,
+  mar = 3,
+  apr = 4,
+  may = 5,
+  jun = 6,
+  jul = 7,
+  aug = 8,
+  sep = 9,
+  oct = 10,
+  nov = 11,
+  dec = 12,
+}
+
+// these need to be lowercase for the parser to work
+export enum DayOfWeek {
+  sun = 0,
+  mon = 1,
+  tue = 2,
+  wed = 3,
+  thu = 4,
+  fri = 5,
+  sat = 6,
+}
+
+export type RawCronFields = {
+  second: string;
+  minute: string;
+  hour: string;
+  dayOfMonth: string;
+  month: string;
+  dayOfWeek: string;
+};
 
 /**
  * Static class that parses a cron expression and returns a CronExpression object.
@@ -34,14 +86,14 @@ export class CronExpressionParser {
   /**
    * Parses a cron expression and returns a CronExpression object.
    * @param {string} expression - The cron expression to parse.
-   * @param {CronOptions} [options={}] - The options to use when parsing the expression.
+   * @param {CronExpressionOptions} [options={}] - The options to use when parsing the expression.
    * @param {boolean} [options.currentDate=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @param {boolean} [options.strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @param {CronDate} [options.currentDate=new CronDate(undefined, 'UTC')] - The date to use when calculating the next/previous occurrence.
    *
    * @returns {CronExpression} A CronExpression object.
    */
-  static parse(expression: string, options: CronOptions = {}): CronExpression {
+  static parse(expression: string, options: CronExpressionOptions = {}): CronExpression {
     const { strict = false } = options;
     const currentDate = options.currentDate || new CronDate(undefined, 'UTC');
 
