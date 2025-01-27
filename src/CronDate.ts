@@ -16,6 +16,28 @@ export class CronDate {
   #dstEnd: number | null = null;
 
   /**
+   * Maps the verb to the appropriate method
+   */
+  #verbMap: { add: VerbMap; subtract: VerbMap } = {
+    add: {
+      [TimeUnit.Year]: this.addYear.bind(this),
+      [TimeUnit.Month]: this.addMonth.bind(this),
+      [TimeUnit.Day]: this.addDay.bind(this),
+      [TimeUnit.Hour]: this.addHour.bind(this),
+      [TimeUnit.Minute]: this.addMinute.bind(this),
+      [TimeUnit.Second]: this.addSecond.bind(this),
+    },
+    subtract: {
+      [TimeUnit.Year]: this.subtractYear.bind(this),
+      [TimeUnit.Month]: this.subtractMonth.bind(this),
+      [TimeUnit.Day]: this.subtractDay.bind(this),
+      [TimeUnit.Hour]: this.subtractHour.bind(this),
+      [TimeUnit.Minute]: this.subtractMinute.bind(this),
+      [TimeUnit.Second]: this.subtractSecond.bind(this),
+    },
+  };
+
+  /**
    * Constructs a new CronDate instance.
    * @param {CronDate | Date | number | string} [timestamp] - The timestamp to initialize the CronDate with.
    * @param {string} [tz] - The timezone to use for the CronDate.
@@ -178,15 +200,7 @@ export class CronDate {
    * @param {TimeUnit} unit
    */
   addUnit(unit: TimeUnit): void {
-    const unitMap: VerbMap = {
-      [TimeUnit.Year]: () => this.addYear(),
-      [TimeUnit.Month]: () => this.addMonth(),
-      [TimeUnit.Day]: () => this.addDay(),
-      [TimeUnit.Hour]: () => this.addHour(),
-      [TimeUnit.Minute]: () => this.addMinute(),
-      [TimeUnit.Second]: () => this.addSecond(),
-    };
-    unitMap[unit]();
+    this.#verbMap.add[unit]();
   }
 
   /**
@@ -194,15 +208,7 @@ export class CronDate {
    * @param {TimeUnit} unit
    */
   subtractUnit(unit: TimeUnit): void {
-    const unitMap: VerbMap = {
-      [TimeUnit.Year]: () => this.subtractYear(),
-      [TimeUnit.Month]: () => this.subtractMonth(),
-      [TimeUnit.Day]: () => this.subtractDay(),
-      [TimeUnit.Hour]: () => this.subtractHour(),
-      [TimeUnit.Minute]: () => this.subtractMinute(),
-      [TimeUnit.Second]: () => this.subtractSecond(),
-    };
-    unitMap[unit]();
+    this.#verbMap.subtract[unit]();
   }
 
   /**
@@ -475,7 +481,8 @@ export class CronDate {
    */
   applyDateOperation(op: DateMathOp, unit: TimeUnit, hoursLength?: number): void {
     if (unit === TimeUnit.Month || unit === TimeUnit.Day) {
-      return void this.invokeDateOperation(op, unit);
+      this.invokeDateOperation(op, unit);
+      return;
     }
 
     if (hoursLength === undefined) {
