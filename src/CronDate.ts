@@ -1,4 +1,3 @@
-import assert from 'assert';
 import { DateTime } from 'luxon';
 
 import { DateMathOp, TimeUnit } from './types';
@@ -36,7 +35,6 @@ export class CronDate {
     } else if (typeof timestamp === 'number') {
       this.#date = DateTime.fromMillis(timestamp, dateOpts);
     } else {
-      // redundant typeof check: 'timestamp' always has type 'string'
       this.#date = DateTime.fromISO(timestamp, dateOpts);
       this.#date.isValid || (this.#date = DateTime.fromRFC2822(timestamp, dateOpts));
       this.#date.isValid || (this.#date = DateTime.fromSQL(timestamp, dateOpts));
@@ -44,7 +42,9 @@ export class CronDate {
     }
 
     // Check for valid DateTime and throw an error if not valid.
-    assert(this.#date && this.#date.isValid, `CronDate: unhandled timestamp: ${timestamp}`);
+    if (!this.#date.isValid) {
+      throw new Error(`CronDate: unhandled timestamp: ${timestamp}`);
+    }
 
     // Set the timezone if it is provided and different from the current zone.
     if (tz && tz !== this.#date.zoneName) {
@@ -477,7 +477,11 @@ export class CronDate {
     if (unit === TimeUnit.Month || unit === TimeUnit.Day) {
       return void this.invokeDateOperation(op, unit);
     }
-    assert(hoursLength !== undefined, 'hoursLength must be defined when unit is not month or day');
+
+    if (hoursLength === undefined) {
+      throw new Error('hoursLength must be defined when unit is not month or day');
+    }
+
     const previousHour = this.getHours();
     this.invokeDateOperation(op, unit);
     const currentHour = this.getHours();

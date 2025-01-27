@@ -363,16 +363,24 @@ export class CronExpression {
    */
   #findSchedule(reverse = false): CronDate {
     const dateMathVerb: DateMathOp = reverse ? DateMathOp.Subtract : DateMathOp.Add;
-    const currentDate = new CronDate(this.#currentDate, this.#tz);
+    const currentDate = new CronDate(this.#currentDate);
     const startDate = this.#startDate;
     const endDate = this.#endDate;
     const startTimestamp = currentDate.getTime();
     let stepCount = 0;
 
     while (stepCount++ < LOOP_LIMIT) {
-      assert(stepCount < LOOP_LIMIT, 'Invalid expression, loop limit exceeded');
-      assert(!reverse || !(startDate && startDate.getTime() > currentDate.getTime()), 'Out of the timespan range');
-      assert(reverse || !(endDate && currentDate.getTime() > endDate.getTime()), 'Out of the timespan range');
+      if (stepCount > LOOP_LIMIT) {
+        throw new Error('Invalid expression, loop limit exceeded');
+      }
+
+      if (reverse && startDate && startDate.getTime() > currentDate.getTime()) {
+        throw new Error('Out of the timespan range');
+      }
+
+      if (!reverse && endDate && currentDate.getTime() > endDate.getTime()) {
+        throw new Error('Out of the timespan range');
+      }
 
       if (!this.#matchDayOfMonth(currentDate)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
@@ -409,7 +417,7 @@ export class CronExpression {
       break;
     }
 
-    this.#currentDate = new CronDate(currentDate, this.#tz);
+    this.#currentDate = currentDate;
     return currentDate;
   }
 
