@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import { DateTime, WeekdayNumbers } from 'luxon';
 
 export enum TimeUnit {
   Second = 'Second',
@@ -408,7 +408,7 @@ export class CronDate {
    * @param d
    */
   setDay(d: number): void {
-    this.#date = this.#date.set({ weekday: d });
+    this.#date = this.#date.set({ weekday: d as WeekdayNumbers });
   }
 
   /**

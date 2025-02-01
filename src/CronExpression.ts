@@ -163,7 +163,7 @@ export class CronExpression {
     try {
       this.#findSchedule();
       return true;
-    } catch (err) {
+    } catch {
       return false;
     } finally {
       this.#currentDate = current;
@@ -182,7 +182,7 @@ export class CronExpression {
     try {
       this.#findSchedule(true);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     } finally {
       this.#currentDate = current;
@@ -202,7 +202,7 @@ export class CronExpression {
       for (let i = 0; i < limit; i++) {
         try {
           items.push(this.next());
-        } catch (err) {
+        } catch {
           return items;
         }
       }
@@ -210,7 +210,7 @@ export class CronExpression {
       for (let i = 0; i > limit; i--) {
         try {
           items.push(this.prev());
-        } catch (err) {
+        } catch {
           return items;
         }
       }
