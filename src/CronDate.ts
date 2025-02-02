@@ -157,7 +157,7 @@ export class CronDate {
    * Adds one second to the current CronDate.
    */
   addSecond(): void {
-    this.#date = this.#date.plus({ seconds: 1 }).startOf('second');
+    this.#date = this.#date.plus({ seconds: 1 });
   }
 
   /**
@@ -204,7 +204,7 @@ export class CronDate {
    * If the second is 0, it will subtract one minute instead.
    */
   subtractSecond(): void {
-    this.#date = this.#date.minus({ seconds: 1 }).startOf('second');
+    this.#date = this.#date.minus({ seconds: 1 });
   }
 
   /**
