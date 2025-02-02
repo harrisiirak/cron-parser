@@ -1,204 +1,281 @@
-cron-parser
-================
+# cron-parser
 
 [![Build Status](https://github.com/harrisiirak/cron-parser/actions/workflows/push.yml/badge.svg?branch=master)](https://github.com/harrisiirak/cron-parser/actions/workflows/push.yml)
-[![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)![Statements](./coverage/badge-statements.svg)
+[![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)
+![Statements](./coverage/badge-statements.svg)
 
-[//]: # (![Branches]&#40;./coverage/badge-branches.svg&#41;)
+A JavaScript library for parsing and manipulating cron expressions. Features timezone support, DST handling, and iterator capabilities.
 
-[//]: # (![Functions]&#40;./coverage/badge-functions.svg&#41;)
+## Requirements
 
-[//]: # (![Lines]&#40;./coverage/badge-lines.svg&#41;)
+- Node.js >= 15.14.0
+- TypeScript >= 4.2
 
+## Installation
 
-
-Node.js library for parsing and manipulating crontab instructions. It includes support for timezones and DST transitions.
-
-__Compatibility__  
-Node >= 12.0.0
-TypeScript >= 4.2
-
-Setup
-========
 ```bash
 npm install cron-parser
 ```
 
-Supported format
-========
+## Cron Format
 
 ```
 *    *    *    *    *    *
 ┬    ┬    ┬    ┬    ┬    ┬
-│    │    │    │    │    |
-│    │    │    │    │    └ day of week (0 - 7, 1L - 7L) (0 or 7 is Sun)
-│    │    │    │    └───── month (1 - 12)
-│    │    │    └────────── day of month (1 - 31, L)
-│    │    └─────────────── hour (0 - 23)
-│    └──────────────────── minute (0 - 59)
-└───────────────────────── second (0 - 59, optional)
+│    │    │    │    │    │
+│    │    │    │    │    └─ day of week (0-7, 1L-7L) (0 or 7 is Sun)
+│    │    │    │    └────── month (1-12, JAN-DEC)
+│    │    │    └─────────── day of month (1-31, L)
+│    │    └──────────────── hour (0-23)
+│    └───────────────────── minute (0-59)
+└────────────────────────── second (0-59, optional)
 ```
 
-Supports mixed use of ranges and range increments (W character not supported currently). See tests for examples.
+### Special Characters
 
-Usage
-========
+| Character | Description | Example |
+|-----------|-------------|---------|
+| `*` | Any value | `* * * * *` (every minute) |
+| `?` | Any value (alias for `*`) | `? * * * *` (every minute) |
+| `,` | Value list separator | `1,2,3 * * * *` (1st, 2nd, and 3rd minute) |
+| `-` | Range of values | `1-5 * * * *` (every minute from 1 through 5) |
+| `/` | Step values | `*/5 * * * *` (every 5th minute) |
+| `L` | Last day of month/week | `0 0 L * *` (midnight on last day of month) |
+| `#` | Nth day of month | `0 0 * * 1#1` (first Monday of month) |
 
-Simple expression.
+### Predefined Expressions
 
-```javascript
-var parser = require('cron-parser');
+| Expression | Description | Equivalent |
+|------------|-------------|------------|
+| `@yearly` | Once a year at midnight of January 1 | `0 0 0 1 1 *` |
+| `@monthly` | Once a month at midnight of first day | `0 0 0 1 * *` |
+| `@weekly` | Once a week at midnight on Sunday | `0 0 0 * * 0` |
+| `@daily` | Once a day at midnight | `0 0 0 * * *` |
+| `@hourly` | Once an hour at the beginning of the hour | `0 0 * * * *` |
+| `@minutely` | Once a minute | `0 * * * * *` |
+| `@secondly` | Once a second | `* * * * * *` |
+| `@weekdays` | Every weekday at midnight | `0 0 0 * * 1-5` |
+| `@weekends` | Every weekend at midnight | `0 0 0 * * 0,6` |
+
+### Field Values
+
+| Field | Values | Special Characters | Aliases |
+|-------|--------|-------------------|----------|
+| second | 0-59 | `*` `?` `,` `-` `/` | |
+| minute | 0-59 | `*` `?` `,` `-` `/` | |
+| hour | 0-23 | `*` `?` `,` `-` `/` | |
+| day of month | 1-31 | `*` `?` `,` `-` `/` `L` | |
+| month | 1-12 | `*` `?` `,` `-` `/` | `JAN`-`DEC` |
+| day of week | 0-7 | `*` `?` `,` `-` `/` `L` `#` | `SUN`-`SAT` (0 or 7 is Sunday) |
+
+## Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| currentDate | Date \| string \| number | Current date. Defaults to current local time in UTC |
+| endDate | Date \| string \| number | End date of iteration range. Sets iteration range end point |
+| startDate | Date \| string \| number | Start date of iteration range. Set iteration range start point |
+| tz | string | Timezone (e.g., 'Europe/London') |
+| strict | boolean | Enable strict mode validation |
+
+When using string dates, the following formats are supported:
+- ISO8601
+- HTTP and RFC2822
+- SQL
+
+## Basic Usage
+
+### Simple Expression
+
+```typescript
+// Using default import
+import parser from 'cron-parser';
+
+// Or using named import
+import { CronParser, CronExpressionParser } from 'cron-parser';
 
 try {
-  var interval = parser.parseExpression('*/2 * * * *');
-
-  console.log('Date: ', interval.next().toString()); // Sat Dec 29 2012 00:42:00 GMT+0200 (EET)
-  console.log('Date: ', interval.next().toString()); // Sat Dec 29 2012 00:44:00 GMT+0200 (EET)
-
-  console.log('Date: ', interval.prev().toString()); // Sat Dec 29 2012 00:42:00 GMT+0200 (EET)
-  console.log('Date: ', interval.prev().toString()); // Sat Dec 29 2012 00:40:00 GMT+0200 (EET)
+  const interval = parser.parseExpression('*/2 * * * *');
+  
+  // Get next date
+  console.log('Next:', interval.next().toString());
+  // Get next 3 dates
+  console.log('Next 3:', interval.take(3).map(date => date.toString()));
+  
+  // Get previous date
+  console.log('Previous:', interval.prev().toString());
 } catch (err) {
-  console.log('Error: ' + err.message);
+  console.log('Error:', err.message);
 }
-
 ```
 
-Iteration with limited timespan. Also returns ES6 compatible iterator (when iterator flag is set to true).
+### With Options
 
-```javascript
-var parser = require('cron-parser');
+```typescript
+import parser from 'cron-parser';
 
-var options = {
-  currentDate: new Date('Wed, 26 Dec 2012 12:38:53 UTC'),
-  endDate: new Date('Wed, 26 Dec 2012 14:40:00 UTC'),
-  iterator: true
+const options = {
+  currentDate: '2023-01-01T00:00:00Z',
+  endDate: '2024-01-01T00:00:00Z',
+  tz: 'Europe/London'
 };
 
 try {
-  var interval = parser.parseExpression('*/22 * * * *', options);
-
-  while (true) {
-    try {
-      var obj = interval.next();
-      console.log('value:', obj.value.toString(), 'done:', obj.done);
-    } catch (e) {
-      break;
-    }
-  }
-
-  // value: Wed Dec 26 2012 14:44:00 GMT+0200 (EET) done: false
-  // value: Wed Dec 26 2012 15:00:00 GMT+0200 (EET) done: false
-  // value: Wed Dec 26 2012 15:22:00 GMT+0200 (EET) done: false
-  // value: Wed Dec 26 2012 15:44:00 GMT+0200 (EET) done: false
-  // value: Wed Dec 26 2012 16:00:00 GMT+0200 (EET) done: false
-  // value: Wed Dec 26 2012 16:22:00 GMT+0200 (EET) done: true
+  const interval = parser.parseExpression('0 0 * * *', options);
+  console.log('Next:', interval.next().toString());
 } catch (err) {
-  console.log('Error: ' + err.message);
-}
-
-```
-
-Timezone support
-
-```javascript
-var parser = require('cron-parser');
-
-var options = {
-  currentDate: '2016-03-27 00:00:01',
-  tz: 'Europe/Athens'
-};
-
-try {
-  var interval = parser.parseExpression('0 * * * *', options);
-
-  console.log('Date: ', interval.next().toString()); // Date:  Sun Mar 27 2016 01:00:00 GMT+0200
-  console.log('Date: ', interval.next().toString()); // Date:  Sun Mar 27 2016 02:00:00 GMT+0200
-  console.log('Date: ', interval.next().toString()); // Date:  Sun Mar 27 2016 04:00:00 GMT+0300 (Notice DST transition)
-} catch (err) {
-  console.log('Error: ' + err.message);
+  console.log('Error:', err.message);
 }
 ```
 
-Manipulation
+## Filesystem-Independent Usage
 
-```javascript
-var parser = require('cron-parser');
+While `parser.parseExpression` is the recommended high-level API, you can also use `CronExpressionParser` directly if you need to avoid filesystem dependencies:
 
-var interval = parser.parseExpression('0 7 * * 0-4');
-var fields = JSON.parse(JSON.stringify(interval.#fields)); // Fields is immutable
-fields.hour = [8];
-fields.minute = [29];
-fields.dayOfWeek = [1, 3, 4, 5, 6, 7];
-var modifiedInterval = parser.fieldsToExpression(fields);
-var cronString = modifiedInterval.stringify();
-console.log(cronString); // "29 8 * * 1,3-7"
+```typescript
+import { CronExpressionParser } from 'cron-parser';
+
+// Basic usage
+const expression = CronExpressionParser.parse('*/5 * * * *');
+console.log('Next:', expression.next().toString());
+
+// With options
+const expressionWithOptions = CronExpressionParser.parse('0 0 * * *', {
+  currentDate: new Date(),
+  tz: 'Europe/London',
+  strict: true
+});
+
+// Supports predefined expressions
+const weeklyExpression = CronExpressionParser.parse('@weekly');
+console.log('Next weekly run:', weeklyExpression.next().toString());
 ```
 
-Strict Mode
+Both `parser.parseExpression` and `CronExpressionParser.parse`:
+- Return the same `CronExpression` object with identical functionality
+- Support the same options (currentDate, tz, strict, etc.)
+- Handle predefined expressions (@yearly, @monthly, etc.)
+
+The main difference is that `CronParser` class provides additional utilities for working with crontab files and strings:
+- `parseFile`: Parse a crontab file (requires filesystem access)
+- `parseString`: Parse a crontab-formatted string
+- `fieldsToExpression`: Convert cron fields to an expression
+
+## Advanced Features
+
+### Strict Mode
 
 In several implementations of CRON, it's ambiguous to specify both the Day Of Month and Day Of Week parameters simultaneously, as it's unclear which one should take precedence. Despite this ambiguity, this library allows both parameters to be set by default, although the resultant behavior might not align with your expectations.
 
-To resolve this ambiguity, you can activate the strict mode of the library. In strict mode, the library prevents the simultaneous setting of both Day Of Month and Day Of Week, effectively serving as a validation method for user inputs. To enable strict mode, set the `options.strict` flag to true.
+To resolve this ambiguity, you can activate the strict mode of the library. In strict mode, the library prevents the simultaneous setting of both Day Of Month and Day Of Week, effectively serving as a validation method for user inputs.
 
-Consider the example below:
+```typescript
+import parser from 'cron-parser';
 
-```javascript
-// Specifies a schedule that occurs at 12:00 on every day-of-month from 1 through 31 and on Monday.
+// Specifies a schedule that occurs at 12:00 on every day-of-month from 1 through 31 and on Monday
 const options = {
-  currentDate: new CronDate('Mon, 12 Sep 2022 14:00:00', 'UTC'),
-  strict: true,
+  currentDate: new Date('Mon, 12 Sep 2022 14:00:00'),
+  strict: true
 };
-const expression = '0 0 12 1-31 * 1';
-// With strict mode enabled, the parser throws an error as both dayOfMonth and dayOfWeek are used together.
-CronExpression.parse(expression, options); // throws: Cannot use both dayOfMonth and dayOfWeek together in strict mode!
+
+try {
+  // This will throw an error in strict mode
+  parser.parseExpression('0 0 12 1-31 * 1', options);
+} catch (err) {
+  console.log('Error:', err.message);
+  // Error: Cannot use both dayOfMonth and dayOfWeek together in strict mode!
+}
 ```
 
-In this example, the CRON expression is meant to trigger an event at 12:00 on every day from the 1st through the 31st and on every Monday. However, since strict mode is enabled in the options, an error is thrown, indicating that both the dayOfMonth and dayOfWeek parameters cannot be used together.
+### Last Day of Month/Week Support
 
-Options
-========
+The library supports parsing the range `0L - 7L` in the `weekday` position of the cron expression, where the `L` means "last occurrence of this weekday for the month in progress".
 
-* *currentDate* - Start date of the iteration
-* *endDate* - End date of the iteration
+For example, the following expression will run on the last Monday of the month at midnight:
 
-`currentDate` and `endDate` accept `string`, `integer` and `Date` as input.
+```typescript
+import parser from 'cron-parser';
 
-In case of using `string` as input, not every string format accepted
-by the `Date` constructor will work correctly. 
-The supported formats are: 
-- [`ISO8601`](https://moment.github.io/luxon/#/parsing?id=iso-8601)
-- [`HTTP and RFC2822`](https://moment.github.io/luxon/#/parsing?id=http-and-rfc2822)
-- [`SQL`](https://moment.github.io/luxon/#/parsing?id=sql) 
+// Last Monday of every month at midnight
+const lastMonday = parser.parseExpression('0 0 0 * * 1L');
 
-The reason being that those are the formats accepted by the
-[`luxon`](https://moment.github.io/luxon/) library which is being used to handle dates.
+// You can also combine L expressions with other weekday expressions
+// This will run every Monday and the last Wednesday of the month
+const mixedWeekdays = parser.parseExpression('0 0 0 * * 1,3L');
 
-Using `Date` as an input can be problematic specially when using the `tz` option. The issue being that, when creating a new `Date` object without
-any timezone information, it will be created in the timezone of the system that is running the code. This (most of the times) won't be what the user
-will be expecting. Using one of the supported `string` formats will solve the issue(see timezone example).
-
-* *iterator* - Return ES6 compatible iterator object 
-* *utc* - Enable UTC
-* *tz* - Timezone string. It won't be used in case `utc` is enabled
-
-Last weekday of the month
-=========================
-
-This library supports parsing the range `0L - 7L` in the `weekday` position of
-the cron expression, where the `L` means "last occurrence of this weekday for
-the month in progress".
-
-For example, the following expression will run on the last monday of the month
-at midnight:
-
-```
-0 0 0 * * 1L
+// Last day of every month
+const lastDay = parser.parseExpression('0 0 L * *');
 ```
 
-The library also supports combining `L` expressions with other weekday
-expressions. For example, the following cron will run every Monday as well
-as the last Wednesday of the month:
+### Using Iterator
 
+```typescript
+import parser from 'cron-parser';
+
+const interval = parser.parseExpression('0 */2 * * *');
+
+// Using for...of
+for (const date of interval) {
+  console.log('Iterator value:', date.toString());
+  if (someCondition) break;
+}
+
+// Using take() for a specific number of iterations
+const nextFiveDates = interval.take(5);
+console.log('Next 5 dates:', nextFiveDates.map(date => date.toString()));
 ```
-0 0 0 * * 1,3L
+
+### Timezone Support
+
+The library provides robust timezone support using Luxon, handling DST transitions correctly:
+
+```typescript
+import parser from 'cron-parser';
+
+const options = {
+  currentDate: '2023-03-26T01:00:00',
+  tz: 'Europe/London'
+};
+
+const interval = parser.parseExpression('0 * * * *', options);
+
+// Will correctly handle DST transition
+console.log('Next dates during DST transition:');
+console.log(interval.next().toString());
+console.log(interval.next().toString());
+console.log(interval.next().toString());
 ```
+
+### Field Manipulation
+
+You can modify cron fields programmatically using `CronFieldCollection.from` and construct a new expression:
+
+```typescript
+import parser from 'cron-parser';
+
+// Parse original expression
+const interval = parser.parseExpression('0 7 * * 1-5');
+
+// Create new collection with modified fields using raw values
+const modified = CronFieldCollection.from(interval.fields, {
+  hour: [8],
+  minute: [30],
+  dayOfWeek: [1, 3, 5]
+});
+
+console.log(modified.stringify()); // "30 8 * * 1,3,5"
+
+// You can also use CronField instances
+const modified2 = CronFieldCollection.from(interval.fields, {
+  hour: new CronHour([15]),
+  minute: new CronMinute([30])
+});
+
+console.log(modified2.stringify()); // "30 15 * * 1-5"
+```
+
+The `CronFieldCollection.from` method accepts either CronField instances or raw values that would be valid for creating new CronField instances. This is particularly useful when you need to modify only specific fields while keeping others unchanged.
+
+## License
+
+MIT
