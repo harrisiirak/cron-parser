@@ -497,10 +497,6 @@ export class CronDate {
       return;
     }
 
-    if (hoursLength === undefined) {
-      throw new Error('hoursLength must be defined when unit is not month or day');
-    }
-
     const previousHour = this.getHours();
     this.invokeDateOperation(op, unit);
     const currentHour = this.getHours();
