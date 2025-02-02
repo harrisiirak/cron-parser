@@ -12,9 +12,10 @@ import {
   CronMonth,
 } from '../src';
 import { CronDate } from '../src/CronDate';
-import ErrnoException = NodeJS.ErrnoException;
 import { ParseStringResponse } from '../src/CronParser';
 import { CronFields } from '../src/CronFieldCollection';
+
+import ErrnoException = NodeJS.ErrnoException;
 
 describe('CronParser', () => {
   describe('parseExpression', () => {
