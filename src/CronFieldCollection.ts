@@ -1,5 +1,6 @@
 import assert from 'assert';
-import { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfWeek, CronField, SerializedCronField, CronChars } from './fields'; 
+import { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfWeek, CronField, SerializedCronField, CronChars } from './fields';
+import { SixtyRange, HourRange, DayOfMonthRange, MonthRange, DayOfWeekRange } from './fields/types';
 
 export type FieldRange = {
   start: number | CronChars;
@@ -16,6 +17,15 @@ export type CronFields = {
   month: CronMonth;
   dayOfWeek: CronDayOfWeek;
 }
+
+export type CronFieldOverride = {
+  second?: CronSecond | SixtyRange[];
+  minute?: CronMinute | SixtyRange[];
+  hour?: CronHour | HourRange[];
+  dayOfMonth?: CronDayOfMonth | DayOfMonthRange[];
+  month?: CronMonth | MonthRange[];
+  dayOfWeek?: CronDayOfWeek | DayOfWeekRange[];
+};
 
 export type SerializedCronFields = {
   second: SerializedCronField;
@@ -37,6 +47,66 @@ export class CronFieldCollection {
   readonly #dayOfMonth: CronDayOfMonth;
   readonly #month: CronMonth;
   readonly #dayOfWeek: CronDayOfWeek;
+
+  /**
+   * Creates a new CronFieldCollection instance by partially overriding fields from an existing one.
+   * @param {CronFieldCollection} base - The base CronFieldCollection to copy fields from
+   * @param {CronFieldOverride} fields - The fields to override, can be CronField instances or raw values
+   * @returns {CronFieldCollection} A new CronFieldCollection instance
+   * @example
+   * const base = new CronFieldCollection({
+   *   second: new CronSecond([0]),
+   *   minute: new CronMinute([0]),
+   *   hour: new CronHour([12]),
+   *   dayOfMonth: new CronDayOfMonth([1]),
+   *   month: new CronMonth([1]),
+   *   dayOfWeek: new CronDayOfWeek([1])
+   * });
+   * 
+   * // Using CronField instances
+   * const modified1 = CronFieldCollection.from(base, {
+   *   hour: new CronHour([15]),
+   *   minute: new CronMinute([30])
+   * });
+   * 
+   * // Using raw values
+   * const modified2 = CronFieldCollection.from(base, {
+   *   hour: [15],        // Will create new CronHour
+   *   minute: [30]       // Will create new CronMinute
+   * });
+   */
+  static from(base: CronFieldCollection, fields: CronFieldOverride): CronFieldCollection {
+    return new CronFieldCollection({
+      second: this.resolveField(CronSecond, base.second, fields.second),
+      minute: this.resolveField(CronMinute, base.minute, fields.minute),
+      hour: this.resolveField(CronHour, base.hour, fields.hour),
+      dayOfMonth: this.resolveField(CronDayOfMonth, base.dayOfMonth, fields.dayOfMonth),
+      month: this.resolveField(CronMonth, base.month, fields.month),
+      dayOfWeek: this.resolveField(CronDayOfWeek, base.dayOfWeek, fields.dayOfWeek),
+    });
+  }
+
+  /**
+   * Resolves a field value, either using the provided CronField instance or creating a new one from raw values.
+   * @param constructor - The constructor for creating new field instances
+   * @param baseField - The base field to use if no override is provided
+   * @param fieldValue - The override value, either a CronField instance or raw values
+   * @returns The resolved CronField instance
+   * @private
+   */
+  private static resolveField<T extends CronField, V extends any[]>(
+    constructor: new (values: V) => T,
+    baseField: T,
+    fieldValue: T | V | undefined,
+  ): T {
+    if (!fieldValue) {
+      return baseField;
+    }
+    if (fieldValue instanceof CronField) {
+      return fieldValue as T;
+    }
+    return new constructor(fieldValue as V);
+  }
 
   /**
    * CronFieldCollection constructor. Initializes the cron fields with the provided values.
