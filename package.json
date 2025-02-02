@@ -9,7 +9,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc -p tsconfig.json",
     "prepublishOnly": "npm run build",
-    "prepare": "husky install && npm run build",
+    "prepare": "husky && npm run build",
     "precommit": "lint-staged",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
