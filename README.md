@@ -85,17 +85,13 @@ When using string dates, the following formats are supported:
 
 ## Basic Usage
 
-### Simple Expression
+### Expression Parsing
 
 ```typescript
-// Using default import
-import parser from 'cron-parser';
-
-// Or using named import
-import { CronParser, CronExpressionParser } from 'cron-parser';
+import { CronExpressionParser } from 'cron-parser';
 
 try {
-  const interval = parser.parseExpression('*/2 * * * *');
+  const interval = CronExpressionParser.parse('*/2 * * * *');
   
   // Get next date
   console.log('Next:', interval.next().toString());
@@ -112,7 +108,7 @@ try {
 ### With Options
 
 ```typescript
-import parser from 'cron-parser';
+import { CronExpressionParser } from 'cron-parser';
 
 const options = {
   currentDate: '2023-01-01T00:00:00Z',
@@ -121,45 +117,40 @@ const options = {
 };
 
 try {
-  const interval = parser.parseExpression('0 0 * * *', options);
+  const interval = CronExpressionParser.parse('0 0 * * *', options);
   console.log('Next:', interval.next().toString());
 } catch (err) {
   console.log('Error:', err.message);
 }
 ```
 
-## Filesystem-Independent Usage
+### Crontab File Operations
 
-While `parser.parseExpression` is the recommended high-level API, you can also use `CronExpressionParser` directly if you need to avoid filesystem dependencies:
+For working with crontab files, use the CronFileParser:
 
 ```typescript
-import { CronExpressionParser } from 'cron-parser';
+import { CronFileParser } from 'cron-parser';
 
-// Basic usage
-const expression = CronExpressionParser.parse('*/5 * * * *');
-console.log('Next:', expression.next().toString());
+// Async file parsing
+try {
+  const result = await CronFileParser.parseFile('/path/to/crontab');
+  console.log('Variables:', result.variables);
+  console.log('Expressions:', result.expressions);
+  console.log('Errors:', result.errors);
+} catch (err) {
+  console.log('Error:', err.message);
+}
 
-// With options
-const expressionWithOptions = CronExpressionParser.parse('0 0 * * *', {
-  currentDate: new Date(),
-  tz: 'Europe/London',
-  strict: true
-});
-
-// Supports predefined expressions
-const weeklyExpression = CronExpressionParser.parse('@weekly');
-console.log('Next weekly run:', weeklyExpression.next().toString());
+// Sync file parsing
+try {
+  const result = CronFileParser.parseFileSync('/path/to/crontab');
+  console.log('Variables:', result.variables);
+  console.log('Expressions:', result.expressions);
+  console.log('Errors:', result.errors);
+} catch (err) {
+  console.log('Error:', err.message);
+}
 ```
-
-Both `parser.parseExpression` and `CronExpressionParser.parse`:
-- Return the same `CronExpression` object with identical functionality
-- Support the same options (currentDate, tz, strict, etc.)
-- Handle predefined expressions (@yearly, @monthly, etc.)
-
-The main difference is that `CronParser` class provides additional utilities for working with crontab files and strings:
-- `parseFile`: Parse a crontab file (requires filesystem access)
-- `parseString`: Parse a crontab-formatted string
-- `fieldsToExpression`: Convert cron fields to an expression
 
 ## Advanced Features
 
@@ -170,7 +161,7 @@ In several implementations of CRON, it's ambiguous to specify both the Day Of Mo
 To resolve this ambiguity, you can activate the strict mode of the library. In strict mode, the library prevents the simultaneous setting of both Day Of Month and Day Of Week, effectively serving as a validation method for user inputs.
 
 ```typescript
-import parser from 'cron-parser';
+import { CronExpressionParser } from 'cron-parser';
 
 // Specifies a schedule that occurs at 12:00 on every day-of-month from 1 through 31 and on Monday
 const options = {
@@ -180,7 +171,7 @@ const options = {
 
 try {
   // This will throw an error in strict mode
-  parser.parseExpression('0 0 12 1-31 * 1', options);
+  CronExpressionParser.parse('0 0 12 1-31 * 1', options);
 } catch (err) {
   console.log('Error:', err.message);
   // Error: Cannot use both dayOfMonth and dayOfWeek together in strict mode!
@@ -194,25 +185,25 @@ The library supports parsing the range `0L - 7L` in the `weekday` position of th
 For example, the following expression will run on the last Monday of the month at midnight:
 
 ```typescript
-import parser from 'cron-parser';
+import { CronExpressionParser } from 'cron-parser';
 
 // Last Monday of every month at midnight
-const lastMonday = parser.parseExpression('0 0 0 * * 1L');
+const lastMonday = CronExpressionParser.parse('0 0 0 * * 1L');
 
 // You can also combine L expressions with other weekday expressions
 // This will run every Monday and the last Wednesday of the month
-const mixedWeekdays = parser.parseExpression('0 0 0 * * 1,3L');
+const mixedWeekdays = CronExpressionParser.parse('0 0 0 * * 1,3L');
 
 // Last day of every month
-const lastDay = parser.parseExpression('0 0 L * *');
+const lastDay = CronExpressionParser.parse('0 0 L * *');
 ```
 
 ### Using Iterator
 
 ```typescript
-import parser from 'cron-parser';
+import { CronExpressionParser } from 'cron-parser';
 
-const interval = parser.parseExpression('0 */2 * * *');
+const interval = CronExpressionParser.parse('0 */2 * * *');
 
 // Using for...of
 for (const date of interval) {
@@ -230,14 +221,14 @@ console.log('Next 5 dates:', nextFiveDates.map(date => date.toString()));
 The library provides robust timezone support using Luxon, handling DST transitions correctly:
 
 ```typescript
-import parser from 'cron-parser';
+import { CronExpressionParser } from 'cron-parser';
 
 const options = {
   currentDate: '2023-03-26T01:00:00',
   tz: 'Europe/London'
 };
 
-const interval = parser.parseExpression('0 * * * *', options);
+const interval = CronExpressionParser.parse('0 * * * *', options);
 
 // Will correctly handle DST transition
 console.log('Next dates during DST transition:');
@@ -251,10 +242,10 @@ console.log(interval.next().toString());
 You can modify cron fields programmatically using `CronFieldCollection.from` and construct a new expression:
 
 ```typescript
-import parser from 'cron-parser';
+import { CronExpressionParser, CronFieldCollection, CronHour, CronMinute } from 'cron-parser';
 
 // Parse original expression
-const interval = parser.parseExpression('0 7 * * 1-5');
+const interval = CronExpressionParser.parse('0 7 * * 1-5');
 
 // Create new collection with modified fields using raw values
 const modified = CronFieldCollection.from(interval.fields, {
