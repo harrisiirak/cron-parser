@@ -364,6 +364,7 @@ export class CronExpression {
     let stepCount = 0;
 
     while (stepCount++ < LOOP_LIMIT) {
+      /* istanbul ignore next - should be impossible under normal use to trigger the branch */
       if (stepCount > LOOP_LIMIT) {
         throw new Error('Invalid expression, loop limit exceeded');
       }
