@@ -23,4 +23,7 @@ docs
 .nyc_output
 yarn.lock
 
+benchmarks/versions/
+benchmarks/results/
+
 !coverage/*.svg

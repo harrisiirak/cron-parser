@@ -7,6 +7,9 @@
   "type": "commonjs",
   "scripts": {
     "clean": "rimraf dist",
+    "bench": "cross-env node -r ts-node/register benchmarks/index.ts",
+    "bench:pattern": "cross-env node -r ts-node/register benchmarks/pattern.ts",
+    "bench:clean": "rimraf benchmarks/versions && rimraf benchmarks/results",
     "build": "npm run clean && tsc -p tsconfig.json",
     "prepublishOnly": "npm run build",
     "prepare": "husky && npm run build",
@@ -36,6 +39,8 @@
     "@types/node": "^22.13.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
     "cross-env": "^7.0.3",
     "eslint": "^9.19.0",
     "husky": "^9.1.7",
