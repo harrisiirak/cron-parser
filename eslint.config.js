@@ -1,14 +1,11 @@
 const typescriptParser = require('@typescript-eslint/parser');
 const typescriptPlugin = require('@typescript-eslint/eslint-plugin');
+const prettierPlugin = require('eslint-plugin-prettier');
+const prettierConfig = require('eslint-config-prettier');
 
 module.exports = [
   {
-    ignores: [
-      'dist/**',
-      '**/*.json',
-      'coverage/**',
-      'docs/**',
-    ],
+    ignores: ['dist/**', '**/*.json', 'coverage/**', 'docs/**'],
   },
 
   {
@@ -22,18 +19,15 @@ module.exports = [
     },
     plugins: {
       '@typescript-eslint': typescriptPlugin,
+      prettier: prettierPlugin,
     },
     rules: {
       ...typescriptPlugin.configs.recommended.rules,
-      'indent': ['error', 2, { SwitchCase: 1 }],
-      'quotes': ['error', 'single'],
-      'semi': ['error', 'always'],
-      'comma-dangle': ['error', 'always-multiline'],
+      ...prettierConfig.rules,
+      'prettier/prettier': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-duplicate-enum-values': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
-      'object-curly-spacing': ['warn', 'always'],
-      'max-len': ['error', { code: 160 }],
     },
   },
 ];
