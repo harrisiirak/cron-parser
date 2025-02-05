@@ -12,13 +12,13 @@ describe('CronFieldCollection', () => {
         hour: new CronHour([12]),
         dayOfMonth: new CronDayOfMonth([1]),
         month: new CronMonth([1]),
-        dayOfWeek: new CronDayOfWeek([1])
+        dayOfWeek: new CronDayOfWeek([1]),
       });
     });
 
     it('should return same fields when no overrides provided', () => {
       const result = CronFieldCollection.from(base, {});
-      
+
       expect(result.second).toBe(base.second);
       expect(result.minute).toBe(base.minute);
       expect(result.hour).toBe(base.hour);
@@ -30,10 +30,10 @@ describe('CronFieldCollection', () => {
     it('should use provided CronField instances', () => {
       const newHour = new CronHour([15]);
       const newMinute = new CronMinute([30]);
-      
+
       const result = CronFieldCollection.from(base, {
         hour: newHour,
-        minute: newMinute
+        minute: newMinute,
       });
 
       expect(result.hour).toBe(newHour);
@@ -44,7 +44,7 @@ describe('CronFieldCollection', () => {
     it('should create new fields from raw values', () => {
       const result = CronFieldCollection.from(base, {
         hour: [15],
-        minute: [30]
+        minute: [30],
       });
 
       expect(result.hour).not.toBe(base.hour);
@@ -55,10 +55,10 @@ describe('CronFieldCollection', () => {
 
     it('should handle mix of CronField instances and raw values', () => {
       const newHour = new CronHour([15]);
-      
+
       const result = CronFieldCollection.from(base, {
         hour: newHour,
-        minute: [30]
+        minute: [30],
       });
 
       expect(result.hour).toBe(newHour);
@@ -69,7 +69,7 @@ describe('CronFieldCollection', () => {
     it('should handle multiple values in raw array', () => {
       const result = CronFieldCollection.from(base, {
         hour: [12, 15, 18],
-        minute: [0, 15, 30, 45]
+        minute: [0, 15, 30, 45],
       });
 
       expect(result.hour).not.toBe(base.hour);

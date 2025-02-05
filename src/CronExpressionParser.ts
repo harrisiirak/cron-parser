@@ -99,15 +99,38 @@ export class CronExpressionParser {
 
     expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
-    assert(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict, 'Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
+    assert(
+      rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict,
+      'Cannot use both dayOfMonth and dayOfWeek together in strict mode!',
+    );
 
-    const second = CronExpressionParser.#parseField(CronUnit.Second, rawFields.second, CronSecond.constraints) as SixtyRange[];
-    const minute = CronExpressionParser.#parseField(CronUnit.Minute, rawFields.minute, CronMinute.constraints) as SixtyRange[];
+    const second = CronExpressionParser.#parseField(
+      CronUnit.Second,
+      rawFields.second,
+      CronSecond.constraints,
+    ) as SixtyRange[];
+    const minute = CronExpressionParser.#parseField(
+      CronUnit.Minute,
+      rawFields.minute,
+      CronMinute.constraints,
+    ) as SixtyRange[];
     const hour = CronExpressionParser.#parseField(CronUnit.Hour, rawFields.hour, CronHour.constraints) as HourRange[];
-    const month = CronExpressionParser.#parseField(CronUnit.Month, rawFields.month, CronMonth.constraints) as MonthRange[];
-    const dayOfMonth = CronExpressionParser.#parseField(CronUnit.DayOfMonth, rawFields.dayOfMonth, CronDayOfMonth.constraints) as DayOfMonthRange[];
+    const month = CronExpressionParser.#parseField(
+      CronUnit.Month,
+      rawFields.month,
+      CronMonth.constraints,
+    ) as MonthRange[];
+    const dayOfMonth = CronExpressionParser.#parseField(
+      CronUnit.DayOfMonth,
+      rawFields.dayOfMonth,
+      CronDayOfMonth.constraints,
+    ) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
-    const dayOfWeek = CronExpressionParser.#parseField(CronUnit.DayOfWeek, _dayOfWeek, CronDayOfWeek.constraints) as DayOfWeekRange[];
+    const dayOfWeek = CronExpressionParser.#parseField(
+      CronUnit.DayOfWeek,
+      _dayOfWeek,
+      CronDayOfWeek.constraints,
+    ) as DayOfWeekRange[];
 
     const fields = new CronFieldCollection({
       second: new CronSecond(second, ['*', '?'].includes(rawFields.second)),
@@ -184,7 +207,10 @@ export class CronExpressionParser {
           if (!CronExpressionParser.#isValidConstraintChar(constraints, value)) {
             const v = parseInt(value.toString(), 10);
             const isValid = v >= constraints.min && v <= constraints.max;
-            assert(isValid, `Constraint error, got value ${value} expected range ${constraints.min}-${constraints.max}`);
+            assert(
+              isValid,
+              `Constraint error, got value ${value} expected range ${constraints.min}-${constraints.max}`,
+            );
             stack.push(value);
           }
         });
@@ -252,7 +278,10 @@ export class CronExpressionParser {
    * @throws {Error} Throws an error if the repeat interval is invalid.
    */
   static #validateRepeatInterval(repeatInterval: number): void {
-    assert(!isNaN(repeatInterval) && repeatInterval > 0, `Constraint error, cannot repeat at every ${repeatInterval} time.`);
+    assert(
+      !isNaN(repeatInterval) && repeatInterval > 0,
+      `Constraint error, cannot repeat at every ${repeatInterval} time.`,
+    );
   }
 
   /**
@@ -286,7 +315,12 @@ export class CronExpressionParser {
    * @private
    * @returns {number[] | string[] | number | string} The parsed range.
    */
-  static #parseRange(field: CronUnit, val: string, repeatInterval: number, constraints: CronConstraints): ParseRageResponse {
+  static #parseRange(
+    field: CronUnit,
+    val: string,
+    repeatInterval: number,
+    constraints: CronConstraints,
+  ): ParseRageResponse {
     const atoms: string[] = val.split('-');
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;
@@ -305,15 +339,21 @@ export class CronExpressionParser {
    * @private
    * @returns {string} The parsed cron expression.
    */
-  static #parseNthDay(val: string): { dayOfWeek: string; nthDayOfWeek?: number; } {
+  static #parseNthDay(val: string): { dayOfWeek: string; nthDayOfWeek?: number } {
     const atoms = val.split('#');
     if (atoms.length <= 1) {
       return { dayOfWeek: atoms[0] };
     }
     const nthValue = +atoms[atoms.length - 1];
     const matches = val.match(/([,-/])/);
-    assert(matches === null, `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`);
-    assert(atoms.length <= 2 && !isNaN(nthValue) && nthValue >= 1 && nthValue <= 5, 'Constraint error, invalid dayOfWeek occurrence number (#)');
+    assert(
+      matches === null,
+      `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`,
+    );
+    assert(
+      atoms.length <= 2 && !isNaN(nthValue) && nthValue >= 1 && nthValue <= 5,
+      'Constraint error, invalid dayOfWeek occurrence number (#)',
+    );
     return { dayOfWeek: atoms[0], nthDayOfWeek: nthValue };
   }
 

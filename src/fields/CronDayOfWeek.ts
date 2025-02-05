@@ -3,7 +3,7 @@ import { CronChars, CronMax, CronMin, DayOfWeekRange } from './types';
 
 const MIN_DAY = 0;
 const MAX_DAY = 7;
-const DAY_CHARS: readonly CronChars[] = Object.freeze(['L']) ;
+const DAY_CHARS: readonly CronChars[] = Object.freeze(['L']);
 
 /**
  * Represents the "day of the week" field within a cron expression.

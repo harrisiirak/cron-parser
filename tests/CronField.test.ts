@@ -86,8 +86,8 @@ describe('CronFields', () => {
     });
 
     expect(cronFields.dayOfMonth.serialize()).toEqual({
-      'values': [15],
-      'wildcard': false,
+      values: [15],
+      wildcard: false,
     });
   });
 
@@ -104,12 +104,18 @@ describe('CronFields', () => {
 
     test('2 elements array', () => {
       const result = CronFieldCollection.compactField([1, 2]);
-      expect(result).toEqual([{ start: 1, count: 1 }, { start: 2, count: 1 }]);
+      expect(result).toEqual([
+        { start: 1, count: 1 },
+        { start: 2, count: 1 },
+      ]);
     });
 
     test('2 elements array big step', () => {
       const result = CronFieldCollection.compactField([1, 5]);
-      expect(result).toEqual([{ start: 1, count: 1 }, { start: 5, count: 1 }]);
+      expect(result).toEqual([
+        { start: 1, count: 1 },
+        { start: 5, count: 1 },
+      ]);
     });
 
     test('3 elements array 1 step', () => {
@@ -119,7 +125,10 @@ describe('CronFields', () => {
 
     test('3 elements array 1 step, dangling extra at end', () => {
       const result = CronFieldCollection.compactField([1, 2, 3, 5]);
-      expect(result).toEqual([{ start: 1, end: 3, count: 3, step: 1 }, { start: 5, count: 1 }]);
+      expect(result).toEqual([
+        { start: 1, end: 3, count: 3, step: 1 },
+        { start: 5, count: 1 },
+      ]);
     });
 
     test('3 elements array 1 step, dangling extra at end and beginning', () => {
@@ -138,7 +147,6 @@ describe('CronFields', () => {
         { start: 6, count: 1 },
         { start: 9, end: 13, count: 3, step: 2 },
       ]);
-
     });
 
     test('with chars', () => {
@@ -147,7 +155,6 @@ describe('CronFields', () => {
         { start: 'L', count: 1 },
         { start: 'W', count: 1 },
       ]);
-
     });
 
     test('with chars and range', () => {
@@ -157,7 +164,6 @@ describe('CronFields', () => {
         { start: 'L', count: 1 },
         { start: 'W', count: 1 },
       ]);
-
     });
 
     test('with chars and range (v2)', () => {

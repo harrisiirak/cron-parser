@@ -6,7 +6,6 @@ import { Months } from '../src/CronExpressionParser';
 // @ts-ignore
 expectAssignable<number>(5);
 
-
 // Assert that SixtyRange includes 0 and 59
 expectAssignable<SixtyRange>(0);
 expectAssignable<SixtyRange>(59);
@@ -18,7 +17,6 @@ expectNotAssignable<SixtyRange>(60);
 // Assert that SixtyRange does not include 0.5 and 58.5
 expectNotAssignable<SixtyRange>(0.5);
 expectNotAssignable<SixtyRange>(58.5);
-
 
 // Assert that HourRange includes 0 and 23
 expectAssignable<HourRange>(0);

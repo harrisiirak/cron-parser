@@ -1,4 +1,6 @@
-export type RangeFrom<LENGTH extends number, ACC extends unknown[] = []> = ACC['length'] extends LENGTH ? ACC : RangeFrom<LENGTH, [...ACC, 1]>;
+export type RangeFrom<LENGTH extends number, ACC extends unknown[] = []> = ACC['length'] extends LENGTH
+  ? ACC
+  : RangeFrom<LENGTH, [...ACC, 1]>;
 export type IntRange<FROM extends number[], TO extends number, ACC extends number = never> = FROM['length'] extends TO
   ? ACC | TO
   : IntRange<[...FROM, 1], TO, ACC | FROM['length']>;
@@ -19,4 +21,4 @@ export type CronConstraints = {
   max: CronMax;
   chars: readonly CronChars[];
   validChars: RegExp;
-}
+};

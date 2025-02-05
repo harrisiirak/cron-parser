@@ -1,5 +1,15 @@
 import assert from 'assert';
-import { CronSecond, CronMinute, CronHour, CronDayOfMonth, CronMonth, CronDayOfWeek, CronField, SerializedCronField, CronChars } from './fields';
+import {
+  CronSecond,
+  CronMinute,
+  CronHour,
+  CronDayOfMonth,
+  CronMonth,
+  CronDayOfWeek,
+  CronField,
+  SerializedCronField,
+  CronChars,
+} from './fields';
 import { SixtyRange, HourRange, DayOfMonthRange, MonthRange, DayOfWeekRange } from './fields/types';
 
 export type FieldRange = {
@@ -7,7 +17,7 @@ export type FieldRange = {
   count: number;
   end?: number;
   step?: number;
-}
+};
 
 export type CronFields = {
   second: CronSecond;
@@ -16,7 +26,7 @@ export type CronFields = {
   dayOfMonth: CronDayOfMonth;
   month: CronMonth;
   dayOfWeek: CronDayOfWeek;
-}
+};
 
 export type CronFieldOverride = {
   second?: CronSecond | SixtyRange[];
@@ -62,13 +72,13 @@ export class CronFieldCollection {
    *   month: new CronMonth([1]),
    *   dayOfWeek: new CronDayOfWeek([1])
    * });
-   * 
+   *
    * // Using CronField instances
    * const modified1 = CronFieldCollection.from(base, {
    *   hour: new CronHour([15]),
    *   minute: new CronMinute([30])
    * });
-   * 
+   *
    * // Using raw values
    * const modified2 = CronFieldCollection.from(base, {
    *   hour: [15],        // Will create new CronHour
@@ -364,7 +374,11 @@ export class CronFieldCollection {
         return singleRangeResult;
       }
     }
-    return ranges.map((range) => (range.count === 1 ? range.start.toString() : CronFieldCollection.#handleMultipleRanges(range, max))).join(',');
+    return ranges
+      .map((range) =>
+        range.count === 1 ? range.start.toString() : CronFieldCollection.#handleMultipleRanges(range, max),
+      )
+      .join(',');
   }
 
   /**

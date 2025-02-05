@@ -279,27 +279,31 @@ describe('CronExpression', () => {
 
     test('stringify from fields out of order', () => {
       const expected = '1-5 1 1 1 1 1';
-      const str = CronExpression.fieldsToExpression(new CronFieldCollection({
-        second: new CronSecond([5, 2, 1, 4, 3]),
-        minute: new CronMinute([1]),
-        hour: new CronHour([1]),
-        month: new CronMonth([1]),
-        dayOfMonth: new CronDayOfMonth([1]),
-        dayOfWeek: new CronDayOfWeek([1]),
-      })).stringify(true);
+      const str = CronExpression.fieldsToExpression(
+        new CronFieldCollection({
+          second: new CronSecond([5, 2, 1, 4, 3]),
+          minute: new CronMinute([1]),
+          hour: new CronHour([1]),
+          month: new CronMonth([1]),
+          dayOfMonth: new CronDayOfMonth([1]),
+          dayOfWeek: new CronDayOfWeek([1]),
+        }),
+      ).stringify(true);
       expect(str).toEqual(expected);
     });
 
     test('stringify from fields out of order (discard seconds)', () => {
       const expected = '1 1 1 1 1';
-      const str = CronExpression.fieldsToExpression(new CronFieldCollection({
-        second: new CronSecond([5, 2, 1, 4, 3]),
-        minute: new CronMinute([1]),
-        hour: new CronHour([1]),
-        month: new CronMonth([1]),
-        dayOfMonth: new CronDayOfMonth([1]),
-        dayOfWeek: new CronDayOfWeek([1]),
-      })).stringify();
+      const str = CronExpression.fieldsToExpression(
+        new CronFieldCollection({
+          second: new CronSecond([5, 2, 1, 4, 3]),
+          minute: new CronMinute([1]),
+          hour: new CronHour([1]),
+          month: new CronMonth([1]),
+          dayOfMonth: new CronDayOfMonth([1]),
+          dayOfWeek: new CronDayOfWeek([1]),
+        }),
+      ).stringify();
       expect(str).toEqual(expected);
     });
 
@@ -307,24 +311,28 @@ describe('CronExpression', () => {
       const expected = '* * * * *';
       const interval = CronExpressionParser.parse('* * * * *');
 
-      let str = CronExpression.fieldsToExpression(new CronFieldCollection({
-        second: interval.fields.second,
-        minute: interval.fields.minute,
-        hour: interval.fields.hour,
-        month: interval.fields.month,
-        dayOfMonth: interval.fields.dayOfMonth,
-        dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6]),
-      })).stringify();
+      let str = CronExpression.fieldsToExpression(
+        new CronFieldCollection({
+          second: interval.fields.second,
+          minute: interval.fields.minute,
+          hour: interval.fields.hour,
+          month: interval.fields.month,
+          dayOfMonth: interval.fields.dayOfMonth,
+          dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6]),
+        }),
+      ).stringify();
       expect(str).toEqual(expected);
 
-      str = CronExpression.fieldsToExpression(new CronFieldCollection({
-        second: interval.fields.second,
-        minute: interval.fields.minute,
-        hour: interval.fields.hour,
-        month: interval.fields.month,
-        dayOfMonth: interval.fields.dayOfMonth,
-        dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6, 7]),
-      })).stringify();
+      str = CronExpression.fieldsToExpression(
+        new CronFieldCollection({
+          second: interval.fields.second,
+          minute: interval.fields.minute,
+          hour: interval.fields.hour,
+          month: interval.fields.month,
+          dayOfMonth: interval.fields.dayOfMonth,
+          dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6, 7]),
+        }),
+      ).stringify();
       expect(str).toEqual(expected);
     });
 
@@ -336,7 +344,9 @@ describe('CronExpression', () => {
         dayOfMonth: new CronDayOfMonth([1]),
         dayOfWeek: new CronDayOfWeek([1]),
       };
-      expect(() => CronExpression.fieldsToExpression(new CronFieldCollection(input))).toThrowError('Validation error, Field second is missing');
+      expect(() => CronExpression.fieldsToExpression(new CronFieldCollection(input))).toThrowError(
+        'Validation error, Field second is missing',
+      );
     });
   });
 });

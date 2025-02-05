@@ -21,7 +21,7 @@ const newParseExpression = CronExpressionParser.parse as ParseExpressionFn;
 export async function initializeBenchmark(version?: string) {
   const { version: resolvedVersion, packagePath } = await VersionManager.getPackageVersion(version);
   console.log(`Using cron-parser version ${resolvedVersion} for comparison`);
-  
+
   const parser = require(packagePath);
   oldParseExpression = parser.parseExpression as ParseExpressionFn;
 }
@@ -51,9 +51,9 @@ function getChangeIndicator(percentChange: number): string {
   if (Math.abs(percentChange) <= 1) {
     return chalk.yellow('⟷'); // minimal change
   }
-  return percentChange > 0 
-    ? chalk.green('↑')  // improvement
-    : chalk.red('↓');   // degradation
+  return percentChange > 0
+    ? chalk.green('↑') // improvement
+    : chalk.red('↓'); // degradation
 }
 
 function formatPercentage(value: number): string {
@@ -61,33 +61,34 @@ function formatPercentage(value: number): string {
   if (Math.abs(value) <= 1) {
     return chalk.yellow(formatted);
   }
-  return value > 0
-    ? chalk.green(formatted)
-    : chalk.red(formatted);
+  return value > 0 ? chalk.green(formatted) : chalk.red(formatted);
 }
 
 function printStats(oldStats: BenchmarkStats, newStats: BenchmarkStats, expression: string, outputFile: string): void {
-  const tableData: Record<string, { 
-    Old: string;
-    New: string;
-    Change: string;
-    Indicator: string;
-  }> = {};
-  
+  const tableData: Record<
+    string,
+    {
+      Old: string;
+      New: string;
+      Change: string;
+      Indicator: string;
+    }
+  > = {};
+
   const metrics = ['stddev', 'min', 'max', 'mean'] as const;
   const meanPercentChange = ((oldStats.mean - newStats.mean) / oldStats.mean) * 100;
   const hasWarnings = meanPercentChange < 0;
-  
-  metrics.forEach(metric => {
+
+  metrics.forEach((metric) => {
     const oldValue = oldStats[metric];
     const newValue = newStats[metric];
     const percentChange = ((oldValue - newValue) / oldValue) * 100;
-    
+
     tableData[metric] = {
       Old: formatTime(oldValue),
       New: formatTime(newValue),
       Change: formatPercentage(percentChange),
-      Indicator: getChangeIndicator(percentChange)
+      Indicator: getChangeIndicator(percentChange),
     };
   });
 
@@ -96,21 +97,21 @@ function printStats(oldStats: BenchmarkStats, newStats: BenchmarkStats, expressi
     head: ['Metric', 'Old', 'New', 'Change', ' '],
     style: {
       head: [],
-      border: []
+      border: [],
     },
     colWidths: [10, 12, 12, 10, 5],
-    colAligns: ['left', 'right', 'right', 'right', 'center']
+    colAligns: ['left', 'right', 'right', 'right', 'center'],
   });
 
   // Add rows
-  metrics.forEach(metric => {
+  metrics.forEach((metric) => {
     const data = tableData[metric];
     const row = [
       metric === 'mean' ? chalk.bold(metric) : metric,
       metric === 'mean' ? chalk.bold(data.Old) : data.Old,
       metric === 'mean' ? chalk.bold(data.New) : data.New,
       metric === 'mean' ? chalk.bold(data.Change) : data.Change,
-      metric === 'mean' ? chalk.bold(data.Indicator) : data.Indicator
+      metric === 'mean' ? chalk.bold(data.Indicator) : data.Indicator,
     ];
     table.push(row);
   });
@@ -127,9 +128,9 @@ function printStats(oldStats: BenchmarkStats, newStats: BenchmarkStats, expressi
 Pattern: ${expression}
 Timestamp: ${new Date().toISOString()}
 ${'-'.repeat(50)}
-${Object.entries(tableData).map(([metric, data]) => 
-  `${metric}: ${data.Old} -> ${data.New} (${data.Change.replace(/\u001b\[\d+m/g, '')})`
-).join('\n')}
+${Object.entries(tableData)
+  .map(([metric, data]) => `${metric}: ${data.Old} -> ${data.New} (${data.Change.replace(/\u001b\[\d+m/g, '')})`)
+  .join('\n')}
 ${hasWarnings ? `\nWARNING: Overall performance degraded by ${formatPercentage(-meanPercentChange)}!` : ''}
 ${'-'.repeat(50)}\n
 `;
@@ -138,38 +139,40 @@ ${'-'.repeat(50)}\n
 }
 
 export function printSummary() {
-    // Print summary table
+  // Print summary table
   console.log('\nSummary of all benchmarks:');
   const summaryTable = new Table({
     head: ['Pattern', 'Old Mean', 'New Mean', 'Change', ''],
     style: {
       head: [],
-      border: []
+      border: [],
     },
     colWidths: [20, 12, 12, 10, 5],
-    colAligns: ['left', 'right', 'right', 'right', 'center']
+    colAligns: ['left', 'right', 'right', 'right', 'center'],
   });
 
   // Sort by improvement percentage
   benchmarkResults.sort((a, b) => b.change - a.change);
 
-  benchmarkResults.forEach(result => {
+  benchmarkResults.forEach((result) => {
     summaryTable.push([
       result.pattern,
       `${result.oldMean.toFixed(2)}ms`,
       `${result.newMean.toFixed(2)}ms`,
-      result.change > 0 
-        ? chalk.green(`${result.change.toFixed(2)}%`)
-        : chalk.red(`${result.change.toFixed(2)}%`),
-      result.change > 0 ? chalk.green('↑') : chalk.red('↓')
+      result.change > 0 ? chalk.green(`${result.change.toFixed(2)}%`) : chalk.red(`${result.change.toFixed(2)}%`),
+      result.change > 0 ? chalk.green('↑') : chalk.red('↓'),
     ]);
   });
 
   console.log(summaryTable.toString());
 }
 
-
-function runBenchmark(expression: string, currentDate: Date, parser: ParseExpressionFn, iterations: number): [number, string[]] {
+function runBenchmark(
+  expression: string,
+  currentDate: Date,
+  parser: ParseExpressionFn,
+  iterations: number,
+): [number, string[]] {
   const start = performance.now();
   const result = parser(expression, { currentDate });
   const dates: string[] = [];
@@ -180,7 +183,12 @@ function runBenchmark(expression: string, currentDate: Date, parser: ParseExpres
   return [end - start, dates];
 }
 
-export async function parseAndBenchMarkExpression(expression: string, iterations = 10000, samples = 5, outputFile: string) {
+export async function parseAndBenchMarkExpression(
+  expression: string,
+  iterations = 10000,
+  samples = 5,
+  outputFile: string,
+) {
   const currentDate = new Date();
   const oldTimes: number[] = [];
   const newTimes: number[] = [];
@@ -223,7 +231,7 @@ export async function parseAndBenchMarkExpression(expression: string, iterations
     pattern: expression,
     oldMean: oldStats.mean,
     newMean: newStats.mean,
-    change: ((oldStats.mean - newStats.mean) / oldStats.mean) * 100
+    change: ((oldStats.mean - newStats.mean) / oldStats.mean) * 100,
   });
 
   printStats(oldStats, newStats, expression, outputFile);

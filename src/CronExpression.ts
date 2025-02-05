@@ -3,14 +3,7 @@ import { DateTime } from 'luxon';
 
 import { CronDate, DateMathOp, TimeUnit } from './CronDate';
 import { CronFieldCollection } from './CronFieldCollection';
-import {
-  CronFieldType,
-  DayOfMonthRange,
-  DayOfWeekRange,
-  HourRange,
-  MonthRange,
-  SixtyRange,
-} from './fields';
+import { CronFieldType, DayOfMonthRange, DayOfWeekRange, HourRange, MonthRange, SixtyRange } from './fields';
 
 export type CronExpressionOptions = {
   currentDate?: Date | string | number | CronDate;
@@ -20,7 +13,7 @@ export type CronExpressionOptions = {
   nthDayOfWeek?: number;
   expression?: string;
   strict?: boolean;
-}
+};
 
 /**
  * Cron iteration loop safety limit
@@ -422,7 +415,7 @@ export class CronExpression {
    * @name Symbol.iterator
    * @memberof CronExpression
    * @returns {Iterator<CronDate>} An iterator object for CronExpression that returns CronDate values.
-  */
+   */
   [Symbol.iterator](): Iterator<CronDate> {
     return {
       next: () => {
@@ -431,7 +424,6 @@ export class CronExpression {
       },
     };
   }
-
 }
 
 export default CronExpression;

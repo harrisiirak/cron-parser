@@ -6,35 +6,51 @@ import { CronFieldCollection } from '../src/CronFieldCollection';
 describe('CronExpressionParser', () => {
   describe('invalid expression', () => {
     test('value out of the range', () => {
-      expect(() => CronExpressionParser.parse('61 * * * * *')).toThrow('Constraint error, got value 61 expected range 0-59');
+      expect(() => CronExpressionParser.parse('61 * * * * *')).toThrow(
+        'Constraint error, got value 61 expected range 0-59',
+      );
     });
 
     test('second value out of the range', () => {
-      expect(() => CronExpressionParser.parse('-1 * * * * *')).toThrow('Constraint error, got range NaN-1 expected range 0-59');
+      expect(() => CronExpressionParser.parse('-1 * * * * *')).toThrow(
+        'Constraint error, got range NaN-1 expected range 0-59',
+      );
     });
 
     test('invalid range', () => {
-      expect(() => CronExpressionParser.parse('- * * * * *')).toThrow('Constraint error, got range NaN-NaN expected range 0-59');
+      expect(() => CronExpressionParser.parse('- * * * * *')).toThrow(
+        'Constraint error, got range NaN-NaN expected range 0-59',
+      );
     });
 
     test('minute value out of the range', () => {
-      expect(() => CronExpressionParser.parse('* 32,72 * * * *')).toThrow('Constraint error, got value 72 expected range 0-59');
+      expect(() => CronExpressionParser.parse('* 32,72 * * * *')).toThrow(
+        'Constraint error, got value 72 expected range 0-59',
+      );
     });
 
     test('hour value out of the range', () => {
-      expect(() => CronExpressionParser.parse('* * 12-36 * * *')).toThrow('Constraint error, got range 12-36 expected range 0-23');
+      expect(() => CronExpressionParser.parse('* * 12-36 * * *')).toThrow(
+        'Constraint error, got range 12-36 expected range 0-23',
+      );
     });
 
     test('day of the month value out of the range', () => {
-      expect(() => CronExpressionParser.parse('* * * 10-15,40 * *')).toThrow('Constraint error, got value 40 expected range 1-31');
+      expect(() => CronExpressionParser.parse('* * * 10-15,40 * *')).toThrow(
+        'Constraint error, got value 40 expected range 1-31',
+      );
     });
 
     test('month value out of the range', () => {
-      expect(() => CronExpressionParser.parse('* * * * */10,12-13 *')).toThrow('Constraint error, got range 12-13 expected range 1-12');
+      expect(() => CronExpressionParser.parse('* * * * */10,12-13 *')).toThrow(
+        'Constraint error, got range 12-13 expected range 1-12',
+      );
     });
 
     test('day of the week value out of the range', () => {
-      expect(() => CronExpressionParser.parse('* * * * * 9')).toThrow('Constraint error, got value 9 expected range 0-7');
+      expect(() => CronExpressionParser.parse('* * * * * 9')).toThrow(
+        'Constraint error, got value 9 expected range 0-7',
+      );
     });
 
     test('invalid expression that contains too many fields', () => {
@@ -73,11 +89,15 @@ describe('CronExpressionParser', () => {
     });
 
     test('invalid expression which has repeat 0 times', () => {
-      expect(() => CronExpressionParser.parse('0 */0 * * *')).toThrow('Constraint error, cannot repeat at every 0 time.');
+      expect(() => CronExpressionParser.parse('0 */0 * * *')).toThrow(
+        'Constraint error, cannot repeat at every 0 time.',
+      );
     });
 
     test('invalid expression which has repeat negative number times', () => {
-      expect(() => CronExpressionParser.parse('0 */-5 * * *')).toThrow('Constraint error, cannot repeat at every -5 time.');
+      expect(() => CronExpressionParser.parse('0 */-5 * * *')).toThrow(
+        'Constraint error, cannot repeat at every -5 time.',
+      );
     });
 
     test('invalid expression which has multiple combined repeat cycles', () => {
@@ -85,7 +105,9 @@ describe('CronExpressionParser', () => {
     });
 
     test('invalid days of week strings - wrong alias', () => {
-      expect(() => CronExpressionParser.parse('15 10 * * MON-TUR')).toThrow('Validation error, cannot resolve alias "tur"');
+      expect(() => CronExpressionParser.parse('15 10 * * MON-TUR')).toThrow(
+        'Validation error, cannot resolve alias "tur"',
+      );
     });
 
     test('invalid list value without value', () => {
@@ -103,28 +125,31 @@ describe('CronExpressionParser', () => {
     // http://www.quartz-scheduler.org/api/2.3.0/index.html
     test('cannot combine `-` range and # occurrence special characters', () => {
       const expression = '0 0 0 ? * 2-4#2';
-      expect(() => CronExpressionParser.parse(expression)).toThrow('Constraint error, invalid dayOfWeek `#` and `-` special characters are incompatible');
+      expect(() => CronExpressionParser.parse(expression)).toThrow(
+        'Constraint error, invalid dayOfWeek `#` and `-` special characters are incompatible',
+      );
     });
 
     test('cannot combine `/` repeat interval and # occurrence special characters', () => {
       const expression = '0 0 0 ? * 1/2#3';
-      expect(() => CronExpressionParser.parse(expression)).toThrow('Constraint error, invalid dayOfWeek `#` and `/` special characters are incompatible');
+      expect(() => CronExpressionParser.parse(expression)).toThrow(
+        'Constraint error, invalid dayOfWeek `#` and `/` special characters are incompatible',
+      );
     });
 
     test('cannot combine `,` list and # occurrence special characters', () => {
       const expression = '0 0 0 ? * 0,6#4';
-      expect(() => CronExpressionParser.parse(expression)).toThrow('Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible');
+      expect(() => CronExpressionParser.parse(expression)).toThrow(
+        'Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible',
+      );
     });
 
     test('invalid occurrence value', () => {
-      const expressions = [
-        '0 0 0 ? * 1#',
-        '0 0 0 ? * 1#0',
-        '0 0 0 ? * 4#6',
-        '0 0 0 ? * 0##4',
-      ];
+      const expressions = ['0 0 0 ? * 1#', '0 0 0 ? * 1#0', '0 0 0 ? * 4#6', '0 0 0 ? * 0##4'];
       for (const expression of expressions) {
-        expect(() => CronExpressionParser.parse(expression)).toThrow('Constraint error, invalid dayOfWeek occurrence number (#)');
+        expect(() => CronExpressionParser.parse(expression)).toThrow(
+          'Constraint error, invalid dayOfWeek occurrence number (#)',
+        );
       }
     });
 
@@ -132,7 +157,6 @@ describe('CronExpressionParser', () => {
       const expression = '20 15 * *';
       expect(() => CronExpressionParser.parse(expression, { strict: true })).toThrow();
     });
-
   });
 
   describe('take multiple dates', () => {
@@ -172,10 +196,10 @@ describe('CronExpressionParser', () => {
       for (let i = 0, c = intervals.length; i < c; i++) {
         const next = intervals[i];
         expect(next).toBeTruthy();
-        expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
+        expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
         expect(next.getMonth()).toEqual(7);
         expect(next.getHours()).toEqual(2);
-        expect(next.getMinutes()).toEqual(10 + (i * 2));
+        expect(next.getMinutes()).toEqual(10 + i * 2);
       }
     });
 
@@ -279,9 +303,9 @@ describe('CronExpressionParser', () => {
     const interval = CronExpressionParser.parse('10 2 12 8 0');
     const next = interval.next();
     expect(next).toBeInstanceOf(CronDate);
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
-    expect(next.getHours()).toEqual(2); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
+    expect(next.getHours()).toEqual(2);
     expect(next.getMinutes()).toEqual(10);
   });
 
@@ -352,30 +376,30 @@ describe('CronExpressionParser', () => {
 
     // Forward iteration
     let next = interval.next();
-    expect(next.getHours()).toEqual(14); 
+    expect(next.getHours()).toEqual(14);
     expect(next.getMinutes()).toEqual(40);
     next = interval.next();
-    expect(next.getHours()).toEqual(15); 
+    expect(next.getHours()).toEqual(15);
     expect(next.getMinutes()).toEqual(0);
     next = interval.next();
-    expect(next.getHours()).toEqual(15); 
+    expect(next.getHours()).toEqual(15);
     expect(next.getMinutes()).toEqual(20);
     next = interval.next();
-    expect(next.getHours()).toEqual(15); 
+    expect(next.getHours()).toEqual(15);
     expect(next.getMinutes()).toEqual(40);
     next = interval.next();
-    expect(next.getHours()).toEqual(16); 
+    expect(next.getHours()).toEqual(16);
     expect(next.getMinutes()).toEqual(0);
     next = interval.next();
-    expect(next.getHours()).toEqual(16); 
+    expect(next.getHours()).toEqual(16);
     expect(next.getMinutes()).toEqual(20);
     next = interval.next();
-    expect(next.getHours()).toEqual(16); 
+    expect(next.getHours()).toEqual(16);
     expect(next.getMinutes()).toEqual(40);
     expect(() => interval.next()).toThrow(); // 'Should fail'
 
     next = interval.prev();
-    expect(next.getHours()).toEqual(16); 
+    expect(next.getHours()).toEqual(16);
     expect(next.getMinutes()).toEqual(20);
   });
 
@@ -390,23 +414,23 @@ describe('CronExpressionParser', () => {
 
     // Backward iteration
     let prev = interval.prev();
-    expect(prev.getHours()).toEqual(14); 
+    expect(prev.getHours()).toEqual(14);
     expect(prev.getMinutes()).toEqual(20);
     prev = interval.prev();
-    expect(prev.getHours()).toEqual(14); 
+    expect(prev.getHours()).toEqual(14);
     expect(prev.getMinutes()).toEqual(0);
     prev = interval.prev();
-    expect(prev.getHours()).toEqual(13); 
+    expect(prev.getHours()).toEqual(13);
     expect(prev.getMinutes()).toEqual(40);
     prev = interval.prev();
-    expect(prev.getHours()).toEqual(13); 
+    expect(prev.getHours()).toEqual(13);
     expect(prev.getMinutes()).toEqual(20);
     prev = interval.prev();
-    expect(prev.getHours()).toEqual(13); 
+    expect(prev.getHours()).toEqual(13);
     expect(prev.getMinutes()).toEqual(0);
     expect(interval.hasPrev()).toBe(true);
     prev = interval.prev();
-    expect(prev.getHours()).toEqual(12); 
+    expect(prev.getHours()).toEqual(12);
     expect(prev.getMinutes()).toEqual(40);
     expect(interval.hasPrev()).toBe(false);
     expect(() => interval.prev()).toThrow(); // 'Should fail'
@@ -420,35 +444,35 @@ describe('CronExpressionParser', () => {
 
     // Forward iteration
     let next = interval.next();
-    expect(next.getHours()).toEqual(14); 
+    expect(next.getHours()).toEqual(14);
     expect(next.getMinutes()).toEqual(40);
 
     interval.reset(); // defaults to initial currentDate
 
     next = interval.next();
-    expect(next.getHours()).toEqual(14); 
+    expect(next.getHours()).toEqual(14);
     expect(next.getMinutes()).toEqual(40);
 
     interval.reset(new CronDate('Wed, 26 Dec 2012 17:23:53'));
 
     next = interval.next();
-    expect(next.getHours()).toEqual(17); 
+    expect(next.getHours()).toEqual(17);
     expect(next.getMinutes()).toEqual(40);
 
     next = interval.next();
-    expect(next.getHours()).toEqual(18); 
+    expect(next.getHours()).toEqual(18);
     expect(next.getMinutes()).toEqual(0);
 
     interval.reset(new Date('2019-06-18T08:18:36.000'));
 
     next = interval.prev();
-    expect(next.getDate()).toEqual(18); 
-    expect(next.getHours()).toEqual(8); 
+    expect(next.getDate()).toEqual(18);
+    expect(next.getHours()).toEqual(8);
     expect(next.getMinutes()).toEqual(0);
 
     next = interval.prev();
-    expect(next.getDate()).toEqual(18); 
-    expect(next.getHours()).toEqual(7); 
+    expect(next.getDate()).toEqual(18);
+    expect(next.getHours()).toEqual(7);
     expect(next.getMinutes()).toEqual(40);
   });
 
@@ -457,8 +481,8 @@ describe('CronExpressionParser', () => {
     const intervals = interval.take(8);
     for (const next of intervals) {
       const day = next.getDay();
-      expect(day === 1 || day === 2).toBeTruthy(); 
-      expect(next.getHours()).toEqual(10); 
+      expect(day === 1 || day === 2).toBeTruthy();
+      expect(next.getHours()).toEqual(10);
       expect(next.getMinutes()).toEqual(15);
     }
   });
@@ -473,9 +497,9 @@ describe('CronExpressionParser', () => {
     for (const next of intervals) {
       const day = next.getDay();
       const month = next.getMonth();
-      expect(month === 0 || month === 1).toBeTruthy(); 
-      expect(day === 1 || day === 2).toBeTruthy(); 
-      expect(next.getHours()).toEqual(10); 
+      expect(month === 0 || month === 1).toBeTruthy();
+      expect(day === 1 || day === 2).toBeTruthy();
+      expect(next.getHours()).toEqual(10);
       expect(next.getMinutes()).toEqual(15);
     }
   });
@@ -515,7 +539,7 @@ describe('CronExpressionParser', () => {
     const interval = CronExpressionParser.parse('20-40/10 * * * * *', options);
     const intervals = interval.take(3);
     for (const [index, next] of intervals.entries()) {
-      expect(next.getSeconds()).toEqual(20 + (index * 10));
+      expect(next.getSeconds()).toEqual(20 + index * 10);
     }
   });
 
@@ -557,20 +581,20 @@ describe('CronExpressionParser', () => {
   test('day of month and week are both set', () => {
     const interval = CronExpressionParser.parse('10 2 12 8 0');
     let next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
   });
 
   test('day of month is unspecified', () => {
@@ -622,20 +646,20 @@ describe('CronExpressionParser', () => {
     const interval = CronExpressionParser.parse('10 2 12 8 7');
 
     let next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
   });
 
   test('day of month is wildcard, month and day of week are both set', () => {
@@ -649,7 +673,7 @@ describe('CronExpressionParser', () => {
       const next = interval.next();
       expect(next.getDay()).toEqual(2);
       expect(next.getDate()).toEqual(dayOfMonth);
-      expect(next.getMonth()).toEqual(5); 
+      expect(next.getMonth()).toEqual(5);
     }
   });
 
@@ -660,24 +684,24 @@ describe('CronExpressionParser', () => {
     const interval = CronExpressionParser.parse('0 0 0 2-4,7-31 * *', options);
 
     let next = interval.next();
-    expect(next.getDate()).toEqual(2); 
-    expect(next.getMonth()).toEqual(11); 
+    expect(next.getDate()).toEqual(2);
+    expect(next.getMonth()).toEqual(11);
 
     next = interval.next();
-    expect(next.getDate()).toEqual(3); 
-    expect(next.getMonth()).toEqual(11); 
+    expect(next.getDate()).toEqual(3);
+    expect(next.getMonth()).toEqual(11);
 
     next = interval.next();
-    expect(next.getDate()).toEqual(4); 
-    expect(next.getMonth()).toEqual(11); 
+    expect(next.getDate()).toEqual(4);
+    expect(next.getMonth()).toEqual(11);
 
     next = interval.next();
-    expect(next.getDate()).toEqual(7); 
-    expect(next.getMonth()).toEqual(11); 
+    expect(next.getDate()).toEqual(7);
+    expect(next.getMonth()).toEqual(11);
 
     next = interval.next();
-    expect(next.getDate()).toEqual(8); 
-    expect(next.getMonth()).toEqual(11); 
+    expect(next.getDate()).toEqual(8);
+    expect(next.getMonth()).toEqual(11);
     expect(() => interval.next()).not.toThrow();
   });
 
@@ -688,20 +712,20 @@ describe('CronExpressionParser', () => {
     const interval = CronExpressionParser.parse('10 2 12 8 6,0', options);
 
     let next = interval.next();
-    expect(next.getDay() === 6 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 6 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 6 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 6 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
 
     next = interval.next();
-    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy(); 
-    expect(next.getMonth()).toEqual(7); 
+    expect(next.getDay() === 0 || next.getDate() === 12).toBeTruthy();
+    expect(next.getMonth()).toEqual(7);
   });
 
   test('day of month and week are both set and dow is 6-7', () => {
@@ -744,25 +768,25 @@ describe('CronExpressionParser', () => {
     };
     const interval = CronExpressionParser.parse('* * * * 2 *', options);
     const next = interval.next();
-    expect(next.getHours()).toEqual(0); 
-    expect(next.getDate()).toEqual(1); 
-    expect(next.getMonth() + 1).toEqual(2); 
+    expect(next.getHours()).toEqual(0);
+    expect(next.getDate()).toEqual(1);
+    expect(next.getMonth() + 1).toEqual(2);
   });
 
   test('day and date in week should match', () => {
     const interval = CronExpressionParser.parse('0 1 1 1 * 1');
 
     let next = interval.next();
-    expect(next.getHours()).toEqual(1); 
-    expect(next.getDay() === 1 || next.getDate() === 1).toBeTruthy(); 
+    expect(next.getHours()).toEqual(1);
+    expect(next.getDay() === 1 || next.getDate() === 1).toBeTruthy();
 
     next = interval.next();
-    expect(next.getHours()).toEqual(1); 
-    expect(next.getDay() === 1 || next.getDate() === 1).toBeTruthy(); 
+    expect(next.getHours()).toEqual(1);
+    expect(next.getDay() === 1 || next.getDate() === 1).toBeTruthy();
 
     next = interval.next();
-    expect(next.getHours()).toEqual(1); 
-    expect(next.getDay() === 1 || next.getDate() === 1).toBeTruthy(); 
+    expect(next.getHours()).toEqual(1);
+    expect(next.getDay() === 1 || next.getDate() === 1).toBeTruthy();
   });
 
   test('should sort ranges and values in ascending order', () => {
@@ -773,7 +797,7 @@ describe('CronExpressionParser', () => {
     const expectedHours = [1, 2, 3, 10, 12, 13];
     for (const expectedHour of expectedHours) {
       const next = interval.next();
-      expect(next.getHours()).toEqual(expectedHour); 
+      expect(next.getHours()).toEqual(expectedHour);
     }
   });
 
@@ -782,22 +806,17 @@ describe('CronExpressionParser', () => {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
     };
 
-    const expressions = [
-      '30 16 * * 6,7',
-      '30 16 * * 6,0',
-      '30 16 * * 0,6',
-      '30 16 * * 7,6',
-    ];
+    const expressions = ['30 16 * * 6,7', '30 16 * * 6,0', '30 16 * * 0,6', '30 16 * * 7,6'];
     for (const expression of expressions) {
       const interval = CronExpressionParser.parse(expression, options);
       let next = interval.next();
-      expect(next.getDay() === 6).toBeTruthy(); 
+      expect(next.getDay() === 6).toBeTruthy();
 
       next = interval.next();
       expect(next.getDay() === 0).toBeTruthy();
 
       next = interval.next();
-      expect(next.getDay() === 6).toBeTruthy(); 
+      expect(next.getDay() === 6).toBeTruthy();
     }
   });
 
@@ -805,10 +824,7 @@ describe('CronExpressionParser', () => {
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 00:00:00'),
     };
-    const expressions = [
-      '0 9,11,1 * * *',
-      '0 1,9,11 * * *',
-    ];
+    const expressions = ['0 9,11,1 * * *', '0 1,9,11 * * *'];
     for (const expression of expressions) {
       const interval = CronExpressionParser.parse(expression, options);
       let next = interval.next();
@@ -886,13 +902,7 @@ describe('CronExpressionParser', () => {
       expectedFourthDates,
       expectedFifthDates,
     ];
-    const expressions = [
-      '0 0 0 ? * 0#1',
-      '0 0 0 ? * 0#2',
-      '0 0 0 ? * 0#3',
-      '0 0 0 ? * 0#4',
-      '0 0 0 ? * 0#5',
-    ];
+    const expressions = ['0 0 0 ? * 0#1', '0 0 0 ? * 0#2', '0 0 0 ? * 0#3', '0 0 0 ? * 0#4', '0 0 0 ? * 0#5'];
     for (const [index, expression] of expressions.entries()) {
       const interval = CronExpressionParser.parse(expression, options);
       const expectedDates = allExpectedDates[index];
@@ -1021,9 +1031,7 @@ describe('CronExpressionParser', () => {
     expect(interval.fields.minute.values).toEqual([1]);
     expect(interval.fields.hour.values).toEqual([2]);
     expect(interval.fields.dayOfMonth.values).toEqual([3]);
-    expect(interval.fields.month.values).toEqual([
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-    ]);
+    expect(interval.fields.month.values).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
     expect(interval.fields.dayOfWeek.values).toEqual([1, 2, 3, 5]);
   });
 
@@ -1209,7 +1217,7 @@ describe('CronExpressionParser', () => {
         tz: 'Europe/Athens',
       };
 
-      const interval: CronExpression  = CronExpressionParser.parse('0 * * * *', options);
+      const interval: CronExpression = CronExpressionParser.parse('0 * * * *', options);
       let next: CronDate;
       expect(interval).toBeTruthy();
 
@@ -1389,7 +1397,6 @@ describe('CronExpressionParser', () => {
 
       options.currentDate = new Date('Sun Oct 29 2016 02:59:00 GMT+0200');
 
-
       interval = CronExpressionParser.parse('0 12 * * *', options);
       // t.ok(interval, 'Interval parsed');
       expect(interval).toBeTruthy();
@@ -1397,7 +1404,7 @@ describe('CronExpressionParser', () => {
       next = interval.next();
       expect(next.getHours()).toEqual(12); // 12 PM
       expect(next.getDate()).toEqual(29); // on the 29th
-  
+
       next = interval.next();
       expect(next.getHours()).toEqual(12); // 12 PM
       expect(next.getDate()).toEqual(30); // on the 30th
@@ -1649,4 +1656,3 @@ describe('CronExpressionParser', () => {
     });
   });
 });
-

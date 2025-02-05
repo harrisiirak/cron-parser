@@ -18,7 +18,7 @@ export abstract class CronField {
   /**
    * Returns the minimum value allowed for this field.
    */
-  /* istanbul ignore next */static get min(): CronMin {
+  /* istanbul ignore next */ static get min(): CronMin {
     /* istanbul ignore next */
     throw new Error('min must be overridden');
   }
@@ -26,7 +26,7 @@ export abstract class CronField {
   /**
    * Returns the maximum value allowed for this field.
    */
-  /* istanbul ignore next */static get max(): CronMax {
+  /* istanbul ignore next */ static get max(): CronMax {
     /* istanbul ignore next */
     throw new Error('max must be overridden');
   }
@@ -34,7 +34,7 @@ export abstract class CronField {
   /**
    * Returns the allowed characters for this field.
    */
-  /* istanbul ignore next */static get chars(): readonly CronChars[] {
+  /* istanbul ignore next */ static get chars(): readonly CronChars[] {
     /* istanbul ignore next - this is overridden */
     return Object.freeze([]);
   }
@@ -53,7 +53,6 @@ export abstract class CronField {
     return { min: this.min, max: this.max, chars: this.chars, validChars: this.validChars };
   }
 
-
   /**
    * CronField constructor. Initializes the field with the provided values.
    * @param {number[] | string[]} values - Values for this field
@@ -61,7 +60,10 @@ export abstract class CronField {
    * @throws {TypeError} if the constructor is called directly
    * @throws {Error} if validation fails
    */
-  protected constructor(values: (number | string)[], /* istanbul ignore next - we always pass a value */ wildcard = false) {
+  protected constructor(
+    values: (number | string)[],
+    /* istanbul ignore next - we always pass a value */ wildcard = false,
+  ) {
     assert(Array.isArray(values), `${this.constructor.name} Validation error, values is not an array`);
     assert(values.length > 0, `${this.constructor.name} Validation error, values contains no values`);
     this.#values = values.sort(CronField.sorter);
@@ -145,15 +147,18 @@ export abstract class CronField {
     let badValue: number | string | undefined;
     const charsString = this.chars.length > 0 ? ` or chars ${this.chars.join('')}` : '';
 
-    const charTest = (value: string) => (char: string) => (new RegExp(`^\\d{0,2}${char}$`)).test(value);
+    const charTest = (value: string) => (char: string) => new RegExp(`^\\d{0,2}${char}$`).test(value);
     const rangeTest = (value: number | string) => {
       badValue = value;
       return typeof value === 'number' ? value >= this.min && value <= this.max : this.chars.some(charTest(value));
     };
     const isValidRange = this.#values.every(rangeTest);
-    assert(isValidRange, `${this.constructor.name} Validation error, got value ${badValue} expected range ${this.min}-${this.max}${charsString}`);
+    assert(
+      isValidRange,
+      `${this.constructor.name} Validation error, got value ${badValue} expected range ${this.min}-${this.max}${charsString}`,
+    );
     // check for duplicate value in this.#values array
     const duplicate = this.#values.find((value, index) => this.#values.indexOf(value) !== index);
-    assert(!duplicate,`${this.constructor.name} Validation error, duplicate values found: ${duplicate}`);
+    assert(!duplicate, `${this.constructor.name} Validation error, duplicate values found: ${duplicate}`);
   }
 }

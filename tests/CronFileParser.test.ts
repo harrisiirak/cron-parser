@@ -52,7 +52,7 @@ describe('CronFileParser', () => {
   describe('parseFile', () => {
     test('reads and parses a valid crontab file', async () => {
       const result = await CronFileParser.parseFile('tests/crontab.example');
-      
+
       expect(Object.keys(result.variables)).toHaveLength(2);
       expect(Object.keys(result.errors)).toHaveLength(0);
       expect(result.expressions).toHaveLength(3);
@@ -67,8 +67,7 @@ describe('CronFileParser', () => {
     });
 
     test('throws error for non-existing file', async () => {
-      await expect(CronFileParser.parseFile('./nonexistent.txt'))
-        .rejects.toThrow('File not found');
+      await expect(CronFileParser.parseFile('./nonexistent.txt')).rejects.toThrow('File not found');
       expect(fsPromises.readFile).toHaveBeenCalledWith('./nonexistent.txt', 'utf8');
     });
   });
@@ -76,7 +75,7 @@ describe('CronFileParser', () => {
   describe('parseFileSync', () => {
     test('reads and parses a valid crontab file synchronously', () => {
       const result = CronFileParser.parseFileSync('tests/crontab.example');
-      
+
       expect(Object.keys(result.variables)).toHaveLength(2);
       expect(Object.keys(result.errors)).toHaveLength(0);
       expect(result.expressions).toHaveLength(3);
@@ -91,14 +90,13 @@ describe('CronFileParser', () => {
     });
 
     test('throws error for non-existing file', () => {
-      expect(() => CronFileParser.parseFileSync('./nonexistent.txt'))
-        .toThrow('File not found');
+      expect(() => CronFileParser.parseFileSync('./nonexistent.txt')).toThrow('File not found');
       expect(fs.readFileSync).toHaveBeenCalledWith('./nonexistent.txt', 'utf8');
     });
 
     test('handles invalid expressions', () => {
       const result = CronFileParser.parseFileSync('./temp-invalid.txt');
-      
+
       expect(result.variables).toEqual({ FOO: 'bar' });
       expect(result.expressions).toHaveLength(2);
       expect(Object.keys(result.errors)).toHaveLength(1);

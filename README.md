@@ -33,52 +33,53 @@ npm install cron-parser
 
 ### Special Characters
 
-| Character | Description | Example |
-|-----------|-------------|---------|
-| `*` | Any value | `* * * * *` (every minute) |
-| `?` | Any value (alias for `*`) | `? * * * *` (every minute) |
-| `,` | Value list separator | `1,2,3 * * * *` (1st, 2nd, and 3rd minute) |
-| `-` | Range of values | `1-5 * * * *` (every minute from 1 through 5) |
-| `/` | Step values | `*/5 * * * *` (every 5th minute) |
-| `L` | Last day of month/week | `0 0 L * *` (midnight on last day of month) |
-| `#` | Nth day of month | `0 0 * * 1#1` (first Monday of month) |
+| Character | Description               | Example                                       |
+| --------- | ------------------------- | --------------------------------------------- |
+| `*`       | Any value                 | `* * * * *` (every minute)                    |
+| `?`       | Any value (alias for `*`) | `? * * * *` (every minute)                    |
+| `,`       | Value list separator      | `1,2,3 * * * *` (1st, 2nd, and 3rd minute)    |
+| `-`       | Range of values           | `1-5 * * * *` (every minute from 1 through 5) |
+| `/`       | Step values               | `*/5 * * * *` (every 5th minute)              |
+| `L`       | Last day of month/week    | `0 0 L * *` (midnight on last day of month)   |
+| `#`       | Nth day of month          | `0 0 * * 1#1` (first Monday of month)         |
 
 ### Predefined Expressions
 
-| Expression | Description | Equivalent |
-|------------|-------------|------------|
-| `@yearly` | Once a year at midnight of January 1 | `0 0 0 1 1 *` |
-| `@monthly` | Once a month at midnight of first day | `0 0 0 1 * *` |
-| `@weekly` | Once a week at midnight on Sunday | `0 0 0 * * 0` |
-| `@daily` | Once a day at midnight | `0 0 0 * * *` |
-| `@hourly` | Once an hour at the beginning of the hour | `0 0 * * * *` |
-| `@minutely` | Once a minute | `0 * * * * *` |
-| `@secondly` | Once a second | `* * * * * *` |
-| `@weekdays` | Every weekday at midnight | `0 0 0 * * 1-5` |
-| `@weekends` | Every weekend at midnight | `0 0 0 * * 0,6` |
+| Expression  | Description                               | Equivalent      |
+| ----------- | ----------------------------------------- | --------------- |
+| `@yearly`   | Once a year at midnight of January 1      | `0 0 0 1 1 *`   |
+| `@monthly`  | Once a month at midnight of first day     | `0 0 0 1 * *`   |
+| `@weekly`   | Once a week at midnight on Sunday         | `0 0 0 * * 0`   |
+| `@daily`    | Once a day at midnight                    | `0 0 0 * * *`   |
+| `@hourly`   | Once an hour at the beginning of the hour | `0 0 * * * *`   |
+| `@minutely` | Once a minute                             | `0 * * * * *`   |
+| `@secondly` | Once a second                             | `* * * * * *`   |
+| `@weekdays` | Every weekday at midnight                 | `0 0 0 * * 1-5` |
+| `@weekends` | Every weekend at midnight                 | `0 0 0 * * 0,6` |
 
 ### Field Values
 
-| Field | Values | Special Characters | Aliases |
-|-------|--------|-------------------|----------|
-| second | 0-59 | `*` `?` `,` `-` `/` | |
-| minute | 0-59 | `*` `?` `,` `-` `/` | |
-| hour | 0-23 | `*` `?` `,` `-` `/` | |
-| day of month | 1-31 | `*` `?` `,` `-` `/` `L` | |
-| month | 1-12 | `*` `?` `,` `-` `/` | `JAN`-`DEC` |
-| day of week | 0-7 | `*` `?` `,` `-` `/` `L` `#` | `SUN`-`SAT` (0 or 7 is Sunday) |
+| Field        | Values | Special Characters          | Aliases                        |
+| ------------ | ------ | --------------------------- | ------------------------------ |
+| second       | 0-59   | `*` `?` `,` `-` `/`         |                                |
+| minute       | 0-59   | `*` `?` `,` `-` `/`         |                                |
+| hour         | 0-23   | `*` `?` `,` `-` `/`         |                                |
+| day of month | 1-31   | `*` `?` `,` `-` `/` `L`     |                                |
+| month        | 1-12   | `*` `?` `,` `-` `/`         | `JAN`-`DEC`                    |
+| day of week  | 0-7    | `*` `?` `,` `-` `/` `L` `#` | `SUN`-`SAT` (0 or 7 is Sunday) |
 
 ## Options
 
-| Option | Type | Description |
-|--------|------|-------------|
-| currentDate | Date \| string \| number | Current date. Defaults to current local time in UTC |
-| endDate | Date \| string \| number | End date of iteration range. Sets iteration range end point |
-| startDate | Date \| string \| number | Start date of iteration range. Set iteration range start point |
-| tz | string | Timezone (e.g., 'Europe/London') |
-| strict | boolean | Enable strict mode validation |
+| Option      | Type                     | Description                                                    |
+| ----------- | ------------------------ | -------------------------------------------------------------- |
+| currentDate | Date \| string \| number | Current date. Defaults to current local time in UTC            |
+| endDate     | Date \| string \| number | End date of iteration range. Sets iteration range end point    |
+| startDate   | Date \| string \| number | Start date of iteration range. Set iteration range start point |
+| tz          | string                   | Timezone (e.g., 'Europe/London')                               |
+| strict      | boolean                  | Enable strict mode validation                                  |
 
 When using string dates, the following formats are supported:
+
 - ISO8601
 - HTTP and RFC2822
 - SQL
@@ -92,12 +93,15 @@ import { CronExpressionParser } from 'cron-parser';
 
 try {
   const interval = CronExpressionParser.parse('*/2 * * * *');
-  
+
   // Get next date
   console.log('Next:', interval.next().toString());
   // Get next 3 dates
-  console.log('Next 3:', interval.take(3).map(date => date.toString()));
-  
+  console.log(
+    'Next 3:',
+    interval.take(3).map((date) => date.toString()),
+  );
+
   // Get previous date
   console.log('Previous:', interval.prev().toString());
 } catch (err) {
@@ -113,7 +117,7 @@ import { CronExpressionParser } from 'cron-parser';
 const options = {
   currentDate: '2023-01-01T00:00:00Z',
   endDate: '2024-01-01T00:00:00Z',
-  tz: 'Europe/London'
+  tz: 'Europe/London',
 };
 
 try {
@@ -166,7 +170,7 @@ import { CronExpressionParser } from 'cron-parser';
 // Specifies a schedule that occurs at 12:00 on every day-of-month from 1 through 31 and on Monday
 const options = {
   currentDate: new Date('Mon, 12 Sep 2022 14:00:00'),
-  strict: true
+  strict: true,
 };
 
 try {
@@ -213,7 +217,10 @@ for (const date of interval) {
 
 // Using take() for a specific number of iterations
 const nextFiveDates = interval.take(5);
-console.log('Next 5 dates:', nextFiveDates.map(date => date.toString()));
+console.log(
+  'Next 5 dates:',
+  nextFiveDates.map((date) => date.toString()),
+);
 ```
 
 ### Timezone Support
@@ -225,7 +232,7 @@ import { CronExpressionParser } from 'cron-parser';
 
 const options = {
   currentDate: '2023-03-26T01:00:00',
-  tz: 'Europe/London'
+  tz: 'Europe/London',
 };
 
 const interval = CronExpressionParser.parse('0 * * * *', options);
@@ -251,7 +258,7 @@ const interval = CronExpressionParser.parse('0 7 * * 1-5');
 const modified = CronFieldCollection.from(interval.fields, {
   hour: [8],
   minute: [30],
-  dayOfWeek: [1, 3, 5]
+  dayOfWeek: [1, 3, 5],
 });
 
 console.log(modified.stringify()); // "30 8 * * 1,3,5"
@@ -259,7 +266,7 @@ console.log(modified.stringify()); // "30 8 * * 1,3,5"
 // You can also use CronField instances
 const modified2 = CronFieldCollection.from(interval.fields, {
   hour: new CronHour([15]),
-  minute: new CronMinute([30])
+  minute: new CronMinute([30]),
 });
 
 console.log(modified2.stringify()); // "30 15 * * 1-5"

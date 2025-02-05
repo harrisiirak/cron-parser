@@ -1,4 +1,3 @@
-
 import { initializeBenchmark, parseAndBenchMarkExpression, printSummary } from './runner';
 import { benchmarkInputs } from './benchmark-inputs';
 import * as fs from 'fs';
@@ -14,7 +13,7 @@ async function runBenchmarks() {
   // Create results directory
   const resultsDir = path.join(__dirname, 'results');
   if (!fs.existsSync(resultsDir)) {
-    fs.mkdirSync(resultsDir,);
+    fs.mkdirSync(resultsDir);
   }
 
   // Create timestamped file in results directory
@@ -25,7 +24,7 @@ async function runBenchmarks() {
 Timestamp: ${new Date().toISOString()}
 Package Version: ${version || 'latest'}
 ${'-'.repeat(50)}\n\n`;
-  
+
   fs.writeFileSync(outputFile, header);
 
   console.log('Running benchmarks...\n');

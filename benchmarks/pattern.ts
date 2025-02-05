@@ -31,7 +31,7 @@ async function runPatternBenchmark() {
 Timestamp: ${new Date().toISOString()}
 Package Version: ${version || 'latest'}
 ${'-'.repeat(50)}\n\n`;
-  
+
   fs.writeFileSync(outputFile, header);
 
   console.log('Running benchmark...\n');
@@ -39,7 +39,7 @@ ${'-'.repeat(50)}\n\n`;
   await parseAndBenchMarkExpression(pattern, iterations, samples, outputFile);
 }
 
-runPatternBenchmark().catch(error => {
+runPatternBenchmark().catch((error) => {
   console.error('Benchmark failed:', error);
   process.exit(1);
 });
