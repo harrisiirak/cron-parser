@@ -8,8 +8,8 @@ A JavaScript library for parsing and manipulating cron expressions. Features tim
 
 ## Requirements
 
-- Node.js >= 15.14.0
-- TypeScript >= 4.2
+- Node.js >= 18
+- TypeScript >= 5
 
 ## Installation
 
