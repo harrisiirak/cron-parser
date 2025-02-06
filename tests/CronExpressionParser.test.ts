@@ -998,7 +998,7 @@ describe('CronExpressionParser', () => {
       });
   });
 
-  it('should correctly determine if a given expression includes a CronDate (#153 and #299)', () => {
+  test('should correctly determine if a given expression includes a CronDate (#153 and #299)', () => {
     const expression = '* * 1-6 ? * *'; // 1am to 6am every day
     const goodDate = new CronDate('2019-01-01T01:00:00.000');
     const badDateBefore = new CronDate('2019-01-01T00:00:00.000');
