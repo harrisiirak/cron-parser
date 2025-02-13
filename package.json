@@ -1,6 +1,6 @@
 {
   "name": "cron-parser",
-  "version": "4.9.0",
+  "version": "5.0.0",
   "description": "Node.js library for parsing crontab instructions",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -77,9 +77,6 @@
   "browser": {
     "fs": false
   },
-  "tap": {
-    "check-coverage": false
-  },
   "tsd": {
     "directory": "tests"
   },
@@ -113,7 +110,8 @@
     "Charlie Fish <fishcharlie.code@gmail.com>",
     "Ian Graves <ian+diskimage@iangrav.es>",
     "Andy Thompson <me@andytson.com>",
-    "Regev Brody <regevbr@gmail.com>"
+    "Regev Brody <regevbr@gmail.com>",
+    "Michael Hobbs <michael.lee.hobbs@gmail.com>"
   ],
   "license": "MIT"
 }
