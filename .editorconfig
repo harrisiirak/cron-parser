@@ -1,0 +1,10 @@
+# .editorconfig
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+[*.{js,ts}]
+ij_typescript_spaces_within_imports  = true

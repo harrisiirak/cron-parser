@@ -1,26 +1,84 @@
 {
   "name": "cron-parser",
-  "version": "4.9.0",
+  "version": "5.0.0",
   "description": "Node.js library for parsing crontab instructions",
-  "main": "lib/parser.js",
-  "types": "types/index.d.ts",
-  "typesVersions": {
-    "<4.1": {
-      "*": [
-        "types/ts3/*"
-      ]
-    }
-  },
-  "directories": {
-    "test": "test"
-  },
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "type": "commonjs",
   "scripts": {
-    "test:tsd": "tsd",
-    "test:unit": "TZ=UTC tap ./test/*.js",
-    "test:cover": "TZ=UTC tap --coverage-report=html ./test/*.js",
+    "clean": "rimraf dist",
+    "bench": "cross-env node -r ts-node/register benchmarks/index.ts",
+    "bench:pattern": "cross-env node -r ts-node/register benchmarks/pattern.ts",
+    "bench:clean": "rimraf benchmarks/versions && rimraf benchmarks/results",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build",
+    "prepare": "husky && npm run build",
+    "precommit": "lint-staged",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "npm run lint && npm run test:unit && npm run test:tsd"
+    "lint:debug": "cross-env DEBUG=eslint:cli-engine eslint .",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "test:unit": "cross-env TZ=UTC jest",
+    "test:coverage": "cross-env TZ=UTC jest --coverage",
+    "generate-badges": "jest-coverage-badges",
+    "test:types": "npm run build && tsd",
+    "test": "cross-env TZ=UTC npm run lint && npm run test:types && npm run test:coverage && npm run generate-badges",
+    "docs": "rimraf docs && typedoc --out docs --readme none --name 'CronParser' src"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "luxon": "^3.5.0"
+  },
+  "devDependencies": {
+    "@tsd/typescript": "^5.7.3",
+    "@types/jest": "^29.5.14",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^22.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
+    "@typescript-eslint/parser": "^8.22.0",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jest-coverage-badges": "^1.0.0",
+    "jest-runner-tsd": "^6.0.0",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "sinon": "^19.0.2",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "tsd": "^0.31.2",
+    "typedoc": "^0.27.6",
+    "typescript": "^5.7.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,js,json}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "browser": {
+    "fs": false
+  },
+  "tsd": {
+    "directory": "tests"
   },
   "repository": {
     "type": "git",
@@ -52,40 +110,8 @@
     "Charlie Fish <fishcharlie.code@gmail.com>",
     "Ian Graves <ian+diskimage@iangrav.es>",
     "Andy Thompson <me@andytson.com>",
-    "Regev Brody <regevbr@gmail.com>"
+    "Regev Brody <regevbr@gmail.com>",
+    "Michael Hobbs <michael.lee.hobbs@gmail.com>"
   ],
-  "license": "MIT",
-  "dependencies": {
-    "luxon": "^3.2.1"
-  },
-  "devDependencies": {
-    "eslint": "^8.27.0",
-    "sinon": "^15.0.1",
-    "tap": "^16.3.3",
-    "tsd": "^0.26.0"
-  },
-  "engines": {
-    "node": ">=12.0.0"
-  },
-  "browser": {
-    "fs": false
-  },
-  "tap": {
-    "check-coverage": false
-  },
-  "tsd": {
-    "directory": "test",
-    "compilerOptions": {
-      "lib": [
-        "es2017",
-        "dom"
-      ]
-    }
-  },
-  "files": [
-    "lib",
-    "types",
-    "LICENSE",
-    "README.md"
-  ]
+  "license": "MIT"
 }
