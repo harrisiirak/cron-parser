@@ -6,6 +6,8 @@
 
 A JavaScript library for parsing and manipulating cron expressions. Features timezone support, DST handling, and iterator capabilities.
 
+[API documentation](https://harrisiirak.github.io/cron-parser/)
+
 ## Requirements
 
 - Node.js >= 18
