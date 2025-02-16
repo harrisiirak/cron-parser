@@ -17,6 +17,10 @@ describe('CronExpressionParser', () => {
       );
     });
 
+    test('range order is invalid', () => {
+      expect(() => CronExpressionParser.parse('30-20 * * * * *')).toThrow('Invalid range: 30-20, min(30) > max(20)');
+    });
+
     test('invalid range', () => {
       expect(() => CronExpressionParser.parse('- * * * * *')).toThrow(
         'Constraint error, got range NaN-NaN expected range 0-59',
@@ -153,9 +157,18 @@ describe('CronExpressionParser', () => {
       }
     });
 
+    test('both dayOfMonth and dayOfWeek used together in strict mode', () => {
+      const expression = '0 0 12 1-31 * 1';
+      expect(() => CronExpressionParser.parse(expression, { strict: true })).toThrow();
+    });
+
     test('missing fields when in strict mode', () => {
       const expression = '20 15 * *';
       expect(() => CronExpressionParser.parse(expression, { strict: true })).toThrow();
+    });
+
+    test('empty expression in strict mode', () => {
+      expect(() => CronExpressionParser.parse('', { strict: true })).toThrow();
     });
   });
 
@@ -1007,6 +1020,7 @@ describe('CronExpressionParser', () => {
     expect(interval.includesDate(goodDate)).toBe(true);
     expect(interval.includesDate(badDateBefore)).toBe(false);
     expect(interval.includesDate(badDateAfter)).toBe(false);
+    expect(() => interval.includesDate(new Date('invalid'))).toThrow();
   });
 
   test('correctly handle 0 12 1-31 * 1 (#284)', () => {

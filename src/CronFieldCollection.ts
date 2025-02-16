@@ -1,4 +1,3 @@
-import assert from 'assert';
 import {
   CronSecond,
   CronMinute,
@@ -140,18 +139,29 @@ export class CronFieldCollection {
    * console.log(cronFields.dayOfWeek.values); // [1, 2, 3, 4, 5]
    */
   constructor({ second, minute, hour, dayOfMonth, month, dayOfWeek }: CronFields) {
-    assert(second, 'Validation error, Field second is missing');
-    assert(minute, 'Validation error, Field minute is missing');
-    assert(hour, 'Validation error, Field hour is missing');
-    assert(dayOfMonth, 'Validation error, Field dayOfMonth is missing');
-    assert(month, 'Validation error, Field month is missing');
-    assert(dayOfWeek, 'Validation error, Field dayOfWeek is missing');
+    if (!second) {
+      throw new Error('Validation error, Field second is missing');
+    }
+    if (!minute) {
+      throw new Error('Validation error, Field minute is missing');
+    }
+    if (!hour) {
+      throw new Error('Validation error, Field hour is missing');
+    }
+    if (!dayOfMonth) {
+      throw new Error('Validation error, Field dayOfMonth is missing');
+    }
+    if (!month) {
+      throw new Error('Validation error, Field month is missing');
+    }
+    if (!dayOfWeek) {
+      throw new Error('Validation error, Field dayOfWeek is missing');
+    }
 
     if (month.values.length === 1) {
-      assert(
-        parseInt(dayOfMonth.values[0] as string, 10) <= CronMonth.daysInMonth[month.values[0] - 1],
-        'Invalid explicit day of month definition',
-      );
+      if (!(parseInt(dayOfMonth.values[0] as string, 10) <= CronMonth.daysInMonth[month.values[0] - 1])) {
+        throw new Error('Invalid explicit day of month definition');
+      }
     }
 
     this.#second = second;
@@ -332,14 +342,26 @@ export class CronFieldCollection {
     }
 
     const multiplier = range.start === 0 ? range.count - 1 : range.count;
-    assert(step, 'Unexpected range step');
-    assert(range.end, 'Unexpected range end');
+    /* istanbul ignore if */
+    if (!step) {
+      throw new Error('Unexpected range step');
+    }
+    /* istanbul ignore if */
+    if (!range.end) {
+      throw new Error('Unexpected range end');
+    }
     if (step * multiplier > range.end) {
       const mapFn = (_: number, index: number) => {
-        assert(typeof range.start === 'number', 'Unexpected range start');
+        /* istanbul ignore if */
+        if (typeof range.start !== 'number') {
+          throw new Error('Unexpected range start');
+        }
         return index % step === 0 ? range.start + index : null;
       };
-      assert(typeof range.start === 'number', 'Unexpected range start');
+      /* istanbul ignore if */
+      if (typeof range.start !== 'number') {
+        throw new Error('Unexpected range start');
+      }
       const seed = { length: range.end - range.start + 1 };
       return Array.from(seed, mapFn)
         .filter((value) => value !== null)

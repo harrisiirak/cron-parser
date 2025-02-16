@@ -1,4 +1,3 @@
-import assert from 'assert';
 import { DateTime } from 'luxon';
 
 import { CronDate, DateMathOp, TimeUnit } from './CronDate';
@@ -117,7 +116,9 @@ export class CronExpression {
 
       // The first character represents the weekday
       const weekday = parseInt(expression.toString().charAt(0), 10) % 7;
-      assert(!Number.isNaN(weekday), `Invalid last weekday of the month expression: ${expression}`);
+      if (Number.isNaN(weekday)) {
+        throw new Error(`Invalid last weekday of the month expression: ${expression}`);
+      }
 
       // Check if the current date matches the last specified weekday of the month
       return currentDate.getDay() === weekday && currentDate.isLastWeekdayOfMonth();
@@ -239,9 +240,7 @@ export class CronExpression {
    */
   includesDate(date: Date | CronDate): boolean {
     const { second, minute, hour, dayOfMonth, month, dayOfWeek } = this.#fields;
-    const dtStr = date.toISOString();
-    assert(dtStr != null, 'Invalid date');
-    const dt = DateTime.fromISO(dtStr, { zone: this.#tz });
+    const dt = DateTime.fromISO(date.toISOString()!, { zone: this.#tz });
     return (
       dayOfMonth.values.includes(<DayOfMonthRange>dt.day) &&
       dayOfWeek.values.includes(<DayOfWeekRange>dt.weekday) &&

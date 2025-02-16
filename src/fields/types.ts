@@ -14,7 +14,7 @@ export type CronFieldType = SixtyRange[] | HourRange[] | DayOfMonthRange[] | Mon
 export type CronChars = 'L' | 'W';
 export type CronMin = 0 | 1;
 export type CronMax = 7 | 12 | 23 | 31 | 59;
-export type ParseRageResponse = number[] | string[] | number | string;
+export type ParseRangeResponse = number[] | string[] | number | string;
 
 export type CronConstraints = {
   min: CronMin;

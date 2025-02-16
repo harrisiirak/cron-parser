@@ -1,4 +1,3 @@
-import assert from 'assert';
 import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin } from './types';
 
 export type SerializedCronField = {
@@ -64,8 +63,12 @@ export abstract class CronField {
     values: (number | string)[],
     /* istanbul ignore next - we always pass a value */ wildcard = false,
   ) {
-    assert(Array.isArray(values), `${this.constructor.name} Validation error, values is not an array`);
-    assert(values.length > 0, `${this.constructor.name} Validation error, values contains no values`);
+    if (!Array.isArray(values)) {
+      throw new Error(`${this.constructor.name} Validation error, values is not an array`);
+    }
+    if (!(values.length > 0)) {
+      throw new Error(`${this.constructor.name} Validation error, values contains no values`);
+    }
     this.#values = values.sort(CronField.sorter);
     this.#wildcard = wildcard;
   }
@@ -153,12 +156,15 @@ export abstract class CronField {
       return typeof value === 'number' ? value >= this.min && value <= this.max : this.chars.some(charTest(value));
     };
     const isValidRange = this.#values.every(rangeTest);
-    assert(
-      isValidRange,
-      `${this.constructor.name} Validation error, got value ${badValue} expected range ${this.min}-${this.max}${charsString}`,
-    );
+    if (!isValidRange) {
+      throw new Error(
+        `${this.constructor.name} Validation error, got value ${badValue} expected range ${this.min}-${this.max}${charsString}`,
+      );
+    }
     // check for duplicate value in this.#values array
     const duplicate = this.#values.find((value, index) => this.#values.indexOf(value) !== index);
-    assert(!duplicate, `${this.constructor.name} Validation error, duplicate values found: ${duplicate}`);
+    if (duplicate) {
+      throw new Error(`${this.constructor.name} Validation error, duplicate values found: ${duplicate}`);
+    }
   }
 }

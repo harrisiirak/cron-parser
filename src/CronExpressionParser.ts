@@ -1,5 +1,3 @@
-import assert from 'assert';
-
 import { CronFieldCollection } from './CronFieldCollection';
 import { CronDate } from './CronDate';
 import { CronExpression, CronExpressionOptions } from './CronExpression';
@@ -15,7 +13,7 @@ import {
   DayOfWeekRange,
   HourRange,
   MonthRange,
-  ParseRageResponse,
+  ParseRangeResponse,
   SixtyRange,
 } from './fields';
 
@@ -99,10 +97,9 @@ export class CronExpressionParser {
 
     expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
-    assert(
-      rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict,
-      'Cannot use both dayOfMonth and dayOfWeek together in strict mode!',
-    );
+    if (!(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict)) {
+      throw new Error('Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
+    }
 
     const second = CronExpressionParser.#parseField(
       CronUnit.Second,
@@ -151,11 +148,17 @@ export class CronExpressionParser {
    * @returns {RawCronFields} The raw fields.
    */
   static #getRawFields(expression: string, strict: boolean): RawCronFields {
-    assert(!strict || expression.length, 'Invalid cron expression');
+    if (!(!strict || expression.length)) {
+      throw new Error('Invalid cron expression');
+    }
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);
-    assert(!strict || atoms.length === 6, 'Invalid cron expression, expected 6 fields');
-    assert(atoms.length <= 6, 'Invalid cron expression, too many fields');
+    if (!(!strict || atoms.length === 6)) {
+      throw new Error('Invalid cron expression, expected 6 fields');
+    }
+    if (atoms.length > 6) {
+      throw new Error('Invalid cron expression, too many fields');
+    }
     const defaults = ['*', '*', '*', '*', '*', '0'];
     if (atoms.length < defaults.length) {
       atoms.unshift(...defaults.slice(atoms.length));
@@ -178,13 +181,17 @@ export class CronExpressionParser {
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
         const replacer = Months[match as keyof typeof Months] || DayOfWeek[match as keyof typeof DayOfWeek];
-        assert(replacer != null, `Validation error, cannot resolve alias "${match}"`);
+        if (!replacer) {
+          throw new Error(`Validation error, cannot resolve alias "${match}"`);
+        }
         return replacer.toString();
       });
     }
 
     // Check for valid characters
-    assert(constraints.validChars.test(value), `Invalid characters, got value: ${value}`);
+    if (!constraints.validChars.test(value)) {
+      throw new Error(`Invalid characters, got value: ${value}`);
+    }
 
     // Replace '*' and '?'
     value = value.replace(/[*?]/g, constraints.min + '-' + constraints.max);
@@ -200,27 +207,20 @@ export class CronExpressionParser {
    */
   static #parseSequence(field: CronUnit, val: string, constraints: CronConstraints): (number | string)[] {
     const stack: (number | string)[] = [];
-
     function handleResult(result: number | string | (number | string)[], constraints: CronConstraints) {
       if (Array.isArray(result)) {
-        result.forEach((value) => {
-          if (!CronExpressionParser.#isValidConstraintChar(constraints, value)) {
-            const v = parseInt(value.toString(), 10);
-            const isValid = v >= constraints.min && v <= constraints.max;
-            assert(
-              isValid,
-              `Constraint error, got value ${value} expected range ${constraints.min}-${constraints.max}`,
-            );
-            stack.push(value);
-          }
-        });
+        stack.push(...result);
       } else {
         if (CronExpressionParser.#isValidConstraintChar(constraints, result)) {
           stack.push(result);
         } else {
           const v = parseInt(result.toString(), 10);
           const isValid = v >= constraints.min && v <= constraints.max;
-          assert(isValid, `Constraint error, got value ${result} expected range ${constraints.min}-${constraints.max}`);
+          if (!isValid) {
+            throw new Error(
+              `Constraint error, got value ${result} expected range ${constraints.min}-${constraints.max}`,
+            );
+          }
           stack.push(field === CronUnit.DayOfWeek ? v % 7 : result);
         }
       }
@@ -228,7 +228,9 @@ export class CronExpressionParser {
 
     const atoms = val.split(',');
     atoms.forEach((atom) => {
-      assert(atom.length > 0, 'Invalid list value format');
+      if (!(atom.length > 0)) {
+        throw new Error('Invalid list value format');
+      }
       handleResult(CronExpressionParser.#parseRepeat(field, atom, constraints), constraints);
     });
     return stack;
@@ -242,9 +244,11 @@ export class CronExpressionParser {
    * @private
    * @returns {(number | string)[]} The parsed repeat.
    */
-  static #parseRepeat(field: CronUnit, val: string, constraints: CronConstraints): ParseRageResponse {
+  static #parseRepeat(field: CronUnit, val: string, constraints: CronConstraints): ParseRangeResponse {
     const atoms = val.split('/');
-    assert(atoms.length <= 2, `Invalid repeat: ${val}`);
+    if (atoms.length > 2) {
+      throw new Error(`Invalid repeat: ${val}`);
+    }
     if (atoms.length === 2) {
       if (!isNaN(parseInt(atoms[0], 10))) {
         atoms[0] = `${atoms[0]}-${constraints.max}`;
@@ -266,8 +270,12 @@ export class CronExpressionParser {
    */
   static #validateRange(min: number, max: number, constraints: CronConstraints): void {
     const isValid = !isNaN(min) && !isNaN(max) && min >= constraints.min && max <= constraints.max;
-    assert(isValid, `Constraint error, got range ${min}-${max} expected range ${constraints.min}-${constraints.max}`);
-    assert(min <= max, `Invalid range: ${min}-${max}, min(${min}) > max(${max})`);
+    if (!isValid) {
+      throw new Error(`Constraint error, got range ${min}-${max} expected range ${constraints.min}-${constraints.max}`);
+    }
+    if (min > max) {
+      throw new Error(`Invalid range: ${min}-${max}, min(${min}) > max(${max})`);
+    }
   }
 
   /**
@@ -278,10 +286,9 @@ export class CronExpressionParser {
    * @throws {Error} Throws an error if the repeat interval is invalid.
    */
   static #validateRepeatInterval(repeatInterval: number): void {
-    assert(
-      !isNaN(repeatInterval) && repeatInterval > 0,
-      `Constraint error, cannot repeat at every ${repeatInterval} time.`,
-    );
+    if (!(!isNaN(repeatInterval) && repeatInterval > 0)) {
+      throw new Error(`Constraint error, cannot repeat at every ${repeatInterval} time.`);
+    }
   }
 
   /**
@@ -320,7 +327,7 @@ export class CronExpressionParser {
     val: string,
     repeatInterval: number,
     constraints: CronConstraints,
-  ): ParseRageResponse {
+  ): ParseRangeResponse {
     const atoms: string[] = val.split('-');
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;
@@ -346,14 +353,14 @@ export class CronExpressionParser {
     }
     const nthValue = +atoms[atoms.length - 1];
     const matches = val.match(/([,-/])/);
-    assert(
-      matches === null,
-      `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`,
-    );
-    assert(
-      atoms.length <= 2 && !isNaN(nthValue) && nthValue >= 1 && nthValue <= 5,
-      'Constraint error, invalid dayOfWeek occurrence number (#)',
-    );
+    if (matches !== null) {
+      throw new Error(
+        `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`,
+      );
+    }
+    if (!(atoms.length <= 2 && !isNaN(nthValue) && nthValue >= 1 && nthValue <= 5)) {
+      throw new Error('Constraint error, invalid dayOfWeek occurrence number (#)');
+    }
     return { dayOfWeek: atoms[0], nthDayOfWeek: nthValue };
   }
 
