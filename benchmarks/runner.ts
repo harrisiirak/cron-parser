@@ -22,8 +22,8 @@ export async function initializeBenchmark(version?: string) {
   const { version: resolvedVersion, packagePath } = await VersionManager.getPackageVersion(version);
   console.log(`Using cron-parser version ${resolvedVersion} for comparison`);
 
-  const parser = require(packagePath);
-  oldParseExpression = parser.parseExpression as ParseExpressionFn;
+  const module = require(packagePath);
+  oldParseExpression = (module.default?.parse as ParseExpressionFn) ?? (module.parseExpression as ParseExpressionFn);
 }
 
 interface BenchmarkStats {
