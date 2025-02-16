@@ -1,6 +1,3 @@
-import fs from 'fs/promises';
-import { readFileSync } from 'fs';
-
 import { CronExpression } from './CronExpression';
 import { CronExpressionParser } from './CronExpressionParser';
 
@@ -21,7 +18,8 @@ export class CronFileParser {
    * @throws If file cannot be read
    */
   static async parseFile(filePath: string): Promise<CronFileParserResult> {
-    const data = await fs.readFile(filePath, 'utf8');
+    const { readFile } = await import('fs/promises');
+    const data = await readFile(filePath, 'utf8');
     return CronFileParser.#parseContent(data);
   }
 
@@ -32,6 +30,8 @@ export class CronFileParser {
    * @throws If file cannot be read
    */
   static parseFileSync(filePath: string): CronFileParserResult {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { readFileSync } = require('fs');
     const data = readFileSync(filePath, 'utf8');
     return CronFileParser.#parseContent(data);
   }
