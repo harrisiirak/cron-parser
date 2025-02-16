@@ -50,7 +50,6 @@
     "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-coverage-badges": "^1.0.0",
-    "jest-runner-tsd": "^6.0.0",
     "lint-staged": "^15.4.3",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
