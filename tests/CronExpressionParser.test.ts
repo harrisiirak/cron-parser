@@ -489,6 +489,17 @@ describe('CronExpressionParser', () => {
     expect(next.getMinutes()).toEqual(40);
   });
 
+  test('using day of week string', () => {
+    const interval = CronExpressionParser.parse('15 10 * * SUN');
+    const intervals = interval.take(8);
+    for (const next of intervals) {
+      const day = next.getDay();
+      expect(day === 0).toBeTruthy();
+      expect(next.getHours()).toEqual(10);
+      expect(next.getMinutes()).toEqual(15);
+    }
+  });
+
   test('using days of week strings', () => {
     const interval = CronExpressionParser.parse('15 10 * * MON-TUE');
     const intervals = interval.take(8);

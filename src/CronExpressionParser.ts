@@ -181,7 +181,7 @@ export class CronExpressionParser {
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
         const replacer = Months[match as keyof typeof Months] || DayOfWeek[match as keyof typeof DayOfWeek];
-        if (!replacer) {
+        if (replacer === undefined) {
           throw new Error(`Validation error, cannot resolve alias "${match}"`);
         }
         return replacer.toString();
