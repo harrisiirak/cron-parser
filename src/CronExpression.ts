@@ -401,6 +401,8 @@ export class CronExpression {
         }
         continue;
       }
+
+      currentDate.setMilliseconds(0);
       break;
     }
 
