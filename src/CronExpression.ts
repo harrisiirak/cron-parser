@@ -396,14 +396,15 @@ export class CronExpression {
       if (startTimestamp === currentDate.getTime()) {
         if (dateMathVerb === 'Add' || currentDate.getMilliseconds() === 0) {
           currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
-        } else {
-          currentDate.setMilliseconds(0);
         }
         continue;
       }
       break;
     }
 
+    if (currentDate.getMilliseconds() !== 0) {
+      currentDate.setMilliseconds(0);
+    }
     this.#currentDate = currentDate;
     return currentDate;
   }

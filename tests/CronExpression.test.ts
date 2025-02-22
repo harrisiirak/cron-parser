@@ -84,6 +84,22 @@ describe('CronExpression', () => {
     expect(cronExpression.toString()).toBe('0 0 0 1 1 0');
   });
 
+  test('should set milliseconds to 0 on next scheduled date (issue #363)', () => {
+    const cronExpression = CronExpressionParser.parse('* * * * *', {
+      currentDate: '2020-03-06T10:02:01.002Z',
+    });
+    const nextDate = cronExpression.next();
+    expect(nextDate.toISOString()).toBe('2020-03-06T10:03:00.000Z');
+  });
+
+  test('should set milliseconds to 0 on previous scheduled date (issue #363)', () => {
+    const cronExpression = CronExpressionParser.parse('* * * * *', {
+      currentDate: '2020-03-06T10:02:01.002Z',
+    });
+    const prevDate = cronExpression.prev();
+    expect(prevDate.toISOString()).toBe('2020-03-06T10:02:00.000Z');
+  });
+
   describe('stringify', () => {
     test('stringify cron expression all stars no seconds 0 * * * * *', () => {
       const expected = '0 * * * * *';
