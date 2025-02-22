@@ -401,11 +401,12 @@ export class CronExpression {
         }
         continue;
       }
-
-      currentDate.setMilliseconds(0);
       break;
     }
 
+    if (currentDate.getMilliseconds() !== 0) {
+      currentDate.setMilliseconds(0);
+    }
     this.#currentDate = currentDate;
     return currentDate;
   }
