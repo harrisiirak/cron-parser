@@ -93,7 +93,7 @@ export class CronExpressionParser {
    */
   static parse(expression: string, options: CronExpressionOptions = {}): CronExpression {
     const { strict = false } = options;
-    const currentDate = options.currentDate || new CronDate(undefined, 'UTC');
+    const currentDate = options.currentDate || new CronDate();
 
     expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
