@@ -164,12 +164,18 @@ try {
 
 In several implementations of CRON, it's ambiguous to specify both the Day Of Month and Day Of Week parameters simultaneously, as it's unclear which one should take precedence. Despite this ambiguity, this library allows both parameters to be set by default, although the resultant behavior might not align with your expectations.
 
-To resolve this ambiguity, you can activate the strict mode of the library. In strict mode, the library prevents the simultaneous setting of both Day Of Month and Day Of Week, effectively serving as a validation method for user inputs.
+To resolve this ambiguity, you can activate the strict mode of the library. When strict mode is enabled, the library enforces several validation rules:
+
+1. **Day Of Month and Day Of Week**: Prevents the simultaneous setting of both Day Of Month and Day Of Week fields
+2. **Complete Expression**: Requires all 6 fields to be present in the expression (second, minute, hour, day of month, month, day of week)
+3. **Non-empty Expression**: Rejects empty expressions that would otherwise default to '0 \* \* \* \* \*'
+
+These validations help ensure that your cron expressions are unambiguous and correctly formatted.
 
 ```typescript
 import { CronExpressionParser } from 'cron-parser';
 
-// Specifies a schedule that occurs at 12:00 on every day-of-month from 1 through 31 and on Monday
+// This will throw an error in strict mode because it uses both dayOfMonth and dayOfWeek
 const options = {
   currentDate: new Date('Mon, 12 Sep 2022 14:00:00'),
   strict: true,
@@ -181,6 +187,14 @@ try {
 } catch (err) {
   console.log('Error:', err.message);
   // Error: Cannot use both dayOfMonth and dayOfWeek together in strict mode!
+}
+
+// This will also throw an error in strict mode because it has fewer than 6 fields
+try {
+  CronExpressionParser.parse('0 20 15 * *', { strict: true });
+} catch (err) {
+  console.log('Error:', err.message);
+  // Error: Invalid cron expression, expected 6 fields
 }
 ```
 
