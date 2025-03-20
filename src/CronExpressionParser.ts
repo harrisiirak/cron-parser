@@ -148,12 +148,12 @@ export class CronExpressionParser {
    * @returns {RawCronFields} The raw fields.
    */
   static #getRawFields(expression: string, strict: boolean): RawCronFields {
-    if (!(!strict || expression.length)) {
+    if (strict && !expression.length) {
       throw new Error('Invalid cron expression');
     }
     expression = expression || '0 * * * * *';
     const atoms = expression.trim().split(/\s+/);
-    if (!(!strict || atoms.length === 6)) {
+    if (strict && atoms.length < 6) {
       throw new Error('Invalid cron expression, expected 6 fields');
     }
     if (atoms.length > 6) {
