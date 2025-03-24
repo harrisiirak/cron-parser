@@ -18,6 +18,8 @@ type VerbMap = {
   [key in TimeUnit]: () => void;
 };
 
+export const DAYS_IN_MONTH: readonly number[] = Object.freeze([31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
+
 /**
  * CronDate class that wraps the Luxon DateTime object to provide
  * a consistent API for working with dates and times in the context of cron.
@@ -84,6 +86,16 @@ export class CronDate {
     if (tz && tz !== this.#date.zoneName) {
       this.#date = this.#date.setZone(tz);
     }
+  }
+
+  /**
+   * Determines if the given year is a leap year.
+   * @param {number} year - The year to check
+   * @returns {boolean} - True if the year is a leap year, false otherwise
+   * @private
+   */
+  static #isLeapYear(year: number): boolean {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
   }
 
   /**
@@ -472,8 +484,17 @@ export class CronDate {
    * @returns {boolean}
    */
   isLastDayOfMonth(): boolean {
-    const newDate = this.#date.plus({ days: 1 }).startOf('day');
-    return this.#date.month !== newDate.month;
+    const month = this.#date.month;
+    const day = this.#date.day;
+
+    // Special handling for February in leap years
+    if (month === 2) {
+      const isLeap = CronDate.#isLeapYear(this.#date.year);
+      return day === (isLeap ? 29 : 28);
+    }
+
+    // For other months, check against the static map
+    return day === DAYS_IN_MONTH[month - 1];
   }
 
   /**
@@ -481,8 +502,20 @@ export class CronDate {
    * @returns {boolean}
    */
   isLastWeekdayOfMonth(): boolean {
-    const newDate = this.#date.plus({ days: 7 }).startOf('day');
-    return this.#date.month !== newDate.month;
+    const month = this.#date.month;
+    const day = this.#date.day;
+
+    // Get the last day of the current month
+    let lastDay: number;
+    if (month === 2) {
+      // Special handling for February
+      lastDay = CronDate.#isLeapYear(this.#date.year) ? 29 : 28;
+    } else {
+      lastDay = DAYS_IN_MONTH[month - 1];
+    }
+
+    // Check if the current day is within 7 days of the end of the month
+    return day > lastDay - 7;
   }
 
   /**
