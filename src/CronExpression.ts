@@ -1,8 +1,6 @@
-import { DateTime } from 'luxon';
-
 import { CronDate, DateMathOp, TimeUnit } from './CronDate';
 import { CronFieldCollection } from './CronFieldCollection';
-import { CronFieldType, DayOfMonthRange, DayOfWeekRange, HourRange, MonthRange, SixtyRange } from './fields';
+import { CronFieldType, HourRange, MonthRange, SixtyRange } from './fields';
 
 export type CronExpressionOptions = {
   currentDate?: Date | string | number | CronDate;
@@ -218,16 +216,32 @@ export class CronExpression {
    * @returns {boolean}
    */
   includesDate(date: Date | CronDate): boolean {
-    const { second, minute, hour, dayOfMonth, month, dayOfWeek } = this.#fields;
-    const dt = DateTime.fromISO(date.toISOString()!, { zone: this.#tz });
-    return (
-      dayOfMonth.values.includes(<DayOfMonthRange>dt.day) &&
-      dayOfWeek.values.includes(<DayOfWeekRange>dt.weekday) &&
-      month.values.includes(<MonthRange>dt.month) &&
-      hour.values.includes(<HourRange>dt.hour) &&
-      minute.values.includes(<SixtyRange>dt.minute) &&
-      second.values.includes(<SixtyRange>dt.second)
-    );
+    const { second, minute, hour, month } = this.#fields;
+    const dt = new CronDate(date, this.#tz);
+
+    // Check basic time fields first
+    if (
+      !second.values.includes(<SixtyRange>dt.getSeconds()) ||
+      !minute.values.includes(<SixtyRange>dt.getMinutes()) ||
+      !hour.values.includes(<HourRange>dt.getHours()) ||
+      !month.values.includes(<MonthRange>(dt.getMonth() + 1))
+    ) {
+      return false;
+    }
+
+    // Check day of month and day of week using the same logic as #findSchedule
+    if (!this.#matchDayOfMonth(dt)) {
+      return false;
+    }
+
+    // Check nth day of week if specified
+    if (this.#nthDayOfWeek > 0) {
+      const weekInMonth = Math.ceil(dt.getDate() / 7);
+      if (weekInMonth !== this.#nthDayOfWeek) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

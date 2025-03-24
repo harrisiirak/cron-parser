@@ -73,12 +73,6 @@ describe('CronExpression', () => {
     expect(nextDate).toBe('2023-01-08T00:00:00.000Z');
   });
 
-  test('should check if the cron expression includes a given date', () => {
-    const cronExpression = new CronExpression(fields, options);
-    const date = new Date('2023-01-01T00:00:00.000Z');
-    expect(cronExpression.includesDate(date)).toBe(true);
-  });
-
   test('should return the string representation of the cron expression', () => {
     const cronExpression = new CronExpression(fields, options);
     expect(cronExpression.toString()).toBe('0 0 0 1 1 0');
@@ -363,6 +357,36 @@ describe('CronExpression', () => {
       expect(() => CronExpression.fieldsToExpression(new CronFieldCollection(input))).toThrowError(
         'Validation error, Field second is missing',
       );
+    });
+  });
+
+  describe('includesDate', () => {
+    test('should check if the cron expression includes a given date', () => {
+      const cronExpression = new CronExpression(fields, options);
+      expect(cronExpression.includesDate(new Date('2023-01-01T00:00:00.000Z'))).toBeTruthy();
+      expect(cronExpression.includesDate(new Date('2024-01-01T00:00:00.000Z'))).toBeTruthy();
+      expect(cronExpression.includesDate(new Date('2024-02-01T00:00:00.000Z'))).toBeFalsy();
+    });
+
+    test('should support last weekday of month', () => {
+      const cronExpression = CronExpressionParser.parse('0 0 0 * * 1L', {
+        currentDate: new Date('2023-01-01T00:00:00Z'),
+      });
+
+      expect(cronExpression.includesDate(new Date('2023-01-30T00:00:00Z'))).toBeTruthy();
+      expect(cronExpression.includesDate(new Date('2023-01-23T00:00:00Z'))).toBeFalsy();
+      expect(cronExpression.includesDate(new Date('2023-01-31T00:00:00Z'))).toBeFalsy();
+    });
+
+    test('should support nth day of week', () => {
+      const cronExpression = CronExpressionParser.parse('0 0 0 * * 1#3', {
+        currentDate: new Date('2023-01-01T00:00:00Z'),
+      });
+
+      expect(cronExpression.includesDate(new Date('2023-01-02T00:00:00Z'))).toBeFalsy();
+      expect(cronExpression.includesDate(new Date('2023-01-09T00:00:00Z'))).toBeFalsy();
+      expect(cronExpression.includesDate(new Date('2023-01-16T00:00:00Z'))).toBeTruthy();
+      expect(cronExpression.includesDate(new Date('2023-01-23T00:00:00Z'))).toBeFalsy();
     });
   });
 });
