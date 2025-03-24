@@ -11,6 +11,7 @@ export type SerializedCronField = {
  * @class CronField
  */
 export abstract class CronField {
+  readonly #hasLastChar: boolean = false;
   readonly #wildcard: boolean = false;
   readonly #values: (number | string)[] = [];
 
@@ -71,6 +72,9 @@ export abstract class CronField {
     }
     this.#values = values.sort(CronField.sorter);
     this.#wildcard = wildcard;
+    this.#hasLastChar = values.some((expression: number | string) => {
+      return typeof expression === 'string' && expression.indexOf('L') >= 0;
+    });
   }
 
   /**
@@ -98,6 +102,14 @@ export abstract class CronField {
   get chars(): readonly string[] {
     // return the frozen static value from the child class
     return (this.constructor as typeof CronField).chars;
+  }
+
+  /**
+   * Indicates whether this field has a "last" character.
+   * @returns {boolean}
+   */
+  get hasLastChar(): boolean {
+    return this.#hasLastChar;
   }
 
   /**
