@@ -484,13 +484,12 @@ export class CronDate {
    * @returns {boolean}
    */
   isLastDayOfMonth(): boolean {
-    const month = this.#date.month;
-    const day = this.#date.day;
+    const { day, month } = this.#date;
 
     // Special handling for February in leap years
     if (month === 2) {
       const isLeap = CronDate.#isLeapYear(this.#date.year);
-      return day === (isLeap ? 29 : 28);
+      return day === DAYS_IN_MONTH[month - 1] - (isLeap ? 0 : 1);
     }
 
     // For other months, check against the static map
@@ -502,14 +501,13 @@ export class CronDate {
    * @returns {boolean}
    */
   isLastWeekdayOfMonth(): boolean {
-    const month = this.#date.month;
-    const day = this.#date.day;
+    const { day, month } = this.#date;
 
     // Get the last day of the current month
     let lastDay: number;
     if (month === 2) {
       // Special handling for February
-      lastDay = CronDate.#isLeapYear(this.#date.year) ? 29 : 28;
+      lastDay = DAYS_IN_MONTH[month - 1] - (CronDate.#isLeapYear(this.#date.year) ? 0 : 1);
     } else {
       lastDay = DAYS_IN_MONTH[month - 1];
     }
