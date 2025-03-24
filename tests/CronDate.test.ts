@@ -4,12 +4,16 @@ import { DateTime } from 'luxon';
 describe('CronDate', () => {
   test('is the last weekday of the month', () => {
     // Last monday of september
-    const date1 = new CronDate(new Date(2021, 8, 27));
-    expect(date1.isLastWeekdayOfMonth()).toBe(true);
+    expect(new CronDate(new Date(2021, 8, 27)).isLastWeekdayOfMonth()).toBeTruthy();
 
     // Second-to-last monday of september
-    const date2 = new CronDate(new Date(2021, 8, 20));
-    expect(date2.isLastWeekdayOfMonth()).toBe(false);
+    expect(new CronDate(new Date(2021, 8, 20)).isLastWeekdayOfMonth()).toBeFalsy();
+
+    // Last friday of leap year february
+    expect(new CronDate(new Date(2020, 1, 28)).isLastWeekdayOfMonth()).toBeTruthy();
+
+    // Last friday of non-leap year february
+    expect(new CronDate(new Date(2021, 1, 26)).isLastWeekdayOfMonth()).toBeTruthy();
   });
 
   test('addSecond should succeed', () => {
