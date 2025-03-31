@@ -1,8 +1,6 @@
-import { DateTime } from 'luxon';
-
 import { CronDate, DateMathOp, TimeUnit } from './CronDate';
 import { CronFieldCollection } from './CronFieldCollection';
-import { CronFieldType, DayOfMonthRange, DayOfWeekRange, HourRange, MonthRange, SixtyRange } from './fields';
+import { CronFieldType, HourRange, MonthRange, SixtyRange } from './fields';
 
 export type CronExpressionOptions = {
   currentDate?: Date | string | number | CronDate;
@@ -82,23 +80,6 @@ export class CronExpression {
   }
 
   /**
-   * Checks if the 'L' character is present in any of the given expressions.
-   *
-   * @param {Array} expressions - An array of expressions to be checked.
-   * @returns {boolean} - True if the 'L' character is present in any of the expressions; otherwise, false.
-   * @memberof CronExpression
-   * @private
-   */
-  static #isLInExpressions(expressions: (number | string)[]): boolean {
-    return (
-      expressions.length > 0 &&
-      expressions.some((expression: number | string) => {
-        return typeof expression === 'string' && expression.indexOf('L') >= 0;
-      })
-    );
-  }
-
-  /**
    * Determines if the current date matches the last specified weekday of the month.
    *
    * @param {Array<(number|string)>} expressions - An array of expressions containing weekdays and "L" for the last weekday.
@@ -108,12 +89,8 @@ export class CronExpression {
    * @private
    */
   static #isLastWeekdayOfMonthMatch(expressions: (number | string)[], currentDate: CronDate): boolean {
+    const isLastWeekdayOfMonth = currentDate.isLastWeekdayOfMonth();
     return expressions.some((expression: number | string) => {
-      // There might be multiple expressions and not all of them will contain the "L".
-      if (!CronExpression.#isLInExpressions([expression])) {
-        return false;
-      }
-
       // The first character represents the weekday
       const weekday = parseInt(expression.toString().charAt(0), 10) % 7;
       if (Number.isNaN(weekday)) {
@@ -121,7 +98,7 @@ export class CronExpression {
       }
 
       // Check if the current date matches the last specified weekday of the month
-      return currentDate.getDay() === weekday && currentDate.isLastWeekdayOfMonth();
+      return currentDate.getDay() === weekday && isLastWeekdayOfMonth;
     });
   }
 
@@ -239,16 +216,32 @@ export class CronExpression {
    * @returns {boolean}
    */
   includesDate(date: Date | CronDate): boolean {
-    const { second, minute, hour, dayOfMonth, month, dayOfWeek } = this.#fields;
-    const dt = DateTime.fromISO(date.toISOString()!, { zone: this.#tz });
-    return (
-      dayOfMonth.values.includes(<DayOfMonthRange>dt.day) &&
-      dayOfWeek.values.includes(<DayOfWeekRange>dt.weekday) &&
-      month.values.includes(<MonthRange>dt.month) &&
-      hour.values.includes(<HourRange>dt.hour) &&
-      minute.values.includes(<SixtyRange>dt.minute) &&
-      second.values.includes(<SixtyRange>dt.second)
-    );
+    const { second, minute, hour, month } = this.#fields;
+    const dt = new CronDate(date, this.#tz);
+
+    // Check basic time fields first
+    if (
+      !second.values.includes(<SixtyRange>dt.getSeconds()) ||
+      !minute.values.includes(<SixtyRange>dt.getMinutes()) ||
+      !hour.values.includes(<HourRange>dt.getHours()) ||
+      !month.values.includes(<MonthRange>(dt.getMonth() + 1))
+    ) {
+      return false;
+    }
+
+    // Check day of month and day of week using the same logic as #findSchedule
+    if (!this.#matchDayOfMonth(dt)) {
+      return false;
+    }
+
+    // Check nth day of week if specified
+    if (this.#nthDayOfWeek > 0) {
+      const weekInMonth = Math.ceil(dt.getDate() / 7);
+      if (weekInMonth !== this.#nthDayOfWeek) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -284,10 +277,10 @@ export class CronExpression {
     // Calculate if the current date matches the day of month and day of week fields.
     const matchedDOM =
       CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth.values) ||
-      (CronExpression.#isLInExpressions(this.#fields.dayOfMonth.values) && currentDate.isLastDayOfMonth());
+      (this.#fields.dayOfMonth.hasLastChar && currentDate.isLastDayOfMonth());
     const matchedDOW =
       CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek.values) ||
-      (CronExpression.#isLInExpressions(this.#fields.dayOfWeek.values) &&
+      (this.#fields.dayOfWeek.hasLastChar &&
         CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek.values, currentDate));
 
     // Rule 1: Both "day of month" and "day of week" are restricted; one or both must match the current day.

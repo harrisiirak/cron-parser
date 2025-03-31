@@ -1,11 +1,10 @@
+import { DAYS_IN_MONTH } from '../CronDate';
 import { CronField } from './CronField';
 import { CronChars, CronMax, CronMin, MonthRange } from './types';
 
 const MIN_MONTH = 1;
 const MAX_MONTH = 12;
 const MONTH_CHARS: readonly CronChars[] = Object.freeze([]);
-
-const DAYS_IN_MONTH: readonly number[] = Object.freeze([31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
 
 /**
  * Represents the "day of the month" field within a cron expression.
