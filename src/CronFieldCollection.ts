@@ -158,7 +158,7 @@ export class CronFieldCollection {
       throw new Error('Validation error, Field dayOfWeek is missing');
     }
 
-    if (month.values.length === 1) {
+    if (month.values.length === 1 && !dayOfMonth.hasLastChar) {
       if (!(parseInt(dayOfMonth.values[0] as string, 10) <= CronMonth.daysInMonth[month.values[0] - 1])) {
         throw new Error('Invalid explicit day of month definition');
       }

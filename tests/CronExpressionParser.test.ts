@@ -1559,81 +1559,99 @@ describe('CronExpressionParser', () => {
       { expression: '0 0 0 * * 7L', expectedDate: 26 },
     ];
 
-    test('parse cron with last day in a month', () => {
-      const options = {
-        currentDate: new Date(2014, 0, 1),
-        endDate: new Date(2014, 10, 1),
-      };
-
-      const interval = CronExpressionParser.parse('0 0 L * *', options);
-      expect(interval.hasNext()).toBe(true);
-
-      for (let i = 0; i < 10; ++i) {
-        const next = interval.next();
-        expect(next).toBeDefined();
-      }
-    });
-
-    test('parse cron with last day in feb', () => {
-      const options = {
-        currentDate: new Date(2016, 0, 1),
-        endDate: new Date(2016, 10, 1),
-      };
-
-      const interval = CronExpressionParser.parse('0 0 6-20/2,L 2 *', options);
-      expect(interval.hasNext()).toBe(true);
-
-      const items = 9;
-      let next;
-      let i = 0;
-      while (interval.hasNext()) {
-        next = interval.next();
-        i += 1;
-        expect(next).toBeDefined();
-      }
-
-      //leap year
-      if (!next) {
-        throw new Error('Invalid date');
-      }
-      expect(next).not.toBeUndefined();
-      expect(next.getDate()).toBe(29);
-      expect(i).toBe(items);
-    });
-
-    test('parse cron with last day in feb', () => {
-      const options = {
-        currentDate: new Date(2014, 0, 1),
-        endDate: new Date(2014, 10, 1),
-      };
-
-      const interval = CronExpressionParser.parse('0 0 1,3,6-10,L 2 *', options);
-      expect(interval.hasNext()).toBe(true);
-
-      let next;
-      while (interval.hasNext()) {
-        next = interval.next();
-        expect(next).toBeDefined();
-      }
-      if (!next) {
-        throw new Error('Invalid date');
-      }
-      expect(next).not.toBeUndefined();
-      expect(next.getDate()).toBe(28);
-    });
-
     testCasesLastWeekdayOfMonth.forEach(({ expression, expectedDate }) => {
       const options = {
         currentDate: new Date(2021, 8, 1),
         endDate: new Date(2021, 11, 1),
       };
 
-      test(`parse cron with last weekday of the month: ${expression}`, () => {
+      test(`parses cron with last weekday of the month: ${expression}`, () => {
         const interval = CronExpressionParser.parse(expression, options);
-        expect(interval.hasNext()).toBe(true);
-        const next = interval.next();
-        expect(next.getDate()).toBe(expectedDate);
+        expect(interval.next().getDate()).toBe(expectedDate);
       });
+    });
+
+    test('parses cron with last day in a month (wildcard month)', () => {
+      const options = {
+        currentDate: new Date(2014, 0, 1),
+        endDate: new Date(2014, 10, 1),
+      };
+
+      const interval = CronExpressionParser.parse('0 0 L * *', options);
+      expect(interval.next().getDate()).toBe(31);
+      expect(interval.next().getDate()).toBe(28);
+      expect(interval.next().getDate()).toBe(31);
+      expect(interval.next().getDate()).toBe(30);
+      expect(interval.next().getDate()).toBe(31);
+      expect(interval.next().getDate()).toBe(30);
+      expect(interval.next().getDate()).toBe(31);
+      expect(interval.next().getDate()).toBe(31);
+      expect(interval.next().getDate()).toBe(30);
+      expect(interval.next().getDate()).toBe(31);
+    });
+
+    test('parses cron with last day in a month (explicit month)', () => {
+      const options = {
+        currentDate: new Date(2014, 0, 1),
+        endDate: new Date(2016, 10, 1),
+      };
+
+      const interval = CronExpressionParser.parse('0 0 L 10 *', options);
+
+      let date = interval.next();
+      expect(date.getDate()).toBe(31);
+      expect(date.getMonth()).toBe(9);
+      expect(date.getFullYear()).toBe(2014);
+
+      date = interval.next();
+      expect(date.getDate()).toBe(31);
+      expect(date.getMonth()).toBe(9);
+      expect(date.getFullYear()).toBe(2015);
+
+      date = interval.next();
+      expect(date.getDate()).toBe(31);
+      expect(date.getMonth()).toBe(9);
+      expect(date.getFullYear()).toBe(2016);
+    });
+
+    test('parses cron with last day in feb', () => {
+      const options = {
+        currentDate: new Date(2014, 0, 1),
+        endDate: new Date(2018, 10, 1),
+      };
+
+      const interval = CronExpressionParser.parse('0 0 L 2 *', options);
+
+      let date = interval.next();
+      expect(date.getDate()).toBe(28);
+      expect(date.getMonth()).toBe(1);
+      expect(date.getFullYear()).toBe(2014);
+
+      date = interval.next();
+      expect(date.getDate()).toBe(28);
+      expect(date.getMonth()).toBe(1);
+      expect(date.getFullYear()).toBe(2015);
+
+      date = interval.next();
+      expect(date.getDate()).toBe(29);
+      expect(date.getMonth()).toBe(1);
+      expect(date.getFullYear()).toBe(2016);
+    });
+
+    test('parses cron with mix of sequence and range and last day in feb', () => {
+      const options = {
+        currentDate: new Date(2014, 0, 1),
+        endDate: new Date(2014, 10, 1),
+      };
+
+      const interval = CronExpressionParser.parse('0 0 1,3,6-8,L 2 *', options);
+
+      expect(interval.next().getDate()).toBe(1);
+      expect(interval.next().getDate()).toBe(3);
+      expect(interval.next().getDate()).toBe(6);
+      expect(interval.next().getDate()).toBe(7);
+      expect(interval.next().getDate()).toBe(8);
+      expect(interval.next().getDate()).toBe(28);
     });
 
     test('parses expression that runs on both last monday and friday of the month', () => {
@@ -1642,12 +1660,8 @@ describe('CronExpressionParser', () => {
         endDate: new Date(2021, 11, 1),
       };
       const interval = CronExpressionParser.parse('0 0 0 * * 1L,5L', options);
-      let next = interval.next();
-
-      expect(next.getDate()).toBe(24);
-      next = interval.next();
-
-      expect(next.getDate()).toBe(27);
+      expect(interval.next().getDate()).toBe(24);
+      expect(interval.next().getDate()).toBe(27);
     });
 
     test('parses expression that runs on both every monday and last friday of month', () => {
@@ -1656,21 +1670,11 @@ describe('CronExpressionParser', () => {
         endDate: new Date(2021, 8, 30),
       };
       const interval = CronExpressionParser.parse('0 0 0 * * 1,5L', options);
-      const dates: number[] = [];
-      let isNotDone = true;
-      while (isNotDone) {
-        try {
-          const next = interval.next();
-          dates.push(next.getDate());
-        } catch (e) {
-          if (e instanceof Error && e.message !== 'Out of the timespan range') {
-            throw e;
-          }
-          isNotDone = false;
-          break;
-        }
-      }
-      expect(dates).toEqual([6, 13, 20, 24, 27]);
+      expect(interval.next().getDate()).toBe(6);
+      expect(interval.next().getDate()).toBe(13);
+      expect(interval.next().getDate()).toBe(20);
+      expect(interval.next().getDate()).toBe(24);
+      expect(interval.next().getDate()).toBe(27);
     });
 
     test('throw new Errors to parse for invalid last weekday of month expression', () => {
