@@ -10,6 +10,7 @@ export type CronExpressionOptions = {
   nthDayOfWeek?: number;
   expression?: string;
   strict?: boolean;
+  seed?: string;
 };
 
 /**

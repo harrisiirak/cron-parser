@@ -1,3 +1,5 @@
+import seedrandom, { type PRNG } from 'seedrandom';
+
 import { CronFieldCollection } from './CronFieldCollection';
 import { CronDate } from './CronDate';
 import { CronExpression, CronExpressionOptions } from './CronExpression';
@@ -85,7 +87,6 @@ export class CronExpressionParser {
    * Parses a cron expression and returns a CronExpression object.
    * @param {string} expression - The cron expression to parse.
    * @param {CronExpressionOptions} [options={}] - The options to use when parsing the expression.
-   * @param {boolean} [options.currentDate=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @param {boolean} [options.strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
    * @param {CronDate} [options.currentDate=new CronDate(undefined, 'UTC')] - The date to use when calculating the next/previous occurrence.
    *
@@ -94,6 +95,8 @@ export class CronExpressionParser {
   static parse(expression: string, options: CronExpressionOptions = {}): CronExpression {
     const { strict = false } = options;
     const currentDate = options.currentDate || new CronDate();
+
+    const rand = options.seed ? seedrandom(options.seed) : seedrandom();
 
     expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
@@ -105,28 +108,38 @@ export class CronExpressionParser {
       CronUnit.Second,
       rawFields.second,
       CronSecond.constraints,
+      rand,
     ) as SixtyRange[];
     const minute = CronExpressionParser.#parseField(
       CronUnit.Minute,
       rawFields.minute,
       CronMinute.constraints,
+      rand,
     ) as SixtyRange[];
-    const hour = CronExpressionParser.#parseField(CronUnit.Hour, rawFields.hour, CronHour.constraints) as HourRange[];
+    const hour = CronExpressionParser.#parseField(
+      CronUnit.Hour,
+      rawFields.hour,
+      CronHour.constraints,
+      rand,
+    ) as HourRange[];
     const month = CronExpressionParser.#parseField(
       CronUnit.Month,
       rawFields.month,
       CronMonth.constraints,
+      rand,
     ) as MonthRange[];
     const dayOfMonth = CronExpressionParser.#parseField(
       CronUnit.DayOfMonth,
       rawFields.dayOfMonth,
       CronDayOfMonth.constraints,
+      rand,
     ) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
     const dayOfWeek = CronExpressionParser.#parseField(
       CronUnit.DayOfWeek,
       _dayOfWeek,
       CronDayOfWeek.constraints,
+      rand,
     ) as DayOfWeekRange[];
 
     const fields = new CronFieldCollection({
@@ -175,7 +188,7 @@ export class CronExpressionParser {
    * @private
    * @returns {(number | string)[]} The parsed field.
    */
-  static #parseField(field: CronUnit, value: string, constraints: CronConstraints): (number | string)[] {
+  static #parseField(field: CronUnit, value: string, constraints: CronConstraints, rand: PRNG): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
       value = value.replace(/[a-z]{3}/gi, (match) => {
@@ -195,6 +208,8 @@ export class CronExpressionParser {
 
     // Replace '*' and '?'
     value = value.replace(/[*?]/g, constraints.min + '-' + constraints.max);
+    // Replace 'H' using the seeded PRNG
+    value = value.replace(/H/g, String(Math.floor(rand() * (constraints.max - constraints.min + 1) + constraints.min)));
     return CronExpressionParser.#parseSequence(field, value, constraints);
   }
 

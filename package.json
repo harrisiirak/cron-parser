@@ -32,13 +32,15 @@
     "README.md"
   ],
   "dependencies": {
-    "luxon": "^3.6.1"
+    "luxon": "^3.6.1",
+    "seedrandom": "^3.0.5"
   },
   "devDependencies": {
     "@tsd/typescript": "^5.8.2",
     "@types/jest": "^29.5.14",
     "@types/luxon": "^3.6.2",
     "@types/node": "^22.14.0",
+    "@types/seedrandom": "^3.0.8",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "chalk": "^5.4.1",
