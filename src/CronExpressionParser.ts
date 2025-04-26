@@ -1,8 +1,7 @@
-import seedrandom, { type PRNG } from 'seedrandom';
-
 import { CronFieldCollection } from './CronFieldCollection';
 import { CronDate } from './CronDate';
 import { CronExpression, CronExpressionOptions } from './CronExpression';
+import { type PRNG, seededRandom } from './utils';
 import {
   CronSecond,
   CronMinute,
@@ -96,7 +95,7 @@ export class CronExpressionParser {
     const { strict = false } = options;
     const currentDate = options.currentDate || new CronDate();
 
-    const rand = options.seed ? seedrandom(options.seed) : seedrandom();
+    const rand = options.seed ? seededRandom(options.seed) : seededRandom();
 
     expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);

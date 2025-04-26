@@ -1742,20 +1742,20 @@ describe('CronExpressionParser', () => {
         };
 
         const expressions = [
-          { expression: 'H * * * * *', expected: '10 * * * * *' },
-          { expression: '* H * * * *', expected: '* 33 * * * *' },
-          { expression: '* * H * * *', expected: '* * 19 * * *' },
-          { expression: '* * * H * *', expected: '* * * 27 * *' },
+          { expression: 'H * * * * *', expected: '5 * * * * *' },
+          { expression: '* H * * * *', expected: '* 34 * * * *' },
+          { expression: '* * H * * *', expected: '* * 15 * * *' },
+          { expression: '* * * H * *', expected: '* * * 12 * *' },
           { expression: '* * * * H *', expected: '* * * * 8 *' },
-          { expression: '* * * * * H', expected: '* * * * * 1' },
-          { expression: 'H H * * * *', expected: '10 33 * * * *' },
-          { expression: '* H H * * *', expected: '* 33 19 * * *' },
-          { expression: '* * H H * *', expected: '* * 19 27 * *' },
-          { expression: '* * * H H *', expected: '* * * 27 8 *' },
-          { expression: '* * * * H H', expected: '* * * * 8 1' },
-          { expression: 'H H H H H H', expected: '10 33 19 27 8 1' },
-          { expression: 'H/5 * * * * *', expected: '10/5 * * * * *' },
-          { expression: '* * * * * H#1', expected: '* * * * * 1' },
+          { expression: '* * * * * H', expected: '* * * * * 0' },
+          { expression: 'H H * * * *', expected: '5 34 * * * *' },
+          { expression: '* H H * * *', expected: '* 34 15 * * *' },
+          { expression: '* * H H * *', expected: '* * 15 12 * *' },
+          { expression: '* * * H H *', expected: '* * * 12 8 *' },
+          { expression: '* * * * H H', expected: '* * * * 8 0' },
+          { expression: 'H H H H H H', expected: '5 34 15 12 8 0' },
+          { expression: 'H/5 * * * * *', expected: '5/5 * * * * *' },
+          { expression: '* * * * * H#1', expected: '* * * * * 0' },
         ];
 
         for (const { expression, expected } of expressions) {
