@@ -1,5 +1,3 @@
-// Randomness related utils
-
 function xfnv1a(str: string) {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < str.length; i++) {

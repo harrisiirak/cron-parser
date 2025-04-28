@@ -1,7 +1,7 @@
 import { CronFieldCollection } from './CronFieldCollection';
 import { CronDate } from './CronDate';
 import { CronExpression, CronExpressionOptions } from './CronExpression';
-import { type PRNG, seededRandom } from './utils';
+import { type PRNG, seededRandom } from './utils/random';
 import {
   CronSecond,
   CronMinute,
