@@ -95,7 +95,7 @@ export class CronExpressionParser {
     const { strict = false } = options;
     const currentDate = options.currentDate || new CronDate();
 
-    const rand = options.seed ? seededRandom(options.seed) : seededRandom();
+    const rand = seededRandom(options.seed);
 
     expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
