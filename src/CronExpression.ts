@@ -9,8 +9,8 @@ export type CronExpressionOptions = {
   tz?: string;
   nthDayOfWeek?: number;
   expression?: string;
+  hashSeed?: string;
   strict?: boolean;
-  seed?: string;
 };
 
 /**

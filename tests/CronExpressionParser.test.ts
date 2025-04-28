@@ -1738,7 +1738,7 @@ describe('CronExpressionParser', () => {
       test('parses expressions using H on all fields', () => {
         const options = {
           currentDate: new Date(2025, 0, 1),
-          seed: 'F00D',
+          hashSeed: 'F00D',
         };
 
         const expressions = [

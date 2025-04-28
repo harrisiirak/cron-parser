@@ -79,7 +79,7 @@ npm install cron-parser
 | endDate     | Date \| string \| number | End date of iteration range. Sets iteration range end point     |
 | startDate   | Date \| string \| number | Start date of iteration range. Set iteration range start point  |
 | tz          | string                   | Timezone (e.g., 'Europe/London')                                |
-| seed        | string                   | A seed to be used in conjunction with the `H` special character |
+| hashSeed    | string                   | A seed to be used in conjunction with the `H` special character |
 | strict      | boolean                  | Enable strict mode validation                                   |
 
 When using string dates, the following formats are supported:
@@ -317,14 +317,14 @@ const interval = CronExpressionParser.parse('H/5 * * * *');
 const interval = CronExpressionParser.parse('* * * * H#3');
 ```
 
-The randomness is seed-able using the `seed` option of `CronExpressionOptions`:
+The randomness is seed-able using the `hashSeed` option of `CronExpressionOptions`:
 
 ```typescript
 import { CronExpressionParser } from 'cron-parser';
 
 const options = {
   currentDate: '2023-03-26T01:00:00',
-  seed: 'main-backup', // Generally, seed would be a job name for example
+  hashSeed: 'main-backup', // Generally, hashSeed would be a job name for example
 };
 
 const interval = CronExpressionParser.parse('H * * * H', options);
