@@ -77,7 +77,7 @@ npm install cron-parser
 | currentDate | Date \| string \| number | Current date. Defaults to current local time in UTC            |
 | endDate     | Date \| string \| number | End date of iteration range. Sets iteration range end point    |
 | startDate   | Date \| string \| number | Start date of iteration range. Set iteration range start point |
-| tz          | string                   | Timezone (e.g., 'Europe/London')                               |
+| tz          | string                   | Timezone (e.g., 'Europe/London' or '+00:00')                   |
 | strict      | boolean                  | Enable strict mode validation                                  |
 
 When using string dates, the following formats are supported:
