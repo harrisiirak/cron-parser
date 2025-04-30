@@ -35,15 +35,16 @@ npm install cron-parser
 
 ### Special Characters
 
-| Character | Description               | Example                                       |
-| --------- | ------------------------- | --------------------------------------------- |
-| `*`       | Any value                 | `* * * * *` (every minute)                    |
-| `?`       | Any value (alias for `*`) | `? * * * *` (every minute)                    |
-| `,`       | Value list separator      | `1,2,3 * * * *` (1st, 2nd, and 3rd minute)    |
-| `-`       | Range of values           | `1-5 * * * *` (every minute from 1 through 5) |
-| `/`       | Step values               | `*/5 * * * *` (every 5th minute)              |
-| `L`       | Last day of month/week    | `0 0 L * *` (midnight on last day of month)   |
-| `#`       | Nth day of month          | `0 0 * * 1#1` (first Monday of month)         |
+| Character | Description               | Example                                                                |
+| --------- | ------------------------- | ---------------------------------------------------------------------- |
+| `*`       | Any value                 | `* * * * *` (every minute)                                             |
+| `?`       | Any value (alias for `*`) | `? * * * *` (every minute)                                             |
+| `,`       | Value list separator      | `1,2,3 * * * *` (1st, 2nd, and 3rd minute)                             |
+| `-`       | Range of values           | `1-5 * * * *` (every minute from 1 through 5)                          |
+| `/`       | Step values               | `*/5 * * * *` (every 5th minute)                                       |
+| `L`       | Last day of month/week    | `0 0 L * *` (midnight on last day of month)                            |
+| `#`       | Nth day of month          | `0 0 * * 1#1` (first Monday of month)                                  |
+| `H`       | Randomized value          | `H * * * *` (every n minute where n is randomly picked within [0, 59]) |
 
 ### Predefined Expressions
 
@@ -61,24 +62,25 @@ npm install cron-parser
 
 ### Field Values
 
-| Field        | Values | Special Characters          | Aliases                        |
-| ------------ | ------ | --------------------------- | ------------------------------ |
-| second       | 0-59   | `*` `?` `,` `-` `/`         |                                |
-| minute       | 0-59   | `*` `?` `,` `-` `/`         |                                |
-| hour         | 0-23   | `*` `?` `,` `-` `/`         |                                |
-| day of month | 1-31   | `*` `?` `,` `-` `/` `L`     |                                |
-| month        | 1-12   | `*` `?` `,` `-` `/`         | `JAN`-`DEC`                    |
-| day of week  | 0-7    | `*` `?` `,` `-` `/` `L` `#` | `SUN`-`SAT` (0 or 7 is Sunday) |
+| Field        | Values | Special Characters              | Aliases                        |
+| ------------ | ------ | ------------------------------- | ------------------------------ |
+| second       | 0-59   | `*` `?` `,` `-` `/` `H`         |                                |
+| minute       | 0-59   | `*` `?` `,` `-` `/` `H`         |                                |
+| hour         | 0-23   | `*` `?` `,` `-` `/` `H`         |                                |
+| day of month | 1-31   | `*` `?` `,` `-` `/` `H` `L`     |                                |
+| month        | 1-12   | `*` `?` `,` `-` `/` `H`         | `JAN`-`DEC`                    |
+| day of week  | 0-7    | `*` `?` `,` `-` `/` `H` `L` `#` | `SUN`-`SAT` (0 or 7 is Sunday) |
 
 ## Options
 
-| Option      | Type                     | Description                                                    |
-| ----------- | ------------------------ | -------------------------------------------------------------- |
-| currentDate | Date \| string \| number | Current date. Defaults to current local time in UTC            |
-| endDate     | Date \| string \| number | End date of iteration range. Sets iteration range end point    |
-| startDate   | Date \| string \| number | Start date of iteration range. Set iteration range start point |
-| tz          | string                   | Timezone (e.g., 'Europe/London')                               |
-| strict      | boolean                  | Enable strict mode validation                                  |
+| Option      | Type                     | Description                                                     |
+| ----------- | ------------------------ | --------------------------------------------------------------- |
+| currentDate | Date \| string \| number | Current date. Defaults to current local time in UTC             |
+| endDate     | Date \| string \| number | End date of iteration range. Sets iteration range end point     |
+| startDate   | Date \| string \| number | Start date of iteration range. Set iteration range start point  |
+| tz          | string                   | Timezone (e.g., 'Europe/London')                                |
+| hashSeed    | string                   | A seed to be used in conjunction with the `H` special character |
+| strict      | boolean                  | Enable strict mode validation                                   |
 
 When using string dates, the following formats are supported:
 
@@ -289,6 +291,51 @@ console.log(modified2.stringify()); // "30 15 * * 1-5"
 ```
 
 The `CronFieldCollection.from` method accepts either CronField instances or raw values that would be valid for creating new CronField instances. This is particularly useful when you need to modify only specific fields while keeping others unchanged.
+
+### Hash support
+
+The library support adding [jitter](https://en.wikipedia.org/wiki/Jitter) to the returned intervals using the `H` special character in a field. When `H` is specified instead of `*`, a random value is used (`H` is replaced by `23`, where 23 is picked randomly, within the valid range of the field).
+
+This jitter allows to spread the load when it comes to job scheduling. This feature is inspired by Jenkins's cron syntax.
+
+```typescript
+import { CronExpressionParser } from 'cron-parser';
+
+// At 23:<randomized> on every day-of-week from Monday through Friday.
+const interval = CronExpressionParser.parse('H 23 * * 1-5');
+
+// At <randomized>:30 everyday.
+const interval = CronExpressionParser.parse('30 H * * *');
+
+// At every minutes of <randomized> hour at <randomized> second everyday.
+const interval = CronExpressionParser.parse('H * H * * *');
+
+// At every 5th minute from <randomized> through 59 everyday.
+const interval = CronExpressionParser.parse('H/5 * * * *');
+
+// At every minute of the third <randomized> day of the month
+const interval = CronExpressionParser.parse('* * * * H#3');
+```
+
+The randomness is seed-able using the `hashSeed` option of `CronExpressionOptions`:
+
+```typescript
+import { CronExpressionParser } from 'cron-parser';
+
+const options = {
+  currentDate: '2023-03-26T01:00:00',
+  hashSeed: 'main-backup', // Generally, hashSeed would be a job name for example
+};
+
+const interval = CronExpressionParser.parse('H * * * H', options);
+
+console.log(interval.stringify()); // "12 * * * 4"
+
+const otherInterval = CronExpressionParser.parse('H * * * H', options);
+
+// Using the same seed will always return the same jitter
+console.log(otherInterval.stringify()); // "12 * * * 4"
+```
 
 ## License
 

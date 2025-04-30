@@ -43,7 +43,7 @@ export abstract class CronField {
    * Returns the regular expression used to validate this field.
    */
   static get validChars(): RegExp {
-    return /^[,*\d/-]+$/;
+    return /^[,*\dH/-]+$/;
   }
 
   /**
