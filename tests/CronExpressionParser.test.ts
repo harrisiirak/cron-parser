@@ -1684,4 +1684,84 @@ describe('CronExpressionParser', () => {
       }).toThrow();
     });
   });
+
+  describe('test expressions using the hash extension syntax', () => {
+    // Not having a seed is making tests less useful
+    describe('without a custom seed', () => {
+      test('parses expressions using H on all fields', () => {
+        const options = {
+          currentDate: new Date(2025, 0, 1),
+        };
+
+        const expressions = [
+          'H * * * * *',
+          '* H * * * *',
+          '* * H * * *',
+          '* * * H * *',
+          '* * * * H *',
+          '* * * * * H',
+          'H H * * * *',
+          '* H H * * *',
+          '* * H H * *',
+          '* * * H H *',
+          '* * * * H H',
+          'H H H H H H',
+          'H/5 * * * * *',
+          '* * * * * H#1',
+        ];
+
+        for (const expression of expressions) {
+          const interval = CronExpressionParser.parse(expression, options);
+
+          for (var i = 0; i < 3; i++) {
+            let date = interval.next();
+
+            expect(date.getSeconds()).toBeGreaterThanOrEqual(0);
+            expect(date.getSeconds()).toBeLessThanOrEqual(59);
+            expect(date.getMinutes()).toBeGreaterThanOrEqual(0);
+            expect(date.getMinutes()).toBeLessThanOrEqual(59);
+            expect(date.getHours()).toBeGreaterThanOrEqual(0);
+            expect(date.getHours()).toBeLessThanOrEqual(23);
+            expect(date.getDate()).toBeGreaterThanOrEqual(1);
+            expect(date.getDate()).toBeLessThanOrEqual(31);
+            expect(date.getMonth()).toBeGreaterThanOrEqual(0);
+            expect(date.getMonth()).toBeLessThanOrEqual(11);
+            expect(date.getDay()).toBeGreaterThanOrEqual(0);
+            expect(date.getDay()).toBeLessThanOrEqual(7);
+            expect(date.getFullYear()).toBe(2025);
+          }
+        }
+      });
+    });
+
+    describe('with a custom seed', () => {
+      test('parses expressions using H on all fields', () => {
+        const options = {
+          currentDate: new Date(2025, 0, 1),
+          hashSeed: 'F00D',
+        };
+
+        const expressions = [
+          { expression: 'H * * * * *', expected: '5 * * * * *' },
+          { expression: '* H * * * *', expected: '* 34 * * * *' },
+          { expression: '* * H * * *', expected: '* * 15 * * *' },
+          { expression: '* * * H * *', expected: '* * * 12 * *' },
+          { expression: '* * * * H *', expected: '* * * * 8 *' },
+          { expression: '* * * * * H', expected: '* * * * * 0' },
+          { expression: 'H H * * * *', expected: '5 34 * * * *' },
+          { expression: '* H H * * *', expected: '* 34 15 * * *' },
+          { expression: '* * H H * *', expected: '* * 15 12 * *' },
+          { expression: '* * * H H *', expected: '* * * 12 8 *' },
+          { expression: '* * * * H H', expected: '* * * * 8 0' },
+          { expression: 'H H H H H H', expected: '5 34 15 12 8 0' },
+          { expression: 'H/5 * * * * *', expected: '5/5 * * * * *' },
+          { expression: '* * * * * H#1', expected: '* * * * * 0' },
+        ];
+
+        for (const { expression, expected } of expressions) {
+          expect(CronExpressionParser.parse(expression, options).stringify(true)).toBe(expected);
+        }
+      });
+    });
+  });
 });
