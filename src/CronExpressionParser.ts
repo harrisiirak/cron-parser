@@ -142,14 +142,14 @@ export class CronExpressionParser {
     ) as DayOfWeekRange[];
 
     const fields = new CronFieldCollection({
-      second: new CronSecond(second, ['*', '?'].includes(rawFields.second)),
-      minute: new CronMinute(minute, ['*', '?'].includes(rawFields.minute)),
-      hour: new CronHour(hour, ['*', '?'].includes(rawFields.hour)),
-      dayOfMonth: new CronDayOfMonth(dayOfMonth, ['*', '?'].includes(rawFields.dayOfMonth)),
-      month: new CronMonth(month, ['*', '?'].includes(rawFields.month)),
-      dayOfWeek: new CronDayOfWeek(dayOfWeek, ['*', '?'].includes(rawFields.dayOfWeek)),
+      second: new CronSecond(second, { rawValue: rawFields.second }),
+      minute: new CronMinute(minute, { rawValue: rawFields.minute }),
+      hour: new CronHour(hour, { rawValue: rawFields.hour }),
+      dayOfMonth: new CronDayOfMonth(dayOfMonth, { rawValue: rawFields.dayOfMonth }),
+      month: new CronMonth(month, { rawValue: rawFields.month }),
+      dayOfWeek: new CronDayOfWeek(dayOfWeek, { rawValue: rawFields.dayOfWeek, nthDayOfWeek }),
     });
-    return new CronExpression(fields, { ...options, expression, currentDate, nthDayOfWeek });
+    return new CronExpression(fields, { ...options, expression, currentDate });
   }
 
   /**

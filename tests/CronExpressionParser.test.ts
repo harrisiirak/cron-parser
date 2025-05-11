@@ -1755,7 +1755,7 @@ describe('CronExpressionParser', () => {
           { expression: '* * * * H H', expected: '* * * * 8 0' },
           { expression: 'H H H H H H', expected: '5 34 15 12 8 0' },
           { expression: 'H/5 * * * * *', expected: '5/5 * * * * *' },
-          { expression: '* * * * * H#1', expected: '* * * * * 0' },
+          { expression: '* * * * * H#1', expected: '* * * * * 0#1' },
         ];
 
         for (const { expression, expected } of expressions) {

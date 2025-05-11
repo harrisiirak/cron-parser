@@ -38,7 +38,7 @@ describe('CronFieldCollection', () => {
     test('should serialize collection', () => {
       const expected = {
         second: {
-          wildcard: false,
+          wildcard: true,
           values: Array.from(Array(60).keys()),
         },
         minute: {

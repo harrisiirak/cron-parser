@@ -1,4 +1,4 @@
-import { CronField } from './CronField';
+import { CronField, CronFieldOptions } from './CronField';
 import { CronChars, CronMax, CronMin, DayOfWeekRange } from './types';
 
 const MIN_DAY = 0;
@@ -30,10 +30,10 @@ export class CronDayOfWeek extends CronField {
   /**
    * CronDayOfTheWeek constructor. Initializes the "day of the week" field with the provided values.
    * @param {DayOfWeekRange[]} values - Values for the "day of the week" field
-   * @param {boolean} [wildcard=false] - Whether this field is a wildcard
+   * @param {CronFieldOptions} [options] - Options provided by the parser
    */
-  constructor(values: DayOfWeekRange[], wildcard = false) {
-    super(values, wildcard);
+  constructor(values: DayOfWeekRange[], options?: CronFieldOptions) {
+    super(values, options);
     this.validate();
   }
 
@@ -43,5 +43,14 @@ export class CronDayOfWeek extends CronField {
    */
   get values(): DayOfWeekRange[] {
     return super.values as DayOfWeekRange[];
+  }
+
+  /**
+   * Returns the nth day of the week if specified in the cron expression.
+   * This is used for the '#' character in the cron expression.
+   * @returns {number} The nth day of the week (1-5) or 0 if not specified.
+   */
+  get nthDay(): number {
+    return this.options.nthDayOfWeek ?? 0;
   }
 }
