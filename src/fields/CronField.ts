@@ -19,7 +19,7 @@ export type SerializedCronField = {
  * @property {number} [nthDayOfWeek] - The nth day of the week.
  */
 export type CronFieldOptions = {
-  rawValue: string;
+  rawValue?: string;
   wildcard?: boolean;
   nthDayOfWeek?: number;
 };
@@ -36,7 +36,7 @@ export abstract class CronField {
   readonly #wildcard: boolean = false;
   readonly #values: (number | string)[] = [];
 
-  protected readonly options: CronFieldOptions = { rawValue: '' };
+  protected readonly options: CronFieldOptions & { rawValue: string } = { rawValue: '' };
 
   /**
    * Returns the minimum value allowed for this field.
@@ -83,10 +83,7 @@ export abstract class CronField {
    * @throws {TypeError} if the constructor is called directly
    * @throws {Error} if validation fails
    */
-  protected constructor(
-    values: (number | string)[],
-    /* istanbul ignore next - we always pass a value */ options: CronFieldOptions = { rawValue: '' },
-  ) {
+  protected constructor(values: (number | string)[], options: CronFieldOptions = { rawValue: '' }) {
     if (!Array.isArray(values)) {
       throw new Error(`${this.constructor.name} Validation error, values is not an array`);
     }
@@ -94,7 +91,11 @@ export abstract class CronField {
       throw new Error(`${this.constructor.name} Validation error, values contains no values`);
     }
 
-    this.options = options;
+    /* istanbul ignore next */
+    this.options = {
+      ...options,
+      rawValue: options.rawValue ?? '',
+    };
     this.#values = values.sort(CronField.sorter);
     this.#wildcard = this.options.wildcard !== undefined ? this.options.wildcard : this.#isWildcardValue();
     this.#hasLastChar = this.options.rawValue.includes('L');
