@@ -1,19 +1,21 @@
-import {
-  CronDayOfMonth,
-  CronDayOfWeek,
-  CronFieldCollection,
-  CronHour,
-  CronMinute,
-  CronMonth,
-  CronSecond,
-  DayOfMonthRange,
-  DayOfWeekRange,
-  HourRange,
-  MonthRange,
-  SixtyRange,
-} from '../src';
+import { CronDayOfWeek, CronSecond, SixtyRange } from '../src';
 
 describe('CronField', () => {
+  describe('wildcard detection', () => {
+    test('should detect wildcard based on input values', () => {
+      const secondField = new CronSecond([0, 1, 2, 3, 4, 5, 6, 7]);
+      expect(secondField.isWildcard).toBeFalsy();
+
+      const dayOfWeekField = new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6, 7]);
+      expect(dayOfWeekField.isWildcard).toBeTruthy();
+    });
+
+    test('should detect wildcard based options override', () => {
+      const dayOfWeekField = new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6], { rawValue: '', wildcard: true });
+      expect(dayOfWeekField.isWildcard).toBeTruthy();
+    });
+  });
+
   describe('validate', () => {
     test('should throw error when values is not an array', () => {
       expect(() => new CronSecond(0 as any)).toThrow('CronSecond Validation error, values is not an array');

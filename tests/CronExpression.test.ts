@@ -266,6 +266,21 @@ describe('CronExpression', () => {
       expect(str).toEqual(expected);
     });
 
+    test('stringify cron expression with day of week #', () => {
+      const expressions: string[] = [];
+      for (let week = 1; week <= 5; week++) {
+        for (let day = 0; day <= 6; day++) {
+          expressions.push(`* * * * * ${day}#${week}`);
+        }
+      }
+
+      for (const expression of expressions) {
+        const interval = CronExpressionParser.parse(expression, {});
+        const str = interval.stringify(true);
+        expect(str).toEqual(expression);
+      }
+    });
+
     test('stringify cron expression with wildcard day of month and single month value', () => {
       const expected = '* * * 4 *';
       const interval = CronExpressionParser.parse(expected, {});

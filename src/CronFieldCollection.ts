@@ -397,9 +397,15 @@ export class CronFieldCollection {
       }
     }
     return ranges
-      .map((range) =>
-        range.count === 1 ? range.start.toString() : CronFieldCollection.#handleMultipleRanges(range, max),
-      )
+      .map((range) => {
+        const value =
+          range.count === 1 ? range.start.toString() : CronFieldCollection.#handleMultipleRanges(range, max);
+        if (field instanceof CronDayOfWeek && field.nthDay > 0) {
+          return `${value}#${field.nthDay}`;
+        }
+
+        return value;
+      })
       .join(',');
   }
 
