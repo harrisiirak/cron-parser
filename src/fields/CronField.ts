@@ -31,6 +31,8 @@ export type CronFieldOptions = {
  */
 export abstract class CronField {
   readonly #hasLastChar: boolean = false;
+  readonly #hasQuestionMarkChar: boolean = false;
+
   readonly #wildcard: boolean = false;
   readonly #values: (number | string)[] = [];
 
@@ -64,7 +66,7 @@ export abstract class CronField {
    * Returns the regular expression used to validate this field.
    */
   static get validChars(): RegExp {
-    return /^[,*\dH/-]+$/;
+    return /^[?,*\dH/-]+$/;
   }
 
   /**
@@ -96,6 +98,7 @@ export abstract class CronField {
     this.#values = values.sort(CronField.sorter);
     this.#wildcard = this.options.wildcard !== undefined ? this.options.wildcard : this.#isWildcardValue();
     this.#hasLastChar = this.options.rawValue.includes('L');
+    this.#hasQuestionMarkChar = this.options.rawValue.includes('?');
   }
 
   /**
@@ -131,6 +134,14 @@ export abstract class CronField {
    */
   get hasLastChar(): boolean {
     return this.#hasLastChar;
+  }
+
+  /**
+   * Indicates whether this field has a "question mark" character.
+   * @returns {boolean}
+   */
+  get hasQuestionMarkChar(): boolean {
+    return this.#hasQuestionMarkChar;
   }
 
   /**

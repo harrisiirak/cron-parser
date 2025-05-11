@@ -281,6 +281,13 @@ describe('CronExpression', () => {
       }
     });
 
+    test('stringify cron expression with ?', () => {
+      const expected = '? ? * * ?';
+      const interval = CronExpressionParser.parse(expected, {});
+      const str = interval.stringify();
+      expect(str).toEqual(expected);
+    });
+
     test('stringify cron expression with wildcard day of month and single month value', () => {
       const expected = '* * * 4 *';
       const interval = CronExpressionParser.parse(expected, {});
