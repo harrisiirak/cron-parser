@@ -1,8 +1,27 @@
 import { CronChars, CronConstraints, CronFieldType, CronMax, CronMin } from './types';
 
+/**
+ * Represents the serialized form of a cron field.
+ * @typedef {Object} SerializedCronField
+ * @property {boolean} wildcard - Indicates if the field is a wildcard.
+ * @property {(number|string)[]} values - The values of the field.
+ */
 export type SerializedCronField = {
   wildcard: boolean;
   values: (number | string)[];
+};
+
+/**
+ * Represents the options for a cron field.
+ * @typedef {Object} CronFieldOptions
+ * @property {string} rawValue - The raw value of the field.
+ * @property {boolean} [wildcard] - Indicates if the field is a wildcard.
+ * @property {number} [nthDayOfWeek] - The nth day of the week.
+ */
+export type CronFieldOptions = {
+  rawValue: string;
+  wildcard?: boolean;
+  nthDayOfWeek?: number;
 };
 
 /**
@@ -14,6 +33,8 @@ export abstract class CronField {
   readonly #hasLastChar: boolean = false;
   readonly #wildcard: boolean = false;
   readonly #values: (number | string)[] = [];
+
+  protected readonly options: CronFieldOptions = { rawValue: '' };
 
   /**
    * Returns the minimum value allowed for this field.
@@ -56,13 +77,13 @@ export abstract class CronField {
   /**
    * CronField constructor. Initializes the field with the provided values.
    * @param {number[] | string[]} values - Values for this field
-   * @param {boolean} [wildcard=false] - Whether this field is a wildcard
+   * @param {CronFieldOptions} [options] - Options provided by the parser
    * @throws {TypeError} if the constructor is called directly
    * @throws {Error} if validation fails
    */
   protected constructor(
     values: (number | string)[],
-    /* istanbul ignore next - we always pass a value */ wildcard = false,
+    /* istanbul ignore next - we always pass a value */ options: CronFieldOptions = { rawValue: '' },
   ) {
     if (!Array.isArray(values)) {
       throw new Error(`${this.constructor.name} Validation error, values is not an array`);
@@ -70,11 +91,11 @@ export abstract class CronField {
     if (!(values.length > 0)) {
       throw new Error(`${this.constructor.name} Validation error, values contains no values`);
     }
+
+    this.options = options;
     this.#values = values.sort(CronField.sorter);
-    this.#wildcard = wildcard;
-    this.#hasLastChar = values.some((expression: number | string) => {
-      return typeof expression === 'string' && expression.indexOf('L') >= 0;
-    });
+    this.#wildcard = this.options.wildcard !== undefined ? this.options.wildcard : this.#isWildcardValue();
+    this.#hasLastChar = this.options.rawValue.includes('L');
   }
 
   /**
@@ -144,7 +165,6 @@ export abstract class CronField {
 
   /**
    * Serializes the field to an object.
-   * @todo This is really only for debugging, should it be removed?
    * @returns {SerializedCronField}
    */
   serialize(): SerializedCronField {
@@ -178,5 +198,20 @@ export abstract class CronField {
     if (duplicate) {
       throw new Error(`${this.constructor.name} Validation error, duplicate values found: ${duplicate}`);
     }
+  }
+
+  /**
+   * Determines if the field is a wildcard based on the values.
+   * When options.rawValue is not empty, it checks if the raw value is a wildcard, otherwise it checks if all values in the range are included.
+   * @returns {boolean}
+   */
+  #isWildcardValue(): boolean {
+    if (this.options.rawValue.length > 0) {
+      return ['*', '?'].includes(this.options.rawValue);
+    }
+
+    return Array.from({ length: this.max - this.min + 1 }, (_, i) => i + this.min).every((value) =>
+      this.#values.includes(value),
+    );
   }
 }

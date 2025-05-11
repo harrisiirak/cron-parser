@@ -1,4 +1,4 @@
-import { CronField } from './CronField';
+import { CronField, CronFieldOptions } from './CronField';
 import { CronChars, CronMax, CronMin, SixtyRange } from './types';
 
 const MIN_MINUTE = 0;
@@ -26,10 +26,10 @@ export class CronMinute extends CronField {
   /**
    * CronSecond constructor. Initializes the "second" field with the provided values.
    * @param {SixtyRange[]} values - Values for the "second" field
-   * @param {boolean} [wildcard=false] - Whether this field is a wildcard
+   * @param {CronFieldOptions} [options] - Options provided by the parser
    */
-  constructor(values: SixtyRange[], wildcard = false) {
-    super(values, wildcard);
+  constructor(values: SixtyRange[], options?: CronFieldOptions) {
+    super(values, options);
     this.validate();
   }
 
