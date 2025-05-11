@@ -7,7 +7,6 @@ export type CronExpressionOptions = {
   endDate?: Date | string | number | CronDate;
   startDate?: Date | string | number | CronDate;
   tz?: string;
-  nthDayOfWeek?: number;
   expression?: string;
   hashSeed?: string;
   strict?: boolean;
@@ -27,7 +26,6 @@ export class CronExpression {
   #currentDate: CronDate;
   readonly #startDate: CronDate | null;
   readonly #endDate: CronDate | null;
-  readonly #nthDayOfWeek: number;
   readonly #fields: CronFieldCollection;
 
   /**
@@ -42,7 +40,6 @@ export class CronExpression {
     this.#currentDate = new CronDate(options.currentDate, this.#tz);
     this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
     this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
-    this.#nthDayOfWeek = options.nthDayOfWeek || 0;
     this.#fields = fields;
   }
 
@@ -236,9 +233,9 @@ export class CronExpression {
     }
 
     // Check nth day of week if specified
-    if (this.#nthDayOfWeek > 0) {
+    if (this.#fields.dayOfWeek.nthDay > 0) {
       const weekInMonth = Math.ceil(dt.getDate() / 7);
-      if (weekInMonth !== this.#nthDayOfWeek) {
+      if (weekInMonth !== this.#fields.dayOfWeek.nthDay) {
         return false;
       }
     }
@@ -367,7 +364,9 @@ export class CronExpression {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
         continue;
       }
-      if (!(this.#nthDayOfWeek <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#nthDayOfWeek)) {
+      if (
+        !(this.#fields.dayOfWeek.nthDay <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#fields.dayOfWeek.nthDay)
+      ) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
         continue;
       }
