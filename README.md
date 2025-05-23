@@ -294,7 +294,7 @@ The `CronFieldCollection.from` method accepts either CronField instances or raw 
 
 ### Hash support
 
-The library support adding [jitter](https://en.wikipedia.org/wiki/Jitter) to the returned intervals using the `H` special character in a field. When `H` is specified instead of `*`, a random value is used (`H` is replaced by `23`, where 23 is picked randomly, within the valid range of the field).
+The library supports adding [jitter](https://en.wikipedia.org/wiki/Jitter) to the returned intervals using the `H` special character in a field. When `H` is specified instead of `*`, a random value is used (`H` is replaced by `23`, where 23 is picked randomly, within the valid range of the field).
 
 This jitter allows to spread the load when it comes to job scheduling. This feature is inspired by Jenkins's cron syntax.
 
@@ -310,8 +310,17 @@ const interval = CronExpressionParser.parse('30 H * * *');
 // At every minutes of <randomized> hour at <randomized> second everyday.
 const interval = CronExpressionParser.parse('H * H * * *');
 
-// At every 5th minute from <randomized> through 59 everyday.
+// At every 5th minute starting from a random offset.
+// For example, if the random offset is 3, it will run at minutes 3, 8, 13, 18, etc.
 const interval = CronExpressionParser.parse('H/5 * * * *');
+
+// At a random minute within the range 0-10 everyday.
+const interval = CronExpressionParser.parse('H(0-10) * * * *');
+
+// At every 5th minute starting from a random offset within the range 0-4.
+// For example, if the random offset is 2, it will run at minutes 2, 7, 12, 17, etc.
+// The random offset is constrained to be less than the step value.
+const interval = CronExpressionParser.parse('H(0-29)/5 * * * *');
 
 // At every minute of the third <randomized> day of the month
 const interval = CronExpressionParser.parse('* * * * H#3');
