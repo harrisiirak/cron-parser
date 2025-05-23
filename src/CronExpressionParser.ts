@@ -205,11 +205,89 @@ export class CronExpressionParser {
       throw new Error(`Invalid characters, got value: ${value}`);
     }
 
-    // Replace '*' and '?'
-    value = value.replace(/[*?]/g, constraints.min + '-' + constraints.max);
-    // Replace 'H' using the seeded PRNG
-    value = value.replace(/H/g, String(Math.floor(rand() * (constraints.max - constraints.min + 1) + constraints.min)));
-    return CronExpressionParser.#parseSequence(field, value, constraints);
+    value = this.#parseWildcard(value, constraints);
+    value = this.#parseHashed(value, constraints, rand);
+    return this.#parseSequence(field, value, constraints);
+  }
+
+  /**
+   * Parse a wildcard from a cron expression.
+   * @param {string} value - The value to parse.
+   * @param {CronConstraints} constraints - The constraints for the field.
+   * @private
+   */
+  static #parseWildcard(value: string, constraints: CronConstraints): string {
+    return value.replace(/[*?]/g, constraints.min + '-' + constraints.max);
+  }
+
+  /**
+   * Parse a hashed value from a cron expression.
+   * @param {string} value - The value to parse.
+   * @param {CronConstraints} constraints - The constraints for the field.
+   * @param {PRNG} rand - The random number generator to use.
+   * @private
+   */
+  static #parseHashed(value: string, constraints: CronConstraints, rand: PRNG): string {
+    const randomValue = rand();
+    return value.replace(/H(?:\((\d+)-(\d+)\))?(?:\/(\d+))?/g, (_, min, max, step) => {
+      // H(range)/step
+      if (min && max && step) {
+        const minNum = parseInt(min, 10);
+        const maxNum = parseInt(max, 10);
+        const stepNum = parseInt(step, 10);
+
+        if (minNum > maxNum) {
+          throw new Error(`Invalid range: ${minNum}-${maxNum}, min > max`);
+        }
+        if (stepNum <= 0) {
+          throw new Error(`Invalid step: ${stepNum}, must be positive`);
+        }
+
+        const minStart = Math.max(minNum, constraints.min);
+        const offset = Math.floor(randomValue * stepNum);
+        const values = [];
+        for (let i = Math.floor(minStart / stepNum) * stepNum + offset; i <= maxNum; i += stepNum) {
+          if (i >= minStart) {
+            values.push(i);
+          }
+        }
+
+        return values.join(',');
+      }
+      // H(range)
+      else if (min && max) {
+        const minNum = parseInt(min, 10);
+        const maxNum = parseInt(max, 10);
+
+        if (minNum > maxNum) {
+          throw new Error(`Invalid range: ${minNum}-${maxNum}, min > max`);
+        }
+        return String(Math.floor(randomValue * (maxNum - minNum + 1)) + minNum);
+      }
+      // H/step
+      else if (step) {
+        const stepNum = parseInt(step, 10);
+
+        // Validate step
+        if (stepNum <= 0) {
+          throw new Error(`Invalid step: ${stepNum}, must be positive`);
+        }
+
+        const offset = Math.floor(randomValue * stepNum);
+        const values = [];
+        for (let i = Math.floor(constraints.min / stepNum) * stepNum + offset; i <= constraints.max; i += stepNum) {
+          if (i >= constraints.min) {
+            values.push(i);
+          }
+        }
+
+        return values.join(',');
+      }
+      // H
+      else {
+        return String(Math.floor(randomValue * (constraints.max - constraints.min + 1) + constraints.min));
+      }
+    });
   }
 
   /**
