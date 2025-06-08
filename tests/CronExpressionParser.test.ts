@@ -1685,7 +1685,29 @@ describe('CronExpressionParser', () => {
     });
   });
 
-  describe('test expressions using the hash extension syntax', () => {
+  describe('test expressions using hashed extension syntax', () => {
+    describe('pattern validation', () => {
+      // Test invalid step value for H/step pattern
+      test('throws error for invalid step in H/step pattern', () => {
+        expect(() => CronExpressionParser.parse('H/0 * * * *')).toThrow('Invalid step: 0, must be positive');
+      });
+
+      // Test invalid range for H(range) pattern
+      test('throws error for invalid range in H(range) pattern', () => {
+        expect(() => CronExpressionParser.parse('H(10-5) * * * *')).toThrow('Invalid range: 10-5, min > max');
+      });
+
+      // Test invalid range for H(range)/step pattern
+      test('throws error for invalid range in H(range)/step pattern', () => {
+        expect(() => CronExpressionParser.parse('H(10-5)/2 * * * *')).toThrow('Invalid range: 10-5, min > max');
+      });
+
+      // Test invalid step for H(range)/step pattern
+      test('throws error for invalid step in H(range)/step pattern', () => {
+        expect(() => CronExpressionParser.parse('H(1-10)/0 * * * *')).toThrow('Invalid step: 0, must be positive');
+      });
+    });
+
     // Not having a seed is making tests less useful
     describe('without a custom seed', () => {
       test('parses expressions using H on all fields', () => {
@@ -1754,7 +1776,10 @@ describe('CronExpressionParser', () => {
           { expression: '* * * H H *', expected: '* * * 12 8 *' },
           { expression: '* * * * H H', expected: '* * * * 8 0' },
           { expression: 'H H H H H H', expected: '5 34 15 12 8 0' },
-          { expression: 'H/5 * * * * *', expected: '5/5 * * * * *' },
+          { expression: 'H/5 * * * * *', expected: '*/5 * * * * *' },
+          { expression: 'H(10-20) * * * *', expected: '0 16 * * * *' },
+          { expression: 'H(0-29)/10 * * * *', expected: '0 5,15,25 * * * *' },
+          { expression: '* H H(9-20)/3 * * 1-5', expected: '* 34 10-19/3 * * 1-5' },
           { expression: '* * * * * H#1', expected: '* * * * * 0#1' },
         ];
 

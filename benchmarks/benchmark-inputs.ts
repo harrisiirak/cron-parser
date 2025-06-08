@@ -16,4 +16,10 @@ export const benchmarkInputs: BenchmarkInput[] = [
   { pattern: '0 0 0 * * 4,6L', description: 'At midnight on every Thursday and last Saturday of every month' },
   { pattern: '0 0 0 * * 1L,5L', description: 'At midnight on the last Monday and last Friday of every month' },
   { pattern: '0 0 6-20/2,L 2 *', description: 'At midnight on every 2nd hour between 6-20 and last day in February' },
+  { pattern: '0 H * * *', description: 'Every hour on every day of every month' },
+  { pattern: '0 H/3 * * *', description: 'Every 3 hours on every day of every month' },
+  {
+    pattern: 'H H H(9-20)/3 1-11 *',
+    description: 'Every 3 hours between 9am and 8pm on the 1st through 11th months',
+  },
 ];
