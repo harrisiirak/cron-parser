@@ -333,6 +333,18 @@ describe('CronFieldCollection', () => {
       expect(result.minute.values).toEqual([30]);
     });
 
+    test('should handle special characters (L)', () => {
+      const result = CronFieldCollection.from(base, {
+        dayOfMonth: ['L'],
+        dayOfWeek: ['L'],
+      });
+      expect(result.dayOfMonth).not.toBe(base.dayOfMonth);
+      expect(result.dayOfMonth.values).toEqual(['L']);
+      expect(result.dayOfWeek).not.toBe(base.dayOfWeek);
+      expect(result.dayOfWeek.values).toEqual(['L']);
+      expect(result.stringify(true)).toEqual('0 0 12 L 1 L');
+    });
+
     test('should handle mix of CronField instances and raw values', () => {
       const newHour = new CronHour([15]);
 
