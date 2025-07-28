@@ -1,4 +1,4 @@
-import { CronExpression, CronExpressionOptions } from '../src/CronExpression';
+import { CronExpression, CronExpressionOptions, TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE } from '../src/CronExpression';
 import { CronFieldCollection, CronFields } from '../src/CronFieldCollection';
 import { expect } from '@jest/globals';
 import { CronDayOfMonth, CronDayOfWeek, CronHour, CronMinute, CronMonth, CronSecond } from '../src/fields';
@@ -92,6 +92,47 @@ describe('CronExpression', () => {
     });
     const prevDate = cronExpression.prev();
     expect(prevDate.toISOString()).toBe('2020-03-06T10:02:00.000Z');
+  });
+
+  describe('next schedule bounds validation', () => {
+    test('should not throw an error if the current date is within the bounds', () => {
+      const startDate = new Date('2022-01-01T00:00:00Z');
+      const currentDate = new Date('2023-01-01T00:00:00Z');
+      const endDate = new Date('2024-01-01T00:00:00Z');
+      const cronExpression = new CronExpression(fields, {
+        ...options,
+        currentDate,
+        startDate,
+        endDate,
+      });
+      expect(() => cronExpression.next()).not.toThrow();
+      expect(() => cronExpression.prev()).not.toThrow();
+    });
+
+    test('should throw an error if the current date is before the start date', () => {
+      const startDate = new Date('2023-01-01T00:00:00Z');
+      const currentDate = new Date('2022-01-01T00:00:00Z');
+      const cronExpression = new CronExpression(fields, {
+        ...options,
+        currentDate,
+        startDate,
+      });
+
+      expect(() => cronExpression.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+      expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    });
+
+    test('should throw an error if the current date is after the end date', () => {
+      const endDate = new Date('2023-01-01T00:00:00Z');
+      const currentDate = new Date('2024-01-01T00:00:00Z');
+      const cronExpression = new CronExpression(fields, {
+        ...options,
+        currentDate,
+        endDate,
+      });
+      expect(() => cronExpression.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+      expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    });
   });
 
   describe('stringify', () => {

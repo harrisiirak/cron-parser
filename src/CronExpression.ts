@@ -13,6 +13,16 @@ export type CronExpressionOptions = {
 };
 
 /**
+ * Error message for when the current date is outside the specified time span.
+ */
+export const TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE = 'Out of the time span range';
+
+/**
+ * Error message for when the loop limit is exceeded during iteration.
+ */
+export const LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE = 'Invalid expression, loop limit exceeded';
+
+/**
  * Cron iteration loop safety limit
  */
 const LOOP_LIMIT = 10000;
@@ -41,6 +51,8 @@ export class CronExpression {
     this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
     this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
     this.#fields = fields;
+
+    // TODO: validateTimeSpan could be called here to ensure the initial date is within the specified time span, however, this would be a breaking change; consider adding this in a future version
   }
 
   /**
@@ -332,6 +344,28 @@ export class CronExpression {
   }
 
   /**
+   * Validates the current date against the start and end dates of the cron expression.
+   * If the current date is outside the specified time span, an error is thrown.
+   *
+   * @param currentDate {CronDate} - The current date to validate.
+   * @throws {Error} If the current date is outside the specified time span.
+   * @private
+   */
+  #validateTimeSpan(currentDate: CronDate): void {
+    if (!this.#startDate && !this.#endDate) {
+      return;
+    }
+
+    const currentTime = currentDate.getTime();
+    if (this.#startDate && currentTime < this.#startDate.getTime()) {
+      throw new Error(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    }
+    if (this.#endDate && currentTime > this.#endDate.getTime()) {
+      throw new Error(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    }
+  }
+
+  /**
    * Finds the next or previous schedule based on the cron expression.
    *
    * @param {boolean} [reverse=false] - If true, finds the previous schedule; otherwise, finds the next schedule.
@@ -341,24 +375,11 @@ export class CronExpression {
   #findSchedule(reverse = false): CronDate {
     const dateMathVerb: DateMathOp = reverse ? DateMathOp.Subtract : DateMathOp.Add;
     const currentDate = new CronDate(this.#currentDate);
-    const startDate = this.#startDate;
-    const endDate = this.#endDate;
     const startTimestamp = currentDate.getTime();
     let stepCount = 0;
 
-    while (stepCount++ < LOOP_LIMIT) {
-      /* istanbul ignore next - should be impossible under normal use to trigger the branch */
-      if (stepCount > LOOP_LIMIT) {
-        throw new Error('Invalid expression, loop limit exceeded');
-      }
-
-      if (reverse && startDate && startDate.getTime() > currentDate.getTime()) {
-        throw new Error('Out of the timespan range');
-      }
-
-      if (!reverse && endDate && currentDate.getTime() > endDate.getTime()) {
-        throw new Error('Out of the timespan range');
-      }
+    while (++stepCount < LOOP_LIMIT) {
+      this.#validateTimeSpan(currentDate);
 
       if (!this.#matchDayOfMonth(currentDate)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
@@ -393,6 +414,11 @@ export class CronExpression {
         continue;
       }
       break;
+    }
+
+    /* istanbul ignore next - should be impossible under normal use to trigger the branch */
+    if (stepCount > LOOP_LIMIT) {
+      throw new Error(LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE);
     }
 
     if (currentDate.getMilliseconds() !== 0) {

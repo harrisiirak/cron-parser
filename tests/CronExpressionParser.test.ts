@@ -1,5 +1,5 @@
 import CronDate from '../src/CronDate';
-import { CronExpression, CronExpressionOptions } from '../src/CronExpression';
+import { CronExpression, CronExpressionOptions, TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE } from '../src/CronExpression';
 import { CronExpressionParser } from '../src/CronExpressionParser';
 import { CronFieldCollection } from '../src/CronFieldCollection';
 
@@ -1231,8 +1231,7 @@ describe('CronExpressionParser', () => {
       expect(next.getHours()).toEqual(4); // 4 AM
       expect(next.getDate()).toEqual(27); // on the 27th
 
-      // Out of the timespan range
-      expect(() => interval.next()).toThrow();
+      expect(() => interval.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
     });
 
     test('It works on DST end 2016-10-30 02:00:01 - 0 * * * *', () => {
@@ -1370,8 +1369,7 @@ describe('CronExpressionParser', () => {
       expect(next.getHours()).toEqual(3); // 3 AM
       expect(next.getDate()).toEqual(30); // on the 30th
 
-      // Out of the timespan range
-      expect(() => interval.next()).toThrow();
+      expect(() => interval.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
 
       options.endDate = '2016-10-30 04:00:01';
 
@@ -1398,8 +1396,7 @@ describe('CronExpressionParser', () => {
       expect(next.getHours()).toEqual(4); // 4 AM
       expect(next.getDate()).toEqual(30); // on the 30th
 
-      // Out of the timespan range
-      expect(() => interval.next()).toThrow();
+      expect(() => interval.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
 
       options.currentDate = new Date('Sun Oct 29 2016 01:00:00 GMT+0200');
       options.endDate = undefined;
