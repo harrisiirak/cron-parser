@@ -98,8 +98,8 @@ export abstract class CronField {
     };
     this.#values = values.sort(CronField.sorter);
     this.#wildcard = this.options.wildcard !== undefined ? this.options.wildcard : this.#isWildcardValue();
-    this.#hasLastChar = this.options.rawValue.includes('L');
-    this.#hasQuestionMarkChar = this.options.rawValue.includes('?');
+    this.#hasLastChar = this.options.rawValue.includes('L') || values.includes('L');
+    this.#hasQuestionMarkChar = this.options.rawValue.includes('?') || values.includes('?');
   }
 
   /**
