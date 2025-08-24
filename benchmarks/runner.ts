@@ -13,7 +13,10 @@ export interface BenchmarkResult {
 
 export const benchmarkResults: BenchmarkResult[] = [];
 
-type ParseExpressionFn = (expression: string, options?: { currentDate?: Date }) => { next: () => any };
+type ParseExpressionFn = (
+  expression: string,
+  options?: { currentDate?: Date; hashSeed: string },
+) => { next: () => any };
 
 let oldParseExpression: ParseExpressionFn;
 const newParseExpression = CronExpressionParser.parse as ParseExpressionFn;
@@ -174,7 +177,7 @@ function runBenchmark(
   iterations: number,
 ): [number, string[]] {
   const start = performance.now();
-  const result = parser(expression, { currentDate });
+  const result = parser(expression, { currentDate, hashSeed: 'seed' });
   const dates: string[] = [];
   for (let i = 0; i < iterations; i++) {
     dates.push(result.next().toString());
@@ -197,8 +200,8 @@ export async function parseAndBenchMarkExpression(
   console.log(`running ${samples} samples of ${iterations} iterations each\n`);
 
   // Warm up run
-  runBenchmark(expression, currentDate, oldParseExpression, Math.min(1000, iterations));
-  runBenchmark(expression, currentDate, newParseExpression, Math.min(1000, iterations));
+  runBenchmark(expression, currentDate, oldParseExpression, 1);
+  runBenchmark(expression, currentDate, newParseExpression, 1);
 
   // Actual benchmark runs
   for (let i = 0; i < samples; i++) {
