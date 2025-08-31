@@ -32,7 +32,7 @@
     "README.md"
   ],
   "dependencies": {
-    "luxon": "^3.6.1"
+    "luxon": "^3.7.1"
   },
   "devDependencies": {
     "@tsd/typescript": "^5.8.2",
