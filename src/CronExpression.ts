@@ -47,12 +47,21 @@ export class CronExpression {
   constructor(fields: CronFieldCollection, options: CronExpressionOptions) {
     this.#options = options;
     this.#tz = options.tz;
-    this.#currentDate = new CronDate(options.currentDate, this.#tz);
     this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
     this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
-    this.#fields = fields;
 
-    // TODO: validateTimeSpan could be called here to ensure the initial date is within the specified time span, however, this would be a breaking change; consider adding this in a future version
+    let currentDateValue = options.currentDate ?? options.startDate;
+    if (currentDateValue) {
+      const tempCurrentDate = new CronDate(currentDateValue, this.#tz);
+      if (this.#startDate && tempCurrentDate.getTime() < this.#startDate.getTime()) {
+        currentDateValue = this.#startDate;
+      } else if (this.#endDate && tempCurrentDate.getTime() > this.#endDate.getTime()) {
+        currentDateValue = this.#endDate;
+      }
+    }
+
+    this.#currentDate = new CronDate(currentDateValue, this.#tz);
+    this.#fields = fields;
   }
 
   /**
