@@ -73,14 +73,14 @@ npm install cron-parser
 
 ## Options
 
-| Option      | Type                     | Description                                                     |
-| ----------- | ------------------------ | --------------------------------------------------------------- |
-| currentDate | Date \| string \| number | Current date. Defaults to current local time in UTC             |
-| endDate     | Date \| string \| number | End date of iteration range. Sets iteration range end point     |
-| startDate   | Date \| string \| number | Start date of iteration range. Set iteration range start point  |
-| tz          | string                   | Timezone (e.g., 'Europe/London')                                |
-| hashSeed    | string                   | A seed to be used in conjunction with the `H` special character |
-| strict      | boolean                  | Enable strict mode validation                                   |
+| Option      | Type                     | Description                                                                                                                 |
+| ----------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| currentDate | Date \| string \| number | Current date. Defaults to current local time in UTC. If not provided but startDate is set, startDate is used as currentDate |
+| endDate     | Date \| string \| number | End date of iteration range. Sets iteration range end point                                                                 |
+| startDate   | Date \| string \| number | Start date of iteration range. Set iteration range start point                                                              |
+| tz          | string                   | Timezone (e.g., 'Europe/London')                                                                                            |
+| hashSeed    | string                   | A seed to be used in conjunction with the `H` special character                                                             |
+| strict      | boolean                  | Enable strict mode validation                                                                                               |
 
 When using string dates, the following formats are supported:
 
@@ -131,6 +131,53 @@ try {
   console.log('Error:', err.message);
 }
 ```
+
+### Date Range Handling
+
+The library provides handling of date ranges with automatic adjustment of the `currentDate`:
+
+**startDate as fallback**: If `currentDate` is not provided but `startDate` is, the `startDate` will be used as the `currentDate`.
+
+```typescript
+const options = {
+  startDate: '2023-01-01T00:00:00Z', // No currentDate provided
+};
+// currentDate will be set to 2023-01-01T00:00:00Z automatically
+const interval = CronExpressionParser.parse('0 0 * * *', options);
+```
+
+**Automatic clamping**: If `currentDate` is outside the bounds defined by `startDate` and `endDate`, it will be automatically adjusted:
+
+```typescript
+const options = {
+  currentDate: '2022-01-01T00:00:00Z', // Before startDate
+  startDate: '2023-01-01T00:00:00Z',
+  endDate: '2024-01-01T00:00:00Z',
+};
+// currentDate will be clamped to startDate (2023-01-01T00:00:00Z)
+const interval = CronExpressionParser.parse('0 0 * * *', options);
+```
+
+**Validation during iteration**: While the initial `currentDate` is automatically adjusted, the library still validates date bounds during iteration:
+
+```typescript
+const options = {
+  currentDate: '2023-12-31T00:00:00Z',
+  endDate: '2024-01-01T00:00:00Z', // Very close end date
+};
+
+const interval = CronExpressionParser.parse('0 0 * * *', options);
+console.log('Next:', interval.next().toString()); // Works fine
+
+// This will throw an error because it would exceed endDate
+try {
+  console.log('Next:', interval.next().toString());
+} catch (err) {
+  console.log('Error:', err.message); // "Out of the time span range"
+}
+```
+
+This behavior simplifies working with date ranges by removing the need to manually ensure that `currentDate` is within bounds, reducing confusion and making the API more intuitive.
 
 ### Crontab File Operations
 
