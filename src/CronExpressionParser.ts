@@ -1,5 +1,4 @@
 import { CronFieldCollection } from './CronFieldCollection';
-import { CronDate } from './CronDate';
 import { CronExpression, CronExpressionOptions } from './CronExpression';
 import { type PRNG, seededRandom } from './utils/random';
 import {
@@ -92,10 +91,8 @@ export class CronExpressionParser {
    * @returns {CronExpression} A CronExpression object.
    */
   static parse(expression: string, options: CronExpressionOptions = {}): CronExpression {
-    const { strict = false } = options;
-    const currentDate = options.currentDate || new CronDate();
-
-    const rand = seededRandom(options.hashSeed);
+    const { strict = false, hashSeed } = options;
+    const rand = seededRandom(hashSeed);
 
     expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
@@ -149,7 +146,7 @@ export class CronExpressionParser {
       month: new CronMonth(month, { rawValue: rawFields.month }),
       dayOfWeek: new CronDayOfWeek(dayOfWeek, { rawValue: rawFields.dayOfWeek, nthDayOfWeek }),
     });
-    return new CronExpression(fields, { ...options, expression, currentDate });
+    return new CronExpression(fields, { ...options, expression });
   }
 
   /**

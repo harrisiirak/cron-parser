@@ -95,42 +95,62 @@ describe('CronExpression', () => {
   });
 
   describe('next schedule bounds validation', () => {
-    test('should not throw an error if the current date is within the bounds', () => {
-      const startDate = new Date('2022-01-01T00:00:00Z');
-      const currentDate = new Date('2023-01-01T00:00:00Z');
-      const endDate = new Date('2024-01-01T00:00:00Z');
+    test('should use startDate as currentDate when currentDate is not provided', () => {
+      const cronExpression = new CronExpression(fields, {
+        startDate: '2022-01-01T00:00:00Z',
+      });
+
+      const nextDate = cronExpression.next();
+      expect(nextDate.toISOString()).toBe('2022-01-02T00:00:00.000Z');
+    });
+
+    test('should clamp currentDate to startDate when currentDate is before startDate', () => {
+      const cronExpression = new CronExpression(fields, {
+        currentDate: '2021-01-01T00:00:00Z',
+        startDate: '2022-01-01T00:00:00Z',
+      });
+
+      const nextDate = cronExpression.next();
+      expect(nextDate.toISOString()).toBe('2022-01-02T00:00:00.000Z');
+    });
+
+    test('should clamp currentDate to endDate when currentDate is after endDate', () => {
+      const cronExpression = new CronExpression(fields, {
+        currentDate: '2023-01-01T00:00:00Z',
+        endDate: '2022-01-01T00:00:00Z',
+      });
+
+      const prevDate = cronExpression.prev();
+      expect(prevDate.toISOString()).toBe('2021-01-31T00:00:00.000Z');
+    });
+
+    test('should retain the current date when it is within the bounds', () => {
       const cronExpression = new CronExpression(fields, {
         ...options,
-        currentDate,
-        startDate,
-        endDate,
+        currentDate: '2023-01-01T00:00:00Z',
+        startDate: '2022-01-01T00:00:00Z',
+        endDate: '2024-01-01T00:00:00Z',
       });
       expect(() => cronExpression.next()).not.toThrow();
       expect(() => cronExpression.prev()).not.toThrow();
     });
 
-    test('should throw an error if the current date is before the start date', () => {
-      const startDate = new Date('2023-01-01T00:00:00Z');
-      const currentDate = new Date('2022-01-01T00:00:00Z');
+    test('should throw an error if the current date is after end date', () => {
       const cronExpression = new CronExpression(fields, {
         ...options,
-        currentDate,
-        startDate,
+        currentDate: '2022-01-01T00:00:00Z',
+        endDate: '2022-01-01T00:00:00Z',
       });
 
       expect(() => cronExpression.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
-      expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
     });
 
-    test('should throw an error if the current date is after the end date', () => {
-      const endDate = new Date('2023-01-01T00:00:00Z');
-      const currentDate = new Date('2024-01-01T00:00:00Z');
+    test('should throw an error if the current date is before start date', () => {
       const cronExpression = new CronExpression(fields, {
         ...options,
-        currentDate,
-        endDate,
+        currentDate: '2022-01-01T00:00:00Z',
+        startDate: '2022-01-01T00:00:00Z',
       });
-      expect(() => cronExpression.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
       expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
     });
   });
