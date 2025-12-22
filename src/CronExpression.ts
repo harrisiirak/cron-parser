@@ -1,6 +1,7 @@
 import { CronDate, DateMathOp, TimeUnit } from './CronDate';
 import { CronFieldCollection } from './CronFieldCollection';
 import { CronFieldType, HourRange, MonthRange, SixtyRange } from './fields';
+import { getNextValue } from './utils/getNextValue';
 
 export type CronExpressionOptions = {
   currentDate?: Date | string | number | CronDate;
@@ -96,6 +97,44 @@ export class CronExpression {
    */
   static #matchSchedule(value: number, sequence: CronFieldType): boolean {
     return sequence.some((element) => element === value);
+  }
+
+  #getMinMax(values: number[], reverse: boolean): number {
+    return reverse ? values[values.length - 1] : values[0];
+  }
+
+  #moveToNextSecond(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
+    const seconds = this.#fields.second.values as number[];
+    const currentSecond = currentDate.getSeconds();
+    const nextSecond = getNextValue(seconds, currentSecond, reverse);
+
+    if (nextSecond !== null) {
+      currentDate.setSeconds(nextSecond);
+      return;
+    }
+
+    // Roll over to the next/previous minute and start from the min/max allowed second.
+    currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
+    currentDate.setSeconds(this.#getMinMax(seconds, reverse));
+  }
+
+  #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
+    const minutes = this.#fields.minute.values as number[];
+    const seconds = this.#fields.second.values as number[];
+
+    const currentMinute = currentDate.getMinutes();
+    const nextMinute = getNextValue(minutes, currentMinute, reverse);
+
+    if (nextMinute !== null) {
+      currentDate.setMinutes(nextMinute);
+      currentDate.setSeconds(this.#getMinMax(seconds, reverse));
+      return;
+    }
+
+    // Roll over to the next/previous hour and start from the min/max allowed minute/second.
+    currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
+    currentDate.setMinutes(this.#getMinMax(minutes, reverse));
+    currentDate.setSeconds(this.#getMinMax(seconds, reverse));
   }
 
   /**
@@ -330,26 +369,45 @@ export class CronExpression {
    * @returns {boolean} - True if the current hour matches the cron expression; otherwise, false.
    */
   #matchHour(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): boolean {
+    const hourValues = this.#fields.hour.values;
+    const hours = hourValues as number[];
+
     const currentHour = currentDate.getHours();
-    const isMatch = CronExpression.#matchSchedule(currentHour, this.#fields.hour.values);
+    const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
     const isDstStart = currentDate.dstStart === currentHour;
     const isDstEnd = currentDate.dstEnd === currentHour;
 
-    if (!isMatch && !isDstStart) {
-      currentDate.dstStart = null;
-      currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
-      return false;
-    }
-    if (isDstStart && !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
+    // DST start: if the scheduled hour is skipped (e.g. 03:00 doesn't exist),
+    // accept the next existing hour when it corresponds to the skipped one.
+    if (isDstStart) {
+      if (CronExpression.#matchSchedule(currentHour - 1, hourValues)) {
+        return true;
+      }
       currentDate.invokeDateOperation(dateMathVerb, TimeUnit.Hour);
       return false;
     }
+
+    // DST end: avoid returning the repeated hour twice when searching forward.
     if (isDstEnd && !reverse) {
       currentDate.dstEnd = null;
-      currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, this.#fields.hour.values.length);
+      currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, hours.length);
       return false;
     }
-    return true;
+
+    if (isMatch) {
+      return true;
+    }
+
+    // Normal mismatch: if there's no remaining matching hour in this day, jump a whole day first
+    // to avoid scanning hour-by-hour across the day boundary.
+    currentDate.dstStart = null;
+    const nextHour = getNextValue(hours, currentHour, reverse);
+    if (nextHour === null) {
+      currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, hours.length);
+      return false;
+    }
+    currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, hours.length);
+    return false;
   }
 
   /**
@@ -408,11 +466,11 @@ export class CronExpression {
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
+        this.#moveToNextMinute(currentDate, dateMathVerb, reverse);
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
+        this.#moveToNextSecond(currentDate, dateMathVerb, reverse);
         continue;
       }
 
