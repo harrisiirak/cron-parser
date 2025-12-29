@@ -101,7 +101,7 @@ describe('CronExpression', () => {
   });
 
   describe('iteration jump flows', () => {
-    test('next(): jumps to next allowed second without stepping via applyDateOperation()', () => {
+    test('jumps to next allowed second without stepping via applyDateOperation()', () => {
       const interval = CronExpressionParser.parse('10,20 * * * * *', {
         currentDate: new Date('2023-01-01T00:00:12.000Z'),
       });
@@ -123,7 +123,7 @@ describe('CronExpression', () => {
       }
     });
 
-    test('prev(): jumps to previous allowed second without stepping via applyDateOperation()', () => {
+    test('jumps to previous allowed second without stepping via applyDateOperation()', () => {
       const interval = CronExpressionParser.parse('10,20 * * * * *', {
         currentDate: new Date('2023-01-01T00:00:18.000Z'),
       });
@@ -145,7 +145,7 @@ describe('CronExpression', () => {
       }
     });
 
-    test('next(): jumps to next allowed minute and resets seconds to minimum allowed', () => {
+    test('jumps to next allowed minute and resets seconds to minimum allowed', () => {
       const interval = CronExpressionParser.parse('0 10,20 * * * *', {
         currentDate: new Date('2023-01-01T00:12:30.000Z'),
       });
@@ -168,7 +168,7 @@ describe('CronExpression', () => {
       }
     });
 
-    test('next(): when there is no later allowed minute, rolls to next hour then sets minute/second', () => {
+    test('when there is no later allowed minute, rolls to next hour then sets minute/second', () => {
       const interval = CronExpressionParser.parse('0 10 * * * *', {
         currentDate: new Date('2023-01-01T00:59:30.000Z'),
       });
@@ -190,7 +190,7 @@ describe('CronExpression', () => {
       }
     });
 
-    test('next(): when past the last scheduled hour for the day, jumps a full day first', () => {
+    test('when past the last scheduled hour for the day, jumps a full day first', () => {
       const interval = CronExpressionParser.parse('0 0 9 * * *', {
         currentDate: new Date('2023-01-01T10:00:00.000Z'),
       });
@@ -215,7 +215,7 @@ describe('CronExpression', () => {
       }
     });
 
-    test('next(): DST start (skipped hour) runs at the next existing hour when the scheduled hour is skipped', () => {
+    test('DST start (skipped hour) runs at the next existing hour when the scheduled hour is skipped', () => {
       const interval = CronExpressionParser.parse('0 30 2 * * *', {
         currentDate: new Date('2023-03-12T06:55:00.000Z'),
         tz: 'America/New_York',
@@ -226,7 +226,7 @@ describe('CronExpression', () => {
       expect(next.toISOString()).toBe('2023-03-12T07:30:00.000Z');
     });
 
-    test('next(): DST end (repeated hour) does not return the repeated scheduled hour twice', () => {
+    test('DST end (repeated hour) does not return the repeated scheduled hour twice', () => {
       const interval = CronExpressionParser.parse('0 0 1 * * *', {
         currentDate: new Date('2023-11-05T04:30:00.000Z'),
         tz: 'America/New_York',
@@ -241,63 +241,63 @@ describe('CronExpression', () => {
   });
 
   describe('iteration correctness (published v5.4.0 baselines)', () => {
-    test('next(): when there is no later allowed second, rolls to next minute and uses minimum allowed second', () => {
+    test('when there is no later allowed second, rolls to next minute and uses minimum allowed second', () => {
       const interval = CronExpressionParser.parse('10,20 * * * * *', {
         currentDate: new Date('2023-01-01T00:00:25.000Z'),
       });
       expect(interval.next().toISOString()).toBe('2023-01-01T00:01:10.000Z');
     });
 
-    test('prev(): when there is no earlier allowed second, rolls to previous minute and uses maximum allowed second', () => {
+    test('when there is no earlier allowed second, rolls to previous minute and uses maximum allowed second', () => {
       const interval = CronExpressionParser.parse('10,20 * * * * *', {
         currentDate: new Date('2023-01-01T00:00:05.000Z'),
       });
       expect(interval.prev().toISOString()).toBe('2022-12-31T23:59:20.000Z');
     });
 
-    test('next(): minute jump resets seconds to the configured second value', () => {
+    test('minute jump resets seconds to the configured second value', () => {
       const interval = CronExpressionParser.parse('15 10,20 * * * *', {
         currentDate: new Date('2023-01-01T00:12:30.000Z'),
       });
       expect(interval.next().toISOString()).toBe('2023-01-01T00:20:15.000Z');
     });
 
-    test('next(): minute rollover to next hour preserves the configured minute and second values', () => {
+    test('minute rollover to next hour preserves the configured minute and second values', () => {
       const interval = CronExpressionParser.parse('15 10 * * * *', {
         currentDate: new Date('2023-01-01T00:59:30.000Z'),
       });
       expect(interval.next().toISOString()).toBe('2023-01-01T01:10:15.000Z');
     });
 
-    test('next(): selects a later scheduled hour within the same day', () => {
+    test('selects a later scheduled hour within the same day', () => {
       const interval = CronExpressionParser.parse('0 0 5,10 * * *', {
         currentDate: new Date('2023-01-01T06:00:00.000Z'),
       });
       expect(interval.next().toISOString()).toBe('2023-01-01T10:00:00.000Z');
     });
 
-    test('prev(): selects an earlier scheduled hour within the same day', () => {
+    test('selects an earlier scheduled hour within the same day', () => {
       const interval = CronExpressionParser.parse('0 0 5,10 * * *', {
         currentDate: new Date('2023-01-01T09:00:00.000Z'),
       });
       expect(interval.prev().toISOString()).toBe('2023-01-01T05:00:00.000Z');
     });
 
-    test('prev(): when there is no earlier scheduled hour today, returns the previous day’s last scheduled hour', () => {
+    test('when there is no earlier scheduled hour today, returns the previous day’s last scheduled hour', () => {
       const interval = CronExpressionParser.parse('0 0 5,10 * * *', {
         currentDate: new Date('2023-01-01T04:00:00.000Z'),
       });
       expect(interval.prev().toISOString()).toBe('2022-12-31T10:00:00.000Z');
     });
 
-    test('next(): when currentDate is exactly on a schedule, returns the next occurrence (exclusive)', () => {
+    test('when currentDate is exactly on a schedule, returns the next occurrence (exclusive)', () => {
       const interval = CronExpressionParser.parse('0 0 9 * * *', {
         currentDate: new Date('2023-01-01T09:00:00.000Z'),
       });
       expect(interval.next().toISOString()).toBe('2023-01-02T09:00:00.000Z');
     });
 
-    test('prev(): when currentDate is exactly on a schedule, returns the previous occurrence (exclusive)', () => {
+    test('when currentDate is exactly on a schedule, returns the previous occurrence (exclusive)', () => {
       const interval = CronExpressionParser.parse('0 0 9 * * *', {
         currentDate: new Date('2023-01-01T09:00:00.000Z'),
       });

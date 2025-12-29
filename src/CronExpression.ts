@@ -1,7 +1,6 @@
 import { CronDate, DateMathOp, TimeUnit } from './CronDate';
 import { CronFieldCollection } from './CronFieldCollection';
 import { CronFieldType, HourRange, MonthRange, SixtyRange } from './fields';
-import { getNextValue } from './utils/getNextValue';
 
 export type CronExpressionOptions = {
   currentDate?: Date | string | number | CronDate;
@@ -99,14 +98,14 @@ export class CronExpression {
     return sequence.some((element) => element === value);
   }
 
-  #getMinMax(values: number[], reverse: boolean): number {
-    return reverse ? values[values.length - 1] : values[0];
+  #getMinOrMax(values: number[], reverse: boolean): number {
+    return values[reverse ? values.length - 1 : 0];
   }
 
   #moveToNextSecond(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
     const seconds = this.#fields.second.values as number[];
     const currentSecond = currentDate.getSeconds();
-    const nextSecond = getNextValue(seconds, currentSecond, reverse);
+    const nextSecond = this.#fields.second.findNearestValue(currentSecond, reverse);
 
     if (nextSecond !== null) {
       currentDate.setSeconds(nextSecond);
@@ -115,7 +114,7 @@ export class CronExpression {
 
     // Roll over to the next/previous minute and start from the min/max allowed second.
     currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
-    currentDate.setSeconds(this.#getMinMax(seconds, reverse));
+    currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
   }
 
   #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
@@ -123,18 +122,18 @@ export class CronExpression {
     const seconds = this.#fields.second.values as number[];
 
     const currentMinute = currentDate.getMinutes();
-    const nextMinute = getNextValue(minutes, currentMinute, reverse);
+    const nextMinute = this.#fields.minute.findNearestValue(currentMinute, reverse);
 
     if (nextMinute !== null) {
       currentDate.setMinutes(nextMinute);
-      currentDate.setSeconds(this.#getMinMax(seconds, reverse));
+      currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
       return;
     }
 
     // Roll over to the next/previous hour and start from the min/max allowed minute/second.
     currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
-    currentDate.setMinutes(this.#getMinMax(minutes, reverse));
-    currentDate.setSeconds(this.#getMinMax(seconds, reverse));
+    currentDate.setMinutes(this.#getMinOrMax(minutes, reverse));
+    currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
   }
 
   /**
@@ -401,7 +400,7 @@ export class CronExpression {
     // Normal mismatch: if there's no remaining matching hour in this day, jump a whole day first
     // to avoid scanning hour-by-hour across the day boundary.
     currentDate.dstStart = null;
-    const nextHour = getNextValue(hours, currentHour, reverse);
+    const nextHour = this.#fields.hour.findNearestValue(currentHour, reverse);
     if (nextHour === null) {
       currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, hours.length);
       return false;
