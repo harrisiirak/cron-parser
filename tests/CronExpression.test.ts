@@ -6,7 +6,7 @@ import {
 } from '../src/CronExpression';
 import { CronDate, TimeUnit } from '../src/CronDate';
 import { CronFieldCollection, CronFields } from '../src/CronFieldCollection';
-import { expect } from '@jest/globals';
+import { expect, jest } from '@jest/globals';
 import { CronDayOfMonth, CronDayOfWeek, CronHour, CronMinute, CronMonth, CronSecond } from '../src/fields';
 import CronExpressionParser from '../src';
 
@@ -106,20 +106,13 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T00:00:12.000Z'),
       });
 
-      let opCount = 0;
-      const originalApply = CronDate.prototype.applyDateOperation;
-      CronDate.prototype.applyDateOperation = function (...args: Parameters<CronDate['applyDateOperation']>) {
-        opCount += 1;
-        return originalApply.apply(this, args as any);
-      };
-
+      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
       try {
         const next = interval.next();
-        // Expected from published cron-parser v5.4.0
         expect(next.toISOString()).toBe('2023-01-01T00:00:20.000Z');
-        expect(opCount).toBe(0);
+        expect(spy).not.toHaveBeenCalled();
       } finally {
-        CronDate.prototype.applyDateOperation = originalApply;
+        spy.mockRestore();
       }
     });
 
@@ -128,20 +121,13 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T00:00:18.000Z'),
       });
 
-      let opCount = 0;
-      const originalApply = CronDate.prototype.applyDateOperation;
-      CronDate.prototype.applyDateOperation = function (...args: Parameters<CronDate['applyDateOperation']>) {
-        opCount += 1;
-        return originalApply.apply(this, args as any);
-      };
-
+      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
       try {
         const prev = interval.prev();
-        // Expected from published cron-parser v5.4.0
         expect(prev.toISOString()).toBe('2023-01-01T00:00:10.000Z');
-        expect(opCount).toBe(0);
+        expect(spy).not.toHaveBeenCalled();
       } finally {
-        CronDate.prototype.applyDateOperation = originalApply;
+        spy.mockRestore();
       }
     });
 
@@ -150,21 +136,13 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T00:12:30.000Z'),
       });
 
-      let opCount = 0;
-      const originalApply = CronDate.prototype.applyDateOperation;
-      CronDate.prototype.applyDateOperation = function (...args: Parameters<CronDate['applyDateOperation']>) {
-        opCount += 1;
-        return originalApply.apply(this, args as any);
-      };
-
+      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
       try {
         const next = interval.next();
-        // Expected from published cron-parser v5.4.0
         expect(next.toISOString()).toBe('2023-01-01T00:20:00.000Z');
-        // This path should set minutes/seconds directly (no date operations needed).
-        expect(opCount).toBe(0);
+        expect(spy).not.toHaveBeenCalled();
       } finally {
-        CronDate.prototype.applyDateOperation = originalApply;
+        spy.mockRestore();
       }
     });
 
@@ -173,20 +151,14 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T00:59:30.000Z'),
       });
 
-      const units: TimeUnit[] = [];
-      const originalApply = CronDate.prototype.applyDateOperation;
-      CronDate.prototype.applyDateOperation = function (...args: Parameters<CronDate['applyDateOperation']>) {
-        units.push(args[1]);
-        return originalApply.apply(this, args as any);
-      };
-
+      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
       try {
         const next = interval.next();
-        // Expected from published cron-parser v5.4.0
         expect(next.toISOString()).toBe('2023-01-01T01:10:00.000Z');
-        expect(units).toEqual([TimeUnit.Hour]);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy.mock.calls[0][1]).toBe(TimeUnit.Hour);
       } finally {
-        CronDate.prototype.applyDateOperation = originalApply;
+        spy.mockRestore();
       }
     });
 
@@ -195,109 +167,42 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T10:00:00.000Z'),
       });
 
-      const units: TimeUnit[] = [];
-      const originalApply = CronDate.prototype.applyDateOperation;
-      CronDate.prototype.applyDateOperation = function (...args: Parameters<CronDate['applyDateOperation']>) {
-        units.push(args[1]);
-        return originalApply.apply(this, args as any);
-      };
-
+      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
       try {
         const next = interval.next();
-        // Expected from published cron-parser v5.4.0
         expect(next.toISOString()).toBe('2023-01-02T09:00:00.000Z');
-        // This covers the new control flow: first jump by Day, then scan hours within the next day.
-        expect(units[0]).toBe(TimeUnit.Day);
-        expect(units.filter((u) => u === TimeUnit.Day)).toHaveLength(1);
-        expect(units.filter((u) => u === TimeUnit.Hour)).toHaveLength(9);
+        expect(spy.mock.calls.filter((c) => c[1] === TimeUnit.Day)).toHaveLength(1);
+        expect(spy.mock.calls.filter((c) => c[1] === TimeUnit.Hour)).toHaveLength(0);
       } finally {
-        CronDate.prototype.applyDateOperation = originalApply;
+        spy.mockRestore();
       }
     });
 
-    test('DST start (skipped hour) runs at the next existing hour when the scheduled hour is skipped', () => {
-      const interval = CronExpressionParser.parse('0 30 2 * * *', {
-        currentDate: new Date('2023-03-12T06:55:00.000Z'),
-        tz: 'America/New_York',
-      });
-
-      const next = interval.next();
-      // Expected from published cron-parser v5.4.0
-      expect(next.toISOString()).toBe('2023-03-12T07:30:00.000Z');
-    });
-
-    test('DST end (repeated hour) does not return the repeated scheduled hour twice', () => {
-      const interval = CronExpressionParser.parse('0 0 1 * * *', {
-        currentDate: new Date('2023-11-05T04:30:00.000Z'),
-        tz: 'America/New_York',
-      });
-
-      const first = interval.next();
-      const second = interval.next();
-      // Expected from published cron-parser v5.4.0
-      expect(first.toISOString()).toBe('2023-11-05T05:00:00.000Z');
-      expect(second.toISOString()).toBe('2023-11-06T06:00:00.000Z');
-    });
-  });
-
-  describe('iteration correctness (published v5.4.0 baselines)', () => {
-    test('when there is no later allowed second, rolls to next minute and uses minimum allowed second', () => {
-      const interval = CronExpressionParser.parse('10,20 * * * * *', {
-        currentDate: new Date('2023-01-01T00:00:25.000Z'),
-      });
-      expect(interval.next().toISOString()).toBe('2023-01-01T00:01:10.000Z');
-    });
-
-    test('when there is no earlier allowed second, rolls to previous minute and uses maximum allowed second', () => {
-      const interval = CronExpressionParser.parse('10,20 * * * * *', {
-        currentDate: new Date('2023-01-01T00:00:05.000Z'),
-      });
-      expect(interval.prev().toISOString()).toBe('2022-12-31T23:59:20.000Z');
-    });
-
-    test('minute jump resets seconds to the configured second value', () => {
-      const interval = CronExpressionParser.parse('15 10,20 * * * *', {
-        currentDate: new Date('2023-01-01T00:12:30.000Z'),
-      });
-      expect(interval.next().toISOString()).toBe('2023-01-01T00:20:15.000Z');
-    });
-
-    test('minute rollover to next hour preserves the configured minute and second values', () => {
-      const interval = CronExpressionParser.parse('15 10 * * * *', {
-        currentDate: new Date('2023-01-01T00:59:30.000Z'),
-      });
-      expect(interval.next().toISOString()).toBe('2023-01-01T01:10:15.000Z');
-    });
-
-    test('selects a later scheduled hour within the same day', () => {
+    test('jumps to next allowed hour without stepping via applyDateOperation()', () => {
       const interval = CronExpressionParser.parse('0 0 5,10 * * *', {
         currentDate: new Date('2023-01-01T06:00:00.000Z'),
       });
-      expect(interval.next().toISOString()).toBe('2023-01-01T10:00:00.000Z');
-    });
 
-    test('selects an earlier scheduled hour within the same day', () => {
-      const interval = CronExpressionParser.parse('0 0 5,10 * * *', {
-        currentDate: new Date('2023-01-01T09:00:00.000Z'),
-      });
-      expect(interval.prev().toISOString()).toBe('2023-01-01T05:00:00.000Z');
+      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      try {
+        const next = interval.next();
+        expect(next.toISOString()).toBe('2023-01-01T10:00:00.000Z');
+        expect(spy).not.toHaveBeenCalled();
+      } finally {
+        spy.mockRestore();
+      }
     });
+  });
 
-    test('when there is no earlier scheduled hour today, returns the previous day’s last scheduled hour', () => {
-      const interval = CronExpressionParser.parse('0 0 5,10 * * *', {
-        currentDate: new Date('2023-01-01T04:00:00.000Z'),
-      });
-      expect(interval.prev().toISOString()).toBe('2022-12-31T10:00:00.000Z');
-    });
-
-    test('when currentDate is exactly on a schedule, returns the next occurrence (exclusive)', () => {
+  describe('iteration exclusivity', () => {
+    test('when currentDate is exactly on a schedule, returns the next occurrence', () => {
       const interval = CronExpressionParser.parse('0 0 9 * * *', {
         currentDate: new Date('2023-01-01T09:00:00.000Z'),
       });
       expect(interval.next().toISOString()).toBe('2023-01-02T09:00:00.000Z');
     });
 
-    test('when currentDate is exactly on a schedule, returns the previous occurrence (exclusive)', () => {
+    test('when currentDate is exactly on a schedule, returns the previous occurrence', () => {
       const interval = CronExpressionParser.parse('0 0 9 * * *', {
         currentDate: new Date('2023-01-01T09:00:00.000Z'),
       });

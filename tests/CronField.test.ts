@@ -1,4 +1,4 @@
-import { CronDayOfWeek, CronSecond, SixtyRange } from '../src';
+import { CronDayOfWeek, CronField, CronSecond, SixtyRange } from '../src';
 
 describe('CronField', () => {
   describe('wildcard detection', () => {
@@ -33,6 +33,28 @@ describe('CronField', () => {
 
     test('should throw an error when duplicate value is provided as a range', () => {
       expect(() => new CronSecond([0, 59, 59])).toThrow('CronSecond Validation error, duplicate values found: 59');
+    });
+  });
+
+  describe('findNearestValueInList', () => {
+    test('returns the next greater value when reverse=false', () => {
+      expect(CronField.findNearestValueInList([1, 2, 3], 1, false)).toBe(2);
+      expect(CronField.findNearestValueInList([1, 2, 3], 2, false)).toBe(3);
+    });
+
+    test('returns null when there is no next greater value (reverse=false)', () => {
+      expect(CronField.findNearestValueInList([1, 2, 3], 3, false)).toBeNull();
+      expect(CronField.findNearestValueInList([], 3, false)).toBeNull();
+    });
+
+    test('returns the previous smaller value when reverse=true', () => {
+      expect(CronField.findNearestValueInList([1, 2, 3], 3, true)).toBe(2);
+      expect(CronField.findNearestValueInList([1, 2, 3], 2, true)).toBe(1);
+    });
+
+    test('returns null when there is no previous smaller value (reverse=true)', () => {
+      expect(CronField.findNearestValueInList([1, 2, 3], 1, true)).toBeNull();
+      expect(CronField.findNearestValueInList([], 1, true)).toBeNull();
     });
   });
 });

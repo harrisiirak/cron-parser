@@ -319,6 +319,14 @@ export class CronDate {
   }
 
   /**
+   * Returns the timezone offset from UTC in minutes (e.g. UTC+2 => 120).
+   * Useful for detecting DST transition days.
+   */
+  getUtcOffset(): number {
+    return this.#date.offset;
+  }
+
+  /**
    * Returns the time.
    * @returns {number}
    */
