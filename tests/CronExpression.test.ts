@@ -6,7 +6,7 @@ import {
 } from '../src/CronExpression';
 import { CronDate, TimeUnit } from '../src/CronDate';
 import { CronFieldCollection, CronFields } from '../src/CronFieldCollection';
-import { expect, jest } from '@jest/globals';
+import { expect } from '@jest/globals';
 import { CronDayOfMonth, CronDayOfWeek, CronHour, CronMinute, CronMonth, CronSecond } from '../src/fields';
 import CronExpressionParser from '../src';
 
@@ -101,19 +101,22 @@ describe('CronExpression', () => {
   });
 
   describe('iteration jump flows', () => {
+    let spy: jest.SpyInstance | undefined;
+
+    afterEach(() => {
+      spy?.mockRestore();
+      spy = undefined;
+    });
+
     test('jumps to next allowed second without stepping via applyDateOperation()', () => {
       const interval = CronExpressionParser.parse('10,20 * * * * *', {
         currentDate: new Date('2023-01-01T00:00:12.000Z'),
       });
 
-      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
-      try {
-        const next = interval.next();
-        expect(next.toISOString()).toBe('2023-01-01T00:00:20.000Z');
-        expect(spy).not.toHaveBeenCalled();
-      } finally {
-        spy.mockRestore();
-      }
+      spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      const next = interval.next();
+      expect(next.toISOString()).toBe('2023-01-01T00:00:20.000Z');
+      expect(spy).not.toHaveBeenCalled();
     });
 
     test('jumps to previous allowed second without stepping via applyDateOperation()', () => {
@@ -121,14 +124,10 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T00:00:18.000Z'),
       });
 
-      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
-      try {
-        const prev = interval.prev();
-        expect(prev.toISOString()).toBe('2023-01-01T00:00:10.000Z');
-        expect(spy).not.toHaveBeenCalled();
-      } finally {
-        spy.mockRestore();
-      }
+      spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      const prev = interval.prev();
+      expect(prev.toISOString()).toBe('2023-01-01T00:00:10.000Z');
+      expect(spy).not.toHaveBeenCalled();
     });
 
     test('jumps to next allowed minute and resets seconds to minimum allowed', () => {
@@ -136,14 +135,10 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T00:12:30.000Z'),
       });
 
-      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
-      try {
-        const next = interval.next();
-        expect(next.toISOString()).toBe('2023-01-01T00:20:00.000Z');
-        expect(spy).not.toHaveBeenCalled();
-      } finally {
-        spy.mockRestore();
-      }
+      spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      const next = interval.next();
+      expect(next.toISOString()).toBe('2023-01-01T00:20:00.000Z');
+      expect(spy).not.toHaveBeenCalled();
     });
 
     test('when there is no later allowed minute, rolls to next hour then sets minute/second', () => {
@@ -151,15 +146,11 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T00:59:30.000Z'),
       });
 
-      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
-      try {
-        const next = interval.next();
-        expect(next.toISOString()).toBe('2023-01-01T01:10:00.000Z');
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy.mock.calls[0][1]).toBe(TimeUnit.Hour);
-      } finally {
-        spy.mockRestore();
-      }
+      spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      const next = interval.next();
+      expect(next.toISOString()).toBe('2023-01-01T01:10:00.000Z');
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.mock.calls[0][1]).toBe(TimeUnit.Hour);
     });
 
     test('when past the last scheduled hour for the day, jumps a full day first', () => {
@@ -167,15 +158,11 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T10:00:00.000Z'),
       });
 
-      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
-      try {
-        const next = interval.next();
-        expect(next.toISOString()).toBe('2023-01-02T09:00:00.000Z');
-        expect(spy.mock.calls.filter((c) => c[1] === TimeUnit.Day)).toHaveLength(1);
-        expect(spy.mock.calls.filter((c) => c[1] === TimeUnit.Hour)).toHaveLength(0);
-      } finally {
-        spy.mockRestore();
-      }
+      spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      const next = interval.next();
+      expect(next.toISOString()).toBe('2023-01-02T09:00:00.000Z');
+      expect(spy.mock.calls.filter((c) => c[1] === TimeUnit.Day)).toHaveLength(1);
+      expect(spy.mock.calls.filter((c) => c[1] === TimeUnit.Hour)).toHaveLength(0);
     });
 
     test('jumps to next allowed hour without stepping via applyDateOperation()', () => {
@@ -183,14 +170,10 @@ describe('CronExpression', () => {
         currentDate: new Date('2023-01-01T06:00:00.000Z'),
       });
 
-      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
-      try {
-        const next = interval.next();
-        expect(next.toISOString()).toBe('2023-01-01T10:00:00.000Z');
-        expect(spy).not.toHaveBeenCalled();
-      } finally {
-        spy.mockRestore();
-      }
+      spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      const next = interval.next();
+      expect(next.toISOString()).toBe('2023-01-01T10:00:00.000Z');
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 

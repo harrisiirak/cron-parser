@@ -104,6 +104,17 @@ export class CronExpression {
     return values[reverse ? values.length - 1 : 0];
   }
 
+  /**
+   * Checks whether the given date falls on a DST transition day in its timezone.
+   *
+   * This is used to disable certain “direct set” fast paths on DST days, because setting the hour
+   * directly may land on a non-existent or repeated local time. We cache the result per calendar day
+   * to keep iteration overhead low.
+   *
+   * @param {CronDate} currentDate - Date to check (in the cron timezone)
+   * @returns {boolean} True when the day has a DST transition
+   * @private
+   */
   #isDstTransitionDay(currentDate: CronDate): boolean {
     // Cache per calendar day (in the cron date's timezone) to avoid repeated work inside the iteration loop.
     const key = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
@@ -112,22 +123,25 @@ export class CronExpression {
     }
 
     const startOfDay = new CronDate(currentDate);
-    startOfDay.setHours(0);
-    startOfDay.setMinutes(0);
-    startOfDay.setSeconds(0);
-    startOfDay.setMilliseconds(0);
+    startOfDay.setStartOfDay();
 
     const endOfDay = new CronDate(currentDate);
-    endOfDay.setHours(23);
-    endOfDay.setMinutes(59);
-    endOfDay.setSeconds(59);
-    endOfDay.setMilliseconds(0);
+    endOfDay.setEndOfDay();
 
     this.#dstTransitionDayKey = key;
     this.#isDstTransitionDayCached = startOfDay.getUtcOffset() !== endOfDay.getUtcOffset();
     return this.#isDstTransitionDayCached;
   }
 
+  /**
+   * Moves the date to the next/previous allowed second value. If there is no remaining allowed second
+   * within the current minute, rolls to the next/previous minute and resets seconds to the min/max allowed.
+   *
+   * @param {CronDate} currentDate - Mutable date being iterated
+   * @param {DateMathOp} dateMathVerb - Add/Subtract depending on direction
+   * @param {boolean} reverse - When true, iterating backwards
+   * @private
+   */
   #moveToNextSecond(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
     const seconds = this.#fields.second.values as number[];
     const currentSecond = currentDate.getSeconds();
@@ -143,6 +157,16 @@ export class CronExpression {
     currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
   }
 
+  /**
+   * Moves the date to the next/previous allowed minute value and resets seconds to the min/max allowed.
+   * If there is no remaining allowed minute within the current hour, rolls to the next/previous hour and
+   * resets minutes/seconds to their extrema.
+   *
+   * @param {CronDate} currentDate - Mutable date being iterated
+   * @param {DateMathOp} dateMathVerb - Add/Subtract depending on direction
+   * @param {boolean} reverse - When true, iterating backwards
+   * @private
+   */
   #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
     const minutes = this.#fields.minute.values as number[];
     const seconds = this.#fields.second.values as number[];

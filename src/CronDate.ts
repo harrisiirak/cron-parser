@@ -321,9 +321,25 @@ export class CronDate {
   /**
    * Returns the timezone offset from UTC in minutes (e.g. UTC+2 => 120).
    * Useful for detecting DST transition days.
+   *
+   * @returns {number} UTC offset in minutes
    */
   getUtcOffset(): number {
     return this.#date.offset;
+  }
+
+  /**
+   * Sets the time to the start of the day (00:00:00.000) in the current timezone.
+   */
+  setStartOfDay(): void {
+    this.#date = this.#date.startOf('day');
+  }
+
+  /**
+   * Sets the time to the end of the day (23:59:59.999) in the current timezone.
+   */
+  setEndOfDay(): void {
+    this.#date = this.#date.endOf('day');
   }
 
   /**
