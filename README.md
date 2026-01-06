@@ -393,6 +393,16 @@ const otherInterval = CronExpressionParser.parse('H * * * H', options);
 console.log(otherInterval.stringify()); // "12 * * * 4"
 ```
 
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Setting up the development environment
+- Code style and standards
+- Testing requirements
+- Pull request process
+- Reporting bugs and requesting features
+
 ## License
 
 MIT
