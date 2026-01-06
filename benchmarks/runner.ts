@@ -9,6 +9,8 @@ export interface BenchmarkResult {
   oldMean: number;
   newMean: number;
   change: number;
+  oldOps: number;
+  newOps: number;
 }
 
 export const benchmarkResults: BenchmarkResult[] = [];
@@ -50,6 +52,13 @@ function formatTime(ms: number): string {
   return `${ms.toFixed(2)}ms`;
 }
 
+function formatOps(opsPerSecond: number): string {
+  if (opsPerSecond >= 1000) {
+    return `${(opsPerSecond / 1000).toFixed(2)}k op/s`;
+  }
+  return `${opsPerSecond.toFixed(0)} op/s`;
+}
+
 function getChangeIndicator(percentChange: number): string {
   if (Math.abs(percentChange) <= 1) {
     return chalk.yellow('⟷'); // minimal change
@@ -67,7 +76,13 @@ function formatPercentage(value: number): string {
   return value > 0 ? chalk.green(formatted) : chalk.red(formatted);
 }
 
-function printStats(oldStats: BenchmarkStats, newStats: BenchmarkStats, expression: string, outputFile: string): void {
+function printStats(
+  oldStats: BenchmarkStats,
+  newStats: BenchmarkStats,
+  expression: string,
+  outputFile: string,
+  iterations: number,
+): void {
   const tableData: Record<
     string,
     {
@@ -95,6 +110,19 @@ function printStats(oldStats: BenchmarkStats, newStats: BenchmarkStats, expressi
     };
   });
 
+  // Calculate operations per second
+  const oldOps = Math.round(iterations / (oldStats.mean / 1000));
+  const newOps = Math.round(iterations / (newStats.mean / 1000));
+  const opsPercentChange = ((newOps - oldOps) / oldOps) * 100; // Note: inverted calculation compared to time
+
+  // Add ops/s to the table data
+  tableData['op/s'] = {
+    Old: formatOps(oldOps),
+    New: formatOps(newOps),
+    Change: formatPercentage(opsPercentChange),
+    Indicator: getChangeIndicator(opsPercentChange),
+  };
+
   // Create table
   const table = new Table({
     head: ['Metric', 'Old', 'New', 'Change', ' '],
@@ -102,7 +130,7 @@ function printStats(oldStats: BenchmarkStats, newStats: BenchmarkStats, expressi
       head: [],
       border: [],
     },
-    colWidths: [10, 12, 12, 10, 5],
+    colWidths: [10, 15, 15, 10, 5],
     colAligns: ['left', 'right', 'right', 'right', 'center'],
   });
 
@@ -118,6 +146,17 @@ function printStats(oldStats: BenchmarkStats, newStats: BenchmarkStats, expressi
     ];
     table.push(row);
   });
+
+  // Add op/s row
+  const opsData = tableData['op/s'];
+  const opsRow = [
+    chalk.bold('op/s'),
+    chalk.bold(opsData.Old),
+    chalk.bold(opsData.New),
+    chalk.bold(opsData.Change),
+    chalk.bold(opsData.Indicator),
+  ];
+  table.push(opsRow);
 
   console.log(`\nResults for pattern: ${expression}`);
   console.log(table.toString());
@@ -145,13 +184,13 @@ export function printSummary() {
   // Print summary table
   console.log('\nSummary of all benchmarks:');
   const summaryTable = new Table({
-    head: ['Pattern', 'Old Mean', 'New Mean', 'Change', ''],
+    head: ['Pattern', 'Old Mean', 'New Mean', 'Change', '', 'Old op/s', 'New op/s'],
     style: {
       head: [],
       border: [],
     },
-    colWidths: [20, 12, 12, 10, 5],
-    colAligns: ['left', 'right', 'right', 'right', 'center'],
+    colWidths: [20, 12, 12, 10, 5, 15, 15],
+    colAligns: ['left', 'right', 'right', 'right', 'center', 'right', 'right'],
   });
 
   // Sort by improvement percentage
@@ -164,6 +203,8 @@ export function printSummary() {
       `${result.newMean.toFixed(2)}ms`,
       result.change > 0 ? chalk.green(`${result.change.toFixed(2)}%`) : chalk.red(`${result.change.toFixed(2)}%`),
       result.change > 0 ? chalk.green('↑') : chalk.red('↓'),
+      formatOps(result.oldOps),
+      formatOps(result.newOps),
     ]);
   });
 
@@ -230,12 +271,17 @@ export async function parseAndBenchMarkExpression(
   const newStats = calculateStats(newTimes);
 
   // Store results for summary
+  const oldOps = Math.round(iterations / (oldStats.mean / 1000));
+  const newOps = Math.round(iterations / (newStats.mean / 1000));
+
   benchmarkResults.push({
     pattern: expression,
     oldMean: oldStats.mean,
     newMean: newStats.mean,
     change: ((oldStats.mean - newStats.mean) / oldStats.mean) * 100,
+    oldOps: oldOps,
+    newOps: newOps,
   });
 
-  printStats(oldStats, newStats, expression, outputFile);
+  printStats(oldStats, newStats, expression, outputFile, iterations);
 }
