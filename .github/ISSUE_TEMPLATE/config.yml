@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://harrisiirak.github.io/cron-parser/
+    about: Read the API documentation and examples
+  - name: Discussions
+    url: https://github.com/harrisiirak/cron-parser/discussions
+    about: Ask questions and discuss ideas with the community
