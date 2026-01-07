@@ -324,7 +324,7 @@ export class CronDate {
    *
    * @returns {number} UTC offset in minutes
    */
-  getUtcOffset(): number {
+  getUTCOffset(): number {
     return this.#date.offset;
   }
 

@@ -105,7 +105,6 @@ describe('CronExpression', () => {
 
     afterEach(() => {
       spy?.mockRestore();
-      spy = undefined;
     });
 
     test('jumps to next allowed second without stepping via applyDateOperation()', () => {

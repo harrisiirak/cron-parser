@@ -38,7 +38,7 @@ export class CronExpression {
   readonly #endDate: CronDate | null;
   readonly #fields: CronFieldCollection;
   #dstTransitionDayKey: string | null = null;
-  #isDstTransitionDayCached = false;
+  #isDstTransitionDay = false;
 
   /**
    * Creates a new CronExpression instance.
@@ -100,6 +100,13 @@ export class CronExpression {
     return sequence.some((element) => element === value);
   }
 
+  /**
+   * Returns the minimum or maximum value from the given array of numbers.
+   *
+   * @param {number[]} values - An array of numbers.
+   * @param {boolean} reverse - If true, returns the maximum value; otherwise, returns the minimum value.
+   * @returns {number} - The minimum or maximum value.
+   */
   #getMinOrMax(values: number[], reverse: boolean): number {
     return values[reverse ? values.length - 1 : 0];
   }
@@ -115,11 +122,11 @@ export class CronExpression {
    * @returns {boolean} True when the day has a DST transition
    * @private
    */
-  #isDstTransitionDay(currentDate: CronDate): boolean {
+  #checkDstTransition(currentDate: CronDate): boolean {
     // Cache per calendar day (in the cron date's timezone) to avoid repeated work inside the iteration loop.
     const key = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
     if (this.#dstTransitionDayKey === key) {
-      return this.#isDstTransitionDayCached;
+      return this.#isDstTransitionDay;
     }
 
     const startOfDay = new CronDate(currentDate);
@@ -129,8 +136,8 @@ export class CronExpression {
     endOfDay.setEndOfDay();
 
     this.#dstTransitionDayKey = key;
-    this.#isDstTransitionDayCached = startOfDay.getUtcOffset() !== endOfDay.getUtcOffset();
-    return this.#isDstTransitionDayCached;
+    this.#isDstTransitionDay = startOfDay.getUTCOffset() !== endOfDay.getUTCOffset();
+    return this.#isDstTransitionDay;
   }
 
   /**
@@ -460,7 +467,7 @@ export class CronExpression {
     // On DST transition days, setting the hour directly can land on a non-existent/repeated local time,
     // which breaks the existing DST handling that relies on `applyDateOperation()` to set `dstStart/dstEnd`.
     // For those days, fall back to stepping hour-by-hour to preserve correctness.
-    if (this.#isDstTransitionDay(currentDate)) {
+    if (this.#checkDstTransition(currentDate)) {
       const steps = reverse ? currentHour - nextHour : nextHour - currentHour;
       for (let i = 0; i < steps; i++) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, hours.length);
