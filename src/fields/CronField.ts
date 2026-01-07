@@ -176,6 +176,42 @@ export abstract class CronField {
   }
 
   /**
+   * Find the next (or previous when `reverse` is true) numeric value in a sorted list.
+   * Returns null if there's no value strictly after/before the current one.
+   *
+   * @param values - Sorted numeric values
+   * @param currentValue - Current value to compare against
+   * @param reverse - When true, search in reverse for previous smaller value
+   */
+  static findNearestValueInList(values: number[], currentValue: number, reverse = false): number | null {
+    if (reverse) {
+      for (let i = values.length - 1; i >= 0; i--) {
+        if (values[i] < currentValue) return values[i];
+      }
+      return null;
+    }
+
+    for (let i = 0; i < values.length; i++) {
+      if (values[i] > currentValue) return values[i];
+    }
+    return null;
+  }
+
+  /**
+   * Instance helper that operates on this field's numeric `values`.
+   *
+   * @param currentValue - Current value to compare against
+   * @param reverse - When true, search in reverse for previous smaller value
+   */
+  findNearestValue(currentValue: number, reverse = false): number | null {
+    return (this.constructor as typeof CronField).findNearestValueInList(
+      this.values as number[],
+      currentValue,
+      reverse,
+    );
+  }
+
+  /**
    * Serializes the field to an object.
    * @returns {SerializedCronField}
    */
