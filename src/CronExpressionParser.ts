@@ -339,7 +339,7 @@ export class CronExpressionParser {
       throw new Error(`Invalid repeat: ${val}`);
     }
     if (atoms.length === 2) {
-      if (!isNaN(parseInt(atoms[0], 10))) {
+      if (!atoms[0].includes('-')) {
         atoms[0] = `${atoms[0]}-${constraints.max}`;
       }
       return CronExpressionParser.#parseRange(field, atoms[0], parseInt(atoms[1], 10), constraints);
