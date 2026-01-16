@@ -37,6 +37,8 @@ export class CronExpression {
   readonly #startDate: CronDate | null;
   readonly #endDate: CronDate | null;
   readonly #fields: CronFieldCollection;
+  #dstTransitionDayKey: string | null = null;
+  #isDstTransitionDay = false;
 
   /**
    * Creates a new CronExpression instance.
@@ -96,6 +98,99 @@ export class CronExpression {
    */
   static #matchSchedule(value: number, sequence: CronFieldType): boolean {
     return sequence.some((element) => element === value);
+  }
+
+  /**
+   * Returns the minimum or maximum value from the given array of numbers.
+   *
+   * @param {number[]} values - An array of numbers.
+   * @param {boolean} reverse - If true, returns the maximum value; otherwise, returns the minimum value.
+   * @returns {number} - The minimum or maximum value.
+   */
+  #getMinOrMax(values: number[], reverse: boolean): number {
+    return values[reverse ? values.length - 1 : 0];
+  }
+
+  /**
+   * Checks whether the given date falls on a DST transition day in its timezone.
+   *
+   * This is used to disable certain “direct set” fast paths on DST days, because setting the hour
+   * directly may land on a non-existent or repeated local time. We cache the result per calendar day
+   * to keep iteration overhead low.
+   *
+   * @param {CronDate} currentDate - Date to check (in the cron timezone)
+   * @returns {boolean} True when the day has a DST transition
+   * @private
+   */
+  #checkDstTransition(currentDate: CronDate): boolean {
+    // Cache per calendar day (in the cron date's timezone) to avoid repeated work inside the iteration loop.
+    const key = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+    if (this.#dstTransitionDayKey === key) {
+      return this.#isDstTransitionDay;
+    }
+
+    const startOfDay = new CronDate(currentDate);
+    startOfDay.setStartOfDay();
+
+    const endOfDay = new CronDate(currentDate);
+    endOfDay.setEndOfDay();
+
+    this.#dstTransitionDayKey = key;
+    this.#isDstTransitionDay = startOfDay.getUTCOffset() !== endOfDay.getUTCOffset();
+    return this.#isDstTransitionDay;
+  }
+
+  /**
+   * Moves the date to the next/previous allowed second value. If there is no remaining allowed second
+   * within the current minute, rolls to the next/previous minute and resets seconds to the min/max allowed.
+   *
+   * @param {CronDate} currentDate - Mutable date being iterated
+   * @param {DateMathOp} dateMathVerb - Add/Subtract depending on direction
+   * @param {boolean} reverse - When true, iterating backwards
+   * @private
+   */
+  #moveToNextSecond(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
+    const seconds = this.#fields.second.values as number[];
+    const currentSecond = currentDate.getSeconds();
+    const nextSecond = this.#fields.second.findNearestValue(currentSecond, reverse);
+
+    if (nextSecond !== null) {
+      currentDate.setSeconds(nextSecond);
+      return;
+    }
+
+    // Roll over to the next/previous minute and start from the min/max allowed second.
+    currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
+    currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
+  }
+
+  /**
+   * Moves the date to the next/previous allowed minute value and resets seconds to the min/max allowed.
+   * If there is no remaining allowed minute within the current hour, rolls to the next/previous hour and
+   * resets minutes/seconds to their extrema.
+   *
+   * @param {CronDate} currentDate - Mutable date being iterated
+   * @param {DateMathOp} dateMathVerb - Add/Subtract depending on direction
+   * @param {boolean} reverse - When true, iterating backwards
+   * @private
+   */
+  #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
+    const minutes = this.#fields.minute.values as number[];
+    const seconds = this.#fields.second.values as number[];
+
+    const currentMinute = currentDate.getMinutes();
+    const nextMinute = this.#fields.minute.findNearestValue(currentMinute, reverse);
+
+    if (nextMinute !== null) {
+      currentDate.setMinutes(nextMinute);
+      currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
+      return;
+    }
+
+    // Roll over to the next/previous hour and start from the min/max allowed minute/second.
+    currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
+    currentDate.setMinutes(this.#getMinOrMax(minutes, reverse));
+    currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
   }
 
   /**
@@ -330,26 +425,59 @@ export class CronExpression {
    * @returns {boolean} - True if the current hour matches the cron expression; otherwise, false.
    */
   #matchHour(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): boolean {
+    const hourValues = this.#fields.hour.values;
+    const hours = hourValues as number[];
+
     const currentHour = currentDate.getHours();
-    const isMatch = CronExpression.#matchSchedule(currentHour, this.#fields.hour.values);
+    const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
     const isDstStart = currentDate.dstStart === currentHour;
     const isDstEnd = currentDate.dstEnd === currentHour;
 
-    if (!isMatch && !isDstStart) {
-      currentDate.dstStart = null;
-      currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
-      return false;
-    }
-    if (isDstStart && !CronExpression.#matchSchedule(currentHour - 1, this.#fields.hour.values)) {
+    // DST start: if the scheduled hour is skipped (e.g. 03:00 doesn't exist),
+    // accept the next existing hour when it corresponds to the skipped one.
+    if (isDstStart) {
+      if (CronExpression.#matchSchedule(currentHour - 1, hourValues)) {
+        return true;
+      }
       currentDate.invokeDateOperation(dateMathVerb, TimeUnit.Hour);
       return false;
     }
+
+    // DST end: avoid returning the repeated hour twice when searching forward.
     if (isDstEnd && !reverse) {
       currentDate.dstEnd = null;
-      currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, this.#fields.hour.values.length);
+      currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, hours.length);
       return false;
     }
-    return true;
+
+    if (isMatch) {
+      return true;
+    }
+
+    // Normal mismatch: if there's no remaining matching hour in this day, jump a whole day first
+    // to avoid scanning hour-by-hour across the day boundary.
+    currentDate.dstStart = null;
+    const nextHour = this.#fields.hour.findNearestValue(currentHour, reverse);
+    if (nextHour === null) {
+      currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, hours.length);
+      return false;
+    }
+    // Fast path: jump directly to the next/previous matching hour and reset lower units.
+    //
+    // On DST transition days, setting the hour directly can land on a non-existent/repeated local time,
+    // which breaks the existing DST handling that relies on `applyDateOperation()` to set `dstStart/dstEnd`.
+    // For those days, fall back to stepping hour-by-hour to preserve correctness.
+    if (this.#checkDstTransition(currentDate)) {
+      const steps = reverse ? currentHour - nextHour : nextHour - currentHour;
+      for (let i = 0; i < steps; i++) {
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, hours.length);
+      }
+    } else {
+      currentDate.setHours(nextHour);
+    }
+    currentDate.setMinutes(this.#getMinOrMax(this.#fields.minute.values as number[], reverse));
+    currentDate.setSeconds(this.#getMinOrMax(this.#fields.second.values as number[], reverse));
+    return false;
   }
 
   /**
@@ -408,11 +536,11 @@ export class CronExpression {
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMinutes(), this.#fields.minute.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
+        this.#moveToNextMinute(currentDate, dateMathVerb, reverse);
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getSeconds(), this.#fields.second.values)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
+        this.#moveToNextSecond(currentDate, dateMathVerb, reverse);
         continue;
       }
 
