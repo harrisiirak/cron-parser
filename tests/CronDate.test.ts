@@ -1,4 +1,4 @@
-import { CronDate, TimeUnit } from '../src/CronDate';
+import { CronDate, TimeUnit, DateMathOp } from '../src/CronDate';
 import { DateTime } from 'luxon';
 
 describe('CronDate', () => {
@@ -452,6 +452,20 @@ describe('CronDate', () => {
       const date = new CronDate('Mon, 4 Jan 2021 10:00:00', 'America/New_York');
       const d = new CronDate(date, 'Europe/Athens');
       expect(d.toISOString()).toBe('2021-01-04T15:00:00.000Z');
+    });
+  });
+
+  describe('invokeDateOperation', () => {
+    test('should handle Add operation', () => {
+      const date = new CronDate('2021-01-01T00:00:00.000Z', 'UTC');
+      date.invokeDateOperation(DateMathOp.Add, TimeUnit.Day);
+      expect(date.getDate()).toBe(2);
+    });
+
+    test('should handle Subtract operation', () => {
+      const date = new CronDate('2021-01-02T00:00:00.000Z', 'UTC');
+      date.invokeDateOperation(DateMathOp.Subtract, TimeUnit.Day);
+      expect(date.getDate()).toBe(1);
     });
   });
 });

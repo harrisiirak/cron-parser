@@ -56,5 +56,40 @@ describe('CronField', () => {
       expect(CronField.findNearestValueInList([1, 2, 3], 1, true)).toBeNull();
       expect(CronField.findNearestValueInList([], 1, true)).toBeNull();
     });
+
+    test('uses default reverse=false parameter when not specified', () => {
+      expect(CronField.findNearestValueInList([1, 2, 3], 1)).toBe(2);
+      expect(CronField.findNearestValueInList([1, 2, 3], 3)).toBeNull();
+    });
+  });
+
+  describe('findNearestValue instance method', () => {
+    test('returns the next greater value when reverse=false', () => {
+      const field = new CronSecond([10, 20, 30]);
+      expect(field.findNearestValue(10, false)).toBe(20);
+      expect(field.findNearestValue(20, false)).toBe(30);
+    });
+
+    test('returns null when there is no next greater value (reverse=false)', () => {
+      const field = new CronSecond([10, 20, 30]);
+      expect(field.findNearestValue(30, false)).toBeNull();
+    });
+
+    test('returns the previous smaller value when reverse=true', () => {
+      const field = new CronSecond([10, 20, 30]);
+      expect(field.findNearestValue(30, true)).toBe(20);
+      expect(field.findNearestValue(20, true)).toBe(10);
+    });
+
+    test('returns null when there is no previous smaller value (reverse=true)', () => {
+      const field = new CronSecond([10, 20, 30]);
+      expect(field.findNearestValue(10, true)).toBeNull();
+    });
+
+    test('uses default reverse=false parameter when not specified', () => {
+      const field = new CronSecond([10, 20, 30]);
+      expect(field.findNearestValue(10)).toBe(20);
+      expect(field.findNearestValue(30)).toBeNull();
+    });
   });
 });
