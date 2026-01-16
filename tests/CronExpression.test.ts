@@ -535,7 +535,7 @@ describe('CronExpression', () => {
         dayOfMonth: new CronDayOfMonth([1]),
         dayOfWeek: new CronDayOfWeek([1]),
       };
-      expect(() => CronExpression.fieldsToExpression(new CronFieldCollection(input))).toThrowError(
+      expect(() => CronExpression.fieldsToExpression(new CronFieldCollection(input))).toThrow(
         'Validation error, Field second is missing',
       );
     });
