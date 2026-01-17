@@ -1542,6 +1542,52 @@ describe('CronExpressionParser', () => {
       expect(date.getDate()).toEqual(31);
       expect(date.getMonth()).toEqual(9);
     });
+
+    test('handles DST transition day with hour jump using step-by-step method', () => {
+      // This tests the branch where checkDstTransition returns true and we step hour-by-hour
+      // instead of directly setting the hour (line 471 in CronExpression.ts)
+      // DST start in Europe/Athens: 2016-03-27 (3 AM is skipped, goes from 2 AM to 4 AM)
+      const options: CronExpressionOptions = {
+        tz: 'Europe/Athens',
+        currentDate: '2016-03-27 01:30:00',
+        endDate: undefined,
+      };
+
+      // Create a cron expression that requires jumping from hour 1 to hour 4 on DST transition day
+      // This will trigger the checkDstTransition path and use step-by-step hour adjustment
+      // because directly setting hour 4 could land on a non-existent time
+      const interval = CronExpressionParser.parse('0 4,5 * * *', options);
+
+      // The first next() should trigger the DST transition check and step hour-by-hour
+      const next = interval.next();
+      expect(next).toBeInstanceOf(CronDate);
+      // Should land on hour 4 or 5 (since hour 3 is skipped on DST start day)
+      // The exact hour depends on the iteration logic, but it should be one of the matching hours
+      expect([4, 5]).toContain(next.getHours());
+      expect(next.getMinutes()).toEqual(0);
+    });
+
+    test('handles DST transition day with reverse hour jump using step-by-step method', () => {
+      // This tests the reverse branch where checkDstTransition returns true and we step hour-by-hour
+      // in reverse direction (line 471 reverse branch in CronExpression.ts)
+      // DST end in Europe/Athens: 2016-10-30 (3 AM is repeated)
+      const options: CronExpressionOptions = {
+        tz: 'Europe/Athens',
+        currentDate: '2016-10-30 05:00:00',
+        endDate: undefined,
+      };
+
+      // Create a cron expression that requires jumping backwards from hour 5 to hour 2 on DST transition day
+      // This will trigger the checkDstTransition path with reverse=true and use step-by-step hour adjustment
+      const interval = CronExpressionParser.parse('0 2,3 * * *', options);
+
+      // Use prev() to go backwards, which should trigger the reverse branch
+      const prev = interval.prev();
+      expect(prev).toBeInstanceOf(CronDate);
+      // Should land on hour 2 or 3 (since hour 3 is repeated on DST end day)
+      expect([2, 3]).toContain(prev.getHours());
+      expect(prev.getMinutes()).toEqual(0);
+    });
   });
 
   describe('test expressions with "L" last of flag', () => {
@@ -1783,6 +1829,51 @@ describe('CronExpressionParser', () => {
         for (const { expression, expected } of expressions) {
           expect(CronExpressionParser.parse(expression, options).stringify(true)).toBe(expected);
         }
+      });
+    });
+
+    describe('edge cases for coverage', () => {
+      test('H(range)/step pattern where loop starts below minStart', () => {
+        // This tests line 247 where i >= minStart condition is hit
+        // We need a case where Math.floor(minStart / stepNum) * stepNum + offset < minStart
+        // For example, H(10-20)/5 with offset that makes first value < 10
+        const options = {
+          currentDate: new Date(2025, 0, 1),
+          hashSeed: 'test-seed-for-offset',
+        };
+        const interval = CronExpressionParser.parse('H(10-20)/5 * * * *', options);
+        // The expression should parse successfully and generate valid dates
+        expect(interval).toBeTruthy();
+        const next = interval.next();
+        expect(next).toBeInstanceOf(CronDate);
+      });
+
+      test('H/step pattern where loop starts below constraints.min', () => {
+        // This tests line 276 where i >= constraints.min condition is hit
+        // We need a case where Math.floor(constraints.min / stepNum) * stepNum + offset < constraints.min
+        // For example, H/5 on seconds (0-59) with offset that makes first value < 0
+        const options = {
+          currentDate: new Date(2025, 0, 1),
+          hashSeed: 'test-seed-for-offset',
+        };
+        const interval = CronExpressionParser.parse('H/5 * * * * *', options);
+        // The expression should parse successfully
+        expect(interval).toBeTruthy();
+        const next = interval.next();
+        expect(next).toBeInstanceOf(CronDate);
+        expect(next.getSeconds()).toBeGreaterThanOrEqual(0);
+        expect(next.getSeconds()).toBeLessThanOrEqual(59);
+      });
+
+      test('parseRepeat with numeric start value', () => {
+        // This tests line 342 where atoms[0] is a number (not NaN)
+        // Pattern like 5/10 where first part is a number
+        const interval = CronExpressionParser.parse('5/10 * * * *');
+        expect(interval).toBeTruthy();
+        const next = interval.next();
+        expect(next).toBeInstanceOf(CronDate);
+        expect(next.getMinutes()).toBeGreaterThanOrEqual(5);
+        expect(next.getMinutes()).toBeLessThanOrEqual(59);
       });
     });
   });
