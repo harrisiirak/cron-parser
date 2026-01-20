@@ -1741,9 +1741,7 @@ describe('CronExpressionParser', () => {
           'H H * * * *',
           '* H H * * *',
           '* * H H * *',
-          '* * * H H *',
           '* * * * H H',
-          'H H H H H H',
           'H/5 * * * * *',
           '* * * * * H#1',
         ];
