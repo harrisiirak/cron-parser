@@ -45,9 +45,17 @@ describe('CronExpression', () => {
     expect(prevDate.toISOString()).toBe('2022-01-30T00:00:00.000Z');
   });
 
-  test('should check if there is a next scheduled date', () => {
+  test('should return true if there is a next scheduled date within bounds', () => {
     const cronExpression = new CronExpression(fields, options);
     expect(cronExpression.hasNext()).toBe(true);
+  });
+
+  test('should return false if there is no next scheduled date within bounds', () => {
+    const cronExpression = new CronExpression(fields, {
+      ...options,
+      endDate: new Date('2023-01-02T00:00:00Z'),
+    });
+    expect(cronExpression.hasNext()).toBe(false);
   });
 
   test('should check if there is a previous scheduled date', () => {

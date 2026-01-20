@@ -243,7 +243,6 @@ describe('CronExpressionParser', () => {
     const options = {
       currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
       endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
-      iterator: true,
     };
 
     const interval = CronExpressionParser.parse('*/25 * * * *', options);
@@ -262,7 +261,27 @@ describe('CronExpressionParser', () => {
     val = iterator.next();
     expect(val).not.toBeNull();
     expect(val.value).toBeTruthy();
+    expect(val.done).toBeFalsy();
+
+    val = iterator.next();
+    expect(val).not.toBeNull();
+    expect(val.value).toBeUndefined();
     expect(val.done).toBeTruthy();
+  });
+
+  test('valid ES6 iterator works with for..of loop', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:53'),
+      endDate: new CronDate('Wed, 26 Dec 2012 15:40:00'),
+    };
+    const interval = CronExpressionParser.parse('*/25 * * * *', options);
+
+    const dates = [];
+    for (const date of interval) {
+      dates.push(date);
+    }
+
+    expect(dates.length).toEqual(3);
   });
 
   test('empty expression', () => {

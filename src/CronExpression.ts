@@ -575,8 +575,12 @@ export class CronExpression {
   [Symbol.iterator](): Iterator<CronDate> {
     return {
       next: () => {
-        const schedule = this.#findSchedule();
-        return { value: schedule, done: !this.hasNext() };
+        try {
+          const schedule = this.#findSchedule();
+          return { value: schedule, done: false };
+        } catch {
+          return { value: undefined as any, done: true };
+        }
       },
     };
   }
