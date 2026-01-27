@@ -183,7 +183,7 @@ export abstract class CronField {
    * @param currentValue - Current value to compare against
    * @param reverse - When true, search in reverse for previous smaller value
    */
-  static findNearestValueInList(values: number[], currentValue: number, reverse = false): number | null {
+  static findNearestValueInList(values: number[], currentValue: number, reverse: boolean): number | null {
     if (reverse) {
       for (let i = values.length - 1; i >= 0; i--) {
         if (values[i] < currentValue) return values[i];
@@ -203,7 +203,7 @@ export abstract class CronField {
    * @param currentValue - Current value to compare against
    * @param reverse - When true, search in reverse for previous smaller value
    */
-  findNearestValue(currentValue: number, reverse = false): number | null {
+  findNearestValue(currentValue: number, reverse: boolean): number | null {
     return (this.constructor as typeof CronField).findNearestValueInList(
       this.values as number[],
       currentValue,

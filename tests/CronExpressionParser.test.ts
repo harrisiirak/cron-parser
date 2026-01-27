@@ -1561,6 +1561,36 @@ describe('CronExpressionParser', () => {
       expect(date.getDate()).toEqual(31);
       expect(date.getMonth()).toEqual(9);
     });
+
+    test('handles DST transition day with hour jump using step-by-step method', () => {
+      const options: CronExpressionOptions = {
+        tz: 'Europe/Athens',
+        currentDate: '2016-03-27 01:30:00',
+        endDate: undefined,
+      };
+
+      const interval = CronExpressionParser.parse('0 4,5 * * *', options);
+
+      const next = interval.next();
+      expect(next).toBeInstanceOf(CronDate);
+      expect([4, 5]).toContain(next.getHours());
+      expect(next.getMinutes()).toEqual(0);
+    });
+
+    test('handles DST transition day with reverse hour jump using step-by-step method', () => {
+      const options: CronExpressionOptions = {
+        tz: 'Europe/Athens',
+        currentDate: '2016-10-30 05:00:00',
+        endDate: undefined,
+      };
+
+      const interval = CronExpressionParser.parse('0 2,3 * * *', options);
+
+      const prev = interval.prev();
+      expect(prev).toBeInstanceOf(CronDate);
+      expect([2, 3]).toContain(prev.getHours());
+      expect(prev.getMinutes()).toEqual(0);
+    });
   });
 
   describe('test expressions with "L" last of flag', () => {
@@ -1793,6 +1823,8 @@ describe('CronExpressionParser', () => {
           { expression: 'H/5 * * * * *', expected: '*/5 * * * * *' },
           { expression: 'H(10-20) * * * *', expected: '0 16 * * * *' },
           { expression: 'H(0-29)/10 * * * *', expected: '0 5,15,25 * * * *' },
+          { expression: 'H(5-10)/3 * * * * *', expected: '6,9 * * * * *' },
+          { expression: '0 0 0 H/2 * *', expected: '0 0 0 2/2 * *' },
           { expression: '* H H(9-20)/3 * * 1-5', expected: '* 34 10-19/3 * * 1-5' },
           { expression: '* * * * * H#1', expected: '* * * * * 0#1' },
         ];

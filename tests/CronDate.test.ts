@@ -265,6 +265,14 @@ describe('CronDate', () => {
     expect(date6.getSeconds()).toEqual(0);
   });
 
+  test('should throw error for invalid operation', () => {
+    const date = new CronDate('2021-01-01T00:00:00.000Z', 'UTC');
+    expect(() => {
+      // @ts-expect-error Testing invalid operation
+      date.invokeDateOperation('InvalidOp', TimeUnit.Day);
+    }).toThrow('Invalid verb: InvalidOp');
+  });
+
   test('getUTCDate should succeed', () => {
     const date1 = new CronDate(new Date('2020-11-30T01:01:01.000-00:00'), 'UTC');
     expect(date1.getUTCDate()).toEqual(30);
