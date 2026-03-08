@@ -471,6 +471,10 @@ export class CronExpression {
       const steps = reverse ? currentHour - nextHour : nextHour - currentHour;
       for (let i = 0; i < steps; i++) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, hours.length);
+        // On spring-forward days, one step jumps 2 wall-clock hours (e.g. 01:00 → 03:00),
+        // which can overshoot the target hour. Stop as soon as we reach or pass it.
+        if (!reverse && currentDate.getHours() >= nextHour) break;
+        if (reverse && currentDate.getHours() <= nextHour) break;
       }
     } else {
       currentDate.setHours(nextHour);
