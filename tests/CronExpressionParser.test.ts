@@ -1592,11 +1592,7 @@ describe('CronExpressionParser', () => {
       expect(prev.getMinutes()).toEqual(0);
     });
 
-    test('does not skip spring-forward DST day when targeted by day-of-week', () => {
-      // March 8, 2026 is the US spring-forward day (America/Chicago clocks jump 01:00→03:00).
-      // currentDate is Saturday night (23:45 CST = 05:45 UTC Sunday).
-      // The cron targets Sundays at 8am; the library was incorrectly skipping the DST day
-      // entirely and returning the following Sunday instead.
+    test('does not overshoot target hour on spring-forward DST day (forward)', () => {
       const options: CronExpressionOptions = {
         tz: 'America/Chicago',
         currentDate: new Date('2026-03-08T05:45:00.000Z'), // 11:45 PM CST Sat Mar 7
@@ -1606,7 +1602,20 @@ describe('CronExpressionParser', () => {
       const next = interval.next();
 
       expect(next).toBeInstanceOf(CronDate);
-      expect(next.toISOString()).toEqual('2026-03-08T13:00:00.000Z'); // 8am CDT Sun Mar 8 (UTC-5)
+      expect(next.toISOString()).toEqual('2026-03-08T13:00:00.000Z'); // 8am CDT Sun Mar 8
+    });
+
+    test('does not overshoot target hour on spring-forward DST day (reverse)', () => {
+      const options: CronExpressionOptions = {
+        tz: 'America/Chicago',
+        currentDate: new Date('2026-03-08T23:00:00.000Z'), // 6pm CDT Sun Mar 8
+      };
+
+      const interval = CronExpressionParser.parse('0 8 * * 0', options);
+      const prev = interval.prev();
+
+      expect(prev).toBeInstanceOf(CronDate);
+      expect(prev.toISOString()).toEqual('2026-03-08T13:00:00.000Z'); // 8am CDT Sun Mar 8
     });
   });
 
