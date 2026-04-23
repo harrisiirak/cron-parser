@@ -612,4 +612,112 @@ describe('CronExpression', () => {
       expect(cronExpression.includesDate(new Date('2023-01-23T00:00:00Z'))).toBeFalsy();
     });
   });
+
+  describe('DST handling - Europe/Rome (Spring Forward)', () => {
+    const baseOptions = {
+      currentDate: new Date('2025-03-29T00:00:00Z'),
+      endDate: new Date('2025-03-31T00:00:00Z'),
+      tz: 'Europe/Rome',
+    };
+
+    const createInterval = (pattern: string) => {
+      return CronExpressionParser.parse(pattern, {
+        ...baseOptions,
+        currentDate: new Date(baseOptions.currentDate.getTime() - 1000),
+      });
+    };
+
+    test('should handle DST gap (02:30 does not exist)', () => {
+      const interval = createInterval('30 2 * * 7');
+      expect(interval.hasNext()).toBe(true);
+      const next = interval.next().toDate();
+      expect(next.toISOString()).toBe('2025-03-30T01:30:00.000Z');
+      expect(interval.hasNext()).toBe(false);
+    });
+
+    test('should return valid occurrence after DST gap (03:00)', () => {
+      const interval = createInterval('0 3 * * 7');
+      expect(interval.hasNext()).toBe(true);
+      const next = interval.next().toDate();
+      expect(next.toISOString()).toBe('2025-03-30T01:00:00.000Z');
+    });
+
+    test('should return valid occurrence after DST gap (04:00)', () => {
+      const interval = createInterval('0 4 * * 7');
+      expect(interval.hasNext()).toBe(true);
+      const next = interval.next().toDate();
+      expect(next.toISOString()).toBe('2025-03-30T02:00:00.000Z');
+    });
+
+    test('should return valid occurrence after DST gap (05:00)', () => {
+      const interval = createInterval('0 5 * * 7');
+      expect(interval.hasNext()).toBe(true);
+      const next = interval.next().toDate();
+      expect(next.toISOString()).toBe('2025-03-30T03:00:00.000Z');
+    });
+
+    test('should not stop iteration after DST boundary', () => {
+      const interval = createInterval('0 5 * * 7');
+      const results: string[] = [];
+      for (let i = 0; i < 2; i++) {
+        if (interval.hasNext()) {
+          results.push(interval.next().toDate().toISOString());
+        }
+      }
+      expect(results.length).toBeGreaterThan(0);
+      expect(results[0]).toBe('2025-03-30T03:00:00.000Z');
+    });
+
+    test('should NOT return undefined after DST gap', () => {
+      const interval = CronExpressionParser.parse('0 5 * * 7', {
+        currentDate: new Date('2025-03-29T00:00:00Z'),
+        endDate: new Date('2025-03-31T00:00:00Z'),
+        tz: 'Europe/Rome',
+      });
+      expect(interval.hasNext()).toBe(true);
+      const next = interval.next();
+      expect(next.toISOString()).toBe('2025-03-30T03:00:00.000Z');
+    });
+
+    test('iterator should remain stable across DST gap', () => {
+      const interval = CronExpressionParser.parse('0 * * * 7', {
+        currentDate: new Date('2025-03-29T00:00:00Z'),
+        endDate: new Date('2025-03-31T00:00:00Z'),
+        tz: 'Europe/Rome',
+      });
+      const results: string[] = [];
+      for (let i = 0; i < 10; i++) {
+        if (!interval.hasNext()) break;
+        results.push(interval.next().toDate().toISOString());
+      }
+      expect(results).toEqual([
+        '2025-03-29T23:00:00.000Z',
+        '2025-03-30T00:00:00.000Z',
+        '2025-03-30T01:00:00.000Z',
+        '2025-03-30T02:00:00.000Z',
+        '2025-03-30T03:00:00.000Z',
+        '2025-03-30T04:00:00.000Z',
+        '2025-03-30T05:00:00.000Z',
+        '2025-03-30T06:00:00.000Z',
+        '2025-03-30T07:00:00.000Z',
+        '2025-03-30T08:00:00.000Z',
+      ]);
+    });
+
+    test('Europe/Rome vs UTC should differ correctly', () => {
+      const rome = CronExpressionParser.parse('0 5 * * 7', {
+        currentDate: new Date('2025-03-29T00:00:00Z'),
+        endDate: new Date('2025-03-31T00:00:00Z'),
+        tz: 'Europe/Rome',
+      });
+      const utc = CronExpressionParser.parse('0 5 * * 7', {
+        currentDate: new Date('2025-03-29T00:00:00Z'),
+        endDate: new Date('2025-03-31T00:00:00Z'),
+        tz: 'UTC',
+      });
+      const romeNext = rome.next().toDate();
+      const utcNext = utc.next().toDate();
+      expect(romeNext.toISOString()).not.toBe(utcNext.toISOString());
+    });
+  });
 });
