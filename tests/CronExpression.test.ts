@@ -87,6 +87,40 @@ describe('CronExpression', () => {
     expect(nextDate).toBe('2023-01-08T00:00:00.000Z');
   });
 
+  test('should preserve timezone after reset (issue #406)', () => {
+    // Regression test: reset() was silently dropping the tz from parse() options,
+    // causing subsequent next()/prev() to evaluate cron fields in the host's
+    // system local timezone instead of the originally-configured one.
+    const cron = '0 9,12,15,18 * * 1-5';
+    const tz = 'Australia/Melbourne';
+
+    const it = CronExpressionParser.parse(cron, { tz, currentDate: '2026-05-06T00:00:00.000Z' });
+
+    const first = it.next().toDate();
+    // Melbourne is UTC+10 in May, so 2026-05-06T00:00:00Z = 10:00 Melbourne.
+    // Next match is 12:00 Melbourne = 02:00 UTC.
+    expect(first.toISOString()).toBe('2026-05-06T02:00:00.000Z');
+
+    it.reset(first);
+    const second = it.next().toDate();
+    // After reset, next() should still be anchored in Australia/Melbourne.
+    // 15:00 Melbourne = 05:00 UTC.
+    expect(second.toISOString()).toBe('2026-05-06T05:00:00.000Z');
+  });
+
+  test('should preserve timezone after reset with explicit new date (issue #406)', () => {
+    const cron = '0 9,12,15,18 * * 1-5';
+    const tz = 'America/New_York';
+
+    const it = CronExpressionParser.parse(cron, { tz, currentDate: '2026-05-06T00:00:00.000Z' });
+
+    // Skip ahead to a specific date (May 7 is Thursday)
+    it.reset(new Date('2026-05-07T00:00:00.000Z'));
+    const next = it.next().toDate();
+    // Late May NY is UTC-4 (EDT), so 9 AM NY = 13:00 UTC.
+    expect(next.toISOString()).toBe('2026-05-07T13:00:00.000Z');
+  });
+
   test('should return the string representation of the cron expression', () => {
     const cronExpression = new CronExpression(fields, options);
     expect(cronExpression.toString()).toBe('0 0 0 1 1 0');
