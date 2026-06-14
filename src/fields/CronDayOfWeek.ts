@@ -7,7 +7,7 @@ const DAY_CHARS: readonly CronChars[] = Object.freeze(['L']);
 
 /**
  * Represents the "day of the week" field within a cron expression.
- * @class CronDayOfTheWeek
+ * @class CronDayOfWeek
  * @extends CronField
  */
 export class CronDayOfWeek extends CronField {
@@ -28,7 +28,7 @@ export class CronDayOfWeek extends CronField {
   }
 
   /**
-   * CronDayOfTheWeek constructor. Initializes the "day of the week" field with the provided values.
+   * CronDayOfWeek constructor. Initializes the "day of the week" field with the provided values.
    * @param {DayOfWeekRange[]} values - Values for the "day of the week" field
    * @param {CronFieldOptions} [options] - Options provided by the parser
    */

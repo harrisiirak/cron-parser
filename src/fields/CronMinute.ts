@@ -6,8 +6,8 @@ const MAX_MINUTE = 59;
 const MINUTE_CHARS: readonly CronChars[] = Object.freeze([]);
 
 /**
- * Represents the "second" field within a cron expression.
- * @class CronSecond
+ * Represents the "minute" field within a cron expression.
+ * @class CronMinute
  * @extends CronField
  */
 export class CronMinute extends CronField {
@@ -24,8 +24,8 @@ export class CronMinute extends CronField {
   }
 
   /**
-   * CronSecond constructor. Initializes the "second" field with the provided values.
-   * @param {SixtyRange[]} values - Values for the "second" field
+   * CronMinute constructor. Initializes the "minute" field with the provided values.
+   * @param {SixtyRange[]} values - Values for the "minute" field
    * @param {CronFieldOptions} [options] - Options provided by the parser
    */
   constructor(values: SixtyRange[], options?: CronFieldOptions) {
@@ -34,7 +34,7 @@ export class CronMinute extends CronField {
   }
 
   /**
-   * Returns an array of allowed values for the "second" field.
+   * Returns an array of allowed values for the "minute" field.
    * @returns {SixtyRange[]}
    */
   get values(): SixtyRange[] {
