@@ -13,7 +13,7 @@ import {
   DayOfWeekRange,
   HourRange,
   MonthRange,
-  ParseRangeResponse,
+  ParsedRangeResult,
   SixtyRange,
 } from './fields';
 
@@ -139,12 +139,12 @@ export class CronExpressionParser {
     ) as DayOfWeekRange[];
 
     const fields = new CronFieldCollection({
-      second: new CronSecond(second, { rawValue: rawFields.second }),
-      minute: new CronMinute(minute, { rawValue: rawFields.minute }),
-      hour: new CronHour(hour, { rawValue: rawFields.hour }),
-      dayOfMonth: new CronDayOfMonth(dayOfMonth, { rawValue: rawFields.dayOfMonth }),
-      month: new CronMonth(month, { rawValue: rawFields.month }),
-      dayOfWeek: new CronDayOfWeek(dayOfWeek, { rawValue: rawFields.dayOfWeek, nthDayOfWeek }),
+      second: new CronSecond(second, { sourceExpression: rawFields.second }),
+      minute: new CronMinute(minute, { sourceExpression: rawFields.minute }),
+      hour: new CronHour(hour, { sourceExpression: rawFields.hour }),
+      dayOfMonth: new CronDayOfMonth(dayOfMonth, { sourceExpression: rawFields.dayOfMonth }),
+      month: new CronMonth(month, { sourceExpression: rawFields.month }),
+      dayOfWeek: new CronDayOfWeek(dayOfWeek, { sourceExpression: rawFields.dayOfWeek, nthDayOfWeek }),
     });
     return new CronExpression(fields, { ...options, expression });
   }
@@ -300,7 +300,7 @@ export class CronExpressionParser {
       if (Array.isArray(result)) {
         stack.push(...result);
       } else {
-        if (CronExpressionParser.#isValidConstraintChar(constraints, result)) {
+        if (CronExpressionParser.#isSpecialCharValue(constraints, result)) {
           stack.push(result);
         } else {
           const v = parseInt(result.toString(), 10);
@@ -333,7 +333,7 @@ export class CronExpressionParser {
    * @private
    * @returns {(number | string)[]} The parsed repeat.
    */
-  static #parseRepeat(field: CronUnit, val: string, constraints: CronConstraints): ParseRangeResponse {
+  static #parseRepeat(field: CronUnit, val: string, constraints: CronConstraints): ParsedRangeResult {
     const atoms = val.split('/');
     if (atoms.length > 2) {
       throw new Error(`Invalid repeat: ${val}`);
@@ -416,7 +416,7 @@ export class CronExpressionParser {
     val: string,
     repeatInterval: number,
     constraints: CronConstraints,
-  ): ParseRangeResponse {
+  ): ParsedRangeResult {
     const atoms: string[] = val.split('-');
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;
@@ -460,7 +460,7 @@ export class CronExpressionParser {
    * @private
    * @returns {boolean} Whether the character is valid for the field.
    */
-  static #isValidConstraintChar(constraints: CronConstraints, value: string | number): boolean {
+  static #isSpecialCharValue(constraints: CronConstraints, value: string | number): boolean {
     return constraints.chars.some((char) => value.toString().includes(char));
   }
 }

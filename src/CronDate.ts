@@ -1,4 +1,5 @@
 import { DateTime, WeekdayNumbers } from 'luxon';
+import { DAYS_IN_MONTH as DAYS_IN_MONTH_CONST } from './constants.js';
 
 export enum TimeUnit {
   Second = 'Second',
@@ -18,7 +19,7 @@ type VerbMap = {
   [key in TimeUnit]: () => void;
 };
 
-export const DAYS_IN_MONTH: readonly number[] = Object.freeze([31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
+export const DAYS_IN_MONTH: readonly number[] = Object.freeze(DAYS_IN_MONTH_CONST);
 
 /**
  * CronDate class that wraps the Luxon DateTime object to provide
@@ -26,13 +27,13 @@ export const DAYS_IN_MONTH: readonly number[] = Object.freeze([31, 29, 31, 30, 3
  */
 export class CronDate {
   #date: DateTime;
-  #dstStart: number | null = null;
-  #dstEnd: number | null = null;
+  #dstTransitionHourStart: number | null = null;
+  #dstTransitionHourEnd: number | null = null;
 
   /**
-   * Maps the verb to the appropriate method
+   * Maps the time unit operation to the appropriate method
    */
-  #verbMap: { add: VerbMap; subtract: VerbMap } = {
+  #timeUnitOperations: { add: VerbMap; subtract: VerbMap } = {
     add: {
       [TimeUnit.Year]: this.addYear.bind(this),
       [TimeUnit.Month]: this.addMonth.bind(this),
@@ -64,8 +65,8 @@ export class CronDate {
       this.#date = DateTime.local();
     } else if (timestamp instanceof CronDate) {
       this.#date = timestamp.#date;
-      this.#dstStart = timestamp.#dstStart;
-      this.#dstEnd = timestamp.#dstEnd;
+      this.#dstTransitionHourStart = timestamp.#dstTransitionHourStart;
+      this.#dstTransitionHourEnd = timestamp.#dstTransitionHourEnd;
     } else if (timestamp instanceof Date) {
       this.#date = DateTime.fromJSDate(timestamp, dateOpts);
     } else if (typeof timestamp === 'number') {
@@ -99,35 +100,35 @@ export class CronDate {
   }
 
   /**
-   * Returns daylight savings start time.
+   * Returns daylight savings transition hour start.
    * @returns {number | null}
    */
-  get dstStart(): number | null {
-    return this.#dstStart;
+  get dstTransitionHourStart(): number | null {
+    return this.#dstTransitionHourStart;
   }
 
   /**
-   * Sets daylight savings start time.
+   * Sets daylight savings transition hour start.
    * @param {number | null} value
    */
-  set dstStart(value: number | null) {
-    this.#dstStart = value;
+  set dstTransitionHourStart(value: number | null) {
+    this.#dstTransitionHourStart = value;
   }
 
   /**
-   * Returns daylight savings end time.
+   * Returns daylight savings transition hour end.
    * @returns {number | null}
    */
-  get dstEnd(): number | null {
-    return this.#dstEnd;
+  get dstTransitionHourEnd(): number | null {
+    return this.#dstTransitionHourEnd;
   }
 
   /**
-   * Sets daylight savings end time.
+   * Sets daylight savings transition hour end.
    * @param {number | null} value
    */
-  set dstEnd(value: number | null) {
-    this.#dstEnd = value;
+  set dstTransitionHourEnd(value: number | null) {
+    this.#dstTransitionHourEnd = value;
   }
 
   /**
@@ -224,7 +225,7 @@ export class CronDate {
    * @param {TimeUnit} unit
    */
   addUnit(unit: TimeUnit): void {
-    this.#verbMap.add[unit]();
+    this.#timeUnitOperations.add[unit]();
   }
 
   /**
@@ -232,7 +233,7 @@ export class CronDate {
    * @param {TimeUnit} unit
    */
   subtractUnit(unit: TimeUnit): void {
-    this.#verbMap.subtract[unit]();
+    this.#timeUnitOperations.subtract[unit]();
   }
 
   /**
@@ -558,11 +559,11 @@ export class CronDate {
     const diff = currentHour - previousHour;
     if (diff === 2) {
       if (hoursLength !== 24) {
-        this.dstStart = currentHour;
+        this.dstTransitionHourStart = currentHour;
       }
     } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
       if (hoursLength !== 24) {
-        this.dstEnd = currentHour;
+        this.dstTransitionHourEnd = currentHour;
       }
     }
   }

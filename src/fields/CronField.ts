@@ -14,12 +14,13 @@ export type SerializedCronField = {
 /**
  * Represents the options for a cron field.
  * @typedef {Object} CronFieldOptions
- * @property {string} rawValue - The raw value of the field.
+ * @property {string} sourceExpression - The source expression of the field (previously rawValue).
  * @property {boolean} [wildcard] - Indicates if the field is a wildcard.
  * @property {number} [nthDayOfWeek] - The nth day of the week.
  */
 export type CronFieldOptions = {
-  rawValue?: string;
+  /** The source expression of the field (previously rawValue) */
+  sourceExpression?: string;
   wildcard?: boolean;
   nthDayOfWeek?: number;
 };
@@ -36,7 +37,7 @@ export abstract class CronField {
   readonly #wildcard: boolean = false;
   readonly #values: (number | string)[] = [];
 
-  protected readonly options: CronFieldOptions & { rawValue: string } = { rawValue: '' };
+  protected readonly options: CronFieldOptions & { sourceExpression: string } = { sourceExpression: '' };
 
   /**
    * Returns the minimum value allowed for this field.
@@ -83,7 +84,7 @@ export abstract class CronField {
    * @throws {TypeError} if the constructor is called directly
    * @throws {Error} if validation fails
    */
-  protected constructor(values: (number | string)[], options: CronFieldOptions = { rawValue: '' }) {
+  protected constructor(values: (number | string)[], options: CronFieldOptions = { sourceExpression: '' }) {
     if (!Array.isArray(values)) {
       throw new Error(`${this.constructor.name} Validation error, values is not an array`);
     }
@@ -94,12 +95,12 @@ export abstract class CronField {
     /* istanbul ignore next */
     this.options = {
       ...options,
-      rawValue: options.rawValue ?? '',
+      sourceExpression: options.sourceExpression ?? '',
     };
     this.#values = values.sort(CronField.sorter);
     this.#wildcard = this.options.wildcard !== undefined ? this.options.wildcard : this.#isWildcardValue();
-    this.#hasLastChar = this.options.rawValue.includes('L') || values.includes('L');
-    this.#hasQuestionMarkChar = this.options.rawValue.includes('?') || values.includes('?');
+    this.#hasLastChar = this.options.sourceExpression.includes('L') || values.includes('L');
+    this.#hasQuestionMarkChar = this.options.sourceExpression.includes('?') || values.includes('?');
   }
 
   /**
@@ -250,12 +251,12 @@ export abstract class CronField {
 
   /**
    * Determines if the field is a wildcard based on the values.
-   * When options.rawValue is not empty, it checks if the raw value is a wildcard, otherwise it checks if all values in the range are included.
+   * When options.sourceExpression is not empty, it checks if the source expression is a wildcard, otherwise it checks if all values in the range are included.
    * @returns {boolean}
    */
   #isWildcardValue(): boolean {
-    if (this.options.rawValue.length > 0) {
-      return ['*', '?'].includes(this.options.rawValue);
+    if (this.options.sourceExpression.length > 0) {
+      return ['*', '?'].includes(this.options.sourceExpression);
     }
 
     return Array.from({ length: this.max - this.min + 1 }, (_, i) => i + this.min).every((value) =>

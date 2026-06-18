@@ -128,7 +128,7 @@ export class CronFieldCollection {
    *   hour: new CronHour([9]),
    *   dayOfMonth: new CronDayOfMonth([15]),
    *   month: new CronMonth([1]),
-   *   dayOfWeek: new CronDayOfTheWeek([1, 2, 3, 4, 5]),
+   *   dayOfWeek: new CronDayOfWeek([1, 2, 3, 4, 5]),
    * })
    *
    * console.log(cronFields.second.values); // [0]
@@ -307,14 +307,14 @@ export class CronFieldCollection {
   }
 
   /**
-   * Handles a single range.
+   * Handles a single range for stringification.
    * @param {CronField} field - The cron field to stringify
    * @param {FieldRange} range {start: number, end: number, step: number, count: number} The range to handle.
    * @param {number} max The maximum value for the field.
    * @returns {string | null} The stringified range or null if it cannot be stringified.
    * @private
    */
-  static #handleSingleRange(field: CronField, range: FieldRange, max: number): string | null {
+  static #stringifySingleRange(field: CronField, range: FieldRange, max: number): string | null {
     const step = range.step;
     if (!step) {
       return null;
@@ -329,13 +329,13 @@ export class CronFieldCollection {
   }
 
   /**
-   * Handles multiple ranges.
+   * Handles multiple ranges for stringification.
    * @param {FieldRange} range {start: number, end: number, step: number, count: number} The range to handle.
    * @param {number} max The maximum value for the field.
    * @returns {string} The stringified range.
    * @private
    */
-  static #handleMultipleRanges(range: FieldRange, max: number): string {
+  static #stringifyMultipleRanges(range: FieldRange, max: number): string {
     const step = range.step;
     if (step === 1) {
       return `${range.start}-${range.end}`;
@@ -391,7 +391,7 @@ export class CronFieldCollection {
 
     const ranges = CronFieldCollection.compactField(values);
     if (ranges.length === 1) {
-      const singleRangeResult = CronFieldCollection.#handleSingleRange(field, ranges[0], max);
+      const singleRangeResult = CronFieldCollection.#stringifySingleRange(field, ranges[0], max);
       if (singleRangeResult) {
         return singleRangeResult;
       }
@@ -399,7 +399,7 @@ export class CronFieldCollection {
     return ranges
       .map((range) => {
         const value =
-          range.count === 1 ? range.start.toString() : CronFieldCollection.#handleMultipleRanges(range, max);
+          range.count === 1 ? range.start.toString() : CronFieldCollection.#stringifyMultipleRanges(range, max);
         if (field instanceof CronDayOfWeek && field.nthDay > 0) {
           return `${value}#${field.nthDay}`;
         }
