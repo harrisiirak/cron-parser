@@ -68,6 +68,17 @@ describe('CronExpressionParser', () => {
       }).toThrow('Invalid explicit day of month definition');
     });
 
+    test('explicit day of month rescued by a restricted day of week', () => {
+      // Day of month and day of week combine with OR, so an out-of-range day of
+      // month is valid when the day of week is restricted: it fires on the
+      // matching weekdays.
+      const iter = CronExpressionParser.parse('0 0 31 2 1-5');
+      const next = iter.next();
+      expect(next.getMonth()).toEqual(1); // February
+      expect(next.getDay()).toBeGreaterThanOrEqual(1);
+      expect(next.getDay()).toBeLessThanOrEqual(5);
+    });
+
     test('invalid characters test - symbol', () => {
       expect(() => CronExpressionParser.parse('10 ! 12 8 0')).toThrow('Invalid characters, got value: !');
     });
