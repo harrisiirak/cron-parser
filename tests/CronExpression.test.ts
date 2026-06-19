@@ -405,7 +405,7 @@ describe('CronExpression', () => {
     });
 
     test('stringify cron expression with semi range step', () => {
-      const expected = '0 5/5 * * * *';
+      const expected = '0 5-55/5 * * * *';
       const interval = CronExpressionParser.parse('5/5 * * * *', {});
       let str = interval.stringify(true);
       expect(str).toEqual(expected);
@@ -414,12 +414,33 @@ describe('CronExpression', () => {
     });
 
     test('stringify cron expression with semi range step (discard seconds)', () => {
-      const expected = '5/5 * * * *';
+      const expected = '5-55/5 * * * *';
       const interval = CronExpressionParser.parse('5/5 * * * *', {});
       let str = interval.stringify();
       expect(str).toEqual(expected);
       str = CronExpression.fieldsToExpression(interval.fields).stringify();
       expect(str).toEqual(expected);
+    });
+
+    // https://github.com/harrisiirak/cron-parser/issues/279
+    // A stepped range whose end coincides with `max - step + 1` must keep its
+    // explicit range bounds. Emitting the bare `start/step` shorthand produces a
+    // non-standard expression (crontab(5) only allows `*/step` or `first-last/step`)
+    // that other parsers reject when `start` is not the field minimum.
+    test('stringify keeps explicit range bounds for stepped ranges not starting at min', () => {
+      // All inputs are five-field expressions, so `stringify()` (no seconds) is used.
+      const cases: [string, string][] = [
+        ['0 6-18/6 * * *', '0 6-18/6 * * *'], // hours 6,12,18 (end === max - step + 1)
+        ['0 3,6,9,12,15,18,21 * * *', '0 3-21/3 * * *'], // produced invalid "3/3" before
+        ['0 0 2/2 * *', '0 0 2-30/2 * *'], // day-of-month 2,4,...,30
+      ];
+      for (const [input, expected] of cases) {
+        const stringified = CronExpressionParser.parse(input).stringify();
+        expect(stringified).toEqual(expected);
+        // Re-parsing the output and stringifying again must be stable (round-trips
+        // to the same expression), proving no value information was lost.
+        expect(CronExpressionParser.parse(stringified).stringify()).toEqual(expected);
+      }
     });
 
     test('stringify cron expression with L', () => {

@@ -331,11 +331,10 @@ export class CronFieldCollection {
   /**
    * Handles multiple ranges.
    * @param {FieldRange} range {start: number, end: number, step: number, count: number} The range to handle.
-   * @param {number} max The maximum value for the field.
    * @returns {string} The stringified range.
    * @private
    */
-  static #handleMultipleRanges(range: FieldRange, max: number): string {
+  static #handleMultipleRanges(range: FieldRange): string {
     const step = range.step;
     if (step === 1) {
       return `${range.start}-${range.end}`;
@@ -368,7 +367,7 @@ export class CronFieldCollection {
         .join(',');
     }
 
-    return range.end === max - step + 1 ? `${range.start}/${step}` : `${range.start}-${range.end}/${step}`;
+    return `${range.start}-${range.end}/${step}`;
   }
 
   /**
@@ -398,8 +397,7 @@ export class CronFieldCollection {
     }
     return ranges
       .map((range) => {
-        const value =
-          range.count === 1 ? range.start.toString() : CronFieldCollection.#handleMultipleRanges(range, max);
+        const value = range.count === 1 ? range.start.toString() : CronFieldCollection.#handleMultipleRanges(range);
         if (field instanceof CronDayOfWeek && field.nthDay > 0) {
           return `${value}#${field.nthDay}`;
         }
