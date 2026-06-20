@@ -430,17 +430,14 @@ export class CronExpression {
 
     const currentHour = currentDate.getHours();
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
-    const isDstStart = currentDate.dstStart === currentHour;
     const isDstEnd = currentDate.dstEnd === currentHour;
 
     // DST start: if the scheduled hour is skipped (e.g. 03:00 doesn't exist),
-    // accept the next existing hour when it corresponds to the skipped one.
-    if (isDstStart) {
-      if (CronExpression.#matchSchedule(currentHour - 1, hourValues)) {
+    // accept the next existing hour when it matches the skipped one.
+    if (currentDate.dstStart !== null && currentDate.dstStart === currentHour - 1) {
+      if (CronExpression.#matchSchedule(currentDate.dstStart, hourValues)) {
         return true;
       }
-      currentDate.invokeDateOperation(dateMathVerb, TimeUnit.Hour);
-      return false;
     }
 
     // DST end: avoid returning the repeated hour twice when searching forward.

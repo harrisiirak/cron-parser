@@ -558,7 +558,8 @@ export class CronDate {
     const diff = currentHour - previousHour;
     if (diff === 2) {
       if (hoursLength !== 24) {
-        this.dstStart = currentHour;
+        // Record the skipped hour during spring-forward transition (previousHour + 1)
+        this.dstStart = previousHour + 1;
       }
     } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
       if (hoursLength !== 24) {
