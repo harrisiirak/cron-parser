@@ -14,10 +14,6 @@ export enum DateMathOp {
   Subtract = 'Subtract',
 }
 
-type VerbMap = {
-  [key in TimeUnit]: () => void;
-};
-
 export const DAYS_IN_MONTH: readonly number[] = Object.freeze([31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
 
 /**
@@ -28,28 +24,6 @@ export class CronDate {
   #date: DateTime;
   #dstStart: number | null = null;
   #dstEnd: number | null = null;
-
-  /**
-   * Maps the verb to the appropriate method
-   */
-  #verbMap: { add: VerbMap; subtract: VerbMap } = {
-    add: {
-      [TimeUnit.Year]: this.addYear.bind(this),
-      [TimeUnit.Month]: this.addMonth.bind(this),
-      [TimeUnit.Day]: this.addDay.bind(this),
-      [TimeUnit.Hour]: this.addHour.bind(this),
-      [TimeUnit.Minute]: this.addMinute.bind(this),
-      [TimeUnit.Second]: this.addSecond.bind(this),
-    },
-    subtract: {
-      [TimeUnit.Year]: this.subtractYear.bind(this),
-      [TimeUnit.Month]: this.subtractMonth.bind(this),
-      [TimeUnit.Day]: this.subtractDay.bind(this),
-      [TimeUnit.Hour]: this.subtractHour.bind(this),
-      [TimeUnit.Minute]: this.subtractMinute.bind(this),
-      [TimeUnit.Second]: this.subtractSecond.bind(this),
-    },
-  };
 
   /**
    * Constructs a new CronDate instance.
@@ -224,7 +198,20 @@ export class CronDate {
    * @param {TimeUnit} unit
    */
   addUnit(unit: TimeUnit): void {
-    this.#verbMap.add[unit]();
+    switch (unit) {
+      case TimeUnit.Year:
+        return this.addYear();
+      case TimeUnit.Month:
+        return this.addMonth();
+      case TimeUnit.Day:
+        return this.addDay();
+      case TimeUnit.Hour:
+        return this.addHour();
+      case TimeUnit.Minute:
+        return this.addMinute();
+      case TimeUnit.Second:
+        return this.addSecond();
+    }
   }
 
   /**
@@ -232,7 +219,20 @@ export class CronDate {
    * @param {TimeUnit} unit
    */
   subtractUnit(unit: TimeUnit): void {
-    this.#verbMap.subtract[unit]();
+    switch (unit) {
+      case TimeUnit.Year:
+        return this.subtractYear();
+      case TimeUnit.Month:
+        return this.subtractMonth();
+      case TimeUnit.Day:
+        return this.subtractDay();
+      case TimeUnit.Hour:
+        return this.subtractHour();
+      case TimeUnit.Minute:
+        return this.subtractMinute();
+      case TimeUnit.Second:
+        return this.subtractSecond();
+    }
   }
 
   /**
