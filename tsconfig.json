@@ -10,6 +10,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "types": ["node", "jest"],
+    "rootDir": "./src",
     "outDir": "./dist",
     "declarationDir": "./dist/types"
   },
