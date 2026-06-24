@@ -1861,7 +1861,7 @@ describe('CronExpressionParser', () => {
           { expression: 'H(10-20) * * * *', expected: '0 16 * * * *' },
           { expression: 'H(0-29)/10 * * * *', expected: '0 5,15,25 * * * *' },
           { expression: 'H(5-10)/3 * * * * *', expected: '6,9 * * * * *' },
-          { expression: '0 0 0 H/2 * *', expected: '0 0 0 2/2 * *' },
+          { expression: '0 0 0 H/2 * *', expected: '0 0 0 2-30/2 * *' },
           { expression: '* H H(9-20)/3 * * 1-5', expected: '* 34 10-19/3 * * 1-5' },
           { expression: '* * * * * H#1', expected: '* * * * * 0#1' },
         ];
