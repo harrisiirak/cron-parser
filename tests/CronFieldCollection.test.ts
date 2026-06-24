@@ -181,9 +181,25 @@ describe('CronFieldCollection', () => {
             hour: new CronHour([12]),
             dayOfMonth: new CronDayOfMonth([31]), // February only has 28/29 days
             month: new CronMonth([2]), // February
-            dayOfWeek: new CronDayOfWeek([1]),
+            dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6], { wildcard: true }), // '*', no day-of-week rescue
           }),
       ).toThrow('Invalid explicit day of month definition');
+    });
+
+    test('should not throw when an out-of-range day of month is rescued by the day of week', () => {
+      // Day of month and day of week combine with OR, so 31 February with a
+      // restricted day of week is valid: it fires on those weekdays.
+      expect(
+        () =>
+          new CronFieldCollection({
+            second: new CronSecond([0]),
+            minute: new CronMinute([0]),
+            hour: new CronHour([12]),
+            dayOfMonth: new CronDayOfMonth([31]),
+            month: new CronMonth([2]),
+            dayOfWeek: new CronDayOfWeek([1]), // Monday
+          }),
+      ).not.toThrow();
     });
   });
 
