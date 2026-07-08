@@ -611,6 +611,15 @@ describe('CronExpression', () => {
       expect(cronExpression.includesDate(new Date('2023-01-16T00:00:00Z'))).toBeTruthy();
       expect(cronExpression.includesDate(new Date('2023-01-23T00:00:00Z'))).toBeFalsy();
     });
+
+    test('honors day of month when combined with an nth day of week', () => {
+      // Day of month 8 OR the 3rd Friday of the month.
+      const cronExpression = CronExpressionParser.parse('0 0 0 8 * 5#3', { tz: 'UTC' });
+
+      expect(cronExpression.includesDate(new Date('2024-01-08T00:00:00.000Z'))).toBeTruthy();
+      expect(cronExpression.includesDate(new Date('2024-01-19T00:00:00.000Z'))).toBeTruthy();
+      expect(cronExpression.includesDate(new Date('2024-01-12T00:00:00.000Z'))).toBeFalsy();
+    });
   });
 
   describe('DST handling - Europe/Rome (Spring Forward)', () => {
