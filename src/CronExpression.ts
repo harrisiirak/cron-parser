@@ -545,16 +545,20 @@ export class CronExpression {
       }
 
       if (startTimestamp === currentDate.getTime()) {
+        // Still on the start time. Step one second in the search direction and keep
+        // looking so a distinct occurrence is returned. A backwards search that began
+        // on a sub-second offset is the exception: stripping the milliseconds below
+        // already yields an earlier matching time, so break and accept it instead of
+        // spinning until the loop limit.
         if (dateMathVerb === 'Add' || currentDate.getMilliseconds() === 0) {
           currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
+          continue;
         }
-        continue;
       }
       break;
     }
 
-    /* istanbul ignore next - should be impossible under normal use to trigger the branch */
-    if (stepCount > LOOP_LIMIT) {
+    if (stepCount >= LOOP_LIMIT) {
       throw new Error(LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE);
     }
 
