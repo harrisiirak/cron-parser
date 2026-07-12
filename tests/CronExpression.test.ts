@@ -293,6 +293,16 @@ describe('CronExpression', () => {
       });
       expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
     });
+
+    test('should throw when no occurrence exists within the loop limit', () => {
+      // Day 31 restricted to April and June, which only ever have 30 days, so
+      // the expression can never match and iteration must not return a bogus date.
+      const cronExpression = CronExpressionParser.parse('0 0 0 31 4,6 *', {
+        currentDate: '2024-01-01T00:00:00Z',
+        tz: 'UTC',
+      });
+      expect(() => cronExpression.next()).toThrow(LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE);
+    });
   });
 
   describe('stringify', () => {
