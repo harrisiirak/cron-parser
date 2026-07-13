@@ -22,4 +22,7 @@ export const benchmarkInputs: BenchmarkInput[] = [
     pattern: 'H H H(9-20)/3 1-11 *',
     description: 'Every 3 hours between 9am and 8pm on the 1st through 11th months',
   },
+  { pattern: '0 0 0 * * 5#3', description: 'At midnight on the 3rd Friday of every month' },
+  { pattern: '0 0 0 8 * 5#3', description: 'At midnight on the 8th or the 3rd Friday of every month' },
+  { pattern: '0 0 0 15 * 5#3', description: 'At midnight on the 15th or the 3rd Friday of every month' },
 ];
