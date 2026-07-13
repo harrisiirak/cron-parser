@@ -651,6 +651,25 @@ describe('CronExpressionParser', () => {
     expect(next.getMonth()).toEqual(7);
   });
 
+  test('day of month combined with nth day of week (OR)', () => {
+    // Day of month 8 OR the 3rd Friday of the month; the two combine with OR.
+    const expectedDates = [
+      '2024-01-08T00:00:00.000Z',
+      '2024-01-19T00:00:00.000Z',
+      '2024-02-08T00:00:00.000Z',
+      '2024-02-16T00:00:00.000Z',
+      '2024-03-08T00:00:00.000Z',
+      '2024-03-15T00:00:00.000Z',
+    ];
+    const interval = CronExpressionParser.parse('0 0 0 8 * 5#3', {
+      currentDate: '2024-01-01T00:00:00.000Z',
+      tz: 'UTC',
+    });
+    for (const expectedDate of expectedDates) {
+      expect(interval.next().toISOString()).toEqual(expectedDate);
+    }
+  });
+
   test('day of month is unspecified', () => {
     // At 02:10:00am, on every Wednesday, every month
     const expectedDates = [

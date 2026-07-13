@@ -217,6 +217,19 @@ export class CronExpression {
   }
 
   /**
+   * Determines if the current date matches the nth occurrence of a weekday in the month.
+   *
+   * @param {number} nthDay - The nth occurrence (1-5) from a `#` expression; values <= 0 mean no nth constraint.
+   * @param {CronDate} currentDate - The current date object.
+   * @returns {boolean} - True if there is no nth constraint, or the current date is the nth occurrence of its weekday; otherwise, false.
+   * @memberof CronExpression
+   * @private
+   */
+  static #isNthWeekdayOfMonthMatch(nthDay: number, currentDate: CronDate): boolean {
+    return nthDay <= 0 || Math.ceil(currentDate.getDate() / 7) === nthDay;
+  }
+
+  /**
    * Find the next scheduled date based on the cron expression.
    * @returns {CronDate} - The next scheduled date or an ES6 compatible iterator object.
    * @memberof CronExpression
@@ -348,13 +361,6 @@ export class CronExpression {
       return false;
     }
 
-    // Check nth day of week if specified
-    if (this.#fields.dayOfWeek.nthDay > 0) {
-      const weekInMonth = Math.ceil(dt.getDate() / 7);
-      if (weekInMonth !== this.#fields.dayOfWeek.nthDay) {
-        return false;
-      }
-    }
     return true;
   }
 
@@ -374,6 +380,7 @@ export class CronExpression {
    * Rule 1: If both "day of month" and "day of week" are restricted (not wildcard), then one or both must match the current day.
    * Rule 2: If "day of month" is restricted and "day of week" is not restricted, then "day of month" must match the current day.
    * Rule 3: If "day of month" is a wildcard, "day of week" is not a wildcard, and "day of week" matches the current day, then the match is accepted.
+   * In all rules, a "day of week" match also honors an nth-occurrence (`#`) constraint (e.g. `5#3` = the 3rd Friday) and the last-weekday (`L`) form.
    * If none of the rules match, the match is rejected.
    *
    * @param {CronDate} currentDate - The current date to be evaluated against the cron expression.
@@ -392,8 +399,10 @@ export class CronExpression {
     const matchedDOM =
       CronExpression.#matchSchedule(currentDate.getDate(), this.#fields.dayOfMonth.values) ||
       (this.#fields.dayOfMonth.hasLastChar && currentDate.isLastDayOfMonth());
+    const nthDay = this.#fields.dayOfWeek.nthDay;
     const matchedDOW =
-      CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek.values) ||
+      (CronExpression.#matchSchedule(currentDate.getDay(), this.#fields.dayOfWeek.values) &&
+        CronExpression.#isNthWeekdayOfMonthMatch(nthDay, currentDate)) ||
       (this.#fields.dayOfWeek.hasLastChar &&
         CronExpression.#isLastWeekdayOfMonthMatch(this.#fields.dayOfWeek.values, currentDate));
 
@@ -519,12 +528,6 @@ export class CronExpression {
       this.#validateTimeSpan(currentDate);
 
       if (!this.#matchDayOfMonth(currentDate)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
-        continue;
-      }
-      if (
-        !(this.#fields.dayOfWeek.nthDay <= 0 || Math.ceil(currentDate.getDate() / 7) === this.#fields.dayOfWeek.nthDay)
-      ) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
         continue;
       }
