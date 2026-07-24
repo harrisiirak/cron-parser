@@ -18,7 +18,8 @@ export class CronFileParser {
    * @throws If file cannot be read
    */
   static async parseFile(filePath: string): Promise<CronFileParserResult> {
-    const { readFile } = await import('fs/promises');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { readFile } = require('fs/promises');
     const data = await readFile(filePath, 'utf8');
     return CronFileParser.#parseContent(data);
   }
