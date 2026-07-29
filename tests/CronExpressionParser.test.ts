@@ -188,6 +188,75 @@ describe('CronExpressionParser', () => {
     });
   });
 
+  describe('duplicate values', () => {
+    // A duplicated 0 used to slip through the validator (find() returns the value, and 0 is falsy),
+    // so `0,0` was silently accepted while `1,1` was rejected in the same field.
+    test('rejects a duplicated non-zero value in every field', () => {
+      expect(() => CronExpressionParser.parse('1,1 * * * *')).toThrow('duplicate values found: 1');
+      expect(() => CronExpressionParser.parse('* 1,1 * * *')).toThrow('duplicate values found: 1');
+      expect(() => CronExpressionParser.parse('* * 1,1 * *')).toThrow('duplicate values found: 1');
+      expect(() => CronExpressionParser.parse('* * * 1,1 *')).toThrow('duplicate values found: 1');
+      expect(() => CronExpressionParser.parse('* * * * 1,1')).toThrow('duplicate values found: 1');
+    });
+
+    test('rejects a duplicated 0 in every field whose minimum is 0', () => {
+      expect(() => CronExpressionParser.parse('0,0 0 0 1 1 0')).toThrow(
+        'CronSecond Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0,0 * * * *')).toThrow(
+        'CronMinute Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0 0,0 * * *')).toThrow(
+        'CronHour Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0 0 * * 0,0')).toThrow(
+        'CronDayOfWeek Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0,0,0 * * * *')).toThrow(
+        'CronMinute Validation error, duplicate values found: 0',
+      );
+    });
+
+    test('still accepts valid single and repeated-step values that include 0', () => {
+      expect(() => CronExpressionParser.parse('0 * * * *')).not.toThrow();
+      expect(() => CronExpressionParser.parse('0-5 * * * *')).not.toThrow();
+      expect(() => CronExpressionParser.parse('*/2 * * * *')).not.toThrow();
+      expect(() => CronExpressionParser.parse('0,30 * * * *')).not.toThrow();
+    });
+
+    describe('day of week Sunday alias (0 and 7)', () => {
+      // 0 and 7 both mean Sunday. A redundant alias collapses to a single value,
+      // but a repeated token is a genuine duplicate.
+      test('accepts 0,7 and 7,0 as a single Sunday', () => {
+        expect(CronExpressionParser.parse('0 0 * * 0,7').fields.dayOfWeek.values).toEqual([0]);
+        expect(CronExpressionParser.parse('0 0 * * 7,0').fields.dayOfWeek.values).toEqual([0]);
+      });
+
+      test('rejects a repeated Sunday token 0,0 / 7,7', () => {
+        expect(() => CronExpressionParser.parse('0 0 * * 0,0')).toThrow('duplicate values found: 0');
+        expect(() => CronExpressionParser.parse('0 0 * * 7,7')).toThrow('duplicate values found: 0');
+      });
+
+      test('leaves other day-of-week values and ranges unchanged', () => {
+        expect(CronExpressionParser.parse('0 0 * * 7').fields.dayOfWeek.values).toEqual([0]);
+        expect(CronExpressionParser.parse('0 0 * * 1,7').fields.dayOfWeek.values).toEqual([0, 1]);
+        expect(CronExpressionParser.parse('0 0 * * 0-7').fields.dayOfWeek.values).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+        expect(CronExpressionParser.parse('0 0 * * 5-7').fields.dayOfWeek.values).toEqual([0, 5, 6, 7]);
+        expect(() => CronExpressionParser.parse('0 0 * * 1,1')).toThrow('duplicate values found: 1');
+      });
+    });
+
+    test('stringify() no longer crashes on a parsed expression (Unexpected range step)', () => {
+      // A duplicated 0 previously produced a step of 0 that tripped an "unreachable" invariant.
+      // These now fail validation at parse time, so stringify() is never reached with a bad field.
+      expect(() => CronExpressionParser.parse('0,0,0 * * * *')).toThrow();
+      expect(() => CronExpressionParser.parse('0 0 * * 0,0,0')).toThrow();
+      // Valid expressions still round-trip cleanly through stringify().
+      expect(CronExpressionParser.parse('0 0 * * 0,7').stringify()).toEqual('0 0 * * 0');
+      expect(CronExpressionParser.parse('*/15 0 * * *').stringify()).toEqual('*/15 0 * * *');
+    });
+  });
+
   describe('take multiple dates', () => {
     test('step', () => {
       const options = {
