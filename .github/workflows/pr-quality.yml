@@ -1,0 +1,48 @@
+name: PR Quality Gates
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-quality-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run coverage
+        run: npm run test:coverage
+
+      - name: Run benchmark
+        run: npm run bench
+
+      - name: Collect results
+        run: |
+          mkdir -p pr-quality
+          cp coverage/coverage-summary.json pr-quality/
+          cp benchmarks/results/benchmark-results.json pr-quality/
+          echo "${{ github.event.pull_request.number }}" > pr-quality/pr-number.txt
+          echo "${{ github.event.pull_request.head.sha }}" > pr-quality/head-sha.txt
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-quality
+          path: pr-quality/
+          retention-days: 7
