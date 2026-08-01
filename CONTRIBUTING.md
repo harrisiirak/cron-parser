@@ -250,6 +250,16 @@ npm run bench:pattern
 npm run bench:clean
 ```
 
+The run can be tuned with environment variables:
+
+```bash
+# Compare against a specific published version instead of the latest release
+PACKAGE_VERSION=5.6.2 npm run bench
+
+# Shorten a run while iterating (defaults: 10000 iterations, 5 samples)
+BENCHMARK_ITERATIONS=100 BENCHMARK_SAMPLES=1 npm run bench
+```
+
 When making performance-related changes:
 
 1. **Run benchmarks before** your changes to establish baseline
