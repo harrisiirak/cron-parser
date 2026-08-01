@@ -260,6 +260,9 @@ PACKAGE_VERSION=5.6.2 npm run bench
 BENCHMARK_ITERATIONS=100 BENCHMARK_SAMPLES=1 npm run bench
 ```
 
+Each run writes a timestamped `.txt` report and a `benchmark-results.json` summary to
+`benchmarks/results/`, which is gitignored.
+
 When making performance-related changes:
 
 1. **Run benchmarks before** your changes to establish baseline
