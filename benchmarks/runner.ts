@@ -23,12 +23,14 @@ type ParseExpressionFn = (
 let oldParseExpression: ParseExpressionFn;
 const newParseExpression = CronExpressionParser.parse as ParseExpressionFn;
 
-export async function initializeBenchmark(version?: string) {
+export async function initializeBenchmark(version?: string): Promise<string> {
   const { version: resolvedVersion, packagePath } = await VersionManager.getPackageVersion(version);
   console.log(`Using cron-parser version ${resolvedVersion} for comparison`);
 
   const module = require(packagePath);
   oldParseExpression = (module.default?.parse as ParseExpressionFn) ?? (module.parseExpression as ParseExpressionFn);
+
+  return resolvedVersion;
 }
 
 interface BenchmarkStats {
