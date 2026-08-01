@@ -159,6 +159,11 @@ describe('CronExpressionParser', () => {
       );
     });
 
+    test('invalid characters test - dot', () => {
+      const expression = '0 0 0 ? * 1.2#2';
+      expect(() => CronExpressionParser.parse(expression)).toThrow('Invalid characters, got value: 1.2');
+    });
+
     test('invalid occurrence value', () => {
       const expressions = ['0 0 0 ? * 1#', '0 0 0 ? * 1#0', '0 0 0 ? * 4#6', '0 0 0 ? * 0##4'];
       for (const expression of expressions) {

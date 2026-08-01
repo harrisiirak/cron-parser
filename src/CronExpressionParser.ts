@@ -441,7 +441,7 @@ export class CronExpressionParser {
       return { dayOfWeek: atoms[0] };
     }
     const nthValue = +atoms[atoms.length - 1];
-    const matches = val.match(/([,-/])/);
+    const matches = val.match(/([,\-/])/);
     if (matches !== null) {
       throw new Error(
         `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`,
