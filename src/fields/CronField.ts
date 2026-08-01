@@ -96,7 +96,7 @@ export abstract class CronField {
       ...options,
       rawValue: options.rawValue ?? '',
     };
-    this.#values = values.sort(CronField.sorter);
+    this.#values = [...values].sort(CronField.sorter);
     this.#wildcard = this.options.wildcard !== undefined ? this.options.wildcard : this.#isWildcardValue();
     this.#hasLastChar = this.options.rawValue.includes('L') || values.includes('L');
     this.#hasQuestionMarkChar = this.options.rawValue.includes('?') || values.includes('?');
