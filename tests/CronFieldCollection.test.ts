@@ -350,15 +350,22 @@ describe('CronFieldCollection', () => {
     });
 
     test('should handle special characters (L)', () => {
+      const dayOfWeek: (number | string)[] = ['5L'];
       const result = CronFieldCollection.from(base, {
         dayOfMonth: ['L'],
-        dayOfWeek: ['L'],
+        dayOfWeek: dayOfWeek as DayOfWeekRange[],
       });
       expect(result.dayOfMonth).not.toBe(base.dayOfMonth);
       expect(result.dayOfMonth.values).toEqual(['L']);
       expect(result.dayOfWeek).not.toBe(base.dayOfWeek);
-      expect(result.dayOfWeek.values).toEqual(['L']);
-      expect(result.stringify(true)).toEqual('0 0 12 L 1 L');
+      expect(result.dayOfWeek.values).toEqual(['5L']);
+      expect(result.stringify(true)).toEqual('0 0 12 L 1 5L');
+    });
+
+    test('should throw when day of week is a standalone L', () => {
+      expect(() => CronFieldCollection.from(base, { dayOfWeek: ['L'] })).toThrow(
+        'CronDayOfWeek Validation error, unexpected standalone L',
+      );
     });
 
     test('should handle mix of CronField instances and raw values', () => {
