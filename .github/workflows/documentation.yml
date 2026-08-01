@@ -30,6 +30,11 @@ jobs:
       - name: Generate documentation
         run: npm run docs
 
+      - name: Generate coverage badges
+        run: |
+          npm run test:coverage
+          npm run generate-badges -- docs
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

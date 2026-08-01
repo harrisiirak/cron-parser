@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/harrisiirak/cron-parser/actions/workflows/push.yml/badge.svg?branch=master)](https://github.com/harrisiirak/cron-parser/actions/workflows/push.yml)
 [![NPM version](https://badge.fury.io/js/cron-parser.png)](http://badge.fury.io/js/cron-parser)
-![Statements](./coverage/badge-statements.svg)
+![Statements](https://harrisiirak.github.io/cron-parser/badge-statements.svg)
 
 A JavaScript library for parsing and manipulating cron expressions. Features timezone support, DST handling, and iterator capabilities.
 
