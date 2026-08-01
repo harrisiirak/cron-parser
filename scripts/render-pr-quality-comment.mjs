@@ -30,6 +30,23 @@ const coverage = JSON.parse(readArtifact('coverage-summary.json'));
 const benchmark = JSON.parse(readArtifact('benchmark-results.json'));
 const headSha = readArtifact('head-sha.txt').trim();
 
+// Both JSON files are produced by code running from the pull request -- benchmark-inputs.ts,
+// benchmarks/index.ts and jest.config.js are all fork-modifiable -- so every value read out of
+// them is untrusted. Nothing here is executed, but interpolating a raw string into the comment
+// would let a fork break out of a code span or table cell and post arbitrary markdown under the
+// github-actions[bot] identity. Sanitize on the way in and bound the output size.
+
+const MAX_FIELD_LENGTH = 120;
+const MAX_ROWS = 100;
+
+const clean = (value, maxLength = MAX_FIELD_LENGTH) =>
+  String(value)
+    .replace(/[`|<>\r\n]/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+
+const number = (value) => (Number.isFinite(Number(value)) ? Number(value) : 0);
+
 const pct = (metric) => {
   const value = coverage.total?.[metric]?.pct;
   if (typeof value !== 'number') {
@@ -38,16 +55,20 @@ const pct = (metric) => {
   return `${value}%`;
 };
 
-const ms = (value) => `${value.toFixed(2)}ms`;
-const signed = (value) => `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+const ms = (value) => `${number(value).toFixed(2)}ms`;
+const signed = (value) => `${number(value) >= 0 ? '+' : ''}${number(value).toFixed(2)}%`;
 
 const benchmarkRow = (result) =>
-  `| \`${result.pattern}\` | ${ms(result.oldMean)} | ${ms(result.newMean)} | ${signed(result.change)} |`;
+  `| \`${clean(result.pattern)}\` | ${ms(result.oldMean)} | ${ms(result.newMean)} | ${signed(result.change)} |`;
 
-const benchmarkRows = benchmark.results.map(benchmarkRow).join('\n');
+const results = Array.isArray(benchmark.results) ? benchmark.results : [];
+const shownResults = results.slice(0, MAX_ROWS);
+const benchmarkRows = shownResults.map(benchmarkRow).join('\n');
+const truncatedNote =
+  results.length > shownResults.length ? `\n\n_Showing the first ${MAX_ROWS} of ${results.length} patterns._` : '';
 
 process.stdout.write(`${MARKER}
-## Quality gates · commit \`${headSha.slice(0, 7)}\`
+## Quality gates · commit \`${clean(headSha, 7)}\`
 
 ### Coverage
 
@@ -55,13 +76,13 @@ process.stdout.write(`${MARKER}
 |---|---|---|---|
 | ${pct('statements')} | ${pct('branches')} | ${pct('functions')} | ${pct('lines')} |
 
-### Benchmark — vs \`cron-parser@${benchmark.baselineVersion}\` (npm latest)
+### Benchmark — vs \`cron-parser@${clean(benchmark.baselineVersion, 40)}\` (npm latest)
 
-${benchmark.iterations} iterations × ${benchmark.samples} ${benchmark.samples === 1 ? 'sample' : 'samples'} per pattern. A positive change is faster than the baseline.
+${number(benchmark.iterations)} iterations × ${number(benchmark.samples)} ${number(benchmark.samples) === 1 ? 'sample' : 'samples'} per pattern. A positive change is faster than the baseline.
 
 | Pattern | Baseline | This PR | Change |
 |---|---|---|---|
-${benchmarkRows}
+${benchmarkRows}${truncatedNote}
 
 <sub>Informational only. Runner timings are noisy and this check never fails.</sub>
 `);
