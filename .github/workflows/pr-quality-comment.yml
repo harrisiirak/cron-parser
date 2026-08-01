@@ -14,6 +14,9 @@ on:
 
 permissions:
   contents: read
+  # Required by download-artifact to read the producer's run. Declaring `permissions` at all
+  # sets every unlisted scope to `none`, so omitting this makes the download 403.
+  actions: read
   pull-requests: write
 
 jobs:
