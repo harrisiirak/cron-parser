@@ -5,6 +5,7 @@ Thank you for your interest in contributing to cron-parser! This document provid
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
+- [Reporting Security Issues](#reporting-security-issues)
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
 - [How to Contribute](#how-to-contribute)
@@ -17,7 +18,11 @@ Thank you for your interest in contributing to cron-parser! This document provid
 
 ## Code of Conduct
 
-This project and everyone participating in it are governed by a commitment to creating a welcoming and inclusive environment. Please be respectful in all interactions.
+This project and everyone participating in it are governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold it. Please report unacceptable behavior using the channels listed there.
+
+## Reporting Security Issues
+
+Do not open a public issue or pull request for a security vulnerability. Report it privately following the [Security Policy](SECURITY.md).
 
 ## Getting Started
 

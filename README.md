@@ -403,6 +403,12 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 - Pull request process
 - Reporting bugs and requesting features
 
+Participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+To report a security vulnerability, please follow the [Security Policy](SECURITY.md) rather than opening a public issue.
+
 ## License
 
 MIT
