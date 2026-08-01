@@ -34,6 +34,19 @@ describe('CronField', () => {
     test('should throw an error when duplicate value is provided as a range', () => {
       expect(() => new CronSecond([0, 59, 59])).toThrow('CronSecond Validation error, duplicate values found: 59');
     });
+
+    test('should not reorder the values array provided by the caller', () => {
+      const values: SixtyRange[] = [30, 10, 20];
+      new CronSecond(values);
+      expect(values).toEqual([30, 10, 20]);
+    });
+
+    test('should not keep a reference to the values array provided by the caller', () => {
+      const values: SixtyRange[] = [10, 20];
+      const field = new CronSecond(values);
+      values.push(30);
+      expect(field.values).toEqual([10, 20]);
+    });
   });
 
   describe('findNearestValueInList', () => {
