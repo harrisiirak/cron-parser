@@ -203,17 +203,12 @@ export class CronExpression {
    * @private
    */
   static #isLastWeekdayOfMonthMatch(expressions: (number | string)[], currentDate: CronDate): boolean {
-    const isLastWeekdayOfMonth = currentDate.isLastWeekdayOfMonth();
-    return expressions.some((expression: number | string) => {
-      // The first character represents the weekday
-      const weekday = parseInt(expression.toString().charAt(0), 10) % 7;
-      if (Number.isNaN(weekday)) {
-        throw new Error(`Invalid last weekday of the month expression: ${expression}`);
-      }
+    if (!currentDate.isLastWeekdayOfMonth()) {
+      return false;
+    }
 
-      // Check if the current date matches the last specified weekday of the month
-      return currentDate.getDay() === weekday && isLastWeekdayOfMonth;
-    });
+    const day = currentDate.getDay();
+    return expressions.some((expression) => day === parseInt(expression.toString().charAt(0), 10) % 7);
   }
 
   /**

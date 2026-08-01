@@ -1784,11 +1784,16 @@ describe('CronExpressionParser', () => {
       expect(interval.next().getDate()).toBe(27);
     });
 
-    test('throw new Errors to parse for invalid last weekday of month expression', () => {
-      expect(() => {
-        const interval = CronExpressionParser.parse('0 0 0 * * L');
-        interval.next();
-      }).toThrow();
+    test('throws when parsing a standalone last weekday of the month marker', () => {
+      expect(() => CronExpressionParser.parse('0 0 0 * * L')).toThrow(
+        'CronDayOfWeek Validation error, unexpected standalone L',
+      );
+    });
+
+    test('throws when parsing a standalone last weekday of the month marker in a list', () => {
+      expect(() => CronExpressionParser.parse('0 0 0 * * 1,L')).toThrow(
+        'CronDayOfWeek Validation error, unexpected standalone L',
+      );
     });
   });
 

@@ -35,6 +35,9 @@ export class CronDayOfWeek extends CronField {
   constructor(values: DayOfWeekRange[], options?: CronFieldOptions) {
     super(values, options);
     this.validate();
+    if (this.values.some((value) => value === 'L')) {
+      throw new Error(`${this.constructor.name} Validation error, unexpected standalone L`);
+    }
   }
 
   /**

@@ -1,4 +1,4 @@
-import { CronDayOfWeek, CronField, CronSecond, SixtyRange } from '../src';
+import { CronDayOfWeek, CronField, CronSecond, DayOfWeekRange, SixtyRange } from '../src';
 
 describe('CronField', () => {
   describe('wildcard detection', () => {
@@ -46,6 +46,20 @@ describe('CronField', () => {
       const field = new CronSecond(values);
       values.push(30);
       expect(field.values).toEqual([10, 20]);
+    });
+
+    test('should throw an error when day of week is a standalone L', () => {
+      expect(() => new CronDayOfWeek(['L'])).toThrow('CronDayOfWeek Validation error, unexpected standalone L');
+    });
+
+    test('should throw an error when day of week contains a standalone L in a list', () => {
+      expect(() => new CronDayOfWeek([1, 'L'])).toThrow('CronDayOfWeek Validation error, unexpected standalone L');
+    });
+
+    test('should accept a day of week L qualified by a weekday', () => {
+      const values: (number | string)[] = ['5L'];
+      const field = new CronDayOfWeek(values as DayOfWeekRange[]);
+      expect(field.values).toEqual(['5L']);
     });
   });
 
