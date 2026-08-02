@@ -323,6 +323,10 @@ export class CronFieldCollection {
       return null;
     }
     if (step === 1 && range.start === field.min && range.end && range.end >= max) {
+      const isDayField = field instanceof CronDayOfMonth || field instanceof CronDayOfWeek;
+      if (isDayField && !field.isWildcard) {
+        return null;
+      }
       return field.hasQuestionMarkChar ? '?' : '*';
     }
     if (step !== 1 && range.start === field.min && range.end && range.end >= max - step + 1) {
