@@ -553,18 +553,46 @@ export class CronDate {
     }
 
     const previousHour = this.getHours();
+    const previousOffset = this.getUTCOffset();
     this.invokeDateOperation(op, unit);
     const currentHour = this.getHours();
     const diff = currentHour - previousHour;
-    if (diff === 2) {
+
+    // Spring-forward is detected from the change in UTC offset rather than from
+    // the wall-clock hour delta.
+    //
+    // `diff === 2` assumes the gap is exactly one hour wide. `Antarctica/Troll`
+    // advances two hours (00:00 -> 03:00), giving `diff === 3`, so the branch
+    // never fires and the skipped hours are never recorded. The offset is exact
+    // for any width: it rises by precisely the amount of wall-clock time that
+    // no longer exists.
+    //
+    // A sub-hour gap such as `Australia/Lord_Howe`'s 30 minutes skips no whole
+    // wall-clock hour, so it records nothing, as before.
+    const skippedHours = Math.floor((this.getUTCOffset() - previousOffset) / 60);
+
+    if (skippedHours >= 1) {
       if (hoursLength !== 24) {
-        // Record the skipped hour during spring-forward transition (previousHour + 1)
-        this.dstStart = previousHour + 1;
+        // The first wall-clock hour that was skipped. The modulo is defensive:
+        // no current zone transitions across midnight by whole hours through
+        // this path, but it keeps the value a valid hour if one ever does.
+        this.dstStart = (previousHour + 1) % 24;
       }
     } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
       if (hoursLength !== 24) {
         this.dstEnd = currentHour;
       }
+    } else if (unit === TimeUnit.Hour) {
+      // Stepping to an hour that is not the far side of a gap means the search
+      // has left the skipped window, so the record no longer applies.
+      //
+      // The previous `dstStart === currentHour - 1` test was self-limiting and
+      // needed no such reset: it stopped matching as soon as the hour advanced
+      // past the single skipped one. Matching a window of several hours is not
+      // self-limiting, so the window is closed explicitly here. Only hour steps
+      // clear it, because the minutes and seconds within the compensating hour
+      // still have to match against the skipped hour.
+      this.dstStart = null;
     }
   }
 
