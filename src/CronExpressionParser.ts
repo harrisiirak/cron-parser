@@ -142,7 +142,7 @@ export class CronExpressionParser {
       second: new CronSecond(second, { rawValue: rawFields.second }),
       minute: new CronMinute(minute, { rawValue: rawFields.minute }),
       hour: new CronHour(hour, { rawValue: rawFields.hour }),
-      dayOfMonth: new CronDayOfMonth(dayOfMonth, { rawValue: rawFields.dayOfMonth }),
+      dayOfMonth: CronDayOfMonth.fromMonth(month, dayOfMonth, { rawValue: rawFields.dayOfMonth }),
       month: new CronMonth(month, { rawValue: rawFields.month }),
       dayOfWeek: new CronDayOfWeek(dayOfWeek, { rawValue: rawFields.dayOfWeek, nthDayOfWeek }),
     });

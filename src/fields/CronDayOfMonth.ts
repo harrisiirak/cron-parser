@@ -1,5 +1,6 @@
 import { CronField, CronFieldOptions } from './CronField';
-import { CronChars, CronMax, CronMin, DayOfMonthRange } from './types';
+import { CronMonth } from './CronMonth';
+import { CronChars, CronMax, CronMin, DayOfMonthRange, MonthRange } from './types';
 
 const MIN_DAY = 1;
 const MAX_DAY = 31;
@@ -11,6 +12,23 @@ const DAY_CHARS = Object.freeze(['L']) as CronChars[];
  * @extends CronField
  */
 export class CronDayOfMonth extends CronField {
+  /**
+   * Creates a "day of the month" field limited to the days the given month has.
+   * @param {MonthRange[]} month - Values for the "month" field the days are used with
+   * @param {DayOfMonthRange[]} values - Values for the "day of the month" field
+   * @param {CronFieldOptions} [options] - Options provided by the parser
+   * @returns {CronDayOfMonth}
+   */
+  static fromMonth(month: MonthRange[], values: DayOfMonthRange[], options?: CronFieldOptions): CronDayOfMonth {
+    if (month.length !== 1) {
+      return new CronDayOfMonth(values, options);
+    }
+
+    const daysInMonth = CronMonth.daysInMonth[month[0] - 1];
+    const days = values.filter((value) => typeof value !== 'number' || value <= daysInMonth);
+    return new CronDayOfMonth(days.length > 0 ? days : values, options);
+  }
+
   static get min(): CronMin {
     return MIN_DAY;
   }
