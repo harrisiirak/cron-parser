@@ -361,7 +361,7 @@ describe('CronExpression', () => {
     });
 
     test('stringify cron expression with star range step', () => {
-      const expected = '0 */5 */2 * * *';
+      const expected = '0 */5 */2 1-31 * *';
       const interval = CronExpressionParser.parse('*/5 */2 */1 * *', {});
       let str = interval.stringify(true);
       expect(str).toEqual(expected);
@@ -406,7 +406,7 @@ describe('CronExpression', () => {
     });
 
     test('stringify cron expression with star range step (discard seconds)', () => {
-      const expected = '*/5 */2 * * *';
+      const expected = '*/5 */2 1-31 * *';
       const interval = CronExpressionParser.parse('*/5 */2 */1 * *', {});
       let str = interval.stringify();
       expect(str).toEqual(expected);
@@ -551,7 +551,6 @@ describe('CronExpression', () => {
     });
 
     test('stringify cron expression with extended day of week range (0,7)', () => {
-      const expected = '* * * * *';
       const interval = CronExpressionParser.parse('* * * * *');
 
       let str = CronExpression.fieldsToExpression(
@@ -564,7 +563,7 @@ describe('CronExpression', () => {
           dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6]),
         }),
       ).stringify();
-      expect(str).toEqual(expected);
+      expect(str).toEqual('* * * * 0-6');
 
       str = CronExpression.fieldsToExpression(
         new CronFieldCollection({
@@ -576,7 +575,35 @@ describe('CronExpression', () => {
           dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6, 7]),
         }),
       ).stringify();
-      expect(str).toEqual(expected);
+      expect(str).toEqual('* * * * *');
+    });
+
+    test('stringify day of week that covers the whole week without collapsing it', () => {
+      expect(CronExpressionParser.parse('0 0 16 * 0-6').stringify()).toEqual('0 0 16 * 0-6');
+      expect(CronExpressionParser.parse('0 0 16 * 0-7').stringify()).toEqual('0 0 16 * 0-6');
+      expect(CronExpressionParser.parse('0 0 16 * */1').stringify()).toEqual('0 0 16 * 0-6');
+    });
+
+    test('stringify day of month that covers the whole month without collapsing it', () => {
+      expect(CronExpressionParser.parse('0 0 1-31 * 5').stringify()).toEqual('0 0 1-31 * 5');
+    });
+
+    test('stringify day field written as a wildcard collapses it', () => {
+      expect(CronExpressionParser.parse('0 0 16 * *').stringify()).toEqual('0 0 16 * *');
+      expect(CronExpressionParser.parse('0 0 * * 5').stringify()).toEqual('0 0 * * 5');
+    });
+
+    test('stringify question mark day of week is unchanged', () => {
+      expect(CronExpressionParser.parse('0 0 16 * ?').stringify()).toEqual('0 0 16 * ?');
+    });
+
+    test('parsing an expression from its own rendered form keeps the schedule', () => {
+      const options = { currentDate: new Date('2026-01-01T00:00:00Z'), tz: 'UTC' };
+      const expression = CronExpressionParser.parse('0 0 16 * 0-6', options);
+      const reparsed = CronExpressionParser.parse(expression.stringify(), options);
+      expect(reparsed.take(5).map((date) => date.toISOString())).toEqual(
+        expression.take(5).map((date) => date.toISOString()),
+      );
     });
 
     test('throw validation error - missing field (seconds)', () => {
