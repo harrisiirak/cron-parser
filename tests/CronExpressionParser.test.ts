@@ -637,6 +637,38 @@ describe('CronExpressionParser', () => {
     }
   });
 
+  test('drops day of month values that the month cannot contain', () => {
+    const interval = CronExpressionParser.parse('0 0 16,31 6 *');
+    expect(interval.fields.dayOfMonth.values).toEqual([16]);
+  });
+
+  test('drops day of month values outside the month from a stepped range', () => {
+    const interval = CronExpressionParser.parse('0 0 16/5 6 *');
+    expect(interval.fields.dayOfMonth.values).toEqual([16, 21, 26]);
+  });
+
+  test('limits a wildcard day of month to the length of the month', () => {
+    const interval = CronExpressionParser.parse('0 0 * 2 *');
+    expect(interval.fields.dayOfMonth.values).toHaveLength(29);
+    expect(interval.fields.dayOfMonth.isWildcard).toEqual(true);
+  });
+
+  test('keeps day of month values when more than one month is given', () => {
+    const interval = CronExpressionParser.parse('0 0 31 1,6 *');
+    expect(interval.fields.dayOfMonth.values).toEqual([31]);
+  });
+
+  test('keeps the last day of month character when a single month is given', () => {
+    const interval = CronExpressionParser.parse('0 0 L 2 *');
+    expect(interval.fields.dayOfMonth.values).toEqual(['L']);
+  });
+
+  test('renders a stepped day of month in a single month to a stable expression', () => {
+    const rendered = CronExpressionParser.parse('* * 9-20/3 16-26/5 jun *').stringify(true);
+    expect(rendered).toEqual('* * 9-18/3 16/5 6 *');
+    expect(CronExpressionParser.parse(rendered).stringify(true)).toEqual(rendered);
+  });
+
   test('day of month and week are both set', () => {
     const interval = CronExpressionParser.parse('10 2 12 8 0');
     let next = interval.next();
