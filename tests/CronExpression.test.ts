@@ -294,6 +294,15 @@ describe('CronExpression', () => {
       expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
     });
 
+    test('should throw when the previous occurrence would land inside a sub-second start date', () => {
+      const cronExpression = CronExpressionParser.parse('* * * * * *', {
+        currentDate: new Date('2025-01-01T10:00:05.500Z'),
+        startDate: new Date('2025-01-01T10:00:05.200Z'),
+        tz: 'UTC',
+      });
+      expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    });
+
     test('should throw when no occurrence exists within the loop limit', () => {
       // Day 31 restricted to April and June, which only ever have 30 days, so
       // the expression can never match and iteration must not return a bogus date.
@@ -303,6 +312,26 @@ describe('CronExpression', () => {
       });
       expect(() => cronExpression.next()).toThrow(LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE);
     });
+  });
+
+  test('returns an occurrence on the end date when the current date carries milliseconds', () => {
+    const interval = CronExpressionParser.parse('*/1 * * * * *', {
+      currentDate: new Date('2025-01-01T00:00:09.151Z'),
+      endDate: new Date('2025-01-01T00:00:10.000Z'),
+      tz: 'UTC',
+    });
+    expect(interval.next().toISOString()).toBe('2025-01-01T00:00:10.000Z');
+  });
+
+  test('keeps interleaved forward and backward iteration anchored to the last result', () => {
+    const interval = CronExpressionParser.parse('*/5 * * * *', {
+      currentDate: new Date('2025-01-01T12:02:00.000Z'),
+      tz: 'UTC',
+    });
+    expect(interval.next().toISOString()).toBe('2025-01-01T12:05:00.000Z');
+    expect(interval.next().toISOString()).toBe('2025-01-01T12:10:00.000Z');
+    expect(interval.prev().toISOString()).toBe('2025-01-01T12:05:00.000Z');
+    expect(interval.next().toISOString()).toBe('2025-01-01T12:10:00.000Z');
   });
 
   describe('stringify', () => {
