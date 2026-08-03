@@ -240,9 +240,16 @@ describe('CronExpressionParser', () => {
       test('leaves other day-of-week values and ranges unchanged', () => {
         expect(CronExpressionParser.parse('0 0 * * 7').fields.dayOfWeek.values).toEqual([0]);
         expect(CronExpressionParser.parse('0 0 * * 1,7').fields.dayOfWeek.values).toEqual([0, 1]);
-        expect(CronExpressionParser.parse('0 0 * * 0-7').fields.dayOfWeek.values).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
-        expect(CronExpressionParser.parse('0 0 * * 5-7').fields.dayOfWeek.values).toEqual([0, 5, 6, 7]);
+        // The range's own trailing 7 is now a redundant alias of the 0 the same range
+        // already produced, so it collapses just like an explicit `0,7` would.
+        expect(CronExpressionParser.parse('0 0 * * 0-7').fields.dayOfWeek.values).toEqual([0, 1, 2, 3, 4, 5, 6]);
+        expect(CronExpressionParser.parse('0 0 * * 5-7').fields.dayOfWeek.values).toEqual([0, 5, 6]);
         expect(() => CronExpressionParser.parse('0 0 * * 1,1')).toThrow('duplicate values found: 1');
+      });
+
+      test('rejects the alias regardless of which atom (scalar or range) comes first', () => {
+        expect(() => CronExpressionParser.parse('0 0 * * 0-7,0')).toThrow('duplicate values found: 0');
+        expect(() => CronExpressionParser.parse('0 0 * * 7,0-7')).toThrow('duplicate values found: 0');
       });
     });
 
