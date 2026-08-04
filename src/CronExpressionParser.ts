@@ -315,7 +315,8 @@ export class CronExpressionParser {
     function handleResult(result: number | string | (number | string)[], constraints: CronConstraints) {
       if (Array.isArray(result)) {
         if (field === CronUnit.DayOfWeek) {
-          result.forEach((r) => (typeof r === 'number' ? pushDayOfWeekValue(r) : stack.push(r)));
+          // #createRange only ever returns number[] for this field, so `r` is always numeric here.
+          (result as number[]).forEach((r) => pushDayOfWeekValue(r));
         } else {
           stack.push(...result);
         }
