@@ -240,16 +240,7 @@ export class CronExpressionParser {
           throw new Error(`Invalid step: ${stepNum}, must be positive`);
         }
 
-        const minStart = Math.max(minNum, constraints.min);
-        const offset = Math.floor(randomValue * stepNum);
-        const values = [];
-        for (let i = Math.floor(minStart / stepNum) * stepNum + offset; i <= maxNum; i += stepNum) {
-          if (i >= minStart) {
-            values.push(i);
-          }
-        }
-
-        return values.join(',');
+        return CronExpressionParser.#hashedStep(randomValue, Math.max(minNum, constraints.min), maxNum, stepNum);
       }
       // H(range)
       else if (min && max) {
@@ -259,7 +250,7 @@ export class CronExpressionParser {
         if (minNum > maxNum) {
           throw new Error(`Invalid range: ${minNum}-${maxNum}, min > max`);
         }
-        return String(Math.floor(randomValue * (maxNum - minNum + 1)) + minNum);
+        return String(CronExpressionParser.#hashedValue(randomValue, minNum, maxNum));
       }
       // H/step
       else if (step) {
@@ -270,21 +261,50 @@ export class CronExpressionParser {
           throw new Error(`Invalid step: ${stepNum}, must be positive`);
         }
 
-        const offset = Math.floor(randomValue * stepNum);
-        const values = [];
-        for (let i = Math.floor(constraints.min / stepNum) * stepNum + offset; i <= constraints.max; i += stepNum) {
-          if (i >= constraints.min) {
-            values.push(i);
-          }
-        }
-
-        return values.join(',');
+        return CronExpressionParser.#hashedStep(randomValue, constraints.min, constraints.max, stepNum);
       }
       // H
       else {
-        return String(Math.floor(randomValue * (constraints.max - constraints.min + 1) + constraints.min));
+        return String(CronExpressionParser.#hashedValue(randomValue, constraints.min, constraints.max));
       }
     });
+  }
+
+  /**
+   * Picks a single hashed value within an inclusive range.
+   * @param {number} randomValue - The seeded random value in [0, 1).
+   * @param {number} min - Lowest value that may be picked.
+   * @param {number} max - Highest value that may be picked.
+   * @private
+   */
+  static #hashedValue(randomValue: number, min: number, max: number): number {
+    return Math.floor(randomValue * (max - min + 1)) + min;
+  }
+
+  /**
+   * Builds the hashed values of a stepped range, offset from the start of the step by the
+   * seeded jitter. A step wider than the range leaves no step-aligned value inside it, so a
+   * single hashed occurrence within the range is used instead of an empty field.
+   * @param {number} randomValue - The seeded random value in [0, 1).
+   * @param {number} min - Lowest value the range allows.
+   * @param {number} max - Highest value the range allows.
+   * @param {number} step - The step between values, already validated as positive.
+   * @private
+   */
+  static #hashedStep(randomValue: number, min: number, max: number, step: number): string {
+    const offset = Math.floor(randomValue * step);
+    const values = [];
+    for (let i = Math.floor(min / step) * step + offset; i <= max; i += step) {
+      if (i >= min) {
+        values.push(i);
+      }
+    }
+
+    if (values.length === 0) {
+      return String(CronExpressionParser.#hashedValue(randomValue, min, max));
+    }
+
+    return values.join(',');
   }
 
   /**

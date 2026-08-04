@@ -1852,6 +1852,53 @@ describe('CronExpressionParser', () => {
       });
     });
 
+    describe('a step wider than the range it is applied to', () => {
+      // The stepped values start from a step-aligned offset, so a step wider than the
+      // range can place every candidate outside it and leave the field empty. That made
+      // the same expression parse for some seeds and throw for others.
+      test('H(range)/step always yields a value inside the range', () => {
+        for (let seed = 0; seed < 100; seed++) {
+          const options = { hashSeed: `seed-${seed}` };
+          const minutes = CronExpressionParser.parse('H(1-5)/10 * * * *', options).fields.minute.values as number[];
+
+          expect(minutes).toHaveLength(1);
+          expect(minutes[0]).toBeGreaterThanOrEqual(1);
+          expect(minutes[0]).toBeLessThanOrEqual(5);
+        }
+      });
+
+      test('H/step always yields a value inside the field constraints', () => {
+        for (let seed = 0; seed < 100; seed++) {
+          const options = { hashSeed: `seed-${seed}` };
+          const daysOfMonth = CronExpressionParser.parse('0 0 H/40 * *', options).fields.dayOfMonth.values as number[];
+          const months = CronExpressionParser.parse('0 0 * H/60 *', options).fields.month.values as number[];
+
+          expect(daysOfMonth).toHaveLength(1);
+          expect(daysOfMonth[0]).toBeGreaterThanOrEqual(1);
+          expect(daysOfMonth[0]).toBeLessThanOrEqual(31);
+
+          expect(months).toHaveLength(1);
+          expect(months[0]).toBeGreaterThanOrEqual(1);
+          expect(months[0]).toBeLessThanOrEqual(12);
+        }
+      });
+
+      test('keeps the same seed returning the same value', () => {
+        const options = { hashSeed: 'F00D' };
+
+        expect(CronExpressionParser.parse('H(1-5)/10 * * * *', options).stringify(true)).toBe(
+          CronExpressionParser.parse('H(1-5)/10 * * * *', options).stringify(true),
+        );
+      });
+
+      test('leaves a step that fits inside the range untouched', () => {
+        const options = { hashSeed: 'F00D' };
+
+        expect(CronExpressionParser.parse('H(0-29)/10 * * * *', options).stringify(true)).toBe('0 5,15,25 * * * *');
+        expect(CronExpressionParser.parse('H(5-10)/3 * * * * *', options).stringify(true)).toBe('6,9 * * * * *');
+      });
+    });
+
     // Not having a seed is making tests less useful
     describe('without a custom seed', () => {
       test('parses expressions using H on all fields', () => {
