@@ -1897,6 +1897,34 @@ describe('CronExpressionParser', () => {
         expect(CronExpressionParser.parse('H(0-29)/10 * * * *', options).stringify(true)).toBe('0 5,15,25 * * * *');
         expect(CronExpressionParser.parse('H(5-10)/3 * * * * *', options).stringify(true)).toBe('6,9 * * * * *');
       });
+
+      describe('in strict mode', () => {
+        test('rejects H(range)/step whatever the seed', () => {
+          for (let seed = 0; seed < 100; seed++) {
+            const options = { strict: true, hashSeed: `seed-${seed}` };
+
+            expect(() => CronExpressionParser.parse('H(1-5)/10 * * * * *', options)).toThrow(
+              'Invalid step: 10, wider than the 1-5 range of the Second field',
+            );
+          }
+        });
+
+        test('rejects H/step whatever the seed', () => {
+          for (let seed = 0; seed < 100; seed++) {
+            const options = { strict: true, hashSeed: `seed-${seed}` };
+
+            expect(() => CronExpressionParser.parse('0 0 0 * H/60 *', options)).toThrow(
+              'Invalid step: 60, wider than the 1-12 range of the Month field',
+            );
+          }
+        });
+
+        test('accepts a step that fits inside the range', () => {
+          const options = { strict: true, hashSeed: 'F00D' };
+
+          expect(CronExpressionParser.parse('0 H(0-29)/10 * * * *', options).stringify(true)).toBe('0 5,15,25 * * * *');
+        });
+      });
     });
 
     // Not having a seed is making tests less useful
