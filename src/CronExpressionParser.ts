@@ -391,7 +391,7 @@ export class CronExpressionParser {
    */
   static #createRange(field: CronUnit, min: number, max: number, repeatInterval: number): number[] {
     const stack: number[] = [];
-    if (field === CronUnit.DayOfWeek && max % 7 === 0) {
+    if (field === CronUnit.DayOfWeek && max % 7 === 0 && (max - min) % repeatInterval === 0) {
       stack.push(0);
     }
     for (let index = min; index <= max; index += repeatInterval) {
