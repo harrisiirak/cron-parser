@@ -1146,6 +1146,16 @@ describe('CronExpressionParser', () => {
     expect(interval.fields.dayOfWeek.values).toEqual([1, 2, 3, 5]);
   });
 
+  test('day-of-week step does not add Sunday when the step never reaches 7', () => {
+    const dow = (expr: string) => CronExpressionParser.parse(expr).fields.dayOfWeek.values;
+    expect(dow('0 0 * * 2/2')).toEqual([2, 4, 6]);
+    expect(dow('0 0 * * 2-7/2')).toEqual([2, 4, 6]);
+    expect(dow('0 0 * * 4/2')).toEqual([4, 6]);
+    expect(dow('0 0 * * 1/2')).toEqual([0, 1, 3, 5, 7]);
+    expect(dow('0 0 * * 6/1')).toEqual([0, 6, 7]);
+    expect(dow('0 0 * * 0/2')).toEqual([0, 2, 4, 6]);
+  });
+
   describe('Leap Year', () => {
     test('handle leap year with starting date 0 0 29 2 *', () => {
       const options = {
