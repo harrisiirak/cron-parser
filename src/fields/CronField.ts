@@ -242,8 +242,10 @@ export abstract class CronField {
       );
     }
     // check for duplicate value in this.#values array
+    // NB: find() returns the duplicated value, which can legitimately be 0 (a falsy value),
+    // so the presence check must be explicit rather than relying on truthiness.
     const duplicate = this.#values.find((value, index) => this.#values.indexOf(value) !== index);
-    if (duplicate) {
+    if (duplicate !== undefined) {
       throw new Error(`${this.constructor.name} Validation error, duplicate values found: ${duplicate}`);
     }
   }

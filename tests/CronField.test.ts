@@ -1,4 +1,4 @@
-import { CronDayOfWeek, CronField, CronSecond, DayOfWeekRange, SixtyRange } from '../src';
+import { CronDayOfWeek, CronField, CronHour, CronMinute, CronSecond, DayOfWeekRange, SixtyRange } from '../src';
 
 describe('CronField', () => {
   describe('wildcard detection', () => {
@@ -60,6 +60,23 @@ describe('CronField', () => {
       const values: (number | string)[] = ['5L'];
       const field = new CronDayOfWeek(values as DayOfWeekRange[]);
       expect(field.values).toEqual(['5L']);
+    });
+
+    test('should throw an error when the duplicated value is 0 (falsy)', () => {
+      // find() returns the duplicated value; a duplicated 0 must not be treated as "no duplicate".
+      expect(() => new CronSecond([0, 0])).toThrow('CronSecond Validation error, duplicate values found: 0');
+      expect(() => new CronMinute([0, 0])).toThrow('CronMinute Validation error, duplicate values found: 0');
+      expect(() => new CronHour([0, 0])).toThrow('CronHour Validation error, duplicate values found: 0');
+      expect(() => new CronDayOfWeek([0, 0])).toThrow('CronDayOfWeek Validation error, duplicate values found: 0');
+      expect(() => new CronSecond([0, 0, 0])).toThrow('CronSecond Validation error, duplicate values found: 0');
+    });
+
+    test('should not reject a non-duplicate set that contains 0', () => {
+      expect(() => new CronSecond([0, 1])).not.toThrow();
+      expect(() => new CronMinute([0, 30])).not.toThrow();
+      // CronField.validate() checks raw values, not day-of-week aliasing (that lives in the
+      // parser); 0 and 7 are distinct raw values so the class itself accepts both.
+      expect(new CronDayOfWeek([0, 7]).values).toEqual([0, 7]);
     });
   });
 

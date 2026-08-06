@@ -296,9 +296,30 @@ export class CronExpressionParser {
    */
   static #parseSequence(field: CronUnit, val: string, constraints: CronConstraints): (number | string)[] {
     const stack: (number | string)[] = [];
+    // 0 and 7 both denote Sunday in the day-of-week field. Track which spellings were
+    // used so a redundant alias (`0,7`) collapses to a single value, while a repeated
+    // token (`0,0` or `7,7`) is preserved for validate() to reject as a duplicate.
+    const sundaySpellings = new Set<number>();
+    // Shared with the array branch below, so a 0/7 alias from a range/step is deduplicated
+    // the same way as an explicit list value.
+    function pushDayOfWeekValue(v: number) {
+      const normalized = v % 7;
+      const redundantAlias = normalized === 0 && stack.includes(0) && !sundaySpellings.has(v);
+      if (normalized === 0) {
+        sundaySpellings.add(v);
+      }
+      if (!redundantAlias) {
+        stack.push(normalized);
+      }
+    }
     function handleResult(result: number | string | (number | string)[], constraints: CronConstraints) {
       if (Array.isArray(result)) {
-        stack.push(...result);
+        if (field === CronUnit.DayOfWeek) {
+          // #createRange only ever returns number[] for this field, so `r` is always numeric here.
+          (result as number[]).forEach((r) => pushDayOfWeekValue(r));
+        } else {
+          stack.push(...result);
+        }
       } else {
         if (CronExpressionParser.#isValidConstraintChar(constraints, result)) {
           stack.push(result);
@@ -310,7 +331,11 @@ export class CronExpressionParser {
               `Constraint error, got value ${result} expected range ${constraints.min}-${constraints.max}`,
             );
           }
-          stack.push(field === CronUnit.DayOfWeek ? v % 7 : result);
+          if (field !== CronUnit.DayOfWeek) {
+            stack.push(result);
+            return;
+          }
+          pushDayOfWeekValue(v);
         }
       }
     }
