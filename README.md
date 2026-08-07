@@ -218,6 +218,7 @@ To resolve this ambiguity, you can activate the strict mode of the library. When
 1. **Day Of Month and Day Of Week**: Prevents the simultaneous setting of both Day Of Month and Day Of Week fields
 2. **Complete Expression**: Requires all 6 fields to be present in the expression (second, minute, hour, day of month, month, day of week)
 3. **Non-empty Expression**: Rejects empty expressions that would otherwise default to '0 \* \* \* \* \*'
+4. **Usable Hashed Step**: Rejects a hashed step wider than the range it applies to, such as `H(1-5)/10`, which no value can satisfy as a step (see [Hash support](#hash-support))
 
 These validations help ensure that your cron expressions are unambiguous and correctly formatted.
 
@@ -244,6 +245,14 @@ try {
 } catch (err) {
   console.log('Error:', err.message);
   // Error: Invalid cron expression, expected 6 fields
+}
+
+// This will also throw an error in strict mode because a step of 10 cannot fit the range 1-5
+try {
+  CronExpressionParser.parse('0 H(1-5)/10 * * * *', { strict: true });
+} catch (err) {
+  console.log('Error:', err.message);
+  // Error: Invalid step: 10, wider than the 1-5 range of the Minute field
 }
 ```
 
@@ -372,6 +381,22 @@ const interval = CronExpressionParser.parse('H(0-29)/5 * * * *');
 // At every minute of the third <randomized> day of the month
 const interval = CronExpressionParser.parse('* * * * H#3');
 ```
+
+A step only produces several occurrences while it is narrow enough to fit the range more than
+once. When the step is wider than the range — as in `H(1-5)/10`, or `H/60` in a field whose
+constraints are narrower than 60 — no step-aligned value is guaranteed to land inside the range,
+so the field falls back to a single random occurrence within it, exactly as `H(1-5)` would give:
+
+```typescript
+import { CronExpressionParser } from 'cron-parser';
+
+// A step of 10 cannot fit the range 1-5, so this behaves like 'H(1-5)':
+// one random minute between 1 and 5.
+const interval = CronExpressionParser.parse('H(1-5)/10 * * * *');
+```
+
+Whether such an expression is a mistake is up to you: enable [strict mode](#strict-mode) to have
+it rejected instead of falling back.
 
 The randomness is seed-able using the `hashSeed` option of `CronExpressionOptions`:
 

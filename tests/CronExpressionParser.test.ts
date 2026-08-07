@@ -1856,6 +1856,23 @@ describe('CronExpressionParser', () => {
       // The stepped values start from a step-aligned offset, so a step wider than the
       // range can place every candidate outside it and leave the field empty. That made
       // the same expression parse for some seeds and throw for others.
+
+      // The reported symptom: with no hashSeed each parse draws a fresh seed, so the same
+      // expression succeeded or threw from one call to the next within a single process.
+      test('parses without a seed every time', () => {
+        for (let i = 0; i < 200; i++) {
+          expect(() => CronExpressionParser.parse('H(1-5)/10 * * * *')).not.toThrow();
+        }
+      });
+
+      test('is rejected without a seed every time in strict mode', () => {
+        for (let i = 0; i < 200; i++) {
+          expect(() => CronExpressionParser.parse('0 H(1-5)/10 * * * *', { strict: true })).toThrow(
+            'Invalid step: 10, wider than the 1-5 range of the Minute field',
+          );
+        }
+      });
+
       test('H(range)/step always yields a value inside the range', () => {
         for (let seed = 0; seed < 100; seed++) {
           const options = { hashSeed: `seed-${seed}` };
