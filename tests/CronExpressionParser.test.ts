@@ -1697,16 +1697,13 @@ describe('CronExpressionParser', () => {
 
         const interval = CronExpressionParser.parse('30 1 * * *', options);
 
-        // The day before the transition is unaffected: 01:30 at UTC+00.
-        expect(interval.next().toISOString()).toEqual('2026-03-28T01:30:00.000Z');
+        expect(interval.next().toISOString()).toEqual('2026-03-28T01:30:00.000Z'); // 01:30 at UTC+00
 
-        // 01:30 does not exist on the 29th, so the occurrence lands on the
-        // first instant that does: 03:30 at UTC+02, the same compensation a
-        // one-hour zone already performs.
-        expect(interval.next().toISOString()).toEqual('2026-03-29T01:30:00.000Z');
+        // 01:30 does not exist on the 29th, so it lands on the first instant
+        // that does, the same compensation a one-hour zone already performs.
+        expect(interval.next().toISOString()).toEqual('2026-03-29T01:30:00.000Z'); // 03:30 local
 
-        // Back to the scheduled time, now at UTC+02.
-        expect(interval.next().toISOString()).toEqual('2026-03-29T23:30:00.000Z');
+        expect(interval.next().toISOString()).toEqual('2026-03-29T23:30:00.000Z'); // 01:30 at UTC+02
       });
 
       test('compensates the second skipped hour of a two-hour gap', () => {
@@ -1730,13 +1727,29 @@ describe('CronExpressionParser', () => {
 
         const interval = CronExpressionParser.parse('30 1 * * *', options);
 
-        // Matching a window of several skipped hours has to stop once the
-        // search leaves that window, or every later hour of the day matches
-        // the skipped one as well.
+        // Matching has to stop once the search leaves the window, or every
+        // later hour of the day matches a skipped one as well.
         expect(interval.take(3).map((date) => date.toISOString())).toEqual([
           '2026-03-29T01:30:00.000Z', // 03:30 local, compensated
           '2026-03-29T23:30:00.000Z', // 01:30 local on the 30th
           '2026-03-30T23:30:00.000Z', // 01:30 local on the 31st
+        ]);
+      });
+
+      test('does not repeat the compensated occurrence when the minute rolls the hour', () => {
+        // The window is left by a minute step rather than an hour step: minute
+        // 59 rolls into the next hour through #moveToNextSecond.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-07T12:00:00.000Z'),
+          tz: 'America/New_York',
+        };
+
+        const interval = CronExpressionParser.parse('30 59 2 * * *', options);
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-03-08T07:59:30.000Z', // 03:59:30 EDT, compensated
+          '2026-03-09T06:59:30.000Z', // 02:59:30 EDT
+          '2026-03-10T06:59:30.000Z',
         ]);
       });
 

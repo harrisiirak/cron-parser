@@ -437,13 +437,10 @@ export class CronExpression {
     const isDstEnd = currentDate.dstEnd === currentHour;
 
     // DST start: if the scheduled hour is skipped (e.g. 03:00 doesn't exist),
-    // accept the next existing hour when it matches the skipped one.
-    //
-    // A transition can skip more than one hour, so every skipped hour is
-    // considered, not only the one immediately before the current one:
-    // `Antarctica/Troll` goes 00:00 -> 03:00 and skips both 01:00 and 02:00.
-    // For a one-hour gap this loop runs exactly once and behaves as before.
-    if (currentDate.dstStart !== null) {
+    // accept the hour the clock landed on when it matches a skipped one. A gap
+    // can span several hours (Antarctica/Troll skips both 01:00 and 02:00), and
+    // is confined to the landing hour so it ends once the clock moves on.
+    if (currentDate.dstStart !== null && currentDate.dstStartLandingHour === currentHour) {
       for (let skipped = currentDate.dstStart; skipped < currentHour; skipped++) {
         if (CronExpression.#matchSchedule(skipped, hourValues)) {
           return true;
