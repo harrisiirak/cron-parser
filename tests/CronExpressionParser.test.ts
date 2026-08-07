@@ -1694,6 +1694,89 @@ describe('CronExpressionParser', () => {
       expect(prev).toBeInstanceOf(CronDate);
       expect(prev.toISOString()).toEqual('2026-03-08T13:00:00.000Z'); // 8am CDT Sun Mar 8
     });
+
+    // Antarctica/Troll advances two hours on 2026-03-29, 00:00 -> 03:00, so
+    // both 01:00 and 02:00 are skipped. A schedule inside that window used to
+    // be dropped for the day rather than moved to the far side of the gap.
+    describe('transitions wider than one hour', () => {
+      test('compensates a schedule inside a two-hour gap instead of skipping the day', () => {
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-27T12:00:00.000Z'),
+          tz: 'Antarctica/Troll',
+        };
+
+        const interval = CronExpressionParser.parse('30 1 * * *', options);
+
+        expect(interval.next().toISOString()).toEqual('2026-03-28T01:30:00.000Z'); // 01:30 at UTC+00
+
+        // 01:30 does not exist on the 29th, so it lands on the first instant
+        // that does, the same compensation a one-hour zone already performs.
+        expect(interval.next().toISOString()).toEqual('2026-03-29T01:30:00.000Z'); // 03:30 local
+
+        expect(interval.next().toISOString()).toEqual('2026-03-29T23:30:00.000Z'); // 01:30 at UTC+02
+      });
+
+      test('compensates the second skipped hour of a two-hour gap', () => {
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-28T12:00:00.000Z'),
+          tz: 'Antarctica/Troll',
+        };
+
+        // 02:00 is the second of the two hours the transition removes.
+        const interval = CronExpressionParser.parse('30 2 * * *', options);
+
+        expect(interval.next().toISOString()).toEqual('2026-03-29T01:30:00.000Z'); // 03:30 local
+        expect(interval.next().toISOString()).toEqual('2026-03-30T00:30:00.000Z'); // 02:30 local
+      });
+
+      test('does not repeat the compensated occurrence on later hours', () => {
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-28T12:00:00.000Z'),
+          tz: 'Antarctica/Troll',
+        };
+
+        const interval = CronExpressionParser.parse('30 1 * * *', options);
+
+        // Matching has to stop once the search leaves the window, or every
+        // later hour of the day matches a skipped one as well.
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-03-29T01:30:00.000Z', // 03:30 local, compensated
+          '2026-03-29T23:30:00.000Z', // 01:30 local on the 30th
+          '2026-03-30T23:30:00.000Z', // 01:30 local on the 31st
+        ]);
+      });
+
+      test('does not repeat the compensated occurrence when the minute rolls the hour', () => {
+        // The window is left by a minute step rather than an hour step: minute
+        // 59 rolls into the next hour through #moveToNextSecond.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-07T12:00:00.000Z'),
+          tz: 'America/New_York',
+        };
+
+        const interval = CronExpressionParser.parse('30 59 2 * * *', options);
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-03-08T07:59:30.000Z', // 03:59:30 EDT, compensated
+          '2026-03-09T06:59:30.000Z', // 02:59:30 EDT
+          '2026-03-10T06:59:30.000Z',
+        ]);
+      });
+
+      test('leaves a sub-hour transition alone', () => {
+        // Australia/Lord_Howe moves by 30 minutes, so no whole wall-clock hour
+        // is removed and nothing should be compensated.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-10-03T05:00:00.000Z'),
+          tz: 'Australia/Lord_Howe',
+        };
+
+        const interval = CronExpressionParser.parse('30 2 * * *', options);
+
+        expect(interval.next().toISOString()).toEqual('2026-10-03T15:30:00.000Z');
+        expect(interval.next().toISOString()).toEqual('2026-10-04T15:30:00.000Z');
+      });
+    });
   });
 
   describe('test expressions with "L" last of flag', () => {
