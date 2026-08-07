@@ -85,7 +85,7 @@ export class CronExpressionParser {
    * Parses a cron expression and returns a CronExpression object.
    * @param {string} expression - The cron expression to parse.
    * @param {CronExpressionOptions} [options={}] - The options to use when parsing the expression.
-   * @param {boolean} [options.strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek.
+   * @param {boolean} [options.strict=false] - If true, will throw an error if the expression contains both dayOfMonth and dayOfWeek, or a hashed step wider than the range it applies to.
    * @param {CronDate} [options.currentDate=new CronDate(undefined, 'UTC')] - The date to use when calculating the next/previous occurrence.
    *
    * @returns {CronExpression} A CronExpression object.
@@ -105,30 +105,35 @@ export class CronExpressionParser {
       rawFields.second,
       CronSecond.constraints,
       rand,
+      strict,
     ) as SixtyRange[];
     const minute = CronExpressionParser.#parseField(
       CronUnit.Minute,
       rawFields.minute,
       CronMinute.constraints,
       rand,
+      strict,
     ) as SixtyRange[];
     const hour = CronExpressionParser.#parseField(
       CronUnit.Hour,
       rawFields.hour,
       CronHour.constraints,
       rand,
+      strict,
     ) as HourRange[];
     const month = CronExpressionParser.#parseField(
       CronUnit.Month,
       rawFields.month,
       CronMonth.constraints,
       rand,
+      strict,
     ) as MonthRange[];
     const dayOfMonth = CronExpressionParser.#parseField(
       CronUnit.DayOfMonth,
       rawFields.dayOfMonth,
       CronDayOfMonth.constraints,
       rand,
+      strict,
     ) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
     const dayOfWeek = CronExpressionParser.#parseField(
@@ -136,6 +141,7 @@ export class CronExpressionParser {
       _dayOfWeek,
       CronDayOfWeek.constraints,
       rand,
+      strict,
     ) as DayOfWeekRange[];
 
     const fields = new CronFieldCollection({
@@ -181,10 +187,18 @@ export class CronExpressionParser {
    * @param {CronUnit} field - The field to parse.
    * @param {string} value - The value of the field.
    * @param {CronConstraints} constraints - The constraints for the field.
+   * @param {PRNG} rand - The random number generator to use.
+   * @param {boolean} strict - If true, will throw an error on a hashed step wider than its range.
    * @private
    * @returns {(number | string)[]} The parsed field.
    */
-  static #parseField(field: CronUnit, value: string, constraints: CronConstraints, rand: PRNG): (number | string)[] {
+  static #parseField(
+    field: CronUnit,
+    value: string,
+    constraints: CronConstraints,
+    rand: PRNG,
+    strict: boolean,
+  ): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
       value = value.replace(/[a-z]{3}/gi, (match) => {
@@ -203,7 +217,7 @@ export class CronExpressionParser {
     }
 
     value = this.#parseWildcard(value, constraints);
-    value = this.#parseHashed(value, constraints, rand);
+    value = this.#parseHashed(value, constraints, rand, field, strict);
     return this.#parseSequence(field, value, constraints);
   }
 
@@ -222,9 +236,17 @@ export class CronExpressionParser {
    * @param {string} value - The value to parse.
    * @param {CronConstraints} constraints - The constraints for the field.
    * @param {PRNG} rand - The random number generator to use.
+   * @param {CronUnit} field - The field being parsed, used when reporting an unusable step.
+   * @param {boolean} strict - If true, will throw an error on a step wider than its range.
    * @private
    */
-  static #parseHashed(value: string, constraints: CronConstraints, rand: PRNG): string {
+  static #parseHashed(
+    value: string,
+    constraints: CronConstraints,
+    rand: PRNG,
+    field: CronUnit,
+    strict: boolean,
+  ): string {
     const randomValue = rand();
     return value.replace(/H(?:\((\d+)-(\d+)\))?(?:\/(\d+))?/g, (_, min, max, step) => {
       // H(range)/step
@@ -240,16 +262,14 @@ export class CronExpressionParser {
           throw new Error(`Invalid step: ${stepNum}, must be positive`);
         }
 
-        const minStart = Math.max(minNum, constraints.min);
-        const offset = Math.floor(randomValue * stepNum);
-        const values = [];
-        for (let i = Math.floor(minStart / stepNum) * stepNum + offset; i <= maxNum; i += stepNum) {
-          if (i >= minStart) {
-            values.push(i);
-          }
-        }
-
-        return values.join(',');
+        return CronExpressionParser.#hashedStep(
+          randomValue,
+          Math.max(minNum, constraints.min),
+          maxNum,
+          stepNum,
+          field,
+          strict,
+        );
       }
       // H(range)
       else if (min && max) {
@@ -259,7 +279,7 @@ export class CronExpressionParser {
         if (minNum > maxNum) {
           throw new Error(`Invalid range: ${minNum}-${maxNum}, min > max`);
         }
-        return String(Math.floor(randomValue * (maxNum - minNum + 1)) + minNum);
+        return String(CronExpressionParser.#hashedValue(randomValue, minNum, maxNum));
       }
       // H/step
       else if (step) {
@@ -270,21 +290,67 @@ export class CronExpressionParser {
           throw new Error(`Invalid step: ${stepNum}, must be positive`);
         }
 
-        const offset = Math.floor(randomValue * stepNum);
-        const values = [];
-        for (let i = Math.floor(constraints.min / stepNum) * stepNum + offset; i <= constraints.max; i += stepNum) {
-          if (i >= constraints.min) {
-            values.push(i);
-          }
-        }
-
-        return values.join(',');
+        return CronExpressionParser.#hashedStep(randomValue, constraints.min, constraints.max, stepNum, field, strict);
       }
       // H
       else {
-        return String(Math.floor(randomValue * (constraints.max - constraints.min + 1) + constraints.min));
+        return String(CronExpressionParser.#hashedValue(randomValue, constraints.min, constraints.max));
       }
     });
+  }
+
+  /**
+   * Picks a single hashed value within an inclusive range.
+   * @param {number} randomValue - The seeded random value in [0, 1).
+   * @param {number} min - Lowest value that may be picked.
+   * @param {number} max - Highest value that may be picked.
+   * @private
+   */
+  static #hashedValue(randomValue: number, min: number, max: number): number {
+    return Math.floor(randomValue * (max - min + 1)) + min;
+  }
+
+  /**
+   * Builds the hashed values of a stepped range, offset from the start of the step by the
+   * seeded jitter. A step wider than the range leaves no step-aligned value inside it, so a
+   * single hashed occurrence within the range is used instead of an empty field — or, in
+   * strict mode, the expression is rejected as unsatisfiable.
+   * @param {number} randomValue - The seeded random value in [0, 1).
+   * @param {number} min - Lowest value the range allows.
+   * @param {number} max - Highest value the range allows.
+   * @param {number} step - The step between values, already validated as positive.
+   * @param {CronUnit} field - The field being parsed, used when reporting an unusable step.
+   * @param {boolean} strict - If true, will throw an error on a step wider than its range.
+   * @private
+   */
+  static #hashedStep(
+    randomValue: number,
+    min: number,
+    max: number,
+    step: number,
+    field: CronUnit,
+    strict: boolean,
+  ): string {
+    // A step wider than the range has no step-aligned value guaranteed to land inside it,
+    // and which way it falls depends on the seed. Reject it up front so the outcome does
+    // not vary between parses of the same expression.
+    if (strict && step > max - min + 1) {
+      throw new Error(`Invalid step: ${step}, wider than the ${min}-${max} range of the ${field} field`);
+    }
+
+    const offset = Math.floor(randomValue * step);
+    const values = [];
+    for (let i = Math.floor(min / step) * step + offset; i <= max; i += step) {
+      if (i >= min) {
+        values.push(i);
+      }
+    }
+
+    if (values.length === 0) {
+      return String(CronExpressionParser.#hashedValue(randomValue, min, max));
+    }
+
+    return values.join(',');
   }
 
   /**
