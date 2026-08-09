@@ -69,6 +69,10 @@ jobs:
           git add package.json package-lock.json CHANGELOG.md
           git commit -m "chore: bump version"
           git tag "v${{ steps.notes.outputs.version }}"
+      - name: Verify master has not moved
+        run: |
+          git fetch origin master
+          git merge-base --is-ancestor origin/master HEAD
       - name: Publish to npm
         run: npm publish
       - name: Push
