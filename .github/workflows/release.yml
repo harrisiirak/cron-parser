@@ -72,7 +72,7 @@ jobs:
       - name: Publish to npm
         run: npm publish
       - name: Push
-        run: git push origin master --follow-tags
+        run: git push origin --atomic master "v${{ steps.notes.outputs.version }}"
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
