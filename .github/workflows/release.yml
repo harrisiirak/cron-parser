@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: npm test
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Bump version
+        run: npm version ${{ inputs.bump }} --no-git-tag-version
+      - name: Generate release notes
+        id: notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          gh api "repos/${{ github.repository }}/releases/generate-notes" \
+            -f tag_name="v$VERSION" \
+            -f target_commitish=master \
+            --jq .body > /tmp/release-notes.md
+      - name: Update changelog
+        run: |
+          VERSION="${{ steps.notes.outputs.version }}"
+          {
+            echo "# Changelog"
+            echo
+            echo "## v$VERSION - $(date -u +%Y-%m-%d)"
+            echo
+            sed 's/^## /### /' /tmp/release-notes.md
+            echo
+            tail -n +3 CHANGELOG.md
+          } > /tmp/changelog.md
+          mv /tmp/changelog.md CHANGELOG.md
+      - name: Commit and tag
+        run: |
+          git add package.json package-lock.json CHANGELOG.md
+          git commit -m "chore: bump version"
+          git tag "v${{ steps.notes.outputs.version }}"
+      - name: Verify master has not moved
+        run: |
+          git fetch origin master
+          git merge-base --is-ancestor origin/master HEAD
+      - name: Publish to npm
+        run: npm publish
+      - name: Push
+        run: git push origin --atomic master "v${{ steps.notes.outputs.version }}"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh release create "v${{ steps.notes.outputs.version }}"
+          --title "v${{ steps.notes.outputs.version }}"
+          --notes-file /tmp/release-notes.md
