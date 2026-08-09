@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.8.1 - 2026-08-09
+
+### What's Changed
+* ci: automate releases by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/439
+
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.8.0...v5.8.1
+
 ## v5.8.0 - 2026-08-09
 
 ### What's Changed
