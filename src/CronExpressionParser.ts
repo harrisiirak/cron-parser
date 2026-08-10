@@ -255,21 +255,12 @@ export class CronExpressionParser {
         const maxNum = parseInt(max, 10);
         const stepNum = parseInt(step, 10);
 
-        if (minNum > maxNum) {
-          throw new Error(`Invalid range: ${minNum}-${maxNum}, min > max`);
-        }
         if (stepNum <= 0) {
           throw new Error(`Invalid step: ${stepNum}, must be positive`);
         }
 
-        return CronExpressionParser.#hashedStep(
-          randomValue,
-          Math.max(minNum, constraints.min),
-          maxNum,
-          stepNum,
-          field,
-          strict,
-        );
+        const range = CronExpressionParser.#hashedRange(minNum, maxNum, constraints, field, strict);
+        return CronExpressionParser.#hashedStep(randomValue, range.min, range.max, stepNum, field, strict);
       }
       // H(range)
       else if (min && max) {
@@ -311,6 +302,55 @@ export class CronExpressionParser {
   }
 
   /**
+   * The name a field is reported by. CronUnit spells the units in Pascal case, while the
+   * errors thrown elsewhere name them the way the expression object does.
+   * @param {CronUnit} field - The field to name.
+   * @private
+   */
+  static #fieldName(field: CronUnit): string {
+    return field.charAt(0).toLowerCase() + field.slice(1);
+  }
+
+  /**
+   * Narrows an explicit hashed range to the values the field can hold. A bound outside the
+   * field constraints is clamped, so that the range a step is measured against is the one
+   * values are actually drawn from — in strict mode it is rejected instead, which keeps the
+   * reported range the one that was written.
+   * @param {number} min - Lowest value the expression asks for.
+   * @param {number} max - Highest value the expression asks for.
+   * @param {CronConstraints} constraints - The constraints for the field.
+   * @param {CronUnit} field - The field being parsed, used when reporting an unusable range.
+   * @param {boolean} strict - If true, will throw an error on a range outside the constraints.
+   * @private
+   */
+  static #hashedRange(
+    min: number,
+    max: number,
+    constraints: CronConstraints,
+    field: CronUnit,
+    strict: boolean,
+  ): { min: number; max: number } {
+    if (min > max) {
+      throw new Error(`Invalid range: ${min}-${max}, min > max`);
+    }
+    if (strict && (min < constraints.min || max > constraints.max)) {
+      throw new Error(
+        `Invalid range: ${min}-${max}, outside the ${constraints.min}-${constraints.max} range of the ${CronExpressionParser.#fieldName(field)} field`,
+      );
+    }
+
+    const rangeMin = Math.max(min, constraints.min);
+    const rangeMax = Math.min(max, constraints.max);
+    if (rangeMin > rangeMax) {
+      throw new Error(
+        `Invalid range: ${min}-${max}, no usable value in the ${CronExpressionParser.#fieldName(field)} field`,
+      );
+    }
+
+    return { min: rangeMin, max: rangeMax };
+  }
+
+  /**
    * Builds the hashed values of a stepped range, offset from the start of the step by the
    * seeded jitter. A step wider than the range leaves no step-aligned value inside it, so a
    * single hashed occurrence within the range is used instead of an empty field — or, in
@@ -335,7 +375,9 @@ export class CronExpressionParser {
     // and which way it falls depends on the seed. Reject it up front so the outcome does
     // not vary between parses of the same expression.
     if (strict && step > max - min + 1) {
-      throw new Error(`Invalid step: ${step}, wider than the ${min}-${max} range of the ${field} field`);
+      throw new Error(
+        `Invalid step: ${step}, wider than the ${min}-${max} range of the ${CronExpressionParser.#fieldName(field)} field`,
+      );
     }
 
     const offset = Math.floor(randomValue * step);

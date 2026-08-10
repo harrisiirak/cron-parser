@@ -218,7 +218,7 @@ To resolve this ambiguity, you can activate the strict mode of the library. When
 1. **Day Of Month and Day Of Week**: Prevents the simultaneous setting of both Day Of Month and Day Of Week fields
 2. **Complete Expression**: Requires all 6 fields to be present in the expression (second, minute, hour, day of month, month, day of week)
 3. **Non-empty Expression**: Rejects empty expressions that would otherwise default to '0 \* \* \* \* \*'
-4. **Usable Hashed Step**: Rejects a hashed step wider than the range it applies to, such as `H(1-5)/10`, which no value can satisfy as a step (see [Hash support](#hash-support))
+4. **Usable Hashed Step**: Rejects a stepped hash the field cannot satisfy — a range reaching outside the field, such as `H(0-5)/2` in day of month, or a step wider than the range it applies to, such as `H(1-5)/10` (see [Hash support](#hash-support))
 
 These validations help ensure that your cron expressions are unambiguous and correctly formatted.
 
@@ -252,7 +252,7 @@ try {
   CronExpressionParser.parse('0 H(1-5)/10 * * * *', { strict: true });
 } catch (err) {
   console.log('Error:', err.message);
-  // Error: Invalid step: 10, wider than the 1-5 range of the Minute field
+  // Error: Invalid step: 10, wider than the 1-5 range of the minute field
 }
 ```
 
@@ -394,6 +394,10 @@ import { CronExpressionParser } from 'cron-parser';
 // one random minute between 1 and 5.
 const interval = CronExpressionParser.parse('H(1-5)/10 * * * *');
 ```
+
+A range is first narrowed to what the field can hold, so `H(50-100)/60` in the minute field steps
+across 50-59 rather than the 50-100 that was written. A range with nothing left after narrowing,
+such as `H(0-0)/40` in day of month, is rejected.
 
 Whether such an expression is a mistake is up to you: enable [strict mode](#strict-mode) to have
 it rejected instead of falling back.
