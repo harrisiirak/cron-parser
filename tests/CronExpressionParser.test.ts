@@ -1766,6 +1766,93 @@ describe('CronExpressionParser', () => {
         expect(interval.next().toISOString()).toEqual('2026-10-03T15:30:00.000Z');
         expect(interval.next().toISOString()).toEqual('2026-10-04T15:30:00.000Z');
       });
+
+      test('keeps every occurrence when a sub-hour transition is crossed by an hour step', () => {
+        // Same 30-minute shift, but reached hour by hour rather than by a day
+        // jump. The wall clock goes 01:30 -> 03:00, so measuring the gap from
+        // the offset alone rounds 30 minutes to zero and loses an occurrence.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-10-03T12:00:00.000Z'),
+          tz: 'Australia/Lord_Howe',
+        };
+
+        const interval = CronExpressionParser.parse('30 1,2 * * *', options);
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-10-03T15:00:00.000Z', // 01:30 at UTC+10:30
+          '2026-10-03T16:30:00.000Z', // 03:30 on the transition day
+          '2026-10-04T14:30:00.000Z', // 01:30 on the 5th
+        ]);
+      });
+
+      test('does not compensate when stepping backward over a fall-back', () => {
+        // Going back across a fall-back raises the UTC offset too, so a check
+        // that ignores direction reads it as a spring-forward and accepts an
+        // hour the schedule never asked for.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-04-05T12:00:00.000Z'),
+          tz: 'America/Santiago',
+        };
+
+        const interval = CronExpressionParser.parse('30 22 * * *', options);
+
+        expect(interval.prev().toISOString()).toEqual('2026-04-05T01:30:00.000Z'); // 22:30 on the 4th
+      });
+
+      test('compensates a gap that ends after midnight', () => {
+        // Greenland transitions at 01:00 UTC, which on UTC-2 falls at 23:00
+        // local, so 23:00 is skipped and the clock lands on 00:00 the next day.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2024-03-30T00:00:00.000Z'),
+          tz: 'America/Nuuk',
+        };
+
+        const interval = CronExpressionParser.parse('0 22,23 * * *', options);
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2024-03-30T01:00:00.000Z', // 23:00 on the 29th
+          '2024-03-31T00:00:00.000Z', // 22:00 on the 30th
+          '2024-03-31T01:00:00.000Z', // 00:00 on the 31st, for the skipped 23:00
+          '2024-03-31T23:00:00.000Z', // 22:00 on the 31st
+        ]);
+      });
+
+      test('compensates a skipped midnight hour', () => {
+        // Chile transitions at 24:00, so 00:00 is the hour that disappears and
+        // the marker for it has to wrap to 0 rather than run past 23.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-09-05T02:00:00.000Z'),
+          tz: 'America/Santiago',
+        };
+
+        const interval = CronExpressionParser.parse('0 23,0 * * *', options);
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2026-09-05T03:00:00.000Z', // 23:00 on the 4th
+          '2026-09-05T04:00:00.000Z', // 00:00 on the 5th
+          '2026-09-06T03:00:00.000Z', // 23:00 on the 5th
+          '2026-09-06T04:00:00.000Z', // 01:00 on the 6th, for the skipped 00:00
+        ]);
+      });
+
+      test('leaves a skipped calendar day alone', () => {
+        // Pacific/Apia jumped the international date line and lost 30 December
+        // entirely. The offset moves by a full day but no wall-clock hour is
+        // removed, so there is nothing to compensate.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2011-12-28T00:00:00.000Z'),
+          tz: 'Pacific/Apia',
+        };
+
+        const interval = CronExpressionParser.parse('0 12 * * *', options);
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2011-12-28T22:00:00.000Z', // 12:00 on the 28th
+          '2011-12-29T22:00:00.000Z', // 12:00 on the 29th
+          '2011-12-30T22:00:00.000Z', // 12:00 on the 31st, the 30th never happened
+          '2011-12-31T22:00:00.000Z', // 12:00 on 1 January
+        ]);
+      });
     });
   });
 

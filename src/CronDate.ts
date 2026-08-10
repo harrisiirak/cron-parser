@@ -570,15 +570,17 @@ export class CronDate {
     const currentHour = this.getHours();
     const diff = currentHour - previousHour;
 
-    // Spring-forward is measured from the UTC offset, which rises by exactly
-    // the time that no longer exists, so it holds for any gap width. The old
-    // `diff === 2` test only caught one-hour gaps, missing Antarctica/Troll.
-    const skippedHours = Math.floor((this.getUTCOffset() - previousOffset) / 60);
+    // A rising offset says a spring-forward happened but not how much of the
+    // schedule it ate, so the wall clock answers that: `advance` is the hours
+    // crossed, and two or more means at least one was skipped. Any gap width
+    // qualifies, which the old `diff === 2` missed for Antarctica/Troll, while
+    // Lord Howe's 30 minutes and Apia's skipped calendar day do not.
+    const advance = (currentHour - previousHour + 24) % 24;
 
-    if (skippedHours >= 1) {
+    if (op === DateMathOp.Add && this.getUTCOffset() > previousOffset && advance >= 2) {
       if (hoursLength !== 24) {
         // First skipped hour, and the hour landed on so the window can be
-        // recognised later. Modulo guards a gap that crosses midnight.
+        // recognised later. Modulo carries a gap over midnight (23:00 to 01:00).
         this.#dstStart = (previousHour + 1) % 24;
         this.#dstStartLandingHour = currentHour;
       }

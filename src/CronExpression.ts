@@ -438,10 +438,11 @@ export class CronExpression {
 
     // DST start: if the scheduled hour is skipped (e.g. 03:00 doesn't exist),
     // accept the hour the clock landed on when it matches a skipped one. A gap
-    // can span several hours (Antarctica/Troll skips both 01:00 and 02:00), and
+    // can span several hours (Antarctica/Troll skips both 01:00 and 02:00) and
+    // can wrap midnight (America/Nuuk skips 23:00), so the walk is modular. It
     // is confined to the landing hour so it ends once the clock moves on.
     if (currentDate.dstStart !== null && currentDate.dstStartLandingHour === currentHour) {
-      for (let skipped = currentDate.dstStart; skipped < currentHour; skipped++) {
+      for (let skipped = currentDate.dstStart; skipped !== currentHour; skipped = (skipped + 1) % 24) {
         if (CronExpression.#matchSchedule(skipped, hourValues)) {
           return true;
         }
