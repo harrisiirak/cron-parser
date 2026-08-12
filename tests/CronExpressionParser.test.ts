@@ -1694,6 +1694,171 @@ describe('CronExpressionParser', () => {
       expect(prev).toBeInstanceOf(CronDate);
       expect(prev.toISOString()).toEqual('2026-03-08T13:00:00.000Z'); // 8am CDT Sun Mar 8
     });
+
+    // Antarctica/Troll advances two hours on 2026-03-29, 00:00 -> 03:00, so
+    // both 01:00 and 02:00 are skipped. A schedule inside that window used to
+    // be dropped for the day rather than moved to the far side of the gap.
+    describe('transitions wider than one hour', () => {
+      test('compensates a schedule inside a two-hour gap instead of skipping the day', () => {
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-27T12:00:00.000Z'),
+          tz: 'Antarctica/Troll',
+        };
+
+        const interval = CronExpressionParser.parse('30 1 * * *', options);
+
+        expect(interval.next().toISOString()).toEqual('2026-03-28T01:30:00.000Z'); // 01:30 at UTC+00
+
+        // Troll goes 01:00 -> 03:00 on the 29th, so 01:30 does not exist.
+        expect(interval.next().toISOString()).toEqual('2026-03-29T01:30:00.000Z'); // 03:30 local
+
+        expect(interval.next().toISOString()).toEqual('2026-03-29T23:30:00.000Z'); // 01:30 at UTC+02
+      });
+
+      test('compensates the second skipped hour of a two-hour gap', () => {
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-28T12:00:00.000Z'),
+          tz: 'Antarctica/Troll',
+        };
+
+        // 02:00 is the second of the two hours the transition removes.
+        const interval = CronExpressionParser.parse('30 2 * * *', options);
+
+        expect(interval.next().toISOString()).toEqual('2026-03-29T01:30:00.000Z'); // 03:30 local
+        expect(interval.next().toISOString()).toEqual('2026-03-30T00:30:00.000Z'); // 02:30 local
+      });
+
+      test('does not repeat the compensated occurrence on later hours', () => {
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-28T12:00:00.000Z'),
+          tz: 'Antarctica/Troll',
+        };
+
+        const interval = CronExpressionParser.parse('30 1 * * *', options);
+
+        // Matching has to stop once the search leaves the window.
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-03-29T01:30:00.000Z', // 03:30 local, compensated
+          '2026-03-29T23:30:00.000Z', // 01:30 local on the 30th
+          '2026-03-30T23:30:00.000Z', // 01:30 local on the 31st
+        ]);
+      });
+
+      test('does not repeat the compensated occurrence when the minute rolls the hour', () => {
+        // The window is left by a minute step rather than an hour step.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-03-07T12:00:00.000Z'),
+          tz: 'America/New_York',
+        };
+
+        const interval = CronExpressionParser.parse('30 59 2 * * *', options);
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-03-08T07:59:30.000Z', // 03:59:30 EDT, compensated
+          '2026-03-09T06:59:30.000Z', // 02:59:30 EDT
+          '2026-03-10T06:59:30.000Z',
+        ]);
+      });
+
+      test('leaves a sub-hour transition alone', () => {
+        // Lord Howe moves by 30 minutes, removing no whole wall-clock hour.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-10-03T05:00:00.000Z'),
+          tz: 'Australia/Lord_Howe',
+        };
+
+        const interval = CronExpressionParser.parse('30 2 * * *', options);
+
+        expect(interval.next().toISOString()).toEqual('2026-10-03T15:30:00.000Z');
+        expect(interval.next().toISOString()).toEqual('2026-10-04T15:30:00.000Z');
+      });
+
+      test('keeps every occurrence when a sub-hour transition is crossed by an hour step', () => {
+        // Same 30-minute shift, reached hour by hour rather than by a day jump.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-10-03T12:00:00.000Z'),
+          tz: 'Australia/Lord_Howe',
+        };
+
+        const interval = CronExpressionParser.parse('30 1,2 * * *', options);
+
+        // The second value pins master's behaviour, not the correct answer:
+        // 02:30 exists on the transition day and is what was asked for, but the
+        // hour step from 01:30 crosses the shift and lands past it. Known
+        // limitation, unrelated to the gap logic this block covers.
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-10-03T15:00:00.000Z', // 01:30 at UTC+10:30
+          '2026-10-03T16:30:00.000Z', // 03:30, where 02:30 was scheduled
+          '2026-10-04T14:30:00.000Z', // 01:30 on the 5th
+        ]);
+      });
+
+      test('does not compensate when stepping backward over a fall-back', () => {
+        // Santiago falls back on 5 April, and stepping back over it raises the
+        // UTC offset just as a spring-forward does.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-04-05T12:00:00.000Z'),
+          tz: 'America/Santiago',
+        };
+
+        const interval = CronExpressionParser.parse('30 22 * * *', options);
+
+        expect(interval.prev().toISOString()).toEqual('2026-04-05T01:30:00.000Z'); // 22:30 on the 4th
+      });
+
+      test('compensates a gap that ends after midnight', () => {
+        // Nuuk transitions at 01:00 UTC, which on UTC-2 skips 23:00 local and
+        // lands on 00:00 the next day.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2024-03-30T00:00:00.000Z'),
+          tz: 'America/Nuuk',
+        };
+
+        const interval = CronExpressionParser.parse('0 22,23 * * *', options);
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2024-03-30T01:00:00.000Z', // 23:00 on the 29th
+          '2024-03-31T00:00:00.000Z', // 22:00 on the 30th
+          '2024-03-31T01:00:00.000Z', // 00:00 on the 31st, for the skipped 23:00
+          '2024-03-31T23:00:00.000Z', // 22:00 on the 31st
+        ]);
+      });
+
+      test('compensates a skipped midnight hour', () => {
+        // Chile transitions at 24:00, so 00:00 is the hour that disappears.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-09-05T02:00:00.000Z'),
+          tz: 'America/Santiago',
+        };
+
+        const interval = CronExpressionParser.parse('0 23,0 * * *', options);
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2026-09-05T03:00:00.000Z', // 23:00 on the 4th
+          '2026-09-05T04:00:00.000Z', // 00:00 on the 5th
+          '2026-09-06T03:00:00.000Z', // 23:00 on the 5th
+          '2026-09-06T04:00:00.000Z', // 01:00 on the 6th, for the skipped 00:00
+        ]);
+      });
+
+      test('leaves a skipped calendar day alone', () => {
+        // Apia crossed the date line and lost 30 December entirely, moving the
+        // offset by a full day while removing no wall-clock hour.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2011-12-28T00:00:00.000Z'),
+          tz: 'Pacific/Apia',
+        };
+
+        const interval = CronExpressionParser.parse('0 12 * * *', options);
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2011-12-28T22:00:00.000Z', // 12:00 on the 28th
+          '2011-12-29T22:00:00.000Z', // 12:00 on the 29th
+          '2011-12-30T22:00:00.000Z', // 12:00 on the 31st, the 30th never happened
+          '2011-12-31T22:00:00.000Z', // 12:00 on 1 January
+        ]);
+      });
+    });
   });
 
   describe('test expressions with "L" last of flag', () => {

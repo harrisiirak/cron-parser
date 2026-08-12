@@ -436,11 +436,14 @@ export class CronExpression {
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
     const isDstEnd = currentDate.dstEnd === currentHour;
 
-    // DST start: if the scheduled hour is skipped (e.g. 03:00 doesn't exist),
-    // accept the next existing hour when it matches the skipped one.
-    if (currentDate.dstStart !== null && currentDate.dstStart === currentHour - 1) {
-      if (CronExpression.#matchSchedule(currentDate.dstStart, hourValues)) {
-        return true;
+    // DST start: accept the landing hour when a skipped hour was scheduled.
+    // The walk is modular because a gap can wrap midnight, and confined to the
+    // landing hour so it stops once the clock moves past the window.
+    if (currentDate.dstStart !== null && currentDate.dstStartLandingHour === currentHour) {
+      for (let skipped = currentDate.dstStart; skipped !== currentHour; skipped = (skipped + 1) % 24) {
+        if (CronExpression.#matchSchedule(skipped, hourValues)) {
+          return true;
+        }
       }
     }
 
@@ -457,7 +460,7 @@ export class CronExpression {
 
     // Normal mismatch: if there's no remaining matching hour in this day, jump a whole day first
     // to avoid scanning hour-by-hour across the day boundary.
-    currentDate.dstStart = null;
+    currentDate.clearDstStart();
     const nextHour = this.#fields.hour.findNearestValue(currentHour, reverse);
     if (nextHour === null) {
       currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, hours.length);

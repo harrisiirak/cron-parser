@@ -23,6 +23,7 @@ export const DAYS_IN_MONTH: readonly number[] = Object.freeze([31, 29, 31, 30, 3
 export class CronDate {
   #date: DateTime;
   #dstStart: number | null = null;
+  #dstStartLandingHour: number | null = null;
   #dstEnd: number | null = null;
 
   /**
@@ -39,6 +40,7 @@ export class CronDate {
     } else if (timestamp instanceof CronDate) {
       this.#date = timestamp.#date;
       this.#dstStart = timestamp.#dstStart;
+      this.#dstStartLandingHour = timestamp.#dstStartLandingHour;
       this.#dstEnd = timestamp.#dstEnd;
     } else if (timestamp instanceof Date) {
       this.#date = DateTime.fromJSDate(timestamp, dateOpts);
@@ -81,11 +83,20 @@ export class CronDate {
   }
 
   /**
-   * Sets daylight savings start time.
-   * @param {number | null} value
+   * Returns the first existing hour after the skipped window, or null.
+   * @returns {number | null}
    */
-  set dstStart(value: number | null) {
-    this.#dstStart = value;
+  get dstStartLandingHour(): number | null {
+    return this.#dstStartLandingHour;
+  }
+
+  /**
+   * Discards the recorded daylight savings start window. The two halves are
+   * only meaningful together, so neither is writable on its own.
+   */
+  clearDstStart(): void {
+    this.#dstStart = null;
+    this.#dstStartLandingHour = null;
   }
 
   /**
@@ -553,15 +564,23 @@ export class CronDate {
     }
 
     const previousHour = this.getHours();
+    const previousOffset = this.getUTCOffset();
     this.invokeDateOperation(op, unit);
     const currentHour = this.getHours();
-    const diff = currentHour - previousHour;
-    if (diff === 2) {
+    // Wall-clock hours crossed, modular so a step over midnight measures the
+    // same as one within the day.
+    const advance = (currentHour - previousHour + 24) % 24;
+
+    // advance >= 2: at least one whole wall-clock hour was skipped, which
+    // sub-hour shifts and calendar-day jumps must not qualify as.
+    if (op === DateMathOp.Add && this.getUTCOffset() > previousOffset && advance >= 2) {
       if (hoursLength !== 24) {
-        // Record the skipped hour during spring-forward transition (previousHour + 1)
-        this.dstStart = previousHour + 1;
+        // First skipped hour, then the hour landed on. Modulo carries a window
+        // that starts at 23:00 over midnight.
+        this.#dstStart = (previousHour + 1) % 24;
+        this.#dstStartLandingHour = currentHour;
       }
-    } else if (diff === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
+    } else if (advance === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
       if (hoursLength !== 24) {
         this.dstEnd = currentHour;
       }
