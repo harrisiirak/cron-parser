@@ -665,7 +665,7 @@ describe('CronExpressionParser', () => {
 
   test('renders a stepped day of month in a single month to a stable expression', () => {
     const rendered = CronExpressionParser.parse('* * 9-20/3 16-26/5 jun *').stringify(true);
-    expect(rendered).toEqual('* * 9-18/3 16/5 6 *');
+    expect(rendered).toEqual('* * 9-18/3 16-26/5 6 *');
     expect(CronExpressionParser.parse(rendered).stringify(true)).toEqual(rendered);
   });
 
