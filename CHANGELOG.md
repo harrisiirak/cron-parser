@@ -1,5 +1,18 @@
 # Changelog
 
+## v5.9.0 - 2026-08-13
+
+### What's Changed
+* fix: keep explicit range bounds when stringifying stepped fields (#279) by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/440
+* fix: compensate DST transitions wider than one hour by @aniket-3001 in https://github.com/harrisiirak/cron-parser/pull/435
+* fix: keep a hashed step wider than its range from emptying the field by @Jaybhade in https://github.com/harrisiirak/cron-parser/pull/437
+
+### New Contributors
+* @aniket-3001 made their first contribution in https://github.com/harrisiirak/cron-parser/pull/435
+* @Jaybhade made their first contribution in https://github.com/harrisiirak/cron-parser/pull/437
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.8.1...v5.9.0
+
 ## v5.8.1 - 2026-08-09
 
 ### What's Changed
