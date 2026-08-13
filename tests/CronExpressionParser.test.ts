@@ -2027,6 +2027,128 @@ describe('CronExpressionParser', () => {
       });
     });
 
+    describe('a hashed range or step the field cannot satisfy', () => {
+      test('parses without a seed every time', () => {
+        for (let i = 0; i < 20; i++) {
+          expect(() => CronExpressionParser.parse('H(1-5)/10 * * * *')).not.toThrow();
+          expect(() => CronExpressionParser.parse('0 0 H(0-5) * *')).not.toThrow();
+        }
+      });
+
+      test('is rejected without a seed in strict mode', () => {
+        expect(() => CronExpressionParser.parse('0 H(1-5)/10 * * * *', { strict: true })).toThrow(
+          'Invalid step: 10, wider than the 1-5 range of the minute field',
+        );
+      });
+
+      test('H(range) always yields a value inside the field constraints', () => {
+        for (let seed = 0; seed < 20; seed++) {
+          const options = { hashSeed: `seed-${seed}` };
+          const daysOfMonth = CronExpressionParser.parse('0 0 H(0-5) * *', options).fields.dayOfMonth
+            .values as number[];
+
+          expect(daysOfMonth).toHaveLength(1);
+          expect(daysOfMonth[0]).toBeGreaterThanOrEqual(1);
+          expect(daysOfMonth[0]).toBeLessThanOrEqual(5);
+        }
+      });
+
+      test('H(range)/step always yields a value inside the range', () => {
+        for (let seed = 0; seed < 20; seed++) {
+          const options = { hashSeed: `seed-${seed}` };
+          const minutes = CronExpressionParser.parse('H(1-5)/10 * * * *', options).fields.minute.values as number[];
+
+          expect(minutes).toHaveLength(1);
+          expect(minutes[0]).toBeGreaterThanOrEqual(1);
+          expect(minutes[0]).toBeLessThanOrEqual(5);
+        }
+      });
+
+      test('H/step always yields a value inside the field constraints', () => {
+        for (let seed = 0; seed < 20; seed++) {
+          const options = { hashSeed: `seed-${seed}` };
+          const daysOfMonth = CronExpressionParser.parse('0 0 H/40 * *', options).fields.dayOfMonth.values as number[];
+          const months = CronExpressionParser.parse('0 0 * H/60 *', options).fields.month.values as number[];
+
+          expect(daysOfMonth).toHaveLength(1);
+          expect(daysOfMonth[0]).toBeGreaterThanOrEqual(1);
+          expect(daysOfMonth[0]).toBeLessThanOrEqual(31);
+
+          expect(months).toHaveLength(1);
+          expect(months[0]).toBeGreaterThanOrEqual(1);
+          expect(months[0]).toBeLessThanOrEqual(12);
+        }
+      });
+
+      test('a range wider than the field is narrowed before the step is applied', () => {
+        for (let seed = 0; seed < 20; seed++) {
+          const options = { hashSeed: `seed-${seed}` };
+          const minutes = CronExpressionParser.parse('H(50-100)/60 * * * *', options).fields.minute.values as number[];
+
+          expect(minutes).toHaveLength(1);
+          expect(minutes[0]).toBeGreaterThanOrEqual(50);
+          expect(minutes[0]).toBeLessThanOrEqual(59);
+        }
+      });
+
+      test('a range with no value inside the field is rejected', () => {
+        expect(() => CronExpressionParser.parse('0 0 H(0-0)/40 * *')).toThrow(
+          'Invalid range: 0-0, no usable value in the dayOfMonth field',
+        );
+      });
+
+      test('keeps the same seed returning the same value', () => {
+        const options = { hashSeed: 'F00D' };
+
+        expect(CronExpressionParser.parse('H(1-5)/10 * * * *', options).stringify(true)).toBe(
+          CronExpressionParser.parse('H(1-5)/10 * * * *', options).stringify(true),
+        );
+      });
+
+      test('leaves a step that fits inside the range untouched', () => {
+        const options = { hashSeed: 'F00D' };
+
+        expect(CronExpressionParser.parse('H(5-10)/3 * * * * *', options).stringify(true)).toBe('6,9 * * * * *');
+      });
+
+      describe('in strict mode', () => {
+        test('rejects H(range)/step', () => {
+          const options = { strict: true, hashSeed: 'F00D' };
+
+          expect(() => CronExpressionParser.parse('H(1-5)/10 * * * * *', options)).toThrow(
+            'Invalid step: 10, wider than the 1-5 range of the second field',
+          );
+        });
+
+        test('rejects H/step', () => {
+          const options = { strict: true, hashSeed: 'F00D' };
+
+          expect(() => CronExpressionParser.parse('0 0 0 * H/60 *', options)).toThrow(
+            'Invalid step: 60, wider than the 1-12 range of the month field',
+          );
+        });
+
+        test('rejects a range reaching outside the field, quoting the range as written', () => {
+          const options = { strict: true, hashSeed: 'F00D' };
+
+          expect(() => CronExpressionParser.parse('0 0 0 H(0-5) * *', options)).toThrow(
+            'Invalid range: 0-5, outside the 1-31 range of the dayOfMonth field',
+          );
+          expect(() => CronExpressionParser.parse('0 0 0 H(0-5)/50 * *', options)).toThrow(
+            'Invalid range: 0-5, outside the 1-31 range of the dayOfMonth field',
+          );
+        });
+
+        test('accepts a step that fits inside the range', () => {
+          const options = { hashSeed: 'F00D' };
+
+          expect(CronExpressionParser.parse('0 H(0-29)/10 * * * *', { ...options, strict: true }).stringify(true)).toBe(
+            CronExpressionParser.parse('0 H(0-29)/10 * * * *', options).stringify(true),
+          );
+        });
+      });
+    });
+
     // Not having a seed is making tests less useful
     describe('without a custom seed', () => {
       test('parses expressions using H on all fields', () => {
