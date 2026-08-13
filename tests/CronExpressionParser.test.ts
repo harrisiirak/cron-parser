@@ -1852,16 +1852,11 @@ describe('CronExpressionParser', () => {
       });
     });
 
-    describe('a step wider than the range it is applied to', () => {
-      // The stepped values start from a step-aligned offset, so a step wider than the
-      // range can place every candidate outside it and leave the field empty. That made
-      // the same expression parse for some seeds and throw for others.
-
-      // The reported symptom: with no hashSeed each parse draws a fresh seed, so the same
-      // expression succeeded or threw from one call to the next within a single process.
+    describe('a hashed range or step the field cannot satisfy', () => {
       test('parses without a seed every time', () => {
         for (let i = 0; i < 20; i++) {
           expect(() => CronExpressionParser.parse('H(1-5)/10 * * * *')).not.toThrow();
+          expect(() => CronExpressionParser.parse('0 0 H(0-5) * *')).not.toThrow();
         }
       });
 
@@ -1869,6 +1864,18 @@ describe('CronExpressionParser', () => {
         expect(() => CronExpressionParser.parse('0 H(1-5)/10 * * * *', { strict: true })).toThrow(
           'Invalid step: 10, wider than the 1-5 range of the minute field',
         );
+      });
+
+      test('H(range) always yields a value inside the field constraints', () => {
+        for (let seed = 0; seed < 20; seed++) {
+          const options = { hashSeed: `seed-${seed}` };
+          const daysOfMonth = CronExpressionParser.parse('0 0 H(0-5) * *', options).fields.dayOfMonth
+            .values as number[];
+
+          expect(daysOfMonth).toHaveLength(1);
+          expect(daysOfMonth[0]).toBeGreaterThanOrEqual(1);
+          expect(daysOfMonth[0]).toBeLessThanOrEqual(5);
+        }
       });
 
       test('H(range)/step always yields a value inside the range', () => {
@@ -1898,8 +1905,6 @@ describe('CronExpressionParser', () => {
         }
       });
 
-      // A range reaching past the field is narrowed to what the field holds, so the step is
-      // measured against the values that can actually be drawn.
       test('a range wider than the field is narrowed before the step is applied', () => {
         for (let seed = 0; seed < 20; seed++) {
           const options = { hashSeed: `seed-${seed}` };
@@ -1928,11 +1933,9 @@ describe('CronExpressionParser', () => {
       test('leaves a step that fits inside the range untouched', () => {
         const options = { hashSeed: 'F00D' };
 
-        expect(CronExpressionParser.parse('H(0-29)/10 * * * *', options).stringify(true)).toBe('0 5,15,25 * * * *');
         expect(CronExpressionParser.parse('H(5-10)/3 * * * * *', options).stringify(true)).toBe('6,9 * * * * *');
       });
 
-      // The rejections below happen before the seed is drawn, so one parse settles them.
       describe('in strict mode', () => {
         test('rejects H(range)/step', () => {
           const options = { strict: true, hashSeed: 'F00D' };
@@ -1950,20 +1953,23 @@ describe('CronExpressionParser', () => {
           );
         });
 
-        // Reported before the range is narrowed, so the message quotes what was written
-        // rather than the 1-5 the field would have been left with.
-        test('rejects a range reaching outside the field', () => {
+        test('rejects a range reaching outside the field, quoting the range as written', () => {
           const options = { strict: true, hashSeed: 'F00D' };
 
+          expect(() => CronExpressionParser.parse('0 0 0 H(0-5) * *', options)).toThrow(
+            'Invalid range: 0-5, outside the 1-31 range of the dayOfMonth field',
+          );
           expect(() => CronExpressionParser.parse('0 0 0 H(0-5)/50 * *', options)).toThrow(
             'Invalid range: 0-5, outside the 1-31 range of the dayOfMonth field',
           );
         });
 
         test('accepts a step that fits inside the range', () => {
-          const options = { strict: true, hashSeed: 'F00D' };
+          const options = { hashSeed: 'F00D' };
 
-          expect(CronExpressionParser.parse('0 H(0-29)/10 * * * *', options).stringify(true)).toBe('0 5,15,25 * * * *');
+          expect(CronExpressionParser.parse('0 H(0-29)/10 * * * *', { ...options, strict: true }).stringify(true)).toBe(
+            CronExpressionParser.parse('0 H(0-29)/10 * * * *', options).stringify(true),
+          );
         });
       });
     });

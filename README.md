@@ -218,7 +218,7 @@ To resolve this ambiguity, you can activate the strict mode of the library. When
 1. **Day Of Month and Day Of Week**: Prevents the simultaneous setting of both Day Of Month and Day Of Week fields
 2. **Complete Expression**: Requires all 6 fields to be present in the expression (second, minute, hour, day of month, month, day of week)
 3. **Non-empty Expression**: Rejects empty expressions that would otherwise default to '0 \* \* \* \* \*'
-4. **Usable Hashed Step**: Rejects a stepped hash the field cannot satisfy — a range reaching outside the field, such as `H(0-5)/2` in day of month, or a step wider than the range it applies to, such as `H(1-5)/10` (see [Hash support](#hash-support))
+4. **Usable Hashed Range and Step**: Rejects a hash the field cannot satisfy - a range reaching outside the field, such as `H(0-5)` in day of month, or a step wider than the range it applies to, such as `H(1-5)/10` (see [Hash support](#hash-support))
 
 These validations help ensure that your cron expressions are unambiguous and correctly formatted.
 
@@ -382,10 +382,7 @@ const interval = CronExpressionParser.parse('H(0-29)/5 * * * *');
 const interval = CronExpressionParser.parse('* * * * H#3');
 ```
 
-A step only produces several occurrences while it is narrow enough to fit the range more than
-once. When the step is wider than the range — as in `H(1-5)/10`, or `H/60` in a field whose
-constraints are narrower than 60 — no step-aligned value is guaranteed to land inside the range,
-so the field falls back to a single random occurrence within it, exactly as `H(1-5)` would give:
+A step only produces several occurrences while it is narrow enough to fit the range more than once. When the step is wider than the range - as in `H(1-5)/10`, or `H/60` in a field whose constraints are narrower than 60 - no step-aligned value is guaranteed to land inside the range, so the field falls back to a single random occurrence within it, exactly as `H(1-5)` would give:
 
 ```typescript
 import { CronExpressionParser } from 'cron-parser';
@@ -395,12 +392,9 @@ import { CronExpressionParser } from 'cron-parser';
 const interval = CronExpressionParser.parse('H(1-5)/10 * * * *');
 ```
 
-A range is first narrowed to what the field can hold, so `H(50-100)/60` in the minute field steps
-across 50-59 rather than the 50-100 that was written. A range with nothing left after narrowing,
-such as `H(0-0)/40` in day of month, is rejected.
+A range is first narrowed to what the field can hold, so `H(0-5)` in day of month picks a day between 1 and 5, and `H(50-100)/60` in the minute field steps across 50-59 rather than the 50-100 that was written. A range with nothing left after narrowing, such as `H(0-0)/40` in day of month, is rejected.
 
-Whether such an expression is a mistake is up to you: enable [strict mode](#strict-mode) to have
-it rejected instead of falling back.
+Whether such an expression is a mistake is up to you: enable [strict mode](#strict-mode) to have it rejected instead of falling back.
 
 The randomness is seed-able using the `hashSeed` option of `CronExpressionOptions`:
 
