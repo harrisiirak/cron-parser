@@ -602,6 +602,28 @@ describe('CronExpressionParser', () => {
     }
   });
 
+  test('pads a four field expression with a zero second and a wildcard minute', () => {
+    const interval = CronExpressionParser.parse('20 15 * *');
+    expect(interval.stringify(true)).toEqual('0 * 20 15 * *');
+  });
+
+  test('pads a three field expression with a zero second and wildcard minutes and hours', () => {
+    const interval = CronExpressionParser.parse('15 * *');
+    expect(interval.stringify(true)).toEqual('0 * * 15 * *');
+  });
+
+  test('keeps five field expressions unchanged when padding', () => {
+    const interval = CronExpressionParser.parse('20 15 * * *');
+    expect(interval.stringify(true)).toEqual('0 20 15 * * *');
+  });
+
+  test('advances occurrences one minute apart instead of one second apart for a four field expression', () => {
+    const interval = CronExpressionParser.parse('20 15 * *');
+    const first = interval.next();
+    const second = interval.next();
+    expect(second.getTime() - first.getTime()).toEqual(60000);
+  });
+
   test('using explicit month definition and */5 day of month step', () => {
     const firstIterator = CronExpressionParser.parse('0 12 */5 6 *', {
       currentDate: '2019-06-01T11:00:00.000',
