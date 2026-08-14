@@ -19,6 +19,7 @@ concurrency:
 permissions:
   contents: write
   id-token: write
+  issues: write
 
 jobs:
   release:
@@ -84,3 +85,30 @@ jobs:
           gh release create "v${{ steps.notes.outputs.version }}"
           --title "v${{ steps.notes.outputs.version }}"
           --notes-file /tmp/release-notes.md
+      - name: Comment on fixed issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.notes.outputs.version }}"
+          URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/v$VERSION"
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          NAME="${GITHUB_REPOSITORY#*/}"
+          grep -oE "https://github.com/$GITHUB_REPOSITORY/pull/[0-9]+" /tmp/release-notes.md \
+            | grep -oE '[0-9]+$' | sort -un > /tmp/release-prs.txt || true
+          while read -r pr; do
+            gh api graphql -f query='query($owner: String!, $repo: String!, $pr: Int!) {
+              repository(owner: $owner, name: $repo) {
+                pullRequest(number: $pr) {
+                  closingIssuesReferences(first: 20) {
+                    nodes { number locked repository { nameWithOwner } }
+                  }
+                }
+              }
+            }' -f owner="$OWNER" -f repo="$NAME" -F pr="$pr" \
+              --jq ".data.repository.pullRequest.closingIssuesReferences.nodes[] | select((.locked | not) and .repository.nameWithOwner == \"$GITHUB_REPOSITORY\") | .number"
+          done < /tmp/release-prs.txt | sort -un > /tmp/release-issues.txt
+          while read -r issue; do
+            gh issue comment "$issue" -R "$GITHUB_REPOSITORY" \
+              --body ":tada: Fixed in [v$VERSION]($URL)" \
+              || echo "::warning::Failed to comment on #$issue"
+          done < /tmp/release-issues.txt
