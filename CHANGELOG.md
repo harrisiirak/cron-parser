@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.10.0 - 2026-08-14
+
+### What's Changed
+* fix: pad short expressions from the leading field slot by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/443
+
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.9.0...v5.10.0
+
 ## v5.9.0 - 2026-08-13
 
 ### What's Changed
