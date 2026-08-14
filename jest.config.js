@@ -1,5 +1,7 @@
 module.exports = {
   testMatch: ['**/tests/**/*.test.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/.worktrees/'],
+  modulePathIgnorePatterns: ['/.worktrees/'],
   verbose: false,
   testEnvironment: 'node',
   transform: {
