@@ -174,9 +174,9 @@ export class CronExpressionParser {
     if (atoms.length > 6) {
       throw new Error('Invalid cron expression, too many fields');
     }
-    const defaults = ['*', '*', '*', '*', '*', '0'];
+    const defaults = ['0', '*', '*', '*', '*', '*'];
     if (atoms.length < defaults.length) {
-      atoms.unshift(...defaults.slice(atoms.length));
+      atoms.unshift(...defaults.slice(0, defaults.length - atoms.length));
     }
     const [second, minute, hour, dayOfMonth, month, dayOfWeek] = atoms;
     return { second, minute, hour, dayOfMonth, month, dayOfWeek };
