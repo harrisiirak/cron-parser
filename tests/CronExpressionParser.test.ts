@@ -617,8 +617,12 @@ describe('CronExpressionParser', () => {
     expect(interval.stringify(true)).toEqual('0 20 15 * * *');
   });
 
-  test('advances occurrences one minute apart instead of one second apart for a four field expression', () => {
-    const interval = CronExpressionParser.parse('20 15 * *');
+  test('advances occurrences one minute apart for a four field expression', () => {
+    const options = {
+      currentDate: new CronDate('Wed, 26 Dec 2012 14:38:00'),
+    };
+
+    const interval = CronExpressionParser.parse('20 15 * *', options);
     const first = interval.next();
     const second = interval.next();
     expect(second.getTime() - first.getTime()).toEqual(60000);
