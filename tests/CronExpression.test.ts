@@ -233,6 +233,18 @@ describe('CronExpression', () => {
       expect(interval.next().toISOString()).toBe('2068-02-29T00:00:00.000Z');
     });
 
+    test('does not exhaust the loop limit when the next match is decades away', () => {
+      // Occurrences of `0 0 * 2 3#5` are ~28 years apart, which is more than the
+      // 10000-iteration limit in days. Crawling day-by-day therefore throws
+      // "loop limit exceeded"; skipping non-scheduled months keeps it under the cap.
+      const interval = CronExpressionParser.parse('0 0 * 2 3#5', {
+        currentDate: new Date('2040-03-01T00:00:00.000Z'),
+        tz: 'UTC',
+      });
+
+      expect(interval.next().toISOString()).toBe('2068-02-29T00:00:00.000Z');
+    });
+
     test('skips non-scheduled months when iterating backwards for sparse day-restricted schedules', () => {
       const interval = CronExpressionParser.parse('0 0 * 2 3#5', {
         currentDate: new Date('2021-02-27T12:00:00.000Z'),
