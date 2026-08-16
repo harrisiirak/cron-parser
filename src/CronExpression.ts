@@ -533,7 +533,15 @@ export class CronExpression {
       this.#validateTimeSpan(currentDate);
 
       if (!this.#matchDayOfMonth(currentDate)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
+        // If the current month is not scheduled, skip the whole month instead of stepping one
+        // day at a time. Day-restricting fields that only match a boundary day (e.g. `L` or an
+        // `<n>#5` occurrence) otherwise force a day-by-day crawl across every non-matching month,
+        // which can exhaust the loop limit for sparse schedules such as `0 0 * 2 3#5` (the 5th
+        // Wednesday of February, which only exists ~28 years apart).
+        const dayUnit = CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)
+          ? TimeUnit.Day
+          : TimeUnit.Month;
+        currentDate.applyDateOperation(dateMathVerb, dayUnit, this.#fields.hour.values.length);
         continue;
       }
       if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
