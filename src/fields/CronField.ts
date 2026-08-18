@@ -243,7 +243,7 @@ export abstract class CronField {
     }
     // check for duplicate value in this.#values array
     const duplicate = this.#values.find((value, index) => this.#values.indexOf(value) !== index);
-    if (duplicate) {
+    if (duplicate !== undefined) {
       throw new Error(`${this.constructor.name} Validation error, duplicate values found: ${duplicate}`);
     }
   }
