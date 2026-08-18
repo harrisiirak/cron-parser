@@ -1,4 +1,4 @@
-import { CronDayOfWeek, CronField, CronSecond, DayOfWeekRange, SixtyRange } from '../src';
+import { CronDayOfWeek, CronField, CronHour, CronMinute, CronSecond, DayOfWeekRange, SixtyRange } from '../src';
 
 describe('CronField', () => {
   describe('wildcard detection', () => {
@@ -33,6 +33,19 @@ describe('CronField', () => {
 
     test('should throw an error when duplicate value is provided as a range', () => {
       expect(() => new CronSecond([0, 59, 59])).toThrow('CronSecond Validation error, duplicate values found: 59');
+    });
+
+    test('should throw an error when the duplicated value is zero', () => {
+      expect(() => new CronSecond([0, 0])).toThrow('CronSecond Validation error, duplicate values found: 0');
+      expect(() => new CronMinute([0, 0])).toThrow('CronMinute Validation error, duplicate values found: 0');
+      expect(() => new CronHour([0, 0])).toThrow('CronHour Validation error, duplicate values found: 0');
+      expect(() => new CronDayOfWeek([0, 0])).toThrow('CronDayOfWeek Validation error, duplicate values found: 0');
+    });
+
+    test('should not throw an error when a non-duplicate set contains zero', () => {
+      expect(() => new CronSecond([0, 1])).not.toThrow();
+      expect(() => new CronMinute([0, 30])).not.toThrow();
+      expect(new CronDayOfWeek([0, 7]).values).toEqual([0, 7]);
     });
 
     test('should not reorder the values array provided by the caller', () => {

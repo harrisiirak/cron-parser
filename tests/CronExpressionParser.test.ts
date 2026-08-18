@@ -186,6 +186,44 @@ describe('CronExpressionParser', () => {
     test('empty expression in strict mode', () => {
       expect(() => CronExpressionParser.parse('', { strict: true })).toThrow();
     });
+
+    test('duplicated zero values are rejected', () => {
+      expect(() => CronExpressionParser.parse('0,0 0 0 1 1 0')).toThrow(
+        'CronSecond Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0,0 * * * *')).toThrow(
+        'CronMinute Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0 0,0 * * *')).toThrow(
+        'CronHour Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0 0 * * 0,0')).toThrow(
+        'CronDayOfWeek Validation error, duplicate values found: 0',
+      );
+    });
+
+    test('listing both sunday spellings is rejected as a duplicate', () => {
+      expect(() => CronExpressionParser.parse('0 0 * * 0,7')).toThrow(
+        'CronDayOfWeek Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0 0 * * 7,0')).toThrow(
+        'CronDayOfWeek Validation error, duplicate values found: 0',
+      );
+    });
+
+    test('lists that contain a single zero are accepted', () => {
+      expect(() => CronExpressionParser.parse('0,30 * * * *')).not.toThrow();
+      expect(() => CronExpressionParser.parse('0-5 * * * *')).not.toThrow();
+    });
+
+    test('expressions with duplicated zero values fail at parse instead of crashing stringify', () => {
+      expect(() => CronExpressionParser.parse('0,0,0 * * * *')).toThrow(
+        'CronMinute Validation error, duplicate values found: 0',
+      );
+      expect(() => CronExpressionParser.parse('0 0 * * 0,0,0')).toThrow(
+        'CronDayOfWeek Validation error, duplicate values found: 0',
+      );
+    });
   });
 
   describe('take multiple dates', () => {
