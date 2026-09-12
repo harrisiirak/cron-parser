@@ -1,5 +1,14 @@
 # Changelog
 
+## v5.10.1 - 2026-09-12
+
+### What's Changed
+* fix: reject duplicate zero values in field validation by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/445
+* fix: bound field value expansion at parse time by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/450
+
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.10.0...v5.10.1
+
 ## v5.10.0 - 2026-08-14
 
 ### What's Changed
