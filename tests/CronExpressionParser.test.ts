@@ -224,6 +224,16 @@ describe('CronExpressionParser', () => {
         'CronDayOfWeek Validation error, duplicate values found: 0',
       );
     });
+
+    test('a long list of repeated wildcards is rejected in every field', () => {
+      const field = '*,'.repeat(100000) + '*';
+      expect(() => CronExpressionParser.parse(`${field} * * * * *`)).toThrow('too many values in Second field');
+      expect(() => CronExpressionParser.parse(`* ${field} * * * *`)).toThrow('too many values in Minute field');
+      expect(() => CronExpressionParser.parse(`* * ${field} * * *`)).toThrow('too many values in Hour field');
+      expect(() => CronExpressionParser.parse(`* * * ${field} * *`)).toThrow('too many values in DayOfMonth field');
+      expect(() => CronExpressionParser.parse(`* * * * ${field} *`)).toThrow('too many values in Month field');
+      expect(() => CronExpressionParser.parse(`* * * * * ${field}`)).toThrow('too many values in DayOfWeek field');
+    });
   });
 
   describe('take multiple dates', () => {

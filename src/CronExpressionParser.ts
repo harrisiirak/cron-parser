@@ -80,6 +80,12 @@ export type RawCronFields = {
  * @static
  * @class CronExpressionParser
  */
+/**
+ * Upper bound on the number of values a single field may expand to.
+ * No field can hold this many distinct values, so exceeding it always means the list repeats values.
+ */
+const MAX_FIELD_VALUES = 256;
+
 export class CronExpressionParser {
   /**
    * Parses a cron expression and returns a CronExpression object.
@@ -418,12 +424,15 @@ export class CronExpressionParser {
     }
 
     const atoms = val.split(',');
-    atoms.forEach((atom) => {
+    for (const atom of atoms) {
+      if (stack.length > MAX_FIELD_VALUES) {
+        throw new Error(`Constraint error, too many values in ${field} field, expected at most ${MAX_FIELD_VALUES}`);
+      }
       if (!(atom.length > 0)) {
         throw new Error('Invalid list value format');
       }
       handleResult(CronExpressionParser.#parseRepeat(field, atom, constraints), constraints);
-    });
+    }
     return stack;
   }
 
