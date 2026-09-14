@@ -454,6 +454,17 @@ export class CronExpression {
       return false;
     }
 
+    // DST end: avoid returning the repeated hour twice when searching backward.
+    // Iterating in reverse meets the later pass of the repeated hour first; skip it so
+    // prev() keeps only the earlier pass, matching next()'s forward de-duplication. The
+    // wildcard hour (24 values) intentionally keeps both passes in both directions.
+    if (reverse && isMatch && hours.length !== 24 && currentDate.isSecondPassOfRepeatedHour()) {
+      currentDate.applyDateOperation(DateMathOp.Subtract, TimeUnit.Hour, hours.length);
+      currentDate.setMinutes(this.#getMinOrMax(this.#fields.minute.values as number[], reverse));
+      currentDate.setSeconds(this.#getMinOrMax(this.#fields.second.values as number[], reverse));
+      return false;
+    }
+
     if (isMatch) {
       return true;
     }

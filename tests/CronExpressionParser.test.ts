@@ -1482,6 +1482,62 @@ describe('CronExpressionParser', () => {
       expect(next.getDate()).toEqual(31);
     });
 
+    test('prev() de-duplicates the repeated DST end hour like next() - 0 3 * * *', () => {
+      const options: CronExpressionOptions = {
+        currentDate: '2016-10-31 00:00:00',
+        endDate: undefined,
+        tz: 'Europe/Athens',
+      };
+
+      const interval: CronExpression = CronExpressionParser.parse('0 3 * * *', options);
+      let prev: CronDate;
+
+      expect(interval).toBeTruthy();
+
+      // The repeated 03:00 hour (fall-back) must be returned only once on the 30th.
+      prev = interval.prev();
+      expect(prev.getHours()).toEqual(3);
+      expect(prev.getDate()).toEqual(30);
+
+      prev = interval.prev();
+      expect(prev.getHours()).toEqual(3);
+      expect(prev.getDate()).toEqual(29);
+    });
+
+    test('prev() de-duplicates the repeated DST end hour like next() - */20 3 * * *', () => {
+      const options: CronExpressionOptions = {
+        currentDate: '2016-10-31 00:00:00',
+        endDate: undefined,
+        tz: 'Europe/Athens',
+      };
+
+      const interval: CronExpression = CronExpressionParser.parse('*/20 3 * * *', options);
+      let prev: CronDate;
+
+      expect(interval).toBeTruthy();
+
+      prev = interval.prev();
+      expect(prev.getMinutes()).toEqual(40);
+      expect(prev.getHours()).toEqual(3);
+      expect(prev.getDate()).toEqual(30);
+
+      prev = interval.prev();
+      expect(prev.getMinutes()).toEqual(20);
+      expect(prev.getHours()).toEqual(3);
+      expect(prev.getDate()).toEqual(30);
+
+      prev = interval.prev();
+      expect(prev.getMinutes()).toEqual(0);
+      expect(prev.getHours()).toEqual(3);
+      expect(prev.getDate()).toEqual(30);
+
+      // Must move to the previous day rather than repeating the fall-back hour.
+      prev = interval.prev();
+      expect(prev.getMinutes()).toEqual(40);
+      expect(prev.getHours()).toEqual(3);
+      expect(prev.getDate()).toEqual(29);
+    });
+
     test('works on DST end 2016-10-30 00:00:01 - 0 * 30 * *', () => {
       const options: CronExpressionOptions = {
         currentDate: '2016-10-30 00:00:01',
