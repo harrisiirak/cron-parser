@@ -140,7 +140,21 @@ export class CronDate {
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    this.#date = this.#date.plus({ hours: 1 }).startOf('hour');
+    const next = this.#date.plus({ hours: 1 }).startOf('hour');
+    if (next.toMillis() > this.#date.toMillis()) {
+      this.#date = next;
+      return;
+    }
+
+    // A fall-back that is not a whole number of hours (Australia/Lord_Howe, 02:00 -> 01:30) puts
+    // plus(1h) part-way through the repeated stretch. The local hour it rounds down to exists only
+    // before the transition, so startOf('hour') resolves to the instant we started on, or to an
+    // earlier one, and the search would never move forward. Walk to the next local hour boundary.
+    let boundary = this.#date.startOf('minute');
+    do {
+      boundary = boundary.plus({ minutes: 1 });
+    } while (boundary.minute !== 0);
+    this.#date = boundary;
   }
 
   /**
