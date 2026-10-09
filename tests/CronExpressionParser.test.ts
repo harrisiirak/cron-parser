@@ -1944,6 +1944,143 @@ describe('CronExpressionParser', () => {
         ]);
       });
     });
+
+    // Australia/Lord_Howe falls back by 30 minutes on 2024-04-07: 02:00 LHDT (UTC+11:00) becomes
+    // 01:30 LHST (UTC+10:30), so 01:30-02:00 happens twice and there is no second 01:00. An hour
+    // step from 01:xx therefore cannot round down to a later instant than the one it started on.
+    describe('transitions shorter than one hour', () => {
+      const lordHowe = (currentDate: string): CronExpressionOptions => ({
+        currentDate: new Date(currentDate),
+        tz: 'Australia/Lord_Howe',
+      });
+
+      test('reaches the next day instead of exceeding the loop limit', () => {
+        const interval = CronExpressionParser.parse('0 8 * * *', lordHowe('2024-04-06T00:00:00.000Z'));
+
+        expect(interval.next().toISOString()).toEqual('2024-04-06T21:30:00.000Z'); // 08:00 on the 7th, UTC+10:30
+        expect(interval.next().toISOString()).toEqual('2024-04-07T21:30:00.000Z');
+        expect(interval.next().toISOString()).toEqual('2024-04-08T21:30:00.000Z');
+      });
+
+      test('reaches the next day for hours before and after the transition', () => {
+        const noon = CronExpressionParser.parse('0 12 * * *', lordHowe('2024-04-06T00:00:00.000Z'));
+        expect(noon.take(2).map((date) => date.toISOString())).toEqual([
+          '2024-04-06T01:00:00.000Z', // 12:00 on the 6th at UTC+11
+          '2024-04-07T01:30:00.000Z', // 12:00 on the 7th, an hour and a half later in UTC
+        ]);
+
+        const two = CronExpressionParser.parse('0 2 * * *', lordHowe('2024-04-06T00:00:00.000Z'));
+        expect(two.take(2).map((date) => date.toISOString())).toEqual([
+          '2024-04-06T15:30:00.000Z', // 02:00 on the 7th, which only exists after the clocks went back
+          '2024-04-07T15:30:00.000Z',
+        ]);
+      });
+
+      test('steps hour by hour through the transition', () => {
+        const interval = CronExpressionParser.parse('0 * * * *', lordHowe('2024-04-06T13:00:00.000Z'));
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2024-04-06T14:00:00.000Z', // 01:00 LHDT
+          '2024-04-06T15:30:00.000Z', // 02:00 LHST, 30 minutes of wall-clock time later
+          '2024-04-06T16:30:00.000Z', // 03:00 LHST
+        ]);
+
+        // 14:10Z is 01:10 LHDT. Adding an hour lands on 01:40 LHST, which rounds down to 14:00Z,
+        // before the date it started from.
+        const midHour = CronExpressionParser.parse('0 * * * *', lordHowe('2024-04-06T14:10:00.000Z'));
+
+        expect(midHour.take(2).map((date) => date.toISOString())).toEqual([
+          '2024-04-06T15:30:00.000Z', // 02:00 LHST
+          '2024-04-06T16:30:00.000Z', // 03:00 LHST
+        ]);
+      });
+
+      test('moves from the hour before the transition to the hour after it', () => {
+        const interval = CronExpressionParser.parse('0 1,2 * * *', lordHowe('2024-04-06T13:00:00.000Z'));
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2024-04-06T14:00:00.000Z', // 01:00 LHDT
+          '2024-04-06T15:30:00.000Z', // 02:00 LHST
+          '2024-04-07T14:30:00.000Z', // 01:00 LHST on the 8th
+          '2024-04-07T15:30:00.000Z', // 02:00 LHST on the 8th
+        ]);
+      });
+
+      test('still fires once in the repeated half hour when the hour is fixed', () => {
+        const interval = CronExpressionParser.parse('30 1 * * *', lordHowe('2024-04-06T13:00:00.000Z'));
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2024-04-06T14:30:00.000Z', // 01:30 LHDT, the first pass
+          '2024-04-07T15:00:00.000Z', // 01:30 LHST on the 8th, with the 7th's second pass skipped
+          '2024-04-08T15:00:00.000Z',
+        ]);
+      });
+
+      test('keeps hasNext and the iterator going instead of ending them silently', () => {
+        // Both report a thrown error as the end of the sequence.
+        const interval = CronExpressionParser.parse('0 8 * * *', lordHowe('2024-04-06T00:00:00.000Z'));
+
+        expect(interval.hasNext()).toBe(true);
+
+        const dates: (string | null)[] = [];
+        for (const date of interval) {
+          dates.push(date.toISOString());
+          if (dates.length === 3) break;
+        }
+
+        expect(dates).toEqual(['2024-04-06T21:30:00.000Z', '2024-04-07T21:30:00.000Z', '2024-04-08T21:30:00.000Z']);
+      });
+
+      test('steps backward over the transition', () => {
+        const interval = CronExpressionParser.parse('0 8 * * *', lordHowe('2024-04-07T00:00:00.000Z'));
+
+        expect(interval.prev().toISOString()).toEqual('2024-04-06T21:30:00.000Z'); // 08:00 on the 7th, UTC+10:30
+        expect(interval.prev().toISOString()).toEqual('2024-04-05T21:00:00.000Z'); // 08:00 on the 6th, UTC+11
+      });
+
+      test('steps over the half-hour spring-forward', () => {
+        // On 2024-10-06 02:00 LHST (UTC+10:30) becomes 02:30 LHDT (UTC+11:00), so there is no 02:00.
+        const interval = CronExpressionParser.parse('0 * * * *', lordHowe('2024-10-05T12:00:00.000Z'));
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2024-10-05T12:30:00.000Z', // 23:00 LHST
+          '2024-10-05T13:30:00.000Z', // 00:00 LHST
+          '2024-10-05T14:30:00.000Z', // 01:00 LHST
+          '2024-10-05T16:00:00.000Z', // 03:00 LHDT, 02:00 was never on the clock
+        ]);
+      });
+
+      test('finds the nearest hour boundary when the repeated stretch starts mid-hour', () => {
+        // Pacific/Chatham falls back from 03:45 to 02:45 on 2024-04-07, so 02:45-03:45 repeats and
+        // 03:00 is passed twice: first at UTC+13:45, then at UTC+12:45.
+        const interval = CronExpressionParser.parse('0 * * * *', {
+          currentDate: new Date('2024-04-06T13:00:00.000Z'), // 02:45 CHADT
+          tz: 'Pacific/Chatham',
+        });
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2024-04-06T13:15:00.000Z', // 03:00 at UTC+13:45
+          '2024-04-06T14:15:00.000Z', // 03:00 at UTC+12:45
+          '2024-04-06T15:15:00.000Z', // 04:00
+          '2024-04-06T16:15:00.000Z', // 05:00
+        ]);
+      });
+
+      test('leaves whole-hour fall-backs in half-hour zones alone', () => {
+        const interval = CronExpressionParser.parse('30 * * * *', {
+          currentDate: new Date('2024-11-03T03:00:00.000Z'),
+          tz: 'America/St_Johns',
+        });
+
+        // St. John's goes from 02:00 NDT back to 01:00 NST at 04:30Z, so 01:30 happens twice.
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2024-11-03T04:00:00.000Z', // 01:30 NDT
+          '2024-11-03T05:00:00.000Z', // 01:30 NST
+          '2024-11-03T06:00:00.000Z', // 02:30 NST
+          '2024-11-03T07:00:00.000Z', // 03:30 NST
+        ]);
+      });
+    });
   });
 
   describe('test expressions with "L" last of flag', () => {
