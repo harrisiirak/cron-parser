@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.10.2 - 2026-10-09
+
+### What's Changed
+* fix: preserve crontab fields separated by whitespace by @bensynapse in https://github.com/harrisiirak/cron-parser/pull/451
+* fix: bound expression length and hashed step expansion at parse time by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/454
+
+### New Contributors
+* @bensynapse made their first contribution in https://github.com/harrisiirak/cron-parser/pull/451
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.10.1...v5.10.2
+
 ## v5.10.1 - 2026-09-12
 
 ### What's Changed
