@@ -216,6 +216,37 @@ describe('CronExpression', () => {
       expect(next.toISOString()).toBe('2023-01-01T10:00:00.000Z');
       expect(spy).not.toHaveBeenCalled();
     });
+
+    test('skips non-scheduled months instead of crawling day-by-day for sparse day-restricted schedules', () => {
+      const interval = CronExpressionParser.parse('0 0 * 2 3#5', {
+        currentDate: new Date('2021-01-01T00:00:00.000Z'),
+        tz: 'UTC',
+      });
+
+      spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      expect(interval.next().toISOString()).toBe('2040-02-29T00:00:00.000Z');
+      expect(spy.mock.calls.some((c) => c[1] === TimeUnit.Month)).toBe(true);
+      expect(interval.next().toISOString()).toBe('2068-02-29T00:00:00.000Z');
+    });
+
+    test('does not exhaust the loop limit when the next match is decades away', () => {
+      const interval = CronExpressionParser.parse('0 0 * 2 3#5', {
+        currentDate: new Date('2040-03-01T00:00:00.000Z'),
+        tz: 'UTC',
+      });
+
+      expect(interval.next().toISOString()).toBe('2068-02-29T00:00:00.000Z');
+    });
+
+    test('skips non-scheduled months when iterating backwards for sparse day-restricted schedules', () => {
+      const interval = CronExpressionParser.parse('0 0 * 2 3#5', {
+        currentDate: new Date('2021-02-27T12:00:00.000Z'),
+        tz: 'UTC',
+      });
+
+      expect(interval.prev().toISOString()).toBe('2012-02-29T00:00:00.000Z');
+      expect(interval.prev().toISOString()).toBe('1984-02-29T00:00:00.000Z');
+    });
   });
 
   describe('iteration exclusivity', () => {
