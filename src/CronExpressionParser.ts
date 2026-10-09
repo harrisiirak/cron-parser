@@ -86,6 +86,12 @@ export type RawCronFields = {
  */
 const MAX_FIELD_VALUES = 256;
 
+/**
+ * Upper bound on the length of a cron expression.
+ * Listing every value of every field needs about half of this, so a longer expression is never meaningful.
+ */
+const MAX_EXPRESSION_LENGTH = 1024;
+
 export class CronExpressionParser {
   /**
    * Parses a cron expression and returns a CronExpression object.
@@ -173,6 +179,9 @@ export class CronExpressionParser {
       throw new Error('Invalid cron expression');
     }
     expression = expression || '0 * * * * *';
+    if (expression.length > MAX_EXPRESSION_LENGTH) {
+      throw new Error(`Invalid cron expression, too long, expected at most ${MAX_EXPRESSION_LENGTH} characters`);
+    }
     const atoms = expression.trim().split(/\s+/);
     if (strict && atoms.length < 6) {
       throw new Error('Invalid cron expression, expected 6 fields');
@@ -254,6 +263,7 @@ export class CronExpressionParser {
     strict: boolean,
   ): string {
     const randomValue = rand();
+    let count = 0;
     return value.replace(/H(?:\((\d+)-(\d+)\))?(?:\/(\d+))?/g, (_, min, max, step) => {
       // H(range)/step
       if (min && max && step) {
@@ -266,6 +276,8 @@ export class CronExpressionParser {
         }
 
         const range = CronExpressionParser.#hashedRange(minNum, maxNum, constraints, field, strict);
+        count += Math.ceil((range.max - range.min + 1) / stepNum);
+        CronExpressionParser.#assertMaxFieldValues(field, count);
         return CronExpressionParser.#hashedStep(randomValue, range.min, range.max, stepNum, field, strict);
       }
       // H(range)
@@ -285,6 +297,8 @@ export class CronExpressionParser {
           throw new Error(`Invalid step: ${stepNum}, must be positive`);
         }
 
+        count += Math.ceil((constraints.max - constraints.min + 1) / stepNum);
+        CronExpressionParser.#assertMaxFieldValues(field, count);
         return CronExpressionParser.#hashedStep(randomValue, constraints.min, constraints.max, stepNum, field, strict);
       }
       // H
@@ -396,6 +410,18 @@ export class CronExpressionParser {
   }
 
   /**
+   * Throw once a field has expanded to more than MAX_FIELD_VALUES values.
+   * @param {CronUnit} field - The field being parsed.
+   * @param {number} count - The number of values collected so far.
+   * @private
+   */
+  static #assertMaxFieldValues(field: CronUnit, count: number): void {
+    if (count > MAX_FIELD_VALUES) {
+      throw new Error(`Constraint error, too many values in ${field} field, expected at most ${MAX_FIELD_VALUES}`);
+    }
+  }
+
+  /**
    * Parse a sequence from a cron expression.
    * @param {CronUnit} field - The field to parse.
    * @param {string} val - The sequence to parse.
@@ -425,9 +451,7 @@ export class CronExpressionParser {
 
     const atoms = val.split(',');
     for (const atom of atoms) {
-      if (stack.length > MAX_FIELD_VALUES) {
-        throw new Error(`Constraint error, too many values in ${field} field, expected at most ${MAX_FIELD_VALUES}`);
-      }
+      CronExpressionParser.#assertMaxFieldValues(field, stack.length);
       if (!(atom.length > 0)) {
         throw new Error('Invalid list value format');
       }
