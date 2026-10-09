@@ -340,6 +340,20 @@ export class CronDate {
   }
 
   /**
+   * Returns true when this instant is the second (later) occurrence of an ambiguous
+   * local hour produced by a fall-back DST transition, i.e. the repeated hour.
+   *
+   * The real hour before this one lands on the same wall-clock hour but at a larger
+   * UTC offset, which is only possible on the later pass of a repeated hour.
+   *
+   * @returns {boolean} True when this is the repeated (second) pass of a fall-back hour.
+   */
+  isSecondPassOfRepeatedHour(): boolean {
+    const oneHourEarlier = this.#date.minus({ hours: 1 });
+    return oneHourEarlier.hour === this.#date.hour && oneHourEarlier.offset > this.#date.offset;
+  }
+
+  /**
    * Sets the time to the start of the day (00:00:00.000) in the current timezone.
    */
   setStartOfDay(): void {
