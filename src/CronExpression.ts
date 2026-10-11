@@ -532,12 +532,12 @@ export class CronExpression {
     while (++stepCount < LOOP_LIMIT) {
       this.#validateTimeSpan(currentDate);
 
-      if (!this.#matchDayOfMonth(currentDate)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
-        continue;
-      }
       if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Month, this.#fields.hour.values.length);
+        continue;
+      }
+      if (!this.#matchDayOfMonth(currentDate)) {
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
         continue;
       }
       if (!this.#matchHour(currentDate, dateMathVerb, reverse)) {
