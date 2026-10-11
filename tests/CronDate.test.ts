@@ -69,6 +69,34 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toBe(0);
   });
 
+  test('addHour should always move forward across a half-hour fall-back', () => {
+    // Australia/Lord_Howe: 02:00 LHDT (UTC+11:00) becomes 01:30 LHST (UTC+10:30) on 2024-04-07.
+    // Adding an hour to anything in 01:00-01:30 LHDT lands in the repeated half hour, and 01:00
+    // only exists before the transition, so rounding that down would not move forward.
+    for (const start of ['2024-04-06T14:00:00.000Z', '2024-04-06T14:10:30.000Z', '2024-04-06T14:29:59.000Z']) {
+      const date = new CronDate(new Date(start), 'Australia/Lord_Howe');
+      date.addHour();
+      expect(date.toISOString()).toBe('2024-04-06T15:30:00.000Z'); // 02:00 LHST
+      expect(date.getHours()).toBe(2);
+      expect(date.getMinutes()).toBe(0);
+    }
+
+    // From later in the hour the ordinary arithmetic is already correct.
+    const late = new CronDate(new Date('2024-04-06T14:30:00.000Z'), 'Australia/Lord_Howe');
+    late.addHour();
+    expect(late.toISOString()).toBe('2024-04-06T15:30:00.000Z');
+  });
+
+  test('addHour should stop at the first hour boundary when the repeated stretch starts mid-hour', () => {
+    // Pacific/Chatham: 03:45 CHADT (UTC+13:45) becomes 02:45 CHAST (UTC+12:45) on 2024-04-07.
+    const date = new CronDate(new Date('2024-04-06T13:01:00.000Z'), 'Pacific/Chatham'); // 02:46 CHADT
+    date.addHour();
+    expect(date.toISOString()).toBe('2024-04-06T13:15:00.000Z'); // 03:00 CHADT, not the later 03:00 CHAST
+
+    date.addHour();
+    expect(date.toISOString()).toBe('2024-04-06T14:15:00.000Z'); // 03:00 CHAST
+  });
+
   test('addDay should succeed', () => {
     const date1 = new CronDate(new Date('2021-12-30T00:58:58.000-00:00'), 'UTC');
     date1.addDay();
