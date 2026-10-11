@@ -51,6 +51,7 @@ export class CronDate {
       this.#date.isValid || (this.#date = DateTime.fromRFC2822(timestamp, dateOpts));
       this.#date.isValid || (this.#date = DateTime.fromSQL(timestamp, dateOpts));
       this.#date.isValid || (this.#date = DateTime.fromFormat(timestamp, 'EEE, d MMM yyyy HH:mm:ss', dateOpts));
+      this.#date.isValid || (this.#date = DateTime.fromHTTP(timestamp, dateOpts));
     }
 
     // Check for valid DateTime and throw an error if not valid.
