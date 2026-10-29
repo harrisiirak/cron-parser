@@ -341,17 +341,27 @@ export class CronDate {
   }
 
   /**
-   * Returns true when this instant is the second (later) occurrence of an ambiguous
-   * local hour produced by a fall-back DST transition, i.e. the repeated hour.
+   * Returns how many minutes the clock was set back when this instant is the later occurrence of a
+   * local time repeated by a backward offset change, such as the end of DST.
    *
-   * The real hour before this one lands on the same wall-clock hour but at a larger
-   * UTC offset, which is only possible on the later pass of a repeated hour.
-   *
-   * @returns {boolean} True when this is the repeated (second) pass of a fall-back hour.
+   * @returns {number} The backward shift in minutes, or 0 when this local time is not repeated
    */
-  isSecondPassOfRepeatedHour(): boolean {
-    const oneHourEarlier = this.#date.minus({ hours: 1 });
-    return oneHourEarlier.hour === this.#date.hour && oneHourEarlier.offset > this.#date.offset;
+  getRepeatedTimeShift(): number {
+    const { zone, offset } = this.#date;
+    const time = this.#date.toMillis();
+    const shift = zone.offset(time - 86_400_000) - offset;
+    if (shift <= 0 || zone.offset(time - shift * 60_000) !== offset + shift) {
+      return 0;
+    }
+    return shift;
+  }
+
+  /**
+   * Primarily for internal use.
+   * @param {number} minutes - The number of minutes to subtract, without rounding to a unit boundary.
+   */
+  subtractMinutes(minutes: number): void {
+    this.#date = this.#date.minus({ minutes });
   }
 
   /**
