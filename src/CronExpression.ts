@@ -141,6 +141,22 @@ export class CronExpression {
   }
 
   /**
+   * Sets the first allowed minute after an hour step, but only when it is still ahead in the search
+   * direction. Otherwise the minute is left for the main loop: a sub-hour DST transition can land the
+   * date part-way through the hour, and resetting the minute would skip occurrences.
+   *
+   * @param {CronDate} currentDate - Mutable date being iterated
+   * @param {boolean} reverse - When true, iterating backwards
+   * @private
+   */
+  #stepToFirstMinute(currentDate: CronDate, reverse: boolean): void {
+    const minute = this.#getMinOrMax(this.#fields.minute.values as number[], reverse);
+    if (reverse ? minute <= currentDate.getMinutes() : minute >= currentDate.getMinutes()) {
+      currentDate.setMinutes(minute);
+    }
+  }
+
+  /**
    * Moves the date to the next/previous allowed second value. If there is no remaining allowed second
    * within the current minute, rolls to the next/previous minute and resets seconds to the min/max allowed.
    *
@@ -175,7 +191,6 @@ export class CronExpression {
    * @private
    */
   #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
-    const minutes = this.#fields.minute.values as number[];
     const seconds = this.#fields.second.values as number[];
 
     const currentMinute = currentDate.getMinutes();
@@ -189,7 +204,7 @@ export class CronExpression {
 
     // Roll over to the next/previous hour and start from the min/max allowed minute/second.
     currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
-    currentDate.setMinutes(this.#getMinOrMax(minutes, reverse));
+    this.#stepToFirstMinute(currentDate, reverse);
     currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
   }
 
@@ -479,10 +494,11 @@ export class CronExpression {
         if (!reverse && currentDate.getHours() >= nextHour) break;
         if (reverse && currentDate.getHours() <= nextHour) break;
       }
+      this.#stepToFirstMinute(currentDate, reverse);
     } else {
       currentDate.setHours(nextHour);
+      currentDate.setMinutes(this.#getMinOrMax(this.#fields.minute.values as number[], reverse));
     }
-    currentDate.setMinutes(this.#getMinOrMax(this.#fields.minute.values as number[], reverse));
     currentDate.setSeconds(this.#getMinOrMax(this.#fields.second.values as number[], reverse));
     return false;
   }

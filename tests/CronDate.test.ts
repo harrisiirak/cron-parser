@@ -69,6 +69,39 @@ describe('CronDate', () => {
     expect(date2.getSeconds()).toBe(0);
   });
 
+  // Australia/Lord_Howe: 02:00 LHDT (UTC+11:00) becomes 01:30 LHST (UTC+10:30) on 2024-04-07, at 15:00Z.
+  // Rounding plus(1h) down to the start of the hour would go backwards from anywhere in 01:00-01:30.
+  test.each([
+    ['at the top of the hour', '2024-04-06T14:00:00.000Z'],
+    ['with seconds in the minute', '2024-04-06T14:10:30.000Z'],
+    ['in the last minute before the half hour', '2024-04-06T14:29:59.000Z'],
+    ['at the half hour', '2024-04-06T14:30:00.000Z'],
+  ])('addHour moves forward across a half-hour fall-back %s', (_name, start) => {
+    const date = new CronDate(new Date(start), 'Australia/Lord_Howe');
+    date.addHour();
+    expect(date.toISOString()).toBe('2024-04-06T15:00:00.000Z'); // 01:30 LHST, the elapsed time to :00
+    date.addHour();
+    expect(date.toISOString()).toBe('2024-04-06T15:30:00.000Z'); // 02:00 LHST
+  });
+
+  test('setMinutes moves by elapsed time', () => {
+    const date = new CronDate(new Date('2024-04-06T14:10:00.000Z'), 'Australia/Lord_Howe'); // 01:10 LHDT
+    date.setMinutes(45);
+    expect(date.toISOString()).toBe('2024-04-06T14:45:00.000Z');
+    expect(date.getHours()).toBe(1);
+    expect(date.getMinutes()).toBe(45);
+  });
+
+  test('addHour should stop at the first hour boundary when the repeated stretch starts mid-hour', () => {
+    // Pacific/Chatham: 03:45 CHADT (UTC+13:45) becomes 02:45 CHAST (UTC+12:45) on 2024-04-07.
+    const date = new CronDate(new Date('2024-04-06T13:01:00.000Z'), 'Pacific/Chatham'); // 02:46 CHADT
+    date.addHour();
+    expect(date.toISOString()).toBe('2024-04-06T13:15:00.000Z'); // 03:00 CHADT, not the later 03:00 CHAST
+
+    date.addHour();
+    expect(date.toISOString()).toBe('2024-04-06T14:15:00.000Z'); // 03:00 CHAST
+  });
+
   test('addDay should succeed', () => {
     const date1 = new CronDate(new Date('2021-12-30T00:58:58.000-00:00'), 'UTC');
     date1.addDay();
