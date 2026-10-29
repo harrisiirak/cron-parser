@@ -1867,14 +1867,45 @@ describe('CronExpressionParser', () => {
 
         const interval = CronExpressionParser.parse('30 1,2 * * *', options);
 
-        // The second value pins master's behaviour, not the correct answer:
-        // 02:30 exists on the transition day and is what was asked for, but the
-        // hour step from 01:30 crosses the shift and lands past it. Known
-        // limitation, unrelated to the gap logic this block covers.
         expect(interval.take(3).map((date) => date.toISOString())).toEqual([
           '2026-10-03T15:00:00.000Z', // 01:30 at UTC+10:30
-          '2026-10-03T16:30:00.000Z', // 03:30, where 02:30 was scheduled
+          '2026-10-03T15:30:00.000Z', // 02:30 at UTC+11:00
           '2026-10-04T14:30:00.000Z', // 01:30 on the 5th
+        ]);
+      });
+
+      test('keeps every occurrence when the minute is reset after an hour step', () => {
+        // Pacific/Chatham: 03:45 CHADT (UTC+13:45) becomes 02:45 CHAST (UTC+12:45) on 2024-04-07, at 14:00Z.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2024-04-06T13:00:00.000Z'),
+          tz: 'Pacific/Chatham',
+        };
+
+        const interval = CronExpressionParser.parse('0,50 * * * *', options);
+
+        expect(interval.take(6).map((date) => date.toISOString())).toEqual([
+          '2024-04-06T13:05:00.000Z',
+          '2024-04-06T13:15:00.000Z',
+          '2024-04-06T14:05:00.000Z',
+          '2024-04-06T14:15:00.000Z',
+          '2024-04-06T15:05:00.000Z',
+          '2024-04-06T15:15:00.000Z',
+        ]);
+      });
+
+      test('moves forward hour by hour across a half-hour fall-back', () => {
+        // Australia/Lord_Howe falls back from 02:00 to 01:30 on 2026-04-05, at 15:00Z.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-04-04T14:10:00.000Z'),
+          tz: 'Australia/Lord_Howe',
+        };
+
+        const interval = CronExpressionParser.parse('0 * * * *', options);
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-04-04T15:30:00.000Z', // 02:00 LHST
+          '2026-04-04T16:30:00.000Z',
+          '2026-04-04T17:30:00.000Z',
         ]);
       });
 

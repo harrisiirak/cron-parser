@@ -141,21 +141,10 @@ export class CronDate {
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    const next = this.#date.plus({ hours: 1 }).startOf('hour');
-    if (next.toMillis() > this.#date.toMillis()) {
-      this.#date = next;
-      return;
-    }
-
-    // A fall-back that is not a whole number of hours (Australia/Lord_Howe, 02:00 -> 01:30) puts
-    // plus(1h) part-way through the repeated stretch. The local hour it rounds down to exists only
-    // before the transition, so startOf('hour') resolves to the instant we started on, or to an
-    // earlier one, and the search would never move forward. Walk to the next local hour boundary.
-    let boundary = this.#date.startOf('minute');
-    do {
-      boundary = boundary.plus({ minutes: 1 });
-    } while (boundary.minute !== 0);
-    this.#date = boundary;
+    // Move by elapsed time to the next local hour boundary. Rounding plus(1h) down with startOf('hour')
+    // goes backwards across a fall-back that is not a whole number of hours (Australia/Lord_Howe,
+    // 02:00 -> 01:30) and the search would never move forward.
+    this.#date = this.#date.plus({ minutes: 60 - this.#date.minute }).startOf('minute');
   }
 
   /**
@@ -494,7 +483,9 @@ export class CronDate {
    * @param m
    */
   setMinutes(m: number): void {
-    this.#date = this.#date.set({ minute: m });
+    // Shift by elapsed time: set({ minute }) re-resolves the local time and can jump back or forward an
+    // hour inside a fall-back or spring-forward that is shorter than an hour.
+    this.#date = this.#date.plus({ minutes: m - this.#date.minute });
   }
 
   /**
@@ -595,7 +586,11 @@ export class CronDate {
         this.#dstStart = (previousHour + 1) % 24;
         this.#dstStartLandingHour = currentHour;
       }
-    } else if (advance === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
+    } else if (
+      advance === 0 &&
+      ((this.getMinutes() === 0 && this.getSeconds() === 0) || this.getUTCOffset() < previousOffset)
+    ) {
+      // The hour label repeated: a whole-hour fall-back lands on :00:00, a shorter one part-way through.
       if (hoursLength !== 24) {
         this.dstEnd = currentHour;
       }
