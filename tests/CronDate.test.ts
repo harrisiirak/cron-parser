@@ -472,6 +472,16 @@ describe('CronDate', () => {
       expect(d.toISOString()).toBe('2021-01-04T09:00:00.000Z');
     });
 
+    test('HTTP RFC 850', () => {
+      const d = new CronDate('Sunday, 06-Nov-94 08:49:37 GMT', 'Europe/Athens');
+      expect(d.toISOString()).toBe('1994-11-06T08:49:37.000Z');
+    });
+
+    test('HTTP asctime, read as GMT', () => {
+      const d = new CronDate('Sun Nov  6 08:49:37 1994', 'Europe/Athens');
+      expect(d.toISOString()).toBe('1994-11-06T08:49:37.000Z');
+    });
+
     test('milliseconds', () => {
       const date = DateTime.fromISO('2021-01-04T11:00:00.000+02:00').valueOf();
       const d = new CronDate(date, 'Europe/Athens');

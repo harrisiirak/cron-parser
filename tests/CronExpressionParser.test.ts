@@ -61,6 +61,11 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse('* * * * * * * *ASD')).toThrow('Invalid cron expression');
     });
 
+    test('invalid expression that is too long', () => {
+      const field = 'H'.repeat(1024);
+      expect(() => CronExpressionParser.parse(`${field} * * * * *`)).toThrow('Invalid cron expression, too long');
+    });
+
     test('invalid explicit day of month definition', () => {
       expect(() => {
         const iter = CronExpressionParser.parse('0 0 31 4 *');
@@ -226,12 +231,18 @@ describe('CronExpressionParser', () => {
     });
 
     test('a long list of repeated wildcards is rejected in every field', () => {
-      const field = '*,'.repeat(100000) + '*';
+      const field = '*,'.repeat(300) + '*';
       expect(() => CronExpressionParser.parse(`${field} * * * * *`)).toThrow('too many values in Second field');
       expect(() => CronExpressionParser.parse(`* ${field} * * * *`)).toThrow('too many values in Minute field');
       expect(() => CronExpressionParser.parse(`* * ${field} * * *`)).toThrow('too many values in Hour field');
       expect(() => CronExpressionParser.parse(`* * * ${field} * *`)).toThrow('too many values in DayOfMonth field');
       expect(() => CronExpressionParser.parse(`* * * * ${field} *`)).toThrow('too many values in Month field');
+      expect(() => CronExpressionParser.parse(`* * * * * ${field}`)).toThrow('too many values in DayOfWeek field');
+    });
+
+    test('a list of hashed steps is rejected once it expands past the value cap', () => {
+      const field = 'H/1,'.repeat(40) + 'H/1';
+      expect(() => CronExpressionParser.parse(`${field} * * * * *`)).toThrow('too many values in Second field');
       expect(() => CronExpressionParser.parse(`* * * * * ${field}`)).toThrow('too many values in DayOfWeek field');
     });
   });
