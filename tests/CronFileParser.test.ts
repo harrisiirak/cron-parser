@@ -49,6 +49,31 @@ describe('CronFileParser', () => {
     jest.clearAllMocks();
   });
 
+  describe.each(['parseFile', 'parseFileSync'] as const)('%s field separators', (method) => {
+    test.each([
+      { name: 'repeated spaces', separator: '   ' },
+      { name: 'tabs', separator: '\t' },
+      { name: 'mixed spaces and tabs', separator: ' \t ' },
+    ])('preserves a weekday schedule with $name', async ({ separator }) => {
+      const content = ` \t${['15', '9', '*', '*', '1-5', '/usr/bin/report'].join(separator)}\t \r\n`;
+      if (method === 'parseFile') {
+        (fsPromises.readFile as jest.Mock).mockResolvedValueOnce(content);
+      } else {
+        (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
+      }
+
+      const result = await CronFileParser[method]('tests/crontab.example');
+
+      expect(result.errors).toEqual({});
+      expect(result.variables).toEqual({});
+      expect(result.expressions).toHaveLength(1);
+      const [expression] = result.expressions;
+      expect(expression.stringify()).toBe('15 9 * * 1-5');
+      expression.reset(new Date('2026-09-25T09:15:00.000Z'));
+      expect(expression.next().toISOString()).toBe('2026-09-28T09:15:00.000Z');
+    });
+  });
+
   describe('parseFile', () => {
     test('reads and parses a valid crontab file', async () => {
       const result = await CronFileParser.parseFile('tests/crontab.example');
