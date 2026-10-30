@@ -74,6 +74,42 @@ describe('CronFileParser', () => {
     });
   });
 
+  describe.each(['parseFile', 'parseFileSync'] as const)('%s variable detection', (method) => {
+    const parse = async (content: string) => {
+      if (method === 'parseFile') {
+        (fsPromises.readFile as jest.Mock).mockResolvedValueOnce(content);
+      } else {
+        (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
+      }
+      return CronFileParser[method]('tests/crontab.example');
+    };
+
+    test.each([
+      { name: 'a --option=value argument', line: '0 3 * * * /usr/bin/backup --dest=/mnt/x', schedule: '0 3 * * *' },
+      { name: 'an inline FOO=bar assignment', line: '*/5 * * * * FOO=bar /bin/job', schedule: '*/5 * * * *' },
+    ])('keeps a schedule whose command has $name', async ({ line, schedule }) => {
+      const result = await parse(line);
+
+      expect(result.errors).toEqual({});
+      expect(result.variables).toEqual({});
+      expect(result.expressions.map((expression) => expression.stringify())).toEqual([schedule]);
+    });
+
+    test('splits a variable at the first =', async () => {
+      const result = await parse('JAVA_OPTS=-Dfoo=bar');
+
+      expect(result.variables).toEqual({ JAVA_OPTS: '-Dfoo=bar' });
+      expect(result.expressions).toHaveLength(0);
+    });
+
+    test('allows spaces around the = of a variable', async () => {
+      const result = await parse('MAILTO = me@example.com');
+
+      expect(result.variables).toEqual({ MAILTO: 'me@example.com' });
+      expect(result.expressions).toHaveLength(0);
+    });
+  });
+
   describe('parseFile', () => {
     test('reads and parses a valid crontab file', async () => {
       const result = await CronFileParser.parseFile('tests/crontab.example');

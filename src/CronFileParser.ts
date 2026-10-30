@@ -55,7 +55,9 @@ export class CronFileParser {
         continue;
       }
 
-      const variableMatch = entry.match(/^(.*)=(.*)$/);
+      // A variable line is `NAME=value` (spaces around the `=` are allowed). The name has no whitespace, so a
+      // schedule whose command contains an `=` is still treated as an entry, and the value keeps any later `=`.
+      const variableMatch = entry.match(/^([^\s=]+)\s*=\s*(.*)$/);
       if (variableMatch) {
         const [, key, value] = variableMatch;
         result.variables[key] = value.replace(/["']/g, ''); // Remove quotes
