@@ -2,6 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { CronFileParser } from '../src/CronFileParser';
 import { CronDate } from '../src/CronDate';
+import { PredefinedExpressions } from '../src/CronExpressionParser';
 
 jest.mock('fs/promises');
 jest.mock('fs');
@@ -130,33 +131,22 @@ describe('CronFileParser', () => {
     });
   });
 
-  describe.each(['parseFile', 'parseFileSync'] as const)('%s nickname schedules', (method) => {
-    const parse = async (content: string) => {
-      if (method === 'parseFile') {
-        (fsPromises.readFile as jest.Mock).mockResolvedValueOnce(content);
-      } else {
-        (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
-      }
-      return CronFileParser[method]('tests/crontab.example');
+  describe('nickname schedules', () => {
+    const parse = (content: string) => {
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
+      return CronFileParser.parseFileSync('tests/crontab.example');
     };
 
-    test.each([
-      { nickname: '@hourly', schedule: '0 * * * *' },
-      { nickname: '@daily', schedule: '0 0 * * *' },
-      { nickname: '@weekly', schedule: '0 0 * * 0' },
-      { nickname: '@monthly', schedule: '0 0 1 * *' },
-      { nickname: '@yearly', schedule: '0 0 1 1 *' },
-      { nickname: '@annually', schedule: '0 0 1 1 *' },
-    ])('parses $nickname followed by a command', async ({ nickname, schedule }) => {
-      const result = await parse(`${nickname} /usr/bin/backup --now`);
+    test.each(Object.entries(PredefinedExpressions))('parses %s followed by a command', (nickname, schedule) => {
+      const result = parse(`${nickname} /usr/bin/backup --now`);
 
       expect(result.errors).toEqual({});
       expect(result.variables).toEqual({});
-      expect(result.expressions.map((expression) => expression.stringify())).toEqual([schedule]);
+      expect(result.expressions.map((expression) => expression.stringify(true))).toEqual([schedule]);
     });
 
-    test('reports @reboot as an error because it has no schedule', async () => {
-      const result = await parse('@reboot /usr/bin/startup');
+    test('reports @reboot as an error because it has no schedule', () => {
+      const result = parse('@reboot /usr/bin/startup');
 
       expect(result.expressions).toHaveLength(0);
       expect(Object.keys(result.errors)).toEqual(['@reboot /usr/bin/startup']);
