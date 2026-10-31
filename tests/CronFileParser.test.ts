@@ -2,6 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { CronFileParser } from '../src/CronFileParser';
 import { CronDate } from '../src/CronDate';
+import { PredefinedExpressions } from '../src/CronExpressionParser';
 
 jest.mock('fs/promises');
 jest.mock('fs');
@@ -169,6 +170,28 @@ describe('CronFileParser', () => {
       expect(Object.keys(result.errors)).toHaveLength(1);
       expect(result.errors).toHaveProperty('invalid expression here');
       expect(fs.readFileSync).toHaveBeenCalledWith('./temp-invalid.txt', 'utf8');
+    });
+  });
+
+  describe('nickname schedules', () => {
+    const parse = (content: string) => {
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
+      return CronFileParser.parseFileSync('tests/crontab.example');
+    };
+
+    test.each(Object.entries(PredefinedExpressions))('parses %s followed by a command', (nickname, schedule) => {
+      const result = parse(`${nickname} /usr/bin/backup --now`);
+
+      expect(result.errors).toEqual({});
+      expect(result.variables).toEqual({});
+      expect(result.expressions.map((expression) => expression.stringify(true))).toEqual([schedule]);
+    });
+
+    test('reports @reboot as an error because it has no schedule', () => {
+      const result = parse('@reboot /usr/bin/startup');
+
+      expect(result.expressions).toHaveLength(0);
+      expect(Object.keys(result.errors)).toEqual(['@reboot /usr/bin/startup']);
     });
   });
 });

@@ -92,9 +92,11 @@ export class CronFileParser {
    */
   static #parseEntry(entry: string): { interval: CronExpression; command?: string[] } {
     const atoms = entry.split(/\s+/);
+    // A nickname such as `@daily` is the whole schedule, so the command starts right after it.
+    const scheduleLength = atoms[0].startsWith('@') ? 1 : 5;
     return {
-      interval: CronExpressionParser.parse(atoms.slice(0, 5).join(' ')),
-      command: atoms.slice(5, atoms.length),
+      interval: CronExpressionParser.parse(atoms.slice(0, scheduleLength).join(' ')),
+      command: atoms.slice(scheduleLength, atoms.length),
     };
   }
 }
