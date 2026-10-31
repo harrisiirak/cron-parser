@@ -436,9 +436,7 @@ export class CronExpression {
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
     const isDstEnd = currentDate.dstEnd === currentHour;
 
-    // DST start: accept the landing hour when a skipped hour was scheduled.
-    // The walk is modular because a gap can wrap midnight, and confined to the
-    // landing hour so it stops once the clock moves past the window.
+    // Accept the landing hour if a scheduled hour was skipped.
     if (currentDate.dstStart !== null && currentDate.dstStartLandingHour === currentHour) {
       for (let skipped = currentDate.dstStart; skipped !== currentHour; skipped = (skipped + 1) % 24) {
         if (CronExpression.#matchSchedule(skipped, hourValues)) {
@@ -471,9 +469,28 @@ export class CronExpression {
     // On DST transition days, setting the hour directly can land on a non-existent/repeated local time,
     // which breaks the existing DST handling that relies on `applyDateOperation()` to set `dstStart/dstEnd`.
     // For those days, fall back to stepping hour-by-hour to preserve correctness.
+    let preserveLowerUnits = false;
     if (this.#checkDstTransition(currentDate)) {
       const steps = reverse ? currentHour - nextHour : nextHour - currentHour;
       for (let i = 0; i < steps; i++) {
+        if (reverse) {
+          const earlierDate = new CronDate(currentDate);
+          earlierDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, hours.length);
+          const skipped = (currentDate.getHours() - earlierDate.getHours() + 24) % 24;
+          if (currentDate.getUTCOffset() > earlierDate.getUTCOffset() && skipped >= 2) {
+            const gapStart = (earlierDate.getHours() + 1) % 24;
+            const landingHour = currentDate.getHours();
+            let scheduled = false;
+            for (let hour = gapStart; hour !== landingHour; hour = (hour + 1) % 24) {
+              scheduled ||= CronExpression.#matchSchedule(hour, hourValues);
+            }
+            if (scheduled) {
+              currentDate.markDstStart(gapStart, landingHour);
+              preserveLowerUnits = i === 0;
+              break;
+            }
+          }
+        }
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, hours.length);
         // Overshoot protection: a spring-forward step can jump 2 wall-clock hours.
         if (!reverse && currentDate.getHours() >= nextHour) break;
@@ -482,8 +499,10 @@ export class CronExpression {
     } else {
       currentDate.setHours(nextHour);
     }
-    currentDate.setMinutes(this.#getMinOrMax(this.#fields.minute.values as number[], reverse));
-    currentDate.setSeconds(this.#getMinOrMax(this.#fields.second.values as number[], reverse));
+    if (!preserveLowerUnits) {
+      currentDate.setMinutes(this.#getMinOrMax(this.#fields.minute.values as number[], reverse));
+      currentDate.setSeconds(this.#getMinOrMax(this.#fields.second.values as number[], reverse));
+    }
     return false;
   }
 

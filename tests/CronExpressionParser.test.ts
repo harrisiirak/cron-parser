@@ -1780,6 +1780,52 @@ describe('CronExpressionParser', () => {
       expect(prev.toISOString()).toEqual('2026-03-08T13:00:00.000Z'); // 8am CDT Sun Mar 8
     });
 
+    test('returns the skipped spring-forward hour when searching in reverse', () => {
+      const interval = CronExpressionParser.parse('0 2 * * *', {
+        tz: 'America/New_York',
+        currentDate: '2020-03-08T03:01:00.000-04:00',
+      });
+
+      expect(interval.prev().toISOString()).toEqual('2020-03-08T07:00:00.000Z');
+
+      const laterInterval = CronExpressionParser.parse('0 2 * * *', {
+        tz: 'America/New_York',
+        currentDate: '2020-03-08T04:01:00.000-04:00',
+      });
+
+      expect(laterInterval.prev().toISOString()).toEqual('2020-03-08T07:00:00.000Z');
+    });
+
+    test('preserves later scheduled hours and minutes on a spring-forward day', () => {
+      const later = CronExpressionParser.parse('0 2,22 * * *', {
+        tz: 'America/New_York',
+        currentDate: '2020-03-08T23:30:00-04:00',
+      });
+      expect(later.prev().toISOString()).toEqual('2020-03-09T02:00:00.000Z');
+      const minutes = CronExpressionParser.parse('30 2,3 * * *', {
+        tz: 'America/New_York',
+        currentDate: '2020-03-08T04:01:00-04:00',
+      });
+      expect(minutes.prev().toISOString()).toEqual('2020-03-08T07:30:00.000Z');
+    });
+
+    test('does not return a later minute in the landing hour', () => {
+      const interval = CronExpressionParser.parse('30 2 * * *', {
+        tz: 'America/New_York',
+        currentDate: '2020-03-08T03:01:00-04:00',
+      });
+      expect(interval.prev().toISOString()).toEqual('2020-03-07T07:30:00.000Z');
+    });
+
+    test('honors the lower bound while searching backwards across a spring-forward gap', () => {
+      const interval = CronExpressionParser.parse('0 2 * * *', {
+        tz: 'America/New_York',
+        currentDate: '2020-03-08T05:00:00-04:00',
+        startDate: '2020-03-08T04:00:00-04:00',
+      });
+      expect(() => interval.prev()).toThrow();
+    });
+
     // Antarctica/Troll advances two hours on 2026-03-29, 00:00 -> 03:00, so
     // both 01:00 and 02:00 are skipped. A schedule inside that window used to
     // be dropped for the day rather than moved to the far side of the gap.

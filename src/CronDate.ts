@@ -75,6 +75,12 @@ export class CronDate {
     return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
   }
 
+  /** Records a skipped-hour window discovered while searching backwards. */
+  markDstStart(start: number, landingHour: number): void {
+    this.#dstStart = start;
+    this.#dstStartLandingHour = landingHour;
+  }
+
   /**
    * Returns daylight savings start time.
    * @returns {number | null}
