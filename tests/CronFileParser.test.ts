@@ -114,6 +114,16 @@ describe('CronFileParser', () => {
       }
     });
 
+    test('keeps a line named __proto__ as an own property instead of replacing the prototype', () => {
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(['__proto__', '__proto__=polluted', 'ok=1'].join('\n'));
+      const result = CronFileParser.parseFileSync('./temp-proto.txt');
+
+      expect(Object.getPrototypeOf(result.errors)).toBe(Object.prototype);
+      expect(Object.getPrototypeOf(result.variables)).toBe(Object.prototype);
+      expect(Object.keys(result.errors)).toEqual(['__proto__']);
+      expect(Object.keys(result.variables)).toEqual(['__proto__', 'ok']);
+    });
+
     test('throws error for non-existing file', () => {
       expect(() => CronFileParser.parseFileSync('./nonexistent.txt')).toThrow('File not found');
       expect(fs.readFileSync).toHaveBeenCalledWith('./nonexistent.txt', 'utf8');
