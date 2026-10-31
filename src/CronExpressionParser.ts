@@ -106,7 +106,9 @@ export class CronExpressionParser {
     const { strict = false, hashSeed } = options;
     const rand = seededRandom(hashSeed);
 
-    expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
+    if (Object.hasOwn(PredefinedExpressions, expression)) {
+      expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions];
+    }
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
     if (!(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict)) {
       throw new Error('Cannot use both dayOfMonth and dayOfWeek together in strict mode!');

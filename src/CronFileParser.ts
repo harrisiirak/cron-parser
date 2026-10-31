@@ -58,7 +58,13 @@ export class CronFileParser {
       const variableMatch = entry.match(/^(.*)=(.*)$/);
       if (variableMatch) {
         const [, key, value] = variableMatch;
-        result.variables[key] = value.replace(/["']/g, ''); // Remove quotes
+        // Define an own property so that a key such as `__proto__` cannot replace the prototype
+        Object.defineProperty(result.variables, key, {
+          value: value.replace(/["']/g, ''), // Remove quotes
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
         continue;
       }
 
@@ -66,7 +72,12 @@ export class CronFileParser {
         const parsedEntry = CronFileParser.#parseEntry(entry);
         result.expressions.push(parsedEntry.interval);
       } catch (err: unknown) {
-        result.errors[entry] = err;
+        Object.defineProperty(result.errors, entry, {
+          value: err,
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
       }
     }
 

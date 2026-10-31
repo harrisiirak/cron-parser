@@ -61,6 +61,13 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse('* * * * * * * *ASD')).toThrow('Invalid cron expression');
     });
 
+    test.each(['__proto__', 'constructor', 'toString', 'hasOwnProperty'])(
+      'expression named after an Object.prototype member %s is rejected as an unknown alias',
+      (expression) => {
+        expect(() => CronExpressionParser.parse(expression)).toThrow('Validation error, cannot resolve alias');
+      },
+    );
+
     test('invalid expression that is too long', () => {
       const field = 'H'.repeat(1024);
       expect(() => CronExpressionParser.parse(`${field} * * * * *`)).toThrow('Invalid cron expression, too long');
