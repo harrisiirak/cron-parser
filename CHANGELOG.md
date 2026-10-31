@@ -1,5 +1,18 @@
 # Changelog
 
+## v5.10.3 - 2026-10-31
+
+### What's Changed
+* fix: accept the RFC 850 and asctime HTTP date formats as string dates by @andrewstellman in https://github.com/harrisiirak/cron-parser/pull/455
+* fix: skip non-scheduled months when day-of-month is unrestricted by @maximilliangrand in https://github.com/harrisiirak/cron-parser/pull/444
+* fix: use own keys for crontab entries and predefined expressions by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/461
+
+### New Contributors
+* @andrewstellman made their first contribution in https://github.com/harrisiirak/cron-parser/pull/455
+* @maximilliangrand made their first contribution in https://github.com/harrisiirak/cron-parser/pull/444
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.10.2...v5.10.3
+
 ## v5.10.2 - 2026-10-09
 
 ### What's Changed
