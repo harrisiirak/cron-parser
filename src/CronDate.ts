@@ -341,6 +341,30 @@ export class CronDate {
   }
 
   /**
+   * Returns how many minutes the clock was set back when this instant is the later occurrence of a
+   * local time repeated by a backward offset change, such as the end of DST.
+   *
+   * @returns {number} The backward shift in minutes, or 0 when this local time is not repeated
+   */
+  getRepeatedTimeShift(): number {
+    const { zone, offset } = this.#date;
+    const time = this.#date.toMillis();
+    const shift = zone.offset(time - 86_400_000) - offset;
+    if (shift <= 0 || zone.offset(time - shift * 60_000) !== offset + shift) {
+      return 0;
+    }
+    return shift;
+  }
+
+  /**
+   * Primarily for internal use.
+   * @param {number} minutes - The number of minutes to subtract, without rounding to a unit boundary.
+   */
+  subtractMinutes(minutes: number): void {
+    this.#date = this.#date.minus({ minutes });
+  }
+
+  /**
    * Sets the time to the start of the day (00:00:00.000) in the current timezone.
    */
   setStartOfDay(): void {

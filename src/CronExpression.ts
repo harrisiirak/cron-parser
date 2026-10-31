@@ -356,7 +356,7 @@ export class CronExpression {
       return false;
     }
 
-    return true;
+    return hour.values.length === 24 || dt.getRepeatedTimeShift() === 0;
   }
 
   /**
@@ -452,6 +452,13 @@ export class CronExpression {
       currentDate.dstEnd = null;
       currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, hours.length);
       return false;
+    }
+
+    if (reverse && isMatch && hours.length !== 24) {
+      const repeatedTimeShift = currentDate.getRepeatedTimeShift();
+      if (repeatedTimeShift > 0) {
+        currentDate.subtractMinutes(repeatedTimeShift);
+      }
     }
 
     if (isMatch) {
