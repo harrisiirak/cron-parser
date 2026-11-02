@@ -28,6 +28,11 @@ export const LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE = 'Invalid expression, loop limi
 const LOOP_LIMIT = 10000;
 
 /**
+ * Whether a date option was given. 0 is the Unix epoch, so unlike the other falsy values it is still a date.
+ */
+const hasDate = (value: CronExpressionOptions['startDate']): boolean => value === 0 || Boolean(value);
+
+/**
  * Class representing a Cron expression.
  */
 export class CronExpression {
@@ -49,11 +54,11 @@ export class CronExpression {
   constructor(fields: CronFieldCollection, options: CronExpressionOptions) {
     this.#options = options;
     this.#tz = options.tz;
-    this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
-    this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
+    this.#startDate = hasDate(options.startDate) ? new CronDate(options.startDate, this.#tz) : null;
+    this.#endDate = hasDate(options.endDate) ? new CronDate(options.endDate, this.#tz) : null;
 
     let currentDateValue = options.currentDate ?? options.startDate;
-    if (currentDateValue) {
+    if (hasDate(currentDateValue)) {
       const tempCurrentDate = new CronDate(currentDateValue, this.#tz);
       if (this.#startDate && tempCurrentDate.getTime() < this.#startDate.getTime()) {
         currentDateValue = this.#startDate;

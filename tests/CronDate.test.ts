@@ -16,6 +16,10 @@ describe('CronDate', () => {
     expect(new CronDate(new Date(2021, 1, 26)).isLastWeekdayOfMonth()).toBeTruthy();
   });
 
+  test('treats the number 0 as the Unix epoch', () => {
+    expect(new CronDate(0, 'UTC').toISOString()).toBe('1970-01-01T00:00:00.000Z');
+  });
+
   test('addSecond should succeed', () => {
     const date1 = new CronDate(new Date('2021-12-30T00:59:58.000-00:00'), 'UTC');
     date1.addSecond();

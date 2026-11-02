@@ -1272,6 +1272,34 @@ describe('CronExpressionParser', () => {
     });
   });
 
+  describe('the Unix epoch as a date option', () => {
+    const DAY = 24 * 60 * 60 * 1000;
+
+    test('currentDate: 0 starts from the epoch instead of the system time', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { currentDate: 0, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('startDate: 0 is applied as the lower bound', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { startDate: 0, currentDate: -2 * DAY, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('startDate: 0 is used as currentDate when none is given', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { startDate: 0, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('endDate: 0 is applied as the upper bound', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { endDate: 0, currentDate: DAY, tz: 'UTC' });
+
+      expect(() => interval.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    });
+  });
+
   describe('prev date', () => {
     test('prev should match correctly (issue #98) when milliseconds are greater than 0', () => {
       const options = {
