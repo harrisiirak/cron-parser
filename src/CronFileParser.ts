@@ -62,7 +62,7 @@ export class CronFileParser {
         const [, key, value] = variableMatch;
         // Define an own property so that a key such as `__proto__` cannot replace the prototype
         Object.defineProperty(result.variables, key, {
-          value: value.replace(/["']/g, ''), // Remove quotes
+          value: value.replace(/^(["'])(.*)\1$/, '$2'), // Remove one matching pair of quotes around the value
           enumerable: true,
           writable: true,
           configurable: true,
