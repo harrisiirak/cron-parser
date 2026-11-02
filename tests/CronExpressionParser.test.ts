@@ -1547,6 +1547,49 @@ describe('CronExpressionParser', () => {
       expect(prev.getDate()).toEqual(29);
     });
 
+    test.each([
+      ['Europe/Berlin', '0 10 2 * * *', '2025-10-26T02:05:00+01:00', '2025-10-26T00:10:00.000Z'],
+      ['Australia/Lord_Howe', '0 45 1 * * *', '2025-04-06T01:35:00+10:30', '2025-04-05T14:45:00.000Z'],
+      ['Antarctica/Troll', '0 30 2 * * *', '2025-10-26T02:05:00Z', '2025-10-26T00:30:00.000Z'],
+      ['Antarctica/Troll', '0 30 2 * * *', '2025-10-26T01:05:00Z', '2025-10-26T00:30:00.000Z'],
+      ['Antarctica/Troll', '0 30 1 * * *', '2025-10-26T01:05:00Z', '2025-10-25T23:30:00.000Z'],
+      ['Europe/Berlin', '59 59 2 * * *', '2025-10-26T02:00:00+01:00', '2025-10-26T00:59:59.000Z'],
+      ['Europe/Berlin', '59 59 1 * * *', '2025-10-26T02:05:00+01:00', '2025-10-25T23:59:59.000Z'],
+    ])(
+      'prev() searches the entire earlier copy when starting inside repeated time - %s, %s, %s',
+      (tz, expression, currentDate, expected) => {
+        const interval = CronExpressionParser.parse(expression, { tz, currentDate });
+
+        expect(interval.prev().toISOString()).toEqual(expected);
+        expect(interval.includesDate(new Date(expected))).toBeTruthy();
+        expect(interval.prev().getTime()).toBeLessThan(new Date(expected).getTime());
+      },
+    );
+
+    test('prev() rechecks startDate after skipping the later copy of repeated time', () => {
+      const interval = CronExpressionParser.parse('59 59 2 * * *', {
+        tz: 'Europe/Berlin',
+        currentDate: '2025-10-26T02:05:00+01:00',
+        startDate: '2025-10-26T01:00:00Z',
+      });
+
+      expect(() => interval.prev()).toThrow('Out of the time span range');
+    });
+
+    test.each([
+      ['Europe/Berlin', '2025-10-26T02:05:00+01:00', '2025-10-26T01:00:00.000Z', '2025-10-26T00:30:00.000Z'],
+      ['Australia/Lord_Howe', '2025-04-06T01:35:00+10:30', '2025-04-05T15:00:00.000Z', '2025-04-05T14:30:00.000Z'],
+      ['Antarctica/Troll', '2025-10-26T01:05:00Z', '2025-10-26T01:00:00.000Z', '2025-10-26T00:30:00.000Z'],
+    ])(
+      'prev() preserves repeated times with a wildcard hour from inside the later copy - %s',
+      (tz, currentDate, first, second) => {
+        const interval = CronExpressionParser.parse('0 0,30 * * * *', { tz, currentDate });
+
+        expect(interval.prev().toISOString()).toEqual(first);
+        expect(interval.prev().toISOString()).toEqual(second);
+      },
+    );
+
     test('prev() steps back by a 30 minute fall-back - Australia/Lord_Howe', () => {
       const interval = CronExpressionParser.parse('0 45 1 * * *', {
         currentDate: '2025-04-06T02:00:00+10:30',

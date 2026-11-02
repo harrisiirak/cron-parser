@@ -356,12 +356,25 @@ export class CronDate {
     return shift;
   }
 
-  /**
-   * Primarily for internal use.
-   * @param {number} minutes - The number of minutes to subtract, without rounding to a unit boundary.
-   */
-  subtractMinutes(minutes: number): void {
-    this.#date = this.#date.minus({ minutes });
+  skipRepeatedTime(): boolean {
+    const shift = this.getRepeatedTimeShift();
+    if (shift === 0) {
+      return false;
+    }
+
+    const { zone, offset } = this.#date;
+    let earlier = Math.floor((this.#date.toMillis() - shift * 60_000) / 1000);
+    let later = Math.floor(this.#date.toMillis() / 1000);
+    while (later - earlier > 1) {
+      const middle = Math.floor((earlier + later) / 2);
+      if (zone.offset(middle * 1000) === offset) {
+        later = middle;
+      } else {
+        earlier = middle;
+      }
+    }
+    this.#date = DateTime.fromMillis(earlier * 1000, { zone });
+    return true;
   }
 
   /**

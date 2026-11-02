@@ -724,11 +724,18 @@ describe('CronExpression', () => {
       expect(troll.includesDate(new Date('2025-10-26T02:30:00Z'))).toBeFalsy();
     });
 
-    test('should accept both occurrences of a repeated time when every hour is scheduled', () => {
-      const cronExpression = CronExpressionParser.parse('0 30 * * * *', { tz: 'Europe/Berlin' });
-      expect(cronExpression.includesDate(new Date('2025-10-26T00:30:00Z'))).toBeTruthy();
-      expect(cronExpression.includesDate(new Date('2025-10-26T01:30:00Z'))).toBeTruthy();
-    });
+    test.each([
+      ['Europe/Berlin', '0 30 * * * *', '2025-10-26T00:30:00Z', '2025-10-26T01:30:00Z'],
+      ['Australia/Lord_Howe', '0 45 * * * *', '2025-04-05T14:45:00Z', '2025-04-05T15:15:00Z'],
+      ['Antarctica/Troll', '0 30 * * * *', '2025-10-26T00:30:00Z', '2025-10-26T02:30:00Z'],
+    ])(
+      'should accept both occurrences of a repeated time when every hour is scheduled - %s',
+      (tz, expression, first, second) => {
+        const cronExpression = CronExpressionParser.parse(expression, { tz });
+        expect(cronExpression.includesDate(new Date(first))).toBeTruthy();
+        expect(cronExpression.includesDate(new Date(second))).toBeTruthy();
+      },
+    );
 
     test('should support last weekday of month', () => {
       const cronExpression = CronExpressionParser.parse('0 0 0 * * 1L', {

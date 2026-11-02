@@ -432,6 +432,10 @@ export class CronExpression {
     const hourValues = this.#fields.hour.values;
     const hours = hourValues as number[];
 
+    if (reverse && hours.length !== 24 && currentDate.skipRepeatedTime()) {
+      return false;
+    }
+
     const currentHour = currentDate.getHours();
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
     const isDstEnd = currentDate.dstEnd === currentHour;
@@ -452,13 +456,6 @@ export class CronExpression {
       currentDate.dstEnd = null;
       currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, hours.length);
       return false;
-    }
-
-    if (reverse && isMatch && hours.length !== 24) {
-      const repeatedTimeShift = currentDate.getRepeatedTimeShift();
-      if (repeatedTimeShift > 0) {
-        currentDate.subtractMinutes(repeatedTimeShift);
-      }
     }
 
     if (isMatch) {
