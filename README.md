@@ -136,6 +136,8 @@ try {
 
 The library provides handling of date ranges with automatic adjustment of the `currentDate`:
 
+The first `next()` or `prev()` call includes `currentDate` when it falls exactly on a scheduled second. Later calls advance past the last returned occurrence. Calling `reset()` starts inclusive iteration again from the reset date.
+
 **startDate as fallback**: If `currentDate` is not provided but `startDate` is, the `startDate` will be used as the `currentDate`.
 
 ```typescript
