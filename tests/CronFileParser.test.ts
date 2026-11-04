@@ -107,6 +107,29 @@ describe('CronFileParser', () => {
     });
   });
 
+  describe('variable quotes', () => {
+    const parse = (content: string) => {
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
+      return CronFileParser.parseFileSync('tests/crontab.example');
+    };
+
+    test.each([
+      { name: 'double quotes', line: 'MAILTO="me@example.com"', value: 'me@example.com' },
+      { name: 'single quotes', line: "MAILTO='me@example.com'", value: 'me@example.com' },
+      { name: 'an apostrophe inside double quotes', line: `GREETING="it's fine"`, value: "it's fine" },
+      { name: 'double quotes inside single quotes', line: `MSG='say "hi"'`, value: 'say "hi"' },
+      { name: 'blanks inside the quotes', line: 'PAD=" a "', value: ' a ' },
+      { name: 'an empty quoted value', line: 'EMPTY=""', value: '' },
+      { name: 'a quote that has no match', line: 'ODD="abc', value: '"abc' },
+      { name: 'quotes of different kinds', line: `ODD="abc'`, value: `"abc'` },
+    ])('only removes the quotes around the whole value: $name', ({ line, value }) => {
+      const result = parse(line);
+
+      expect(result.variables).toEqual({ [line.split('=')[0]]: value });
+      expect(result.expressions).toHaveLength(0);
+    });
+  });
+
   describe('parseFile', () => {
     test('reads and parses a valid crontab file', async () => {
       const result = await CronFileParser.parseFile('tests/crontab.example');
