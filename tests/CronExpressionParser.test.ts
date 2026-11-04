@@ -137,6 +137,22 @@ describe('CronExpressionParser', () => {
       );
     });
 
+    test.each([
+      ['0 0 1 mon *', 'mon'],
+      ['0 0 1 jan-fri *', 'fri'],
+      ['0 0 * * jan', 'jan'],
+      ['0 0 * * mon-dec', 'dec'],
+      ['0 0 * * sat,jul', 'jul'],
+    ])('alias of another field is not resolved - %s', (expression, alias) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(`Validation error, cannot resolve alias "${alias}"`);
+    });
+
+    test('aliases of the field itself are resolved', () => {
+      const fields = CronExpressionParser.parse('0 0 1 jan-mar,DEC mon-wed,SAT').fields;
+      expect(fields.month.values).toEqual([1, 2, 3, 12]);
+      expect(fields.dayOfWeek.values).toEqual([1, 2, 3, 6]);
+    });
+
     test('invalid list value without value', () => {
       expect(() => {
         CronExpressionParser.parse('*/10 * * * * ,');
