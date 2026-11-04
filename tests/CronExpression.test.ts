@@ -92,6 +92,35 @@ describe('CronExpression', () => {
     expect(nextDate).toBe('2023-01-01T00:00:00.000Z');
   });
 
+  test('should reset to startDate when no currentDate was provided', () => {
+    const cronExpression = CronExpressionParser.parse('0 9 * * *', {
+      tz: 'America/New_York',
+      startDate: '2024-03-09T05:00:00Z',
+      endDate: '2024-03-12T04:00:00Z',
+    });
+
+    expect(cronExpression.take(2).map((date) => date.toISOString())).toEqual([
+      '2024-03-09T14:00:00.000Z',
+      '2024-03-10T13:00:00.000Z',
+    ]);
+    cronExpression.reset();
+    expect(cronExpression.next().toISOString()).toBe('2024-03-09T14:00:00.000Z');
+  });
+
+  test('should reset to the clamped initial currentDate', () => {
+    const cronExpression = CronExpressionParser.parse('0 9 * * *', {
+      tz: 'UTC',
+      currentDate: '2024-03-01T00:00:00Z',
+      startDate: '2024-03-09T00:00:00Z',
+    });
+
+    expect(cronExpression.next().toISOString()).toBe('2024-03-09T09:00:00.000Z');
+    cronExpression.reset(new Date('2024-03-11T00:00:00Z'));
+    expect(cronExpression.next().toISOString()).toBe('2024-03-11T09:00:00.000Z');
+    cronExpression.reset();
+    expect(cronExpression.next().toISOString()).toBe('2024-03-09T09:00:00.000Z');
+  });
+
   test('should preserve timezone after reset (issue #406)', () => {
     // Regression test: reset() was silently dropping the tz from parse() options,
     // causing subsequent next()/prev() to evaluate cron fields in the host's

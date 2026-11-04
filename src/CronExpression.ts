@@ -33,6 +33,7 @@ const LOOP_LIMIT = 10000;
 export class CronExpression {
   #options: CronExpressionOptions;
   readonly #tz?: string;
+  readonly #initialDate: CronDate;
   #currentDate: CronDate;
   #previousScheduleTimestamp: number | null = null;
   readonly #startDate: CronDate | null;
@@ -63,7 +64,8 @@ export class CronExpression {
       }
     }
 
-    this.#currentDate = new CronDate(currentDateValue, this.#tz);
+    this.#initialDate = new CronDate(currentDateValue, this.#tz);
+    this.#currentDate = this.#initialDate;
     this.#fields = fields;
   }
 
@@ -317,13 +319,13 @@ export class CronExpression {
   }
 
   /**
-   * Reset the iterators current date to a new date or the initial date.
+   * Reset the iterator to a new date or its initial date after applying the configured range.
    * @param {Date | CronDate} [newDate] - Optional new date to reset to. If not provided, it will reset to the initial date.
    * @memberof CronExpression
    * @public
    */
   reset(newDate?: Date | CronDate): void {
-    this.#currentDate = new CronDate(newDate || this.#options.currentDate, this.#tz);
+    this.#currentDate = newDate ? new CronDate(newDate, this.#tz) : this.#initialDate;
     this.#previousScheduleTimestamp = null;
   }
 
