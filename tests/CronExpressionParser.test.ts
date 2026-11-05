@@ -27,6 +27,18 @@ describe('CronExpressionParser', () => {
       );
     });
 
+    test.each([
+      ['1-5-9 * * * * *', '1-5-9'],
+      ['* 1-5-9 * * * *', '1-5-9'],
+      ['* * 1-5- * * *', '1-5-'],
+      ['* * * 1-5-9 * *', '1-5-9'],
+      ['* * * * 1-3-5 *', '1-3-5'],
+      ['* * * * * 1-3-5', '1-3-5'],
+      ['* 10-20-30/5 * * * *', '10-20-30'],
+    ])('range with more than two parts - %s', (expression, range) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(`Invalid range: ${range}`);
+    });
+
     test('minute value out of the range', () => {
       expect(() => CronExpressionParser.parse('* 32,72 * * * *')).toThrow(
         'Constraint error, got value 72 expected range 0-59',
