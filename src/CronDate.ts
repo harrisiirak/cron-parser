@@ -356,6 +356,12 @@ export class CronDate {
     return shift;
   }
 
+  /**
+   * Primarily for internal use.
+   * Moves the later occurrence of a repeated local time to the last second before the backward offset change.
+   *
+   * @returns {boolean} True when the date was moved, false when this local time is not repeated
+   */
   skipRepeatedTime(): boolean {
     const shift = this.getRepeatedTimeShift();
     if (shift === 0) {

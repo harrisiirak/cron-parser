@@ -135,8 +135,10 @@ export class CronExpression {
     const endOfDay = new CronDate(currentDate);
     endOfDay.setEndOfDay();
 
+    const beforeDay = new CronDate(new Date(startOfDay.getTime() - 1000), this.#tz);
+
     this.#dstTransitionDayKey = key;
-    this.#isDstTransitionDay = startOfDay.getUTCOffset() !== endOfDay.getUTCOffset();
+    this.#isDstTransitionDay = beforeDay.getUTCOffset() !== endOfDay.getUTCOffset();
     return this.#isDstTransitionDay;
   }
 
@@ -432,7 +434,7 @@ export class CronExpression {
     const hourValues = this.#fields.hour.values;
     const hours = hourValues as number[];
 
-    if (reverse && hours.length !== 24 && currentDate.skipRepeatedTime()) {
+    if (reverse && hours.length !== 24 && this.#checkDstTransition(currentDate) && currentDate.skipRepeatedTime()) {
       return false;
     }
 

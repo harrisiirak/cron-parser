@@ -1555,6 +1555,8 @@ describe('CronExpressionParser', () => {
       ['Antarctica/Troll', '0 30 1 * * *', '2025-10-26T01:05:00Z', '2025-10-25T23:30:00.000Z'],
       ['Europe/Berlin', '59 59 2 * * *', '2025-10-26T02:00:00+01:00', '2025-10-26T00:59:59.000Z'],
       ['Europe/Berlin', '59 59 1 * * *', '2025-10-26T02:05:00+01:00', '2025-10-25T23:59:59.000Z'],
+      ['America/Havana', '0 10 0 * * *', '2025-11-02T05:05:00Z', '2025-11-02T04:10:00.000Z'],
+      ['Atlantic/Azores', '0 10 0 * * *', '2025-10-26T01:05:00Z', '2025-10-26T00:10:00.000Z'],
     ])(
       'prev() searches the entire earlier copy when starting inside repeated time - %s, %s, %s',
       (tz, expression, currentDate, expected) => {
@@ -1576,6 +1578,16 @@ describe('CronExpressionParser', () => {
       expect(() => interval.prev()).toThrow('Out of the time span range');
     });
 
+    test('prev() does not return the later copy when startDate excludes the earlier one', () => {
+      const interval = CronExpressionParser.parse('0 30 2 * * *', {
+        tz: 'Europe/Berlin',
+        currentDate: '2025-10-26T03:00:00+01:00',
+        startDate: '2025-10-26T01:00:00Z',
+      });
+
+      expect(() => interval.prev()).toThrow('Out of the time span range');
+    });
+
     test.each([
       ['Europe/Berlin', '2025-10-26T02:05:00+01:00', '2025-10-26T01:00:00.000Z', '2025-10-26T00:30:00.000Z'],
       ['Australia/Lord_Howe', '2025-04-06T01:35:00+10:30', '2025-04-05T15:00:00.000Z', '2025-04-05T14:30:00.000Z'],
@@ -1589,6 +1601,25 @@ describe('CronExpressionParser', () => {
         expect(interval.prev().toISOString()).toEqual(second);
       },
     );
+
+    test.each([
+      ['America/Havana', '2025-11-02T12:00:00Z', '2025-11-02T04:10:00.000Z', '2025-11-01T04:10:00.000Z'],
+      ['Atlantic/Azores', '2025-10-26T12:00:00Z', '2025-10-26T00:10:00.000Z', '2025-10-25T00:10:00.000Z'],
+    ])('prev() returns a repeated midnight once - %s', (tz, currentDate, first, second) => {
+      const interval = CronExpressionParser.parse('0 10 0 * * *', { tz, currentDate });
+
+      expect(interval.prev().toISOString()).toEqual(first);
+      expect(interval.prev().toISOString()).toEqual(second);
+    });
+
+    test.each([
+      ['Africa/Cairo', '2023-04-27T22:05:00Z', '2023-04-26T22:10:00.000Z'],
+      ['America/Havana', '2025-03-09T05:05:00Z', '2025-03-08T05:10:00.000Z'],
+    ])('prev() crosses a day that starts with a spring-forward gap - %s', (tz, currentDate, expected) => {
+      const interval = CronExpressionParser.parse('0 10 0 * * *', { tz, currentDate });
+
+      expect(interval.prev().toISOString()).toEqual(expected);
+    });
 
     test('prev() steps back by a 30 minute fall-back - Australia/Lord_Howe', () => {
       const interval = CronExpressionParser.parse('0 45 1 * * *', {
@@ -1622,7 +1653,7 @@ describe('CronExpressionParser', () => {
       expect(interval.prev().toISOString()).toEqual('2025-10-25T23:30:00.000Z');
     });
 
-    test('next() from inside a repeated hour continues to the next day - Antarctica/Troll', () => {
+    test('next() past the scheduled minute in a repeated hour continues to the next day - Antarctica/Troll', () => {
       const interval = CronExpressionParser.parse('0 30 2 * * *', {
         currentDate: '2025-10-26T02:40:00Z',
         tz: 'Antarctica/Troll',
