@@ -2,6 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { CronFileParser } from '../src/CronFileParser';
 import { CronDate } from '../src/CronDate';
+import { PredefinedExpressions } from '../src/CronExpressionParser';
 
 jest.mock('fs/promises');
 jest.mock('fs');
@@ -74,6 +75,61 @@ describe('CronFileParser', () => {
     });
   });
 
+  describe('variable detection', () => {
+    const parse = (content: string) => {
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
+      return CronFileParser.parseFileSync('tests/crontab.example');
+    };
+
+    test.each([
+      { name: 'a --option=value argument', line: '0 3 * * * /usr/bin/backup --dest=/mnt/x', schedule: '0 3 * * *' },
+      { name: 'an inline FOO=bar assignment', line: '*/5 * * * * FOO=bar /bin/job', schedule: '*/5 * * * *' },
+    ])('keeps a schedule whose command has $name', ({ line, schedule }) => {
+      const result = parse(line);
+
+      expect(result.errors).toEqual({});
+      expect(result.variables).toEqual({});
+      expect(result.expressions.map((expression) => expression.stringify())).toEqual([schedule]);
+    });
+
+    test('splits a variable at the first =', () => {
+      const result = parse('JAVA_OPTS=-Dfoo=bar');
+
+      expect(result.variables).toEqual({ JAVA_OPTS: '-Dfoo=bar' });
+      expect(result.expressions).toHaveLength(0);
+    });
+
+    test('allows spaces around the = of a variable', () => {
+      const result = parse('MAILTO = me@example.com');
+
+      expect(result.variables).toEqual({ MAILTO: 'me@example.com' });
+      expect(result.expressions).toHaveLength(0);
+    });
+  });
+
+  describe('variable quotes', () => {
+    const parse = (content: string) => {
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
+      return CronFileParser.parseFileSync('tests/crontab.example');
+    };
+
+    test.each([
+      { name: 'double quotes', line: 'MAILTO="me@example.com"', value: 'me@example.com' },
+      { name: 'single quotes', line: "MAILTO='me@example.com'", value: 'me@example.com' },
+      { name: 'an apostrophe inside double quotes', line: `GREETING="it's fine"`, value: "it's fine" },
+      { name: 'double quotes inside single quotes', line: `MSG='say "hi"'`, value: 'say "hi"' },
+      { name: 'blanks inside the quotes', line: 'PAD=" a "', value: ' a ' },
+      { name: 'an empty quoted value', line: 'EMPTY=""', value: '' },
+      { name: 'a quote that has no match', line: 'ODD="abc', value: '"abc' },
+      { name: 'quotes of different kinds', line: `ODD="abc'`, value: `"abc'` },
+    ])('only removes the quotes around the whole value: $name', ({ line, value }) => {
+      const result = parse(line);
+
+      expect(result.variables).toEqual({ [line.split('=')[0]]: value });
+      expect(result.expressions).toHaveLength(0);
+    });
+  });
+
   describe('parseFile', () => {
     test('reads and parses a valid crontab file', async () => {
       const result = await CronFileParser.parseFile('tests/crontab.example');
@@ -114,6 +170,16 @@ describe('CronFileParser', () => {
       }
     });
 
+    test('keeps a line named __proto__ as an own property instead of replacing the prototype', () => {
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(['__proto__', '__proto__=polluted', 'ok=1'].join('\n'));
+      const result = CronFileParser.parseFileSync('./temp-proto.txt');
+
+      expect(Object.getPrototypeOf(result.errors)).toBe(Object.prototype);
+      expect(Object.getPrototypeOf(result.variables)).toBe(Object.prototype);
+      expect(Object.keys(result.errors)).toEqual(['__proto__']);
+      expect(Object.keys(result.variables)).toEqual(['__proto__', 'ok']);
+    });
+
     test('throws error for non-existing file', () => {
       expect(() => CronFileParser.parseFileSync('./nonexistent.txt')).toThrow('File not found');
       expect(fs.readFileSync).toHaveBeenCalledWith('./nonexistent.txt', 'utf8');
@@ -127,6 +193,28 @@ describe('CronFileParser', () => {
       expect(Object.keys(result.errors)).toHaveLength(1);
       expect(result.errors).toHaveProperty('invalid expression here');
       expect(fs.readFileSync).toHaveBeenCalledWith('./temp-invalid.txt', 'utf8');
+    });
+  });
+
+  describe('nickname schedules', () => {
+    const parse = (content: string) => {
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(content);
+      return CronFileParser.parseFileSync('tests/crontab.example');
+    };
+
+    test.each(Object.entries(PredefinedExpressions))('parses %s followed by a command', (nickname, schedule) => {
+      const result = parse(`${nickname} /usr/bin/backup --now`);
+
+      expect(result.errors).toEqual({});
+      expect(result.variables).toEqual({});
+      expect(result.expressions.map((expression) => expression.stringify(true))).toEqual([schedule]);
+    });
+
+    test('reports @reboot as an error because it has no schedule', () => {
+      const result = parse('@reboot /usr/bin/startup');
+
+      expect(result.expressions).toHaveLength(0);
+      expect(Object.keys(result.errors)).toEqual(['@reboot /usr/bin/startup']);
     });
   });
 });
