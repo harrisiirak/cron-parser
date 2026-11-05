@@ -106,7 +106,9 @@ export class CronExpressionParser {
     const { strict = false, hashSeed } = options;
     const rand = seededRandom(hashSeed);
 
-    expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
+    if (Object.hasOwn(PredefinedExpressions, expression)) {
+      expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions];
+    }
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
     if (!(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict)) {
       throw new Error('Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
@@ -216,9 +218,10 @@ export class CronExpressionParser {
   ): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
+      const aliases: Record<string, number | string> = field === CronUnit.Month ? Months : DayOfWeek;
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
-        const replacer = Months[match as keyof typeof Months] || DayOfWeek[match as keyof typeof DayOfWeek];
+        const replacer = aliases[match];
         if (replacer === undefined) {
           throw new Error(`Validation error, cannot resolve alias "${match}"`);
         }
@@ -555,6 +558,9 @@ export class CronExpressionParser {
     const atoms: string[] = val.split('-');
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;
+    }
+    if (atoms.length > 2) {
+      throw new Error(`Invalid range: ${val}`);
     }
     const [min, max] = atoms.map((num) => parseInt(num, 10));
     this.#validateRange(min, max, constraints);

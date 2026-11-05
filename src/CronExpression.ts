@@ -33,6 +33,7 @@ const LOOP_LIMIT = 10000;
 export class CronExpression {
   #options: CronExpressionOptions;
   readonly #tz?: string;
+  readonly #initialDate: CronDate;
   #currentDate: CronDate;
   readonly #startDate: CronDate | null;
   readonly #endDate: CronDate | null;
@@ -49,11 +50,11 @@ export class CronExpression {
   constructor(fields: CronFieldCollection, options: CronExpressionOptions) {
     this.#options = options;
     this.#tz = options.tz;
-    this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
-    this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
+    this.#startDate = options.startDate != null ? new CronDate(options.startDate, this.#tz) : null;
+    this.#endDate = options.endDate != null ? new CronDate(options.endDate, this.#tz) : null;
 
     let currentDateValue = options.currentDate ?? options.startDate;
-    if (currentDateValue) {
+    if (currentDateValue != null) {
       const tempCurrentDate = new CronDate(currentDateValue, this.#tz);
       if (this.#startDate && tempCurrentDate.getTime() < this.#startDate.getTime()) {
         currentDateValue = this.#startDate;
@@ -62,7 +63,8 @@ export class CronExpression {
       }
     }
 
-    this.#currentDate = new CronDate(currentDateValue, this.#tz);
+    this.#initialDate = new CronDate(currentDateValue, this.#tz);
+    this.#currentDate = this.#initialDate;
     this.#fields = fields;
   }
 
@@ -312,13 +314,13 @@ export class CronExpression {
   }
 
   /**
-   * Reset the iterators current date to a new date or the initial date.
+   * Reset the iterator to a new date or its initial date after applying the configured range.
    * @param {Date | CronDate} [newDate] - Optional new date to reset to. If not provided, it will reset to the initial date.
    * @memberof CronExpression
    * @public
    */
   reset(newDate?: Date | CronDate): void {
-    this.#currentDate = new CronDate(newDate || this.#options.currentDate, this.#tz);
+    this.#currentDate = newDate ? new CronDate(newDate, this.#tz) : this.#initialDate;
   }
 
   /**
@@ -551,12 +553,12 @@ export class CronExpression {
     while (++stepCount < LOOP_LIMIT) {
       this.#validateTimeSpan(currentDate);
 
-      if (!this.#matchDayOfMonth(currentDate)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
-        continue;
-      }
       if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Month, this.#fields.hour.values.length);
+        continue;
+      }
+      if (!this.#matchDayOfMonth(currentDate)) {
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Day, this.#fields.hour.values.length);
         continue;
       }
       if (!this.#matchHour(currentDate, dateMathVerb, reverse)) {

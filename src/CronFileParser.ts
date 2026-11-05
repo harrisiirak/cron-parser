@@ -55,10 +55,18 @@ export class CronFileParser {
         continue;
       }
 
-      const variableMatch = entry.match(/^(.*)=(.*)$/);
+      // A variable line is `NAME=value` (spaces around the `=` are allowed). The name has no whitespace, so a
+      // schedule whose command contains an `=` is still treated as an entry, and the value keeps any later `=`.
+      const variableMatch = entry.match(/^([^\s=]+)\s*=\s*(.*)$/);
       if (variableMatch) {
         const [, key, value] = variableMatch;
-        result.variables[key] = value.replace(/["']/g, ''); // Remove quotes
+        // Define an own property so that a key such as `__proto__` cannot replace the prototype
+        Object.defineProperty(result.variables, key, {
+          value: value.replace(/^(["'])(.*)\1$/, '$2'), // Remove one matching pair of quotes around the value
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
         continue;
       }
 
@@ -66,7 +74,12 @@ export class CronFileParser {
         const parsedEntry = CronFileParser.#parseEntry(entry);
         result.expressions.push(parsedEntry.interval);
       } catch (err: unknown) {
-        result.errors[entry] = err;
+        Object.defineProperty(result.errors, entry, {
+          value: err,
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
       }
     }
 
@@ -79,9 +92,11 @@ export class CronFileParser {
    */
   static #parseEntry(entry: string): { interval: CronExpression; command?: string[] } {
     const atoms = entry.split(/\s+/);
+    // A nickname such as `@daily` is the whole schedule, so the command starts right after it.
+    const scheduleLength = atoms[0].startsWith('@') ? 1 : 5;
     return {
-      interval: CronExpressionParser.parse(atoms.slice(0, 5).join(' ')),
-      command: atoms.slice(5, atoms.length),
+      interval: CronExpressionParser.parse(atoms.slice(0, scheduleLength).join(' ')),
+      command: atoms.slice(scheduleLength, atoms.length),
     };
   }
 }

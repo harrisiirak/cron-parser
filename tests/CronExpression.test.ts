@@ -87,6 +87,35 @@ describe('CronExpression', () => {
     expect(nextDate).toBe('2023-01-08T00:00:00.000Z');
   });
 
+  test('should reset to startDate when no currentDate was provided', () => {
+    const cronExpression = CronExpressionParser.parse('0 9 * * *', {
+      tz: 'America/New_York',
+      startDate: '2024-03-09T05:00:00Z',
+      endDate: '2024-03-12T04:00:00Z',
+    });
+
+    expect(cronExpression.take(2).map((date) => date.toISOString())).toEqual([
+      '2024-03-09T14:00:00.000Z',
+      '2024-03-10T13:00:00.000Z',
+    ]);
+    cronExpression.reset();
+    expect(cronExpression.next().toISOString()).toBe('2024-03-09T14:00:00.000Z');
+  });
+
+  test('should reset to the clamped initial currentDate', () => {
+    const cronExpression = CronExpressionParser.parse('0 9 * * *', {
+      tz: 'UTC',
+      currentDate: '2024-03-01T00:00:00Z',
+      startDate: '2024-03-09T00:00:00Z',
+    });
+
+    expect(cronExpression.next().toISOString()).toBe('2024-03-09T09:00:00.000Z');
+    cronExpression.reset(new Date('2024-03-11T00:00:00Z'));
+    expect(cronExpression.next().toISOString()).toBe('2024-03-11T09:00:00.000Z');
+    cronExpression.reset();
+    expect(cronExpression.next().toISOString()).toBe('2024-03-09T09:00:00.000Z');
+  });
+
   test('should preserve timezone after reset (issue #406)', () => {
     // Regression test: reset() was silently dropping the tz from parse() options,
     // causing subsequent next()/prev() to evaluate cron fields in the host's
@@ -215,6 +244,37 @@ describe('CronExpression', () => {
       const next = interval.next();
       expect(next.toISOString()).toBe('2023-01-01T10:00:00.000Z');
       expect(spy).not.toHaveBeenCalled();
+    });
+
+    test('skips non-scheduled months instead of crawling day-by-day for sparse day-restricted schedules', () => {
+      const interval = CronExpressionParser.parse('0 0 * 2 3#5', {
+        currentDate: new Date('2021-01-01T00:00:00.000Z'),
+        tz: 'UTC',
+      });
+
+      spy = jest.spyOn(CronDate.prototype, 'applyDateOperation');
+      expect(interval.next().toISOString()).toBe('2040-02-29T00:00:00.000Z');
+      expect(spy.mock.calls.some((c) => c[1] === TimeUnit.Month)).toBe(true);
+      expect(interval.next().toISOString()).toBe('2068-02-29T00:00:00.000Z');
+    });
+
+    test('does not exhaust the loop limit when the next match is decades away', () => {
+      const interval = CronExpressionParser.parse('0 0 * 2 3#5', {
+        currentDate: new Date('2040-03-01T00:00:00.000Z'),
+        tz: 'UTC',
+      });
+
+      expect(interval.next().toISOString()).toBe('2068-02-29T00:00:00.000Z');
+    });
+
+    test('skips non-scheduled months when iterating backwards for sparse day-restricted schedules', () => {
+      const interval = CronExpressionParser.parse('0 0 * 2 3#5', {
+        currentDate: new Date('2021-02-27T12:00:00.000Z'),
+        tz: 'UTC',
+      });
+
+      expect(interval.prev().toISOString()).toBe('2012-02-29T00:00:00.000Z');
+      expect(interval.prev().toISOString()).toBe('1984-02-29T00:00:00.000Z');
     });
   });
 

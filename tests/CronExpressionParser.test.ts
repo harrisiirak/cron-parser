@@ -27,6 +27,18 @@ describe('CronExpressionParser', () => {
       );
     });
 
+    test.each([
+      ['1-5-9 * * * * *', '1-5-9'],
+      ['* 1-5-9 * * * *', '1-5-9'],
+      ['* * 1-5- * * *', '1-5-'],
+      ['* * * 1-5-9 * *', '1-5-9'],
+      ['* * * * 1-3-5 *', '1-3-5'],
+      ['* * * * * 1-3-5', '1-3-5'],
+      ['* 10-20-30/5 * * * *', '10-20-30'],
+    ])('range with more than two parts - %s', (expression, range) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(`Invalid range: ${range}`);
+    });
+
     test('minute value out of the range', () => {
       expect(() => CronExpressionParser.parse('* 32,72 * * * *')).toThrow(
         'Constraint error, got value 72 expected range 0-59',
@@ -60,6 +72,13 @@ describe('CronExpressionParser', () => {
     test('invalid expression that contains too many fields', () => {
       expect(() => CronExpressionParser.parse('* * * * * * * *ASD')).toThrow('Invalid cron expression');
     });
+
+    test.each(['__proto__', 'constructor', 'toString', 'hasOwnProperty'])(
+      'expression named after an Object.prototype member %s is rejected as an unknown alias',
+      (expression) => {
+        expect(() => CronExpressionParser.parse(expression)).toThrow('Validation error, cannot resolve alias');
+      },
+    );
 
     test('invalid expression that is too long', () => {
       const field = 'H'.repeat(1024);
@@ -128,6 +147,22 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse('15 10 * * MON-TUR')).toThrow(
         'Validation error, cannot resolve alias "tur"',
       );
+    });
+
+    test.each([
+      ['0 0 1 mon *', 'mon'],
+      ['0 0 1 jan-fri *', 'fri'],
+      ['0 0 * * jan', 'jan'],
+      ['0 0 * * mon-dec', 'dec'],
+      ['0 0 * * sat,jul', 'jul'],
+    ])('alias of another field is not resolved - %s', (expression, alias) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(`Validation error, cannot resolve alias "${alias}"`);
+    });
+
+    test('aliases of the field itself are resolved', () => {
+      const fields = CronExpressionParser.parse('0 0 1 jan-mar,DEC mon-wed,SAT').fields;
+      expect(fields.month.values).toEqual([1, 2, 3, 12]);
+      expect(fields.dayOfWeek.values).toEqual([1, 2, 3, 6]);
     });
 
     test('invalid list value without value', () => {
@@ -1262,6 +1297,34 @@ describe('CronExpressionParser', () => {
       for (let i = 0; i < 20; ++i) {
         expect(interval.next().getDate()).not.toBeNull();
       }
+    });
+  });
+
+  describe('the Unix epoch as a date option', () => {
+    const DAY = 24 * 60 * 60 * 1000;
+
+    test('currentDate: 0 starts from the epoch instead of the system time', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { currentDate: 0, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('startDate: 0 is applied as the lower bound', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { startDate: 0, currentDate: -2 * DAY, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('startDate: 0 is used as currentDate when none is given', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { startDate: 0, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('endDate: 0 is applied as the upper bound', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { endDate: 0, currentDate: DAY, tz: 'UTC' });
+
+      expect(() => interval.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
     });
   });
 
