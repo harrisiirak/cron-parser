@@ -143,9 +143,9 @@ export class CronExpression {
   }
 
   /**
-   * Sets the first allowed minute after an hour step, but only when it is still ahead in the search
-   * direction. Otherwise the minute is left for the main loop: a sub-hour DST transition can land the
-   * date part-way through the hour, and resetting the minute would skip occurrences.
+   * Sets the first allowed minute after an hour step, unless the date is already past it. A sub-hour DST
+   * transition can land part-way through the hour, and going back to the first minute would skip occurrences.
+   * Stepping backwards always lands on :59, so only the forward direction can be past it.
    *
    * @param {CronDate} currentDate - Mutable date being iterated
    * @param {boolean} reverse - When true, iterating backwards
@@ -153,7 +153,7 @@ export class CronExpression {
    */
   #stepToFirstMinute(currentDate: CronDate, reverse: boolean): void {
     const minute = this.#getMinOrMax(this.#fields.minute.values as number[], reverse);
-    if (reverse ? minute <= currentDate.getMinutes() : minute >= currentDate.getMinutes()) {
+    if (reverse || minute >= currentDate.getMinutes()) {
       currentDate.setMinutes(minute);
     }
   }
@@ -451,7 +451,6 @@ export class CronExpression {
 
     const currentHour = currentDate.getHours();
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
-    const isDstEnd = currentDate.dstEnd === currentHour;
 
     // DST start: accept the landing hour when a skipped hour was scheduled.
     // The walk is modular because a gap can wrap midnight, and confined to the
@@ -462,13 +461,6 @@ export class CronExpression {
           return true;
         }
       }
-    }
-
-    // DST end: avoid returning the repeated hour twice when searching forward.
-    if (isDstEnd && !reverse) {
-      currentDate.dstEnd = null;
-      currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, hours.length);
-      return false;
     }
 
     if (isMatch) {
@@ -486,7 +478,7 @@ export class CronExpression {
     // Fast path: jump directly to the next/previous matching hour and reset lower units.
     //
     // On DST transition days, setting the hour directly can land on a non-existent/repeated local time,
-    // which breaks the existing DST handling that relies on `applyDateOperation()` to set `dstStart/dstEnd`.
+    // which breaks the existing DST handling that relies on `applyDateOperation()` to set `dstStart`.
     // For those days, fall back to stepping hour-by-hour to preserve correctness.
     if (this.#checkDstTransition(currentDate)) {
       const steps = reverse ? currentHour - nextHour : nextHour - currentHour;
@@ -528,6 +520,25 @@ export class CronExpression {
   }
 
   /**
+   * Checks whether a match is the second pass through wall-clock time that a fall-back repeated. With a fixed
+   * hour such a match is skipped, so the occurrence runs once: it has a lower UTC offset than the previous
+   * occurrence and a wall-clock time that is not after it.
+   *
+   * @param {CronDate} candidate - Matching date found by the search
+   * @param {number} previousTimestamp - Timestamp the search started from
+   * @param {number} previousOffset - UTC offset in minutes at that timestamp
+   * @returns {boolean} True when the match repeats a wall-clock time
+   * @private
+   */
+  #isRepeatedPass(candidate: CronDate, previousTimestamp: number, previousOffset: number): boolean {
+    if (this.#fields.hour.values.length === 24 || candidate.getUTCOffset() >= previousOffset) {
+      return false;
+    }
+    const wallClock = (timestamp: number, offset: number): number => timestamp + offset * 60000;
+    return wallClock(candidate.getTime(), candidate.getUTCOffset()) <= wallClock(previousTimestamp, previousOffset);
+  }
+
+  /**
    * Finds the next or previous schedule based on the cron expression.
    *
    * @param {boolean} [reverse=false] - If true, finds the previous schedule; otherwise, finds the next schedule.
@@ -538,6 +549,7 @@ export class CronExpression {
     const dateMathVerb: DateMathOp = reverse ? DateMathOp.Subtract : DateMathOp.Add;
     const currentDate = new CronDate(this.#currentDate);
     const startTimestamp = currentDate.getTime();
+    const startOffset = currentDate.getUTCOffset();
 
     if (currentDate.getMilliseconds() > 0) {
       currentDate.setMilliseconds(0);
@@ -571,6 +583,10 @@ export class CronExpression {
       }
 
       if (startTimestamp === currentDate.getTime()) {
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
+        continue;
+      }
+      if (!reverse && this.#isRepeatedPass(currentDate, startTimestamp, startOffset)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
         continue;
       }

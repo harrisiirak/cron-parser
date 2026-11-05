@@ -24,7 +24,6 @@ export class CronDate {
   #date: DateTime;
   #dstStart: number | null = null;
   #dstStartLandingHour: number | null = null;
-  #dstEnd: number | null = null;
 
   /**
    * Constructs a new CronDate instance.
@@ -41,7 +40,6 @@ export class CronDate {
       this.#date = timestamp.#date;
       this.#dstStart = timestamp.#dstStart;
       this.#dstStartLandingHour = timestamp.#dstStartLandingHour;
-      this.#dstEnd = timestamp.#dstEnd;
     } else if (timestamp instanceof Date) {
       this.#date = DateTime.fromJSDate(timestamp, dateOpts);
     } else if (typeof timestamp === 'number') {
@@ -101,22 +99,6 @@ export class CronDate {
   }
 
   /**
-   * Returns daylight savings end time.
-   * @returns {number | null}
-   */
-  get dstEnd(): number | null {
-    return this.#dstEnd;
-  }
-
-  /**
-   * Sets daylight savings end time.
-   * @param {number | null} value
-   */
-  set dstEnd(value: number | null) {
-    this.#dstEnd = value;
-  }
-
-  /**
    * Adds one year to the current CronDate.
    */
   addYear(): void {
@@ -141,9 +123,7 @@ export class CronDate {
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    // Move by elapsed time to the next local hour boundary. Rounding plus(1h) down with startOf('hour')
-    // goes backwards across a fall-back that is not a whole number of hours (Australia/Lord_Howe,
-    // 02:00 -> 01:30) and the search would never move forward.
+    // Elapsed time: startOf('hour') after plus(1h) can land before the start when the clocks go back by less than an hour
     this.#date = this.#date.plus({ minutes: 60 - this.#date.minute }).startOf('minute');
   }
 
@@ -479,12 +459,11 @@ export class CronDate {
   }
 
   /**
-   * Sets the minutes.
+   * Sets the minutes by moving elapsed time, so inside a DST transition that is shorter than an hour the hour
+   * (and the day) can change as well.
    * @param m
    */
   setMinutes(m: number): void {
-    // Shift by elapsed time: set({ minute }) re-resolves the local time and can jump back or forward an
-    // hour inside a fall-back or spring-forward that is shorter than an hour.
     this.#date = this.#date.plus({ minutes: m - this.#date.minute });
   }
 
@@ -585,14 +564,6 @@ export class CronDate {
         // that starts at 23:00 over midnight.
         this.#dstStart = (previousHour + 1) % 24;
         this.#dstStartLandingHour = currentHour;
-      }
-    } else if (
-      advance === 0 &&
-      ((this.getMinutes() === 0 && this.getSeconds() === 0) || this.getUTCOffset() < previousOffset)
-    ) {
-      // The hour label repeated: a whole-hour fall-back lands on :00:00, a shorter one part-way through.
-      if (hoursLength !== 24) {
-        this.dstEnd = currentHour;
       }
     }
   }

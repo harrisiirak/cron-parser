@@ -2054,6 +2054,47 @@ describe('CronExpressionParser', () => {
         ]);
       });
 
+      test('fires a fixed hour once when the repeated stretch starts mid-hour', () => {
+        // Pacific/Chatham falls back from 03:45 to 02:45 on 2024-04-07, so 02:45-03:45 repeats.
+        const chatham = (expression: string) =>
+          CronExpressionParser.parse(expression, {
+            currentDate: new Date('2024-04-06T12:00:00.000Z'),
+            tz: 'Pacific/Chatham',
+          });
+
+        expect(
+          chatham('45 2 * * *')
+            .take(2)
+            .map((date) => date.toISOString()),
+        ).toEqual([
+          '2024-04-06T13:00:00.000Z', // 02:45 at UTC+13:45, the first pass
+          '2024-04-07T14:00:00.000Z', // 02:45 on the 8th, the 7th's second pass skipped
+        ]);
+
+        expect(
+          chatham('0,50 3 * * *')
+            .take(2)
+            .map((date) => date.toISOString()),
+        ).toEqual([
+          '2024-04-06T13:15:00.000Z', // 03:00 at UTC+13:45, the first pass
+          '2024-04-06T15:05:00.000Z', // 03:50 at UTC+12:45, which the first pass never reached
+        ]);
+      });
+
+      test('fires every minute of a fixed hour once when a whole-hour fall-back repeats it', () => {
+        // America/New_York goes from 02:00 EDT back to 01:00 EST on 2024-11-03, at 06:00Z.
+        const interval = CronExpressionParser.parse('0,30 1 * * *', {
+          currentDate: new Date('2024-11-03T04:00:00.000Z'),
+          tz: 'America/New_York',
+        });
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2024-11-03T05:00:00.000Z', // 01:00 EDT
+          '2024-11-03T05:30:00.000Z', // 01:30 EDT, the repeated 01:00 and 01:30 EST are skipped
+          '2024-11-04T06:00:00.000Z', // 01:00 EST on the 4th
+        ]);
+      });
+
       test('keeps hasNext and the iterator going instead of ending them silently', () => {
         // Both report a thrown error as the end of the sequence.
         const interval = CronExpressionParser.parse('0 8 * * *', lordHowe('2024-04-06T00:00:00.000Z'));
