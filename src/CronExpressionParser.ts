@@ -218,9 +218,10 @@ export class CronExpressionParser {
   ): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
+      const aliases: Record<string, number | string> = field === CronUnit.Month ? Months : DayOfWeek;
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
-        const replacer = Months[match as keyof typeof Months] || DayOfWeek[match as keyof typeof DayOfWeek];
+        const replacer = aliases[match];
         if (replacer === undefined) {
           throw new Error(`Validation error, cannot resolve alias "${match}"`);
         }
