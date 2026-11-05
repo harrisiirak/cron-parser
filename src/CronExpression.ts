@@ -50,11 +50,11 @@ export class CronExpression {
   constructor(fields: CronFieldCollection, options: CronExpressionOptions) {
     this.#options = options;
     this.#tz = options.tz;
-    this.#startDate = options.startDate ? new CronDate(options.startDate, this.#tz) : null;
-    this.#endDate = options.endDate ? new CronDate(options.endDate, this.#tz) : null;
+    this.#startDate = options.startDate != null ? new CronDate(options.startDate, this.#tz) : null;
+    this.#endDate = options.endDate != null ? new CronDate(options.endDate, this.#tz) : null;
 
     let currentDateValue = options.currentDate ?? options.startDate;
-    if (currentDateValue) {
+    if (currentDateValue != null) {
       const tempCurrentDate = new CronDate(currentDateValue, this.#tz);
       if (this.#startDate && tempCurrentDate.getTime() < this.#startDate.getTime()) {
         currentDateValue = this.#startDate;

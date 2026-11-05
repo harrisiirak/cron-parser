@@ -35,7 +35,8 @@ export class CronDate {
     const dateOpts = { zone: tz };
 
     // Initialize the internal DateTime object based on the type of timestamp provided.
-    if (!timestamp) {
+    // 0 is the Unix epoch, not a missing timestamp
+    if (!timestamp && timestamp !== 0) {
       this.#date = DateTime.local();
     } else if (timestamp instanceof CronDate) {
       this.#date = timestamp.#date;
