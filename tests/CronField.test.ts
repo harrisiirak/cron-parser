@@ -1,4 +1,14 @@
-import { CronDayOfWeek, CronField, CronHour, CronMinute, CronSecond, DayOfWeekRange, SixtyRange } from '../src';
+import {
+  CronDayOfMonth,
+  CronDayOfWeek,
+  CronField,
+  CronHour,
+  CronMinute,
+  CronSecond,
+  DayOfMonthRange,
+  DayOfWeekRange,
+  SixtyRange,
+} from '../src';
 
 describe('CronField', () => {
   describe('wildcard detection', () => {
@@ -73,6 +83,20 @@ describe('CronField', () => {
       const values: (number | string)[] = ['5L'];
       const field = new CronDayOfWeek(values as DayOfWeekRange[]);
       expect(field.values).toEqual(['5L']);
+    });
+
+    test('should throw an error when a day of week L is qualified by something other than a weekday', () => {
+      const values: (number | string)[] = ['8L'];
+      expect(() => new CronDayOfWeek(values as DayOfWeekRange[])).toThrow(
+        'CronDayOfWeek Validation error, got value 8L expected range 0-7 or chars L',
+      );
+    });
+
+    test('should throw an error when a day of month L is qualified by a number', () => {
+      const values: (number | string)[] = ['5L'];
+      expect(() => new CronDayOfMonth(values as DayOfMonthRange[])).toThrow(
+        'CronDayOfMonth Validation error, got value 5L expected range 1-31 or chars L',
+      );
     });
   });
 

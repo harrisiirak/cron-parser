@@ -23,6 +23,10 @@ export class CronDayOfWeek extends CronField {
     return DAY_CHARS;
   }
 
+  static get charPrefix(): string {
+    return '[0-7]?';
+  }
+
   static get validChars(): RegExp {
     return /^[?,*\dLH#/-]+$|^.*H\(\d+-\d+\)\/\d+.*$|^.*H\(\d+-\d+\).*$|^.*H\/\d+.*$/;
   }

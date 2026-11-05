@@ -63,6 +63,13 @@ export abstract class CronField {
   }
 
   /**
+   * Returns the pattern for what may come before an allowed character in a value, such as the weekday in `5L`.
+   */
+  static get charPrefix(): string {
+    return '';
+  }
+
+  /**
    * Returns the regular expression used to validate this field.
    */
   static get validChars(): RegExp {
@@ -230,7 +237,8 @@ export abstract class CronField {
     let badValue: number | string | undefined;
     const charsString = this.chars.length > 0 ? ` or chars ${this.chars.join('')}` : '';
 
-    const charTest = (value: string) => (char: string) => new RegExp(`^\\d{0,2}${char}$`).test(value);
+    const prefix = (this.constructor as typeof CronField).charPrefix;
+    const charTest = (value: string) => (char: string) => new RegExp(`^${prefix}${char}$`).test(value);
     const rangeTest = (value: number | string) => {
       badValue = value;
       return typeof value === 'number' ? value >= this.min && value <= this.max : this.chars.some(charTest(value));
