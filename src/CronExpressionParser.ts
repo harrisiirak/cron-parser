@@ -558,6 +558,9 @@ export class CronExpressionParser {
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;
     }
+    if (atoms.length > 2) {
+      throw new Error(`Invalid range: ${val}`);
+    }
     const [min, max] = atoms.map((num) => parseInt(num, 10));
     this.#validateRange(min, max, constraints);
     this.#validateRepeatInterval(repeatInterval);
