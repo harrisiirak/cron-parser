@@ -133,6 +133,7 @@ export class CronExpression {
 
     const startOfDay = new CronDate(currentDate);
     startOfDay.setStartOfDay();
+    startOfDay.subtractSecond();
 
     const endOfDay = new CronDate(currentDate);
     endOfDay.setEndOfDay();
@@ -358,7 +359,7 @@ export class CronExpression {
       return false;
     }
 
-    return true;
+    return hour.values.length === 24 || dt.getRepeatedTimeShift() === 0;
   }
 
   /**
@@ -433,6 +434,10 @@ export class CronExpression {
   #matchHour(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): boolean {
     const hourValues = this.#fields.hour.values;
     const hours = hourValues as number[];
+
+    if (reverse && hours.length !== 24 && this.#checkDstTransition(currentDate) && currentDate.skipRepeatedTime()) {
+      return false;
+    }
 
     const currentHour = currentDate.getHours();
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);

@@ -370,6 +370,27 @@ describe('CronDate', () => {
     expect(date1.getSeconds()).toEqual(30);
   });
 
+  test('getRepeatedTimeShift returns the backward shift only for the later occurrence of a repeated time', () => {
+    expect(new CronDate(new Date('2025-10-26T00:30:00Z'), 'Europe/Berlin').getRepeatedTimeShift()).toBe(0);
+    expect(new CronDate(new Date('2025-10-26T01:30:00Z'), 'Europe/Berlin').getRepeatedTimeShift()).toBe(60);
+    expect(new CronDate(new Date('2025-10-26T02:30:00Z'), 'Europe/Berlin').getRepeatedTimeShift()).toBe(0);
+    expect(new CronDate(new Date('2025-04-05T15:15:00Z'), 'Australia/Lord_Howe').getRepeatedTimeShift()).toBe(30);
+    expect(new CronDate(new Date('2025-10-26T02:30:00Z'), 'Antarctica/Troll').getRepeatedTimeShift()).toBe(120);
+  });
+
+  test.each([
+    ['Europe/Berlin', '2025-10-26T01:59:59.999Z', '2025-10-26T00:59:59.000Z'],
+    ['Australia/Lord_Howe', '2025-04-05T15:29:59.999Z', '2025-04-05T14:59:59.000Z'],
+    ['Antarctica/Troll', '2025-10-26T02:59:59.999Z', '2025-10-26T00:59:59.000Z'],
+  ])('skipRepeatedTime finds the last second before the transition - %s, %s', (tz, currentDate, expected) => {
+    const date = new CronDate(currentDate, tz);
+
+    expect(date.skipRepeatedTime()).toBeTruthy();
+    expect(date.toISOString()).toEqual(expected);
+    expect(date.skipRepeatedTime()).toBeFalsy();
+    expect(date.toISOString()).toEqual(expected);
+  });
+
   describe('parse cron date formats with local timezone', () => {
     const offset = new Date().getTimezoneOffset();
     const offsetHours = Math.abs(Math.floor(offset / 60));
