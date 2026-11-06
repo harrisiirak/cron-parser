@@ -2033,6 +2033,18 @@ describe('CronExpressionParser', () => {
       });
     });
 
+    test.each(['8L', '9L', '10L', '55L', '99L', '01L'])('rejects %s in the day of week field', (value) => {
+      expect(() => CronExpressionParser.parse(`0 0 0 * * ${value}`)).toThrow(
+        `CronDayOfWeek Validation error, got value ${value} expected range 0-7 or chars L`,
+      );
+    });
+
+    test.each(['1L', '5L', '15L', '31L'])('rejects %s in the day of month field', (value) => {
+      expect(() => CronExpressionParser.parse(`0 0 0 ${value} * *`)).toThrow(
+        `CronDayOfMonth Validation error, got value ${value} expected range 1-31 or chars L`,
+      );
+    });
+
     test('parses cron with last day in a month (wildcard month)', () => {
       const options = {
         currentDate: new Date(2014, 0, 1),
