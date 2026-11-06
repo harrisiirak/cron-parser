@@ -161,8 +161,11 @@ export class CronFieldCollection {
     // Only an explicit day of month that can never occur is invalid. When the
     // day of week is restricted it rescues the expression (day of month and day
     // of week combine with OR), so the day of month need not be reachable.
-    if (month.values.length === 1 && !dayOfMonth.hasLastChar && dayOfWeek.isWildcard) {
-      if (!(parseInt(dayOfMonth.values[0] as string, 10) <= CronMonth.daysInMonth[month.values[0] - 1])) {
+    // With several months, the expression is valid if the smallest day of
+    // month fits in at least one of them.
+    if (!dayOfMonth.hasLastChar && dayOfWeek.isWildcard) {
+      const longestMonth = Math.max(...month.values.map((value) => CronMonth.daysInMonth[value - 1]));
+      if (!(parseInt(dayOfMonth.values[0] as string, 10) <= longestMonth)) {
         throw new Error('Invalid explicit day of month definition');
       }
     }

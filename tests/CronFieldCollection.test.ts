@@ -186,6 +186,34 @@ describe('CronFieldCollection', () => {
       ).toThrow('Invalid explicit day of month definition');
     });
 
+    test('should throw error for a day of month that none of several months have', () => {
+      expect(
+        () =>
+          new CronFieldCollection({
+            second: new CronSecond([0]),
+            minute: new CronMinute([0]),
+            hour: new CronHour([12]),
+            dayOfMonth: new CronDayOfMonth([31]),
+            month: new CronMonth([4, 6, 9, 11]), // 30-day months
+            dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6], { wildcard: true }),
+          }),
+      ).toThrow('Invalid explicit day of month definition');
+    });
+
+    test('should not throw when one of several months has the day of month', () => {
+      expect(
+        () =>
+          new CronFieldCollection({
+            second: new CronSecond([0]),
+            minute: new CronMinute([0]),
+            hour: new CronHour([12]),
+            dayOfMonth: new CronDayOfMonth([31]),
+            month: new CronMonth([2, 4, 5]), // May has 31 days
+            dayOfWeek: new CronDayOfWeek([0, 1, 2, 3, 4, 5, 6], { wildcard: true }),
+          }),
+      ).not.toThrow();
+    });
+
     test('should not throw when an out-of-range day of month is rescued by the day of week', () => {
       // Day of month and day of week combine with OR, so 31 February with a
       // restricted day of week is valid: it fires on those weekdays.
