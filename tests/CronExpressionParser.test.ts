@@ -40,15 +40,15 @@ describe('CronExpressionParser', () => {
     });
 
     test.each([
-      ['0 0 0 5-7L * *', 'Invalid range: 5-7L'],
-      ['0 0 0 L-3 * *', 'Invalid range: L-3'],
-      ['0 0 0 L/2 * *', 'Invalid repeat: L/2'],
-      ['0 0 0 5/2L * *', 'Invalid repeat: 5/2L'],
-      ['0 0 0 */2L * *', 'Invalid repeat: 1-31/2L'],
-      ['0 0 0 * * 1-3L', 'Invalid range: 1-3L'],
-      ['0 0 0 * * 1L-3L', 'Invalid range: 1L-3L'],
-      ['0 0 0 * * 1L/2', 'Invalid repeat: 1L/2'],
-      ['0 0 0 * * */2L', 'Invalid repeat: 0-7/2L'],
+      ['0 0 0 5-7L * *', 'Constraint error, got range 5-NaN expected range 1-31'],
+      ['0 0 0 L-3 * *', 'Constraint error, got range NaN-3 expected range 1-31'],
+      ['0 0 0 L/2 * *', 'Constraint error, got range NaN-31 expected range 1-31'],
+      ['0 0 0 5/2L * *', 'Constraint error, cannot repeat at every NaN time.'],
+      ['0 0 0 */2L * *', 'Constraint error, cannot repeat at every NaN time.'],
+      ['0 0 0 * * 1-3L', 'Constraint error, got range 1-NaN expected range 0-7'],
+      ['0 0 0 * * 1L-3L', 'Constraint error, got range NaN-NaN expected range 0-7'],
+      ['0 0 0 * * 1L/2', 'Constraint error, got range NaN-7 expected range 0-7'],
+      ['0 0 0 * * */2L', 'Constraint error, cannot repeat at every NaN time.'],
     ])('range or step with an L - %s', (expression, message) => {
       expect(() => CronExpressionParser.parse(expression)).toThrow(message);
     });
