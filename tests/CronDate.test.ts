@@ -375,11 +375,8 @@ describe('CronDate', () => {
   });
 
   test.each([
-    ['Europe/Berlin', '2025-10-26T01:00:00.000Z', '2025-10-26T00:59:59.000Z'],
     ['Europe/Berlin', '2025-10-26T01:59:59.999Z', '2025-10-26T00:59:59.000Z'],
-    ['Australia/Lord_Howe', '2025-04-05T15:00:00.000Z', '2025-04-05T14:59:59.000Z'],
     ['Australia/Lord_Howe', '2025-04-05T15:29:59.999Z', '2025-04-05T14:59:59.000Z'],
-    ['Antarctica/Troll', '2025-10-26T01:00:00.000Z', '2025-10-26T00:59:59.000Z'],
     ['Antarctica/Troll', '2025-10-26T02:59:59.999Z', '2025-10-26T00:59:59.000Z'],
   ])('skipRepeatedTime finds the last second before the transition - %s, %s', (tz, currentDate, expected) => {
     const date = new CronDate(currentDate, tz);

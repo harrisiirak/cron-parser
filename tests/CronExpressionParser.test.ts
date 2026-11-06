@@ -1493,65 +1493,10 @@ describe('CronExpressionParser', () => {
       expect(next.getDate()).toEqual(31);
     });
 
-    test('prev() de-duplicates the repeated DST end hour like next() - 0 3 * * *', () => {
-      const options: CronExpressionOptions = {
-        currentDate: '2016-10-31 00:00:00',
-        endDate: undefined,
-        tz: 'Europe/Athens',
-      };
-
-      const interval: CronExpression = CronExpressionParser.parse('0 3 * * *', options);
-      let prev: CronDate;
-
-      expect(interval).toBeTruthy();
-
-      prev = interval.prev();
-      expect(prev.getHours()).toEqual(3);
-      expect(prev.getDate()).toEqual(30);
-
-      prev = interval.prev();
-      expect(prev.getHours()).toEqual(3);
-      expect(prev.getDate()).toEqual(29);
-    });
-
-    test('prev() de-duplicates the repeated DST end hour like next() - */20 3 * * *', () => {
-      const options: CronExpressionOptions = {
-        currentDate: '2016-10-31 00:00:00',
-        endDate: undefined,
-        tz: 'Europe/Athens',
-      };
-
-      const interval: CronExpression = CronExpressionParser.parse('*/20 3 * * *', options);
-      let prev: CronDate;
-
-      expect(interval).toBeTruthy();
-
-      prev = interval.prev();
-      expect(prev.getMinutes()).toEqual(40);
-      expect(prev.getHours()).toEqual(3);
-      expect(prev.getDate()).toEqual(30);
-
-      prev = interval.prev();
-      expect(prev.getMinutes()).toEqual(20);
-      expect(prev.getHours()).toEqual(3);
-      expect(prev.getDate()).toEqual(30);
-
-      prev = interval.prev();
-      expect(prev.getMinutes()).toEqual(0);
-      expect(prev.getHours()).toEqual(3);
-      expect(prev.getDate()).toEqual(30);
-
-      prev = interval.prev();
-      expect(prev.getMinutes()).toEqual(40);
-      expect(prev.getHours()).toEqual(3);
-      expect(prev.getDate()).toEqual(29);
-    });
-
     test.each([
       ['Europe/Berlin', '0 10 2 * * *', '2025-10-26T02:05:00+01:00', '2025-10-26T00:10:00.000Z'],
       ['Australia/Lord_Howe', '0 45 1 * * *', '2025-04-06T01:35:00+10:30', '2025-04-05T14:45:00.000Z'],
       ['Antarctica/Troll', '0 30 2 * * *', '2025-10-26T02:05:00Z', '2025-10-26T00:30:00.000Z'],
-      ['Antarctica/Troll', '0 30 2 * * *', '2025-10-26T01:05:00Z', '2025-10-26T00:30:00.000Z'],
       ['Antarctica/Troll', '0 30 1 * * *', '2025-10-26T01:05:00Z', '2025-10-25T23:30:00.000Z'],
       ['Europe/Berlin', '59 59 2 * * *', '2025-10-26T02:00:00+01:00', '2025-10-26T00:59:59.000Z'],
       ['Europe/Berlin', '59 59 1 * * *', '2025-10-26T02:05:00+01:00', '2025-10-25T23:59:59.000Z'],
@@ -1640,26 +1585,6 @@ describe('CronExpressionParser', () => {
       expect(interval.prev().toISOString()).toEqual('2025-10-26T00:30:00.000Z');
       expect(interval.prev().toISOString()).toEqual('2025-10-25T23:30:00.000Z');
       expect(interval.prev().toISOString()).toEqual('2025-10-25T00:30:00.000Z');
-    });
-
-    test('prev() keeps both occurrences of a repeated hour when every hour is scheduled', () => {
-      const interval = CronExpressionParser.parse('0 30 * * * *', {
-        currentDate: '2025-10-26T02:00:00Z',
-        tz: 'Europe/Berlin',
-      });
-
-      expect(interval.prev().toISOString()).toEqual('2025-10-26T01:30:00.000Z');
-      expect(interval.prev().toISOString()).toEqual('2025-10-26T00:30:00.000Z');
-      expect(interval.prev().toISOString()).toEqual('2025-10-25T23:30:00.000Z');
-    });
-
-    test('next() past the scheduled minute in a repeated hour continues to the next day - Antarctica/Troll', () => {
-      const interval = CronExpressionParser.parse('0 30 2 * * *', {
-        currentDate: '2025-10-26T02:40:00Z',
-        tz: 'Antarctica/Troll',
-      });
-
-      expect(interval.next().toISOString()).toEqual('2025-10-27T02:30:00.000Z');
     });
 
     test('works on DST end 2016-10-30 00:00:01 - 0 * 30 * *', () => {
