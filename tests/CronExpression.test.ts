@@ -36,13 +36,15 @@ describe('CronExpression', () => {
   test('should return the next scheduled date', () => {
     const cronExpression = new CronExpression(fields, options);
     const nextDate = cronExpression.next();
-    expect(nextDate.toISOString()).toBe('2023-01-08T00:00:00.000Z');
+    // currentDate is exactly on the schedule: inclusive range yields it first
+    expect(nextDate.toISOString()).toBe('2023-01-01T00:00:00.000Z');
   });
 
   test('should return the previous scheduled date', () => {
     const cronExpression = new CronExpression(fields, options);
     const prevDate = cronExpression.prev();
-    expect(prevDate.toISOString()).toBe('2022-01-30T00:00:00.000Z');
+    // currentDate is exactly on the schedule: inclusive range yields it first
+    expect(prevDate.toISOString()).toBe('2023-01-01T00:00:00.000Z');
   });
 
   test('should return true if there is a next scheduled date within bounds', () => {
@@ -53,6 +55,7 @@ describe('CronExpression', () => {
   test('should return false if there is no next scheduled date within bounds', () => {
     const cronExpression = new CronExpression(fields, {
       ...options,
+      currentDate: new Date('2023-01-02T00:00:00Z'),
       endDate: new Date('2023-01-02T00:00:00Z'),
     });
     expect(cronExpression.hasNext()).toBe(false);
@@ -80,11 +83,13 @@ describe('CronExpression', () => {
     const newDate = new Date('2023-01-01T00:00:00Z');
 
     let nextDate = cronExpression.next().toISOString();
-    expect(nextDate).toBe('2023-01-08T00:00:00.000Z');
+    // currentDate is exactly on the schedule: inclusive range yields it first
+    expect(nextDate).toBe('2023-01-01T00:00:00.000Z');
 
     cronExpression.reset(newDate);
     nextDate = cronExpression.next().toISOString();
-    expect(nextDate).toBe('2023-01-08T00:00:00.000Z');
+    // reset re-arms inclusivity for the new date
+    expect(nextDate).toBe('2023-01-01T00:00:00.000Z');
   });
 
   test('should reset to startDate when no currentDate was provided', () => {
@@ -131,10 +136,13 @@ describe('CronExpression', () => {
     expect(first.toISOString()).toBe('2026-05-06T02:00:00.000Z');
 
     it.reset(first);
+    // reset() re-arms inclusive iteration, so next() yields the reset date
+    // itself first; it must still be anchored in Australia/Melbourne.
     const second = it.next().toDate();
-    // After reset, next() should still be anchored in Australia/Melbourne.
+    expect(second.toISOString()).toBe('2026-05-06T02:00:00.000Z');
     // 15:00 Melbourne = 05:00 UTC.
-    expect(second.toISOString()).toBe('2026-05-06T05:00:00.000Z');
+    const third = it.next().toDate();
+    expect(third.toISOString()).toBe('2026-05-06T05:00:00.000Z');
   });
 
   test('should preserve timezone after reset with explicit new date (issue #406)', () => {
@@ -278,19 +286,19 @@ describe('CronExpression', () => {
     });
   });
 
-  describe('iteration exclusivity', () => {
-    test('when currentDate is exactly on a schedule, returns the next occurrence', () => {
+  describe('iteration inclusivity', () => {
+    test('when currentDate is exactly on a schedule, returns the current date first', () => {
       const interval = CronExpressionParser.parse('0 0 9 * * *', {
         currentDate: new Date('2023-01-01T09:00:00.000Z'),
       });
-      expect(interval.next().toISOString()).toBe('2023-01-02T09:00:00.000Z');
+      expect(interval.next().toISOString()).toBe('2023-01-01T09:00:00.000Z');
     });
 
-    test('when currentDate is exactly on a schedule, returns the previous occurrence', () => {
+    test('when currentDate is exactly on a schedule, prev returns the current date first', () => {
       const interval = CronExpressionParser.parse('0 0 9 * * *', {
         currentDate: new Date('2023-01-01T09:00:00.000Z'),
       });
-      expect(interval.prev().toISOString()).toBe('2022-12-31T09:00:00.000Z');
+      expect(interval.prev().toISOString()).toBe('2023-01-01T09:00:00.000Z');
     });
   });
 
@@ -301,7 +309,8 @@ describe('CronExpression', () => {
       });
 
       const nextDate = cronExpression.next();
-      expect(nextDate.toISOString()).toBe('2022-01-02T00:00:00.000Z');
+      // startDate falls exactly on the schedule: inclusive range yields it first
+      expect(nextDate.toISOString()).toBe('2022-01-01T00:00:00.000Z');
     });
 
     test('should clamp currentDate to startDate when currentDate is before startDate', () => {
@@ -311,7 +320,8 @@ describe('CronExpression', () => {
       });
 
       const nextDate = cronExpression.next();
-      expect(nextDate.toISOString()).toBe('2022-01-02T00:00:00.000Z');
+      // startDate falls exactly on the schedule: inclusive range yields it first
+      expect(nextDate.toISOString()).toBe('2022-01-01T00:00:00.000Z');
     });
 
     test('should clamp currentDate to endDate when currentDate is after endDate', () => {
@@ -321,7 +331,8 @@ describe('CronExpression', () => {
       });
 
       const prevDate = cronExpression.prev();
-      expect(prevDate.toISOString()).toBe('2021-01-31T00:00:00.000Z');
+      // clamped endDate falls exactly on the schedule: inclusive yields it
+      expect(prevDate.toISOString()).toBe('2022-01-01T00:00:00.000Z');
     });
 
     test('should retain the current date when it is within the bounds', () => {
@@ -338,8 +349,8 @@ describe('CronExpression', () => {
     test('should throw an error if the current date is after end date', () => {
       const cronExpression = new CronExpression(fields, {
         ...options,
-        currentDate: '2022-01-01T00:00:00Z',
-        endDate: '2022-01-01T00:00:00Z',
+        currentDate: '2022-01-02T00:00:00Z',
+        endDate: '2022-01-01T12:00:00Z',
       });
 
       expect(() => cronExpression.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
@@ -348,8 +359,8 @@ describe('CronExpression', () => {
     test('should throw an error if the current date is before start date', () => {
       const cronExpression = new CronExpression(fields, {
         ...options,
-        currentDate: '2022-01-01T00:00:00Z',
-        startDate: '2022-01-01T00:00:00Z',
+        currentDate: '2022-01-02T00:00:00Z',
+        startDate: '2022-01-02T12:00:00Z',
       });
       expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
     });
@@ -874,6 +885,84 @@ describe('CronExpression', () => {
       const romeNext = rome.next().toDate();
       const utcNext = utc.next().toDate();
       expect(romeNext.toISOString()).not.toBe(utcNext.toISOString());
+    });
+  });
+
+  describe('inclusive currentDate (issue #356)', () => {
+    test('should include currentDate when it falls exactly on the schedule', () => {
+      const interval = CronExpressionParser.parse('0 12 * * *', {
+        tz: 'UTC',
+        currentDate: new Date('2020-02-19T12:00:00Z'),
+        endDate: new Date('2020-02-19T13:00:00Z'),
+      });
+      expect(interval.next().toDate().toISOString()).toBe('2020-02-19T12:00:00.000Z');
+    });
+
+    test('should not repeat the boundary date on successive next() calls', () => {
+      const interval = CronExpressionParser.parse('0 12 * * *', {
+        tz: 'UTC',
+        currentDate: new Date('2020-02-19T12:00:00Z'),
+      });
+      expect(interval.next().toDate().toISOString()).toBe('2020-02-19T12:00:00.000Z');
+      expect(interval.next().toDate().toISOString()).toBe('2020-02-20T12:00:00.000Z');
+      expect(interval.next().toDate().toISOString()).toBe('2020-02-21T12:00:00.000Z');
+    });
+
+    test('should include currentDate on first prev() and then advance backwards', () => {
+      const interval = CronExpressionParser.parse('0 12 * * *', {
+        tz: 'UTC',
+        currentDate: new Date('2020-02-19T12:00:00Z'),
+      });
+      expect(interval.prev().toDate().toISOString()).toBe('2020-02-19T12:00:00.000Z');
+      expect(interval.prev().toDate().toISOString()).toBe('2020-02-18T12:00:00.000Z');
+    });
+
+    test('should not duplicate the boundary date when iterating next() then prev()', () => {
+      const interval = CronExpressionParser.parse('0 12 * * *', {
+        tz: 'UTC',
+        currentDate: new Date('2020-02-19T12:00:00Z'),
+      });
+      interval.next();
+      expect(interval.prev().toDate().toISOString()).toBe('2020-02-18T12:00:00.000Z');
+    });
+
+    test('should preserve the inclusive first yield across hasNext()', () => {
+      const interval = CronExpressionParser.parse('0 12 * * *', {
+        tz: 'UTC',
+        currentDate: new Date('2020-02-19T12:00:00Z'),
+      });
+      expect(interval.hasNext()).toBe(true);
+      expect(interval.next().toDate().toISOString()).toBe('2020-02-19T12:00:00.000Z');
+    });
+
+    test('should preserve the inclusive first yield across hasPrev()', () => {
+      const interval = CronExpressionParser.parse('0 12 * * *', {
+        tz: 'UTC',
+        currentDate: new Date('2020-02-19T12:00:00Z'),
+      });
+      expect(interval.hasPrev()).toBe(true);
+      expect(interval.prev().toISOString()).toBe('2020-02-19T12:00:00.000Z');
+      expect(interval.hasPrev()).toBe(true);
+      expect(interval.prev().toISOString()).toBe('2020-02-18T12:00:00.000Z');
+    });
+
+    test('should re-arm inclusivity after reset()', () => {
+      const interval = CronExpressionParser.parse('0 12 * * *', {
+        tz: 'UTC',
+        currentDate: new Date('2020-02-19T12:00:00Z'),
+      });
+      interval.next();
+      interval.next();
+      interval.reset();
+      expect(interval.next().toDate().toISOString()).toBe('2020-02-19T12:00:00.000Z');
+    });
+
+    test('should not include a currentDate with sub-second precision', () => {
+      const interval = CronExpressionParser.parse('0 12 * * *', {
+        tz: 'UTC',
+        currentDate: new Date('2020-02-19T12:00:00.500Z'),
+      });
+      expect(interval.next().toDate().toISOString()).toBe('2020-02-20T12:00:00.000Z');
     });
   });
 });
