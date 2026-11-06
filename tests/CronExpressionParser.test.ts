@@ -2012,6 +2012,33 @@ describe('CronExpressionParser', () => {
         ]);
       });
 
+      test('compensates a skipped midnight hour that is the only scheduled hour', () => {
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-09-05T12:00:00.000Z'),
+          tz: 'America/Santiago',
+        };
+
+        const interval = CronExpressionParser.parse('30 0 * * *', options);
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-09-06T04:30:00.000Z', // 01:30 on the 6th, for the skipped 00:30
+          '2026-09-07T03:30:00.000Z', // 00:30 on the 7th
+          '2026-09-08T03:30:00.000Z',
+        ]);
+      });
+
+      test('compensates a skipped midnight hour on the first day of a month', () => {
+        // Paraguay moved from 00:00 to 01:00 on 1 October 2023, found by stepping to the month.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2023-09-15T12:00:00.000Z'),
+          tz: 'America/Asuncion',
+        };
+
+        const interval = CronExpressionParser.parse('0 0 1 10 *', options);
+
+        expect(interval.next().toISOString()).toEqual('2023-10-01T04:00:00.000Z'); // 01:00, for the skipped 00:00
+      });
+
       test('leaves a skipped calendar day alone', () => {
         // Apia crossed the date line and lost 30 December entirely, moving the
         // offset by a full day while removing no wall-clock hour.
