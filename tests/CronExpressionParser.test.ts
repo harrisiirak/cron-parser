@@ -1533,6 +1533,14 @@ describe('CronExpressionParser', () => {
       expect(() => interval.prev()).toThrow('Out of the time span range');
     });
 
+    test('prev() skips the later copy for a zoned currentDate without a tz option', () => {
+      const interval = CronExpressionParser.parse('0 30 1 * * *', {
+        currentDate: new CronDate('2025-10-26T02:00:00Z', 'Europe/London'),
+      });
+
+      expect(interval.prev().toISOString()).toEqual('2025-10-26T00:30:00.000Z');
+    });
+
     test.each([
       ['Europe/Berlin', '2025-10-26T02:05:00+01:00', '2025-10-26T01:00:00.000Z', '2025-10-26T00:30:00.000Z'],
       ['Australia/Lord_Howe', '2025-04-06T01:35:00+10:30', '2025-04-05T15:00:00.000Z', '2025-04-05T14:30:00.000Z'],

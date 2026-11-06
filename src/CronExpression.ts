@@ -131,14 +131,13 @@ export class CronExpression {
 
     const startOfDay = new CronDate(currentDate);
     startOfDay.setStartOfDay();
+    startOfDay.subtractSecond();
 
     const endOfDay = new CronDate(currentDate);
     endOfDay.setEndOfDay();
 
-    const beforeDay = new CronDate(new Date(startOfDay.getTime() - 1000), this.#tz);
-
     this.#dstTransitionDayKey = key;
-    this.#isDstTransitionDay = beforeDay.getUTCOffset() !== endOfDay.getUTCOffset();
+    this.#isDstTransitionDay = startOfDay.getUTCOffset() !== endOfDay.getUTCOffset();
     return this.#isDstTransitionDay;
   }
 
