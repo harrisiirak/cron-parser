@@ -39,6 +39,20 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse(expression)).toThrow(`Invalid range: ${range}`);
     });
 
+    test.each([
+      ['0 0 0 5-7L * *', 'Invalid range: 5-7L'],
+      ['0 0 0 L-3 * *', 'Invalid range: L-3'],
+      ['0 0 0 L/2 * *', 'Invalid repeat: L/2'],
+      ['0 0 0 5/2L * *', 'Invalid repeat: 5/2L'],
+      ['0 0 0 */2L * *', 'Invalid repeat: 1-31/2L'],
+      ['0 0 0 * * 1-3L', 'Invalid range: 1-3L'],
+      ['0 0 0 * * 1L-3L', 'Invalid range: 1L-3L'],
+      ['0 0 0 * * 1L/2', 'Invalid repeat: 1L/2'],
+      ['0 0 0 * * */2L', 'Invalid repeat: 0-7/2L'],
+    ])('range or step with an L - %s', (expression, message) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(message);
+    });
+
     test('minute value out of the range', () => {
       expect(() => CronExpressionParser.parse('* 32,72 * * * *')).toThrow(
         'Constraint error, got value 72 expected range 0-59',
@@ -198,6 +212,15 @@ describe('CronExpressionParser', () => {
         'Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible',
       );
     });
+
+    test.each(['5L#2', '1L#1', 'L#2'])(
+      'cannot combine `L` last occurrence and # occurrence special characters - %s',
+      (value) => {
+        expect(() => CronExpressionParser.parse(`0 0 0 ? * ${value}`)).toThrow(
+          'Constraint error, invalid dayOfWeek `#` and `L` special characters are incompatible',
+        );
+      },
+    );
 
     test('invalid characters test - dot', () => {
       const expression = '0 0 0 ? * 1.2#2';

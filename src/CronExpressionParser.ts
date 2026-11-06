@@ -473,7 +473,7 @@ export class CronExpressionParser {
    */
   static #parseRepeat(field: CronUnit, val: string, constraints: CronConstraints): ParseRangeResponse {
     const atoms = val.split('/');
-    if (atoms.length > 2) {
+    if (atoms.length > 2 || (atoms.length === 2 && val.includes('L'))) {
       throw new Error(`Invalid repeat: ${val}`);
     }
     if (atoms.length === 2) {
@@ -559,7 +559,7 @@ export class CronExpressionParser {
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;
     }
-    if (atoms.length > 2) {
+    if (atoms.length > 2 || val.includes('L')) {
       throw new Error(`Invalid range: ${val}`);
     }
     const [min, max] = atoms.map((num) => parseInt(num, 10));
@@ -582,7 +582,7 @@ export class CronExpressionParser {
       return { dayOfWeek: atoms[0] };
     }
     const nthValue = +atoms[atoms.length - 1];
-    const matches = val.match(/([,\-/])/);
+    const matches = val.match(/([,\-/])/) ?? val.match(/(L)/);
     if (matches !== null) {
       throw new Error(
         `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`,
