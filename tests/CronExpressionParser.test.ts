@@ -106,6 +106,26 @@ describe('CronExpressionParser', () => {
       }).toThrow('Invalid explicit day of month definition');
     });
 
+    test('invalid explicit day of month definition across several months', () => {
+      // None of these months has the day, so the expression can never fire.
+      for (const expression of ['0 0 31 4,6,9,11 *', '0 0 31 2,4 *', '0 0 31 4-6/2 *', '0 0 31 2-4/2 *']) {
+        expect(() => CronExpressionParser.parse(expression)).toThrow('Invalid explicit day of month definition');
+      }
+    });
+
+    test('explicit day of month valid in at least one of several months', () => {
+      const options = { currentDate: new Date('2026-01-15T00:00:00Z'), tz: 'UTC' };
+      expect(CronExpressionParser.parse('0 0 31 2,3 *', options).next().toISOString()).toEqual(
+        '2026-03-31T00:00:00.000Z',
+      );
+      expect(CronExpressionParser.parse('0 0 30,31 2,4 *', options).next().toISOString()).toEqual(
+        '2026-04-30T00:00:00.000Z',
+      );
+      expect(CronExpressionParser.parse('0 0 29 2,4 *', options).next().toISOString()).toEqual(
+        '2026-04-29T00:00:00.000Z',
+      );
+    });
+
     test('explicit day of month rescued by a restricted day of week', () => {
       // Day of month and day of week combine with OR, so an out-of-range day of
       // month is valid when the day of week is restricted: it fires on the
