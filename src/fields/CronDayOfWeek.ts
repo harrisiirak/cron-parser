@@ -23,8 +23,8 @@ export class CronDayOfWeek extends CronField {
     return DAY_CHARS;
   }
 
-  static get charPrefix(): string {
-    return '[0-7]?';
+  static isValidChar(value: string): boolean {
+    return /^[0-7]?L$/.test(value);
   }
 
   static get validChars(): RegExp {
