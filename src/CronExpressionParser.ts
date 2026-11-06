@@ -480,7 +480,7 @@ export class CronExpressionParser {
       if (!atoms[0].includes('-')) {
         atoms[0] = `${atoms[0]}-${constraints.max}`;
       }
-      return CronExpressionParser.#parseRange(field, atoms[0], parseInt(atoms[1], 10), constraints);
+      return CronExpressionParser.#parseRange(field, atoms[0], +atoms[1], constraints);
     }
 
     return CronExpressionParser.#parseRange(field, val, 1, constraints);
@@ -562,7 +562,8 @@ export class CronExpressionParser {
     if (atoms.length > 2) {
       throw new Error(`Invalid range: ${val}`);
     }
-    const [min, max] = atoms.map((num) => parseInt(num, 10));
+    // digits only: parseInt would read 3L as 3, and +'' would be 0
+    const [min, max] = atoms.map((atom) => (/^\d+$/.test(atom) ? +atom : NaN));
     this.#validateRange(min, max, constraints);
     this.#validateRepeatInterval(repeatInterval);
 
@@ -582,7 +583,7 @@ export class CronExpressionParser {
       return { dayOfWeek: atoms[0] };
     }
     const nthValue = +atoms[atoms.length - 1];
-    const matches = val.match(/([,\-/])/);
+    const matches = val.match(/([,\-/L])/);
     if (matches !== null) {
       throw new Error(
         `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`,
