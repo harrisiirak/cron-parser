@@ -366,12 +366,27 @@ describe('CronDate', () => {
     expect(date1.getSeconds()).toEqual(30);
   });
 
+  test('setStartOfDay and setEndOfDay should succeed', () => {
+    const date = new CronDate(new Date('2021-12-30T10:20:30.000Z'), 'UTC');
+    date.setStartOfDay();
+    expect(date.toISOString()).toEqual('2021-12-30T00:00:00.000Z');
+    date.setEndOfDay();
+    expect(date.toISOString()).toEqual('2021-12-30T23:59:59.999Z');
+  });
+
   test('getRepeatedTimeShift returns the backward shift only for the later occurrence of a repeated time', () => {
     expect(new CronDate(new Date('2025-10-26T00:30:00Z'), 'Europe/Berlin').getRepeatedTimeShift()).toBe(0);
     expect(new CronDate(new Date('2025-10-26T01:30:00Z'), 'Europe/Berlin').getRepeatedTimeShift()).toBe(60);
     expect(new CronDate(new Date('2025-10-26T02:30:00Z'), 'Europe/Berlin').getRepeatedTimeShift()).toBe(0);
     expect(new CronDate(new Date('2025-04-05T15:15:00Z'), 'Australia/Lord_Howe').getRepeatedTimeShift()).toBe(30);
     expect(new CronDate(new Date('2025-10-26T02:30:00Z'), 'Antarctica/Troll').getRepeatedTimeShift()).toBe(120);
+  });
+
+  test('isDstTransitionDay detects an offset change during the day, including one that repeats or skips midnight', () => {
+    expect(new CronDate(new Date('2025-10-26T00:30:00Z'), 'Europe/Berlin').isDstTransitionDay()).toBe(true);
+    expect(new CronDate(new Date('2025-10-27T00:30:00Z'), 'Europe/Berlin').isDstTransitionDay()).toBe(false);
+    expect(new CronDate(new Date('2025-11-02T17:00:00Z'), 'America/Havana').isDstTransitionDay()).toBe(true);
+    expect(new CronDate(new Date('2023-04-28T10:00:00Z'), 'Africa/Cairo').isDstTransitionDay()).toBe(true);
   });
 
   test.each([

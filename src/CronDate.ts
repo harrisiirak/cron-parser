@@ -341,6 +341,18 @@ export class CronDate {
   }
 
   /**
+   * Primarily for internal use.
+   * Checks whether the UTC offset changes during this day, including a change that repeats or skips midnight.
+   *
+   * @returns {boolean} True when the offset one second before the start of the day differs from the offset at its end
+   */
+  isDstTransitionDay(): boolean {
+    const { zone } = this.#date;
+    const start = this.#date.startOf('day').toMillis();
+    return zone.offset(start - 1000) !== this.#date.endOf('day').offset;
+  }
+
+  /**
    * Returns how many minutes the clock was set back when this instant is the later occurrence of a
    * local time repeated by a backward offset change, such as the end of DST.
    *

@@ -129,15 +129,8 @@ export class CronExpression {
       return this.#isDstTransitionDay;
     }
 
-    const startOfDay = new CronDate(currentDate);
-    startOfDay.setStartOfDay();
-    startOfDay.subtractSecond();
-
-    const endOfDay = new CronDate(currentDate);
-    endOfDay.setEndOfDay();
-
     this.#dstTransitionDayKey = key;
-    this.#isDstTransitionDay = startOfDay.getUTCOffset() !== endOfDay.getUTCOffset();
+    this.#isDstTransitionDay = currentDate.isDstTransitionDay();
     return this.#isDstTransitionDay;
   }
 
