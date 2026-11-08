@@ -1,4 +1,4 @@
-import { DateTime, WeekdayNumbers } from 'luxon';
+import { DateTime, DateObjectUnits } from 'luxon';
 
 export enum TimeUnit {
   Second = 'Second',
@@ -35,7 +35,8 @@ export class CronDate {
     const dateOpts = { zone: tz };
 
     // Initialize the internal DateTime object based on the type of timestamp provided.
-    if (!timestamp) {
+    // 0 is the Unix epoch, not a missing timestamp
+    if (!timestamp && timestamp !== 0) {
       this.#date = DateTime.local();
     } else if (timestamp instanceof CronDate) {
       this.#date = timestamp.#date;
@@ -436,11 +437,20 @@ export class CronDate {
   }
 
   /**
+   * Sets a date unit, skipping the luxon `set` call when the value does not change.
+   */
+  #set(unit: keyof DateObjectUnits, value: number): void {
+    if (this.#date[unit] !== value) {
+      this.#date = this.#date.set({ [unit]: value });
+    }
+  }
+
+  /**
    * Sets the day.
    * @param d
    */
   setDate(d: number): void {
-    this.#date = this.#date.set({ day: d });
+    this.#set('day', d);
   }
 
   /**
@@ -448,7 +458,7 @@ export class CronDate {
    * @param y
    */
   setFullYear(y: number): void {
-    this.#date = this.#date.set({ year: y });
+    this.#set('year', y);
   }
 
   /**
@@ -456,7 +466,7 @@ export class CronDate {
    * @param d
    */
   setDay(d: number): void {
-    this.#date = this.#date.set({ weekday: d as WeekdayNumbers });
+    this.#set('weekday', d);
   }
 
   /**
@@ -464,7 +474,7 @@ export class CronDate {
    * @param m
    */
   setMonth(m: number): void {
-    this.#date = this.#date.set({ month: m + 1 });
+    this.#set('month', m + 1);
   }
 
   /**
@@ -472,7 +482,7 @@ export class CronDate {
    * @param h
    */
   setHours(h: number): void {
-    this.#date = this.#date.set({ hour: h });
+    this.#set('hour', h);
   }
 
   /**
@@ -480,7 +490,7 @@ export class CronDate {
    * @param m
    */
   setMinutes(m: number): void {
-    this.#date = this.#date.set({ minute: m });
+    this.#set('minute', m);
   }
 
   /**
@@ -488,7 +498,7 @@ export class CronDate {
    * @param s
    */
   setSeconds(s: number): void {
-    this.#date = this.#date.set({ second: s });
+    this.#set('second', s);
   }
 
   /**
@@ -496,7 +506,7 @@ export class CronDate {
    * @param s
    */
   setMilliseconds(s: number): void {
-    this.#date = this.#date.set({ millisecond: s });
+    this.#set('millisecond', s);
   }
 
   /**
@@ -556,11 +566,19 @@ export class CronDate {
    * Primarily for internal use.
    * @param {DateMathOp} op - The operation to perform.
    * @param {TimeUnit} unit - The unit of time to use.
-   * @param {number} [hoursLength] - The length of the hours. Required when unit is not month or day.
+   * @param {number} [hoursLength] - The length of the hours. Used to skip the DST handling when every hour is scheduled.
    */
   applyDateOperation(op: DateMathOp, unit: TimeUnit, hoursLength?: number): void {
     if (unit === TimeUnit.Month || unit === TimeUnit.Day) {
       this.invokeDateOperation(op, unit);
+      // The hours a DST change skipped belong to the day that was left
+      this.clearDstStart();
+
+      // Stepping forward lands on 00:00, or on the first hour that exists when a DST change skips midnight
+      if (op === DateMathOp.Add && hoursLength !== 24 && this.getHours() > 0) {
+        this.#dstStart = 0;
+        this.#dstStartLandingHour = this.getHours();
+      }
       return;
     }
 

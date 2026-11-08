@@ -375,13 +375,19 @@ describe('CronExpression', () => {
     });
 
     test('should throw when no occurrence exists within the loop limit', () => {
-      // Day 31 restricted to April and June, which only ever have 30 days, so
-      // the expression can never match and iteration must not return a bogus date.
-      const cronExpression = CronExpressionParser.parse('0 0 0 31 4,6 *', {
-        currentDate: '2024-01-01T00:00:00Z',
+      // An expression that can never match is rejected when it is parsed, so
+      // keep the date from advancing to make sure iteration still stops at the
+      // loop limit instead of running forever or returning a bogus date.
+      const cronExpression = CronExpressionParser.parse('0 0 0 1 1 *', {
+        currentDate: '2024-06-01T00:00:00Z',
         tz: 'UTC',
       });
-      expect(() => cronExpression.next()).toThrow(LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE);
+      const spy = jest.spyOn(CronDate.prototype, 'applyDateOperation').mockImplementation(() => undefined);
+      try {
+        expect(() => cronExpression.next()).toThrow(LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE);
+      } finally {
+        spy.mockRestore();
+      }
     });
   });
 
