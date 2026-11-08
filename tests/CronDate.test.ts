@@ -370,6 +370,15 @@ describe('CronDate', () => {
     expect(date1.getSeconds()).toEqual(30);
   });
 
+  test('setting the same hour, minute, or second keeps the time in a repeated DST hour', () => {
+    // 01:30 EST, the second 01:30 on the day that DST ends.
+    const date1 = new CronDate(new Date('2026-11-01T06:30:15.000Z'), 'America/New_York');
+    date1.setHours(1);
+    date1.setMinutes(30);
+    date1.setSeconds(15);
+    expect(date1.toISOString()).toEqual('2026-11-01T06:30:15.000Z');
+  });
+
   describe('parse cron date formats with local timezone', () => {
     const offset = new Date().getTimezoneOffset();
     const offsetHours = Math.abs(Math.floor(offset / 60));

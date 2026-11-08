@@ -473,7 +473,9 @@ export class CronDate {
    * @param h
    */
   setHours(h: number): void {
-    this.#date = this.#date.set({ hour: h });
+    if (this.#date.hour !== h) {
+      this.#date = this.#date.set({ hour: h });
+    }
   }
 
   /**
@@ -481,7 +483,9 @@ export class CronDate {
    * @param m
    */
   setMinutes(m: number): void {
-    this.#date = this.#date.set({ minute: m });
+    if (this.#date.minute !== m) {
+      this.#date = this.#date.set({ minute: m });
+    }
   }
 
   /**
@@ -489,7 +493,9 @@ export class CronDate {
    * @param s
    */
   setSeconds(s: number): void {
-    this.#date = this.#date.set({ second: s });
+    if (this.#date.second !== s) {
+      this.#date = this.#date.set({ second: s });
+    }
   }
 
   /**
