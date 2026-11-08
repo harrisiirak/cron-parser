@@ -562,6 +562,8 @@ export class CronDate {
   applyDateOperation(op: DateMathOp, unit: TimeUnit, hoursLength?: number): void {
     if (unit === TimeUnit.Month || unit === TimeUnit.Day) {
       this.invokeDateOperation(op, unit);
+      // The hours a DST change skipped belong to the day that was left
+      this.clearDstStart();
 
       // Stepping forward lands on 00:00, or on the first hour that exists when a DST change skips midnight
       if (op === DateMathOp.Add && hoursLength !== 24 && this.getHours() > 0) {

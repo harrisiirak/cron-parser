@@ -2027,6 +2027,29 @@ describe('CronExpressionParser', () => {
         ]);
       });
 
+      test('runs the day after a skipped midnight hour once when that day was not scheduled', () => {
+        // The 6th, the day midnight disappears, is a Sunday and not scheduled, so the Monday after it runs at 00:30 only.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-09-04T12:00:00.000Z'),
+          tz: 'America/Santiago',
+        };
+
+        const weekly = CronExpressionParser.parse('30 0 * * 1', options);
+
+        expect(weekly.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-09-07T03:30:00.000Z', // 00:30 on the 7th
+          '2026-09-14T03:30:00.000Z',
+          '2026-09-21T03:30:00.000Z',
+        ]);
+
+        const monthly = CronExpressionParser.parse('30 0 8 9,10 *', options);
+
+        expect(monthly.take(2).map((date) => date.toISOString())).toEqual([
+          '2026-09-08T03:30:00.000Z', // 00:30 on the 8th
+          '2026-10-08T03:30:00.000Z',
+        ]);
+      });
+
       test('compensates a skipped midnight hour on the first day of a month', () => {
         // Paraguay moved from 00:00 to 01:00 on 1 October 2023, found by stepping to the month.
         const options: CronExpressionOptions = {
