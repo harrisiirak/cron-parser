@@ -35,7 +35,7 @@ export class CronExpression {
   readonly #tz?: string;
   readonly #initialDate: CronDate;
   #currentDate: CronDate;
-  #previousScheduleTimestamp: number | null = null;
+  #hasReturnedDate = false;
   readonly #startDate: CronDate | null;
   readonly #endDate: CronDate | null;
   readonly #fields: CronFieldCollection;
@@ -255,7 +255,7 @@ export class CronExpression {
    */
   hasNext(): boolean {
     const current = this.#currentDate;
-    const previousScheduleTimestamp = this.#previousScheduleTimestamp;
+    const hasReturnedDate = this.#hasReturnedDate;
 
     try {
       this.#findSchedule();
@@ -264,7 +264,7 @@ export class CronExpression {
       return false;
     } finally {
       this.#currentDate = current;
-      this.#previousScheduleTimestamp = previousScheduleTimestamp;
+      this.#hasReturnedDate = hasReturnedDate;
     }
   }
 
@@ -276,7 +276,7 @@ export class CronExpression {
    */
   hasPrev(): boolean {
     const current = this.#currentDate;
-    const previousScheduleTimestamp = this.#previousScheduleTimestamp;
+    const hasReturnedDate = this.#hasReturnedDate;
 
     try {
       this.#findSchedule(true);
@@ -285,7 +285,7 @@ export class CronExpression {
       return false;
     } finally {
       this.#currentDate = current;
-      this.#previousScheduleTimestamp = previousScheduleTimestamp;
+      this.#hasReturnedDate = hasReturnedDate;
     }
   }
 
@@ -326,7 +326,7 @@ export class CronExpression {
    */
   reset(newDate?: Date | CronDate): void {
     this.#currentDate = newDate ? new CronDate(newDate, this.#tz) : this.#initialDate;
-    this.#previousScheduleTimestamp = null;
+    this.#hasReturnedDate = false;
   }
 
   /**
@@ -560,10 +560,7 @@ export class CronExpression {
         continue;
       }
 
-      // Skip the schedule we already returned so successive next()/prev()
-      // calls keep advancing, but include the initial currentDate when it
-      // falls exactly on the schedule (inclusive range).
-      if (startTimestamp === currentDate.getTime() && startTimestamp === this.#previousScheduleTimestamp) {
+      if (this.#hasReturnedDate && startTimestamp === currentDate.getTime()) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
         continue;
       }
@@ -574,7 +571,7 @@ export class CronExpression {
       throw new Error(LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE);
     }
 
-    this.#previousScheduleTimestamp = currentDate.getTime();
+    this.#hasReturnedDate = true;
     this.#currentDate = currentDate;
     return currentDate;
   }
