@@ -1,4 +1,4 @@
-import { DateTime, WeekdayNumbers } from 'luxon';
+import { DateTime, DateObjectUnits } from 'luxon';
 
 export enum TimeUnit {
   Second = 'Second',
@@ -437,11 +437,20 @@ export class CronDate {
   }
 
   /**
+   * Sets a date unit, skipping the luxon `set` call when the value does not change.
+   */
+  #set(unit: keyof DateObjectUnits, value: number): void {
+    if (this.#date[unit] !== value) {
+      this.#date = this.#date.set({ [unit]: value });
+    }
+  }
+
+  /**
    * Sets the day.
    * @param d
    */
   setDate(d: number): void {
-    this.#date = this.#date.set({ day: d });
+    this.#set('day', d);
   }
 
   /**
@@ -449,7 +458,7 @@ export class CronDate {
    * @param y
    */
   setFullYear(y: number): void {
-    this.#date = this.#date.set({ year: y });
+    this.#set('year', y);
   }
 
   /**
@@ -457,7 +466,7 @@ export class CronDate {
    * @param d
    */
   setDay(d: number): void {
-    this.#date = this.#date.set({ weekday: d as WeekdayNumbers });
+    this.#set('weekday', d);
   }
 
   /**
@@ -465,7 +474,7 @@ export class CronDate {
    * @param m
    */
   setMonth(m: number): void {
-    this.#date = this.#date.set({ month: m + 1 });
+    this.#set('month', m + 1);
   }
 
   /**
@@ -473,9 +482,7 @@ export class CronDate {
    * @param h
    */
   setHours(h: number): void {
-    if (this.#date.hour !== h) {
-      this.#date = this.#date.set({ hour: h });
-    }
+    this.#set('hour', h);
   }
 
   /**
@@ -483,9 +490,7 @@ export class CronDate {
    * @param m
    */
   setMinutes(m: number): void {
-    if (this.#date.minute !== m) {
-      this.#date = this.#date.set({ minute: m });
-    }
+    this.#set('minute', m);
   }
 
   /**
@@ -493,9 +498,7 @@ export class CronDate {
    * @param s
    */
   setSeconds(s: number): void {
-    if (this.#date.second !== s) {
-      this.#date = this.#date.set({ second: s });
-    }
+    this.#set('second', s);
   }
 
   /**
@@ -503,7 +506,7 @@ export class CronDate {
    * @param s
    */
   setMilliseconds(s: number): void {
-    this.#date = this.#date.set({ millisecond: s });
+    this.#set('millisecond', s);
   }
 
   /**
