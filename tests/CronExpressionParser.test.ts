@@ -1599,6 +1599,34 @@ describe('CronExpressionParser', () => {
       expect(next.getDate()).toEqual(31);
     });
 
+    test('matches the second occurrence of a repeated hour when the first one is exhausted (#273)', () => {
+      // DST ends in America/Toronto on 2020-11-01: 02:00 EDT falls back to
+      // 01:00 EST, so 01:10 happens at both 05:10Z and 06:10Z. Starting the
+      // search at 05:55Z, the first occurrence of 01:10 has already passed
+      // and the second one must be returned instead of throwing.
+      const options: CronExpressionOptions = {
+        currentDate: '2020-11-01T05:55:00.000Z',
+        endDate: '2020-11-01T06:30:00.000Z',
+        tz: 'America/Toronto',
+      };
+
+      const interval: CronExpression = CronExpressionParser.parse('* 10 1 * * 0', options);
+      const next: CronDate = interval.next();
+      expect(next.toISOString()).toEqual('2020-11-01T06:10:00.000Z');
+    });
+
+    test('does not return the repeated hour twice when its first occurrence was matched (#273)', () => {
+      const options: CronExpressionOptions = {
+        currentDate: '2020-11-01T04:00:00.000Z',
+        tz: 'America/Toronto',
+      };
+
+      const interval: CronExpression = CronExpressionParser.parse('10 1 * * 0', options);
+      expect(interval.next().toISOString()).toEqual('2020-11-01T05:10:00.000Z');
+      // The repeated 01:10 EST must be skipped; the next match is next Sunday.
+      expect(interval.next().toISOString()).toEqual('2020-11-08T06:10:00.000Z');
+    });
+
     test('works on DST end 2016-10-30 00:00:01 - 0 * 30 * *', () => {
       const options: CronExpressionOptions = {
         currentDate: '2016-10-30 00:00:01',
