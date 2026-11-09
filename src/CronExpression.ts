@@ -451,6 +451,23 @@ export class CronExpression {
 
     // DST end: avoid returning the repeated hour twice when searching forward.
     if (isDstEnd && !reverse) {
+      // Only skip the second occurrence of the repeated hour when its first
+      // occurrence could still hold a match for this search, i.e. the latest
+      // matching time of the first occurrence does not precede the search
+      // start. When the search began after every matching time of the first
+      // occurrence, the second occurrence is the first real match and must
+      // not be skipped.
+      const maxMinute = this.#getMinOrMax(this.#fields.minute.values as number[], true);
+      const maxSecond = this.#getMinOrMax(this.#fields.second.values as number[], true);
+      const lastFirstPassTime =
+        currentDate.getTime() +
+        (maxMinute - currentDate.getMinutes()) * 60_000 +
+        (maxSecond - currentDate.getSeconds()) * 1_000 -
+        3_600_000;
+      if (isMatch && lastFirstPassTime < this.#currentDate.getTime()) {
+        currentDate.dstEnd = null;
+        return true;
+      }
       currentDate.dstEnd = null;
       currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, hours.length);
       return false;
