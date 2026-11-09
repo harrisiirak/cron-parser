@@ -106,7 +106,9 @@ export class CronExpressionParser {
     const { strict = false, hashSeed } = options;
     const rand = seededRandom(hashSeed);
 
-    expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions] || expression;
+    if (Object.hasOwn(PredefinedExpressions, expression)) {
+      expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions];
+    }
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
     if (!(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict)) {
       throw new Error('Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
@@ -216,9 +218,10 @@ export class CronExpressionParser {
   ): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
+      const aliases: Record<string, number | string> = field === CronUnit.Month ? Months : DayOfWeek;
       value = value.replace(/[a-z]{3}/gi, (match) => {
         match = match.toLowerCase();
-        const replacer = Months[match as keyof typeof Months] || DayOfWeek[match as keyof typeof DayOfWeek];
+        const replacer = aliases[match];
         if (replacer === undefined) {
           throw new Error(`Validation error, cannot resolve alias "${match}"`);
         }
@@ -477,7 +480,7 @@ export class CronExpressionParser {
       if (!atoms[0].includes('-')) {
         atoms[0] = `${atoms[0]}-${constraints.max}`;
       }
-      return CronExpressionParser.#parseRange(field, atoms[0], parseInt(atoms[1], 10), constraints);
+      return CronExpressionParser.#parseRange(field, atoms[0], +atoms[1], constraints);
     }
 
     return CronExpressionParser.#parseRange(field, val, 1, constraints);
@@ -556,7 +559,11 @@ export class CronExpressionParser {
     if (atoms.length <= 1) {
       return isNaN(+val) ? val : +val;
     }
-    const [min, max] = atoms.map((num) => parseInt(num, 10));
+    if (atoms.length > 2) {
+      throw new Error(`Invalid range: ${val}`);
+    }
+    // digits only: parseInt would read 3L as 3, and +'' would be 0
+    const [min, max] = atoms.map((atom) => (/^\d+$/.test(atom) ? +atom : NaN));
     this.#validateRange(min, max, constraints);
     this.#validateRepeatInterval(repeatInterval);
 
@@ -576,7 +583,7 @@ export class CronExpressionParser {
       return { dayOfWeek: atoms[0] };
     }
     const nthValue = +atoms[atoms.length - 1];
-    const matches = val.match(/([,\-/])/);
+    const matches = val.match(/([,\-/L])/);
     if (matches !== null) {
       throw new Error(
         `Constraint error, invalid dayOfWeek \`#\` and \`${matches?.[0]}\` special characters are incompatible`,

@@ -23,6 +23,10 @@ export class CronDayOfWeek extends CronField {
     return DAY_CHARS;
   }
 
+  static isValidChar(value: string): boolean {
+    return /^[0-7]?L$/.test(value);
+  }
+
   static get validChars(): RegExp {
     return /^[?,*\dLH#/-]+$|^.*H\(\d+-\d+\)\/\d+.*$|^.*H\(\d+-\d+\).*$|^.*H\/\d+.*$/;
   }

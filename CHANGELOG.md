@@ -1,5 +1,35 @@
 # Changelog
 
+## v5.10.4 - 2026-11-06
+
+### What's Changed
+* fix: stop treating crontab entries that contain = as variables by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/459
+* fix: parse crontab entries that start with a nickname by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/460
+* fix: restore initial date on reset by @awais-ur-rehman in https://github.com/harrisiirak/cron-parser/pull/465
+* fix: only remove the quotes around a crontab variable value by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/462
+* fix: treat a timestamp of 0 as the Unix epoch, not as a missing date by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/463
+* fix: only resolve month names in the month field and weekday names in the day of week field by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/466
+* fix: reject a range with more than two parts by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/467
+
+### New Contributors
+* @simonkundrik made their first contribution in https://github.com/harrisiirak/cron-parser/pull/459
+* @awais-ur-rehman made their first contribution in https://github.com/harrisiirak/cron-parser/pull/465
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.10.3...v5.10.4
+
+## v5.10.3 - 2026-10-31
+
+### What's Changed
+* fix: accept the RFC 850 and asctime HTTP date formats as string dates by @andrewstellman in https://github.com/harrisiirak/cron-parser/pull/455
+* fix: skip non-scheduled months when day-of-month is unrestricted by @maximilliangrand in https://github.com/harrisiirak/cron-parser/pull/444
+* fix: use own keys for crontab entries and predefined expressions by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/461
+
+### New Contributors
+* @andrewstellman made their first contribution in https://github.com/harrisiirak/cron-parser/pull/455
+* @maximilliangrand made their first contribution in https://github.com/harrisiirak/cron-parser/pull/444
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.10.2...v5.10.3
+
 ## v5.10.2 - 2026-10-09
 
 ### What's Changed
