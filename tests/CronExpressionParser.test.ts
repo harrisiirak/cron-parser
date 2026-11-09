@@ -53,6 +53,40 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse(expression)).toThrow(message);
     });
 
+    test.each([
+      ['3* * * * *', '3*'],
+      ['0* 0 1,5 * *', '0*'],
+      ['5*/5 * * * *', '5*/5'],
+      ['5,10* * * * *', '5,10*'],
+      ['* 1* * * *', '1*'],
+      ['* 0*/2 * * *', '0*/2'],
+      ['0 0 3* * *', '3*'],
+      ['0 0 * 1* *', '1*'],
+      ['0 0 * * 0*', '0*'],
+      ['0 0 * * SUN*', '0*'],
+      ['0 0 5? * *', '5?'],
+      ['*3 * * * *', '*3'],
+      ['* * *3 * *', '*3'],
+      ['*-5 * * * *', '*-5'],
+      ['1-* * * * *', '1-*'],
+      ['** * * * *', '**'],
+      ['*/5* * * * *', '*/5*'],
+      ['*/*  * * * *', '*/*'],
+    ])('wildcard inside a value - %s', (expression, value) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(`Invalid wildcard, got value: ${value}`);
+    });
+
+    test.each([
+      ['*/15 * * * *', '*/15 * * * *'],
+      ['5,*/20 * * * *', '0,5,20,40 * * * *'],
+      ['* * ? * *', '* * ? * *'],
+      ['0 0 ?/2 * *', '0 0 */2 * *'],
+      ['0 0 * * ?/2', '0 0 * * */2'],
+      ['0 0 */5,L * *', '0 0 1,6,11,16,21,26,31,L * *'],
+    ])('wildcard as a whole item still parses - %s', (expression, expected) => {
+      expect(CronExpressionParser.parse(expression).stringify()).toBe(expected);
+    });
+
     test('minute value out of the range', () => {
       expect(() => CronExpressionParser.parse('* 32,72 * * * *')).toThrow(
         'Constraint error, got value 72 expected range 0-59',

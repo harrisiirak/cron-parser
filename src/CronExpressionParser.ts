@@ -246,7 +246,15 @@ export class CronExpressionParser {
    * @private
    */
   static #parseWildcard(value: string, constraints: CronConstraints): string {
-    return value.replace(/[*?]/g, constraints.min + '-' + constraints.max);
+    // Only a whole list item (optionally with a step) stands for the full range
+    const parsed = value.replace(
+      /(^|,)[*?](?=\/|,|$)/g,
+      (_, separator: string) => `${separator}${constraints.min}-${constraints.max}`,
+    );
+    if (/[*?]/.test(parsed)) {
+      throw new Error(`Invalid wildcard, got value: ${value}`);
+    }
+    return parsed;
   }
 
   /**
