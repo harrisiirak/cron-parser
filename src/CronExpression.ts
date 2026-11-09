@@ -520,22 +520,29 @@ export class CronExpression {
   }
 
   /**
-   * Checks whether a match is the second pass through wall-clock time that a fall-back repeated. With a fixed
-   * hour such a match is skipped, so the occurrence runs once: it has a lower UTC offset than the previous
-   * occurrence and a wall-clock time that is not after it.
+   * Checks whether a match is another pass through wall-clock time that a fall-back repeated. With a fixed
+   * hour such a match is skipped, so the occurrence runs once. Going forward the repeat has a lower UTC offset
+   * than the previous occurrence and a wall-clock time that is not after it; going backward it has a higher UTC
+   * offset and a wall-clock time that is not before it.
    *
    * @param {CronDate} candidate - Matching date found by the search
    * @param {number} previousTimestamp - Timestamp the search started from
    * @param {number} previousOffset - UTC offset in minutes at that timestamp
+   * @param {boolean} reverse - When true, iterating backwards
    * @returns {boolean} True when the match repeats a wall-clock time
    * @private
    */
-  #isRepeatedPass(candidate: CronDate, previousTimestamp: number, previousOffset: number): boolean {
-    if (this.#fields.hour.values.length === 24 || candidate.getUTCOffset() >= previousOffset) {
+  #isRepeatedPass(candidate: CronDate, previousTimestamp: number, previousOffset: number, reverse: boolean): boolean {
+    if (this.#fields.hour.values.length === 24) {
       return false;
     }
     const wallClock = (timestamp: number, offset: number): number => timestamp + offset * 60000;
-    return wallClock(candidate.getTime(), candidate.getUTCOffset()) <= wallClock(previousTimestamp, previousOffset);
+    const candidateWallClock = wallClock(candidate.getTime(), candidate.getUTCOffset());
+    const previousWallClock = wallClock(previousTimestamp, previousOffset);
+    if (reverse) {
+      return candidate.getUTCOffset() > previousOffset && candidateWallClock >= previousWallClock;
+    }
+    return candidate.getUTCOffset() < previousOffset && candidateWallClock <= previousWallClock;
   }
 
   /**
@@ -586,7 +593,7 @@ export class CronExpression {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
         continue;
       }
-      if (!reverse && this.#isRepeatedPass(currentDate, startTimestamp, startOffset)) {
+      if (this.#isRepeatedPass(currentDate, startTimestamp, startOffset, reverse)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
         continue;
       }

@@ -2230,6 +2230,26 @@ describe('CronExpressionParser', () => {
         ]);
       });
 
+      test('steps back through a repeated stretch that starts mid-hour without a second pass', () => {
+        // Pacific/Chatham falls back from 03:45 to 02:45 on 2024-04-07 (14:00Z), so 02:45-03:45 repeats.
+        const previous = (expression: string) => {
+          const interval = CronExpressionParser.parse(expression, {
+            currentDate: new Date('2024-04-06T16:00:00.000Z'),
+            tz: 'Pacific/Chatham',
+          });
+          return [interval.prev(), interval.prev()].map((date) => date.toDate().toISOString());
+        };
+
+        expect(previous('0 2,3 * * *')).toEqual([
+          '2024-04-06T14:15:00.000Z', // 03:00 at UTC+12:45, the later pass
+          '2024-04-06T12:15:00.000Z', // 02:00 at UTC+13:45, the 13:15Z pass of 03:00 skipped
+        ]);
+        expect(previous('15 */3 * * *')).toEqual([
+          '2024-04-06T14:30:00.000Z', // 03:15 at UTC+12:45, the later pass
+          '2024-04-06T10:30:00.000Z', // 00:15 at UTC+13:45, the 13:30Z pass of 03:15 skipped
+        ]);
+      });
+
       test('fires every minute of a fixed hour once when a whole-hour fall-back repeats it', () => {
         // America/New_York goes from 02:00 EDT back to 01:00 EST on 2024-11-03, at 06:00Z.
         const interval = CronExpressionParser.parse('0,30 1 * * *', {
