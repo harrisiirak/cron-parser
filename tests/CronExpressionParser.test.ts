@@ -1648,13 +1648,45 @@ describe('CronExpressionParser', () => {
     });
 
     test.each([
-      ['Europe/Berlin', '2025-10-26T02:05:00+01:00', '2025-10-26T01:00:00.000Z', '2025-10-26T00:30:00.000Z'],
-      ['Australia/Lord_Howe', '2025-04-06T01:35:00+10:30', '2025-04-05T15:00:00.000Z', '2025-04-05T14:30:00.000Z'],
-      ['Antarctica/Troll', '2025-10-26T01:05:00Z', '2025-10-26T01:00:00.000Z', '2025-10-26T00:30:00.000Z'],
+      [
+        'Europe/Berlin',
+        '0 0,30 * * * *',
+        '2025-10-26T02:05:00+01:00',
+        '2025-10-26T01:00:00.000Z',
+        '2025-10-26T00:30:00.000Z',
+      ],
+      [
+        'Australia/Lord_Howe',
+        '0 0,30 * * * *',
+        '2025-04-06T01:35:00+10:30',
+        '2025-04-05T15:00:00.000Z',
+        '2025-04-05T14:30:00.000Z',
+      ],
+      [
+        'Antarctica/Troll',
+        '0 0,30 * * * *',
+        '2025-10-26T01:05:00Z',
+        '2025-10-26T01:00:00.000Z',
+        '2025-10-26T00:30:00.000Z',
+      ],
+      [
+        'Australia/Lord_Howe',
+        '0 45 * * * *',
+        '2025-04-05T16:00:00Z',
+        '2025-04-05T15:15:00.000Z',
+        '2025-04-05T14:45:00.000Z',
+      ],
+      [
+        'Australia/Lord_Howe',
+        '0 20,59 * * * *',
+        '2025-04-05T15:29:30Z',
+        '2025-04-05T15:29:00.000Z',
+        '2025-04-05T14:59:00.000Z',
+      ],
     ])(
-      'prev() preserves repeated times with a wildcard hour from inside the later copy - %s',
-      (tz, currentDate, first, second) => {
-        const interval = CronExpressionParser.parse('0 0,30 * * * *', { tz, currentDate });
+      'prev() preserves repeated times with a wildcard hour - %s, %s',
+      (tz, expression, currentDate, first, second) => {
+        const interval = CronExpressionParser.parse(expression, { tz, currentDate });
 
         expect(interval.prev().toISOString()).toEqual(first);
         expect(interval.prev().toISOString()).toEqual(second);

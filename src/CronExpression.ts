@@ -171,6 +171,18 @@ export class CronExpression {
    * @private
    */
   #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
+    if (reverse && this.#checkDstTransition(currentDate)) {
+      const target = new CronDate(currentDate);
+      this.#stepToNextMinute(target, dateMathVerb, reverse);
+      if (target.getUTCOffset() > currentDate.getUTCOffset() && currentDate.skipRepeatedTime()) {
+        return;
+      }
+    }
+
+    this.#stepToNextMinute(currentDate, dateMathVerb, reverse);
+  }
+
+  #stepToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
     const minutes = this.#fields.minute.values as number[];
     const seconds = this.#fields.second.values as number[];
 
