@@ -27,6 +27,32 @@ describe('CronExpressionParser', () => {
       );
     });
 
+    test.each([
+      ['1-5-9 * * * * *', '1-5-9'],
+      ['* 1-5-9 * * * *', '1-5-9'],
+      ['* * 1-5- * * *', '1-5-'],
+      ['* * * 1-5-9 * *', '1-5-9'],
+      ['* * * * 1-3-5 *', '1-3-5'],
+      ['* * * * * 1-3-5', '1-3-5'],
+      ['* 10-20-30/5 * * * *', '10-20-30'],
+    ])('range with more than two parts - %s', (expression, range) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(`Invalid range: ${range}`);
+    });
+
+    test.each([
+      ['0 0 0 5-7L * *', 'Constraint error, got range 5-NaN expected range 1-31'],
+      ['0 0 0 L-3 * *', 'Constraint error, got range NaN-3 expected range 1-31'],
+      ['0 0 0 L/2 * *', 'Constraint error, got range NaN-31 expected range 1-31'],
+      ['0 0 0 5/2L * *', 'Constraint error, cannot repeat at every NaN time.'],
+      ['0 0 0 */2L * *', 'Constraint error, cannot repeat at every NaN time.'],
+      ['0 0 0 * * 1-3L', 'Constraint error, got range 1-NaN expected range 0-7'],
+      ['0 0 0 * * 1L-3L', 'Constraint error, got range NaN-NaN expected range 0-7'],
+      ['0 0 0 * * 1L/2', 'Constraint error, got range NaN-7 expected range 0-7'],
+      ['0 0 0 * * */2L', 'Constraint error, cannot repeat at every NaN time.'],
+    ])('range or step with an L - %s', (expression, message) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(message);
+    });
+
     test('minute value out of the range', () => {
       expect(() => CronExpressionParser.parse('* 32,72 * * * *')).toThrow(
         'Constraint error, got value 72 expected range 0-59',
@@ -78,6 +104,26 @@ describe('CronExpressionParser', () => {
         const iter = CronExpressionParser.parse('0 0 31 4 *');
         iter.next();
       }).toThrow('Invalid explicit day of month definition');
+    });
+
+    test('invalid explicit day of month definition across several months', () => {
+      // None of these months has the day, so the expression can never fire.
+      for (const expression of ['0 0 31 4,6,9,11 *', '0 0 31 2,4 *', '0 0 31 4-6/2 *', '0 0 31 2-4/2 *']) {
+        expect(() => CronExpressionParser.parse(expression)).toThrow('Invalid explicit day of month definition');
+      }
+    });
+
+    test('explicit day of month valid in at least one of several months', () => {
+      const options = { currentDate: new Date('2026-01-15T00:00:00Z'), tz: 'UTC' };
+      expect(CronExpressionParser.parse('0 0 31 2,3 *', options).next().toISOString()).toEqual(
+        '2026-03-31T00:00:00.000Z',
+      );
+      expect(CronExpressionParser.parse('0 0 30,31 2,4 *', options).next().toISOString()).toEqual(
+        '2026-04-30T00:00:00.000Z',
+      );
+      expect(CronExpressionParser.parse('0 0 29 2,4 *', options).next().toISOString()).toEqual(
+        '2026-04-29T00:00:00.000Z',
+      );
     });
 
     test('explicit day of month rescued by a restricted day of week', () => {
@@ -137,6 +183,22 @@ describe('CronExpressionParser', () => {
       );
     });
 
+    test.each([
+      ['0 0 1 mon *', 'mon'],
+      ['0 0 1 jan-fri *', 'fri'],
+      ['0 0 * * jan', 'jan'],
+      ['0 0 * * mon-dec', 'dec'],
+      ['0 0 * * sat,jul', 'jul'],
+    ])('alias of another field is not resolved - %s', (expression, alias) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(`Validation error, cannot resolve alias "${alias}"`);
+    });
+
+    test('aliases of the field itself are resolved', () => {
+      const fields = CronExpressionParser.parse('0 0 1 jan-mar,DEC mon-wed,SAT').fields;
+      expect(fields.month.values).toEqual([1, 2, 3, 12]);
+      expect(fields.dayOfWeek.values).toEqual([1, 2, 3, 6]);
+    });
+
     test('invalid list value without value', () => {
       expect(() => {
         CronExpressionParser.parse('*/10 * * * * ,');
@@ -170,6 +232,15 @@ describe('CronExpressionParser', () => {
         'Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible',
       );
     });
+
+    test.each(['5L#2', '1L#1', 'L#2'])(
+      'cannot combine `L` last occurrence and # occurrence special characters - %s',
+      (value) => {
+        expect(() => CronExpressionParser.parse(`0 0 0 ? * ${value}`)).toThrow(
+          'Constraint error, invalid dayOfWeek `#` and `L` special characters are incompatible',
+        );
+      },
+    );
 
     test('invalid characters test - dot', () => {
       const expression = '0 0 0 ? * 1.2#2';
@@ -1272,6 +1343,34 @@ describe('CronExpressionParser', () => {
     });
   });
 
+  describe('the Unix epoch as a date option', () => {
+    const DAY = 24 * 60 * 60 * 1000;
+
+    test('currentDate: 0 starts from the epoch instead of the system time', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { currentDate: 0, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('startDate: 0 is applied as the lower bound', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { startDate: 0, currentDate: -2 * DAY, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('startDate: 0 is used as currentDate when none is given', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { startDate: 0, tz: 'UTC' });
+
+      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+    });
+
+    test('endDate: 0 is applied as the upper bound', () => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { endDate: 0, currentDate: DAY, tz: 'UTC' });
+
+      expect(() => interval.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    });
+  });
+
   describe('prev date', () => {
     test('prev should match correctly (issue #98) when milliseconds are greater than 0', () => {
       const options = {
@@ -1964,6 +2063,56 @@ describe('CronExpressionParser', () => {
         ]);
       });
 
+      test('compensates a skipped midnight hour that is the only scheduled hour', () => {
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-09-05T12:00:00.000Z'),
+          tz: 'America/Santiago',
+        };
+
+        const interval = CronExpressionParser.parse('30 0 * * *', options);
+
+        expect(interval.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-09-06T04:30:00.000Z', // 01:30 on the 6th, for the skipped 00:30
+          '2026-09-07T03:30:00.000Z', // 00:30 on the 7th
+          '2026-09-08T03:30:00.000Z',
+        ]);
+      });
+
+      test('runs the day after a skipped midnight hour once when that day was not scheduled', () => {
+        // The 6th, the day midnight disappears, is a Sunday and not scheduled, so the Monday after it runs at 00:30 only.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-09-04T12:00:00.000Z'),
+          tz: 'America/Santiago',
+        };
+
+        const weekly = CronExpressionParser.parse('30 0 * * 1', options);
+
+        expect(weekly.take(3).map((date) => date.toISOString())).toEqual([
+          '2026-09-07T03:30:00.000Z', // 00:30 on the 7th
+          '2026-09-14T03:30:00.000Z',
+          '2026-09-21T03:30:00.000Z',
+        ]);
+
+        const monthly = CronExpressionParser.parse('30 0 8 9,10 *', options);
+
+        expect(monthly.take(2).map((date) => date.toISOString())).toEqual([
+          '2026-09-08T03:30:00.000Z', // 00:30 on the 8th
+          '2026-10-08T03:30:00.000Z',
+        ]);
+      });
+
+      test('compensates a skipped midnight hour on the first day of a month', () => {
+        // Paraguay moved from 00:00 to 01:00 on 1 October 2023, found by stepping to the month.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2023-09-15T12:00:00.000Z'),
+          tz: 'America/Asuncion',
+        };
+
+        const interval = CronExpressionParser.parse('0 0 1 10 *', options);
+
+        expect(interval.next().toISOString()).toEqual('2023-10-01T04:00:00.000Z'); // 01:00, for the skipped 00:00
+      });
+
       test('leaves a skipped calendar day alone', () => {
         // Apia crossed the date line and lost 30 December entirely, moving the
         // offset by a full day while removing no wall-clock hour.
@@ -2184,6 +2333,18 @@ describe('CronExpressionParser', () => {
         const interval = CronExpressionParser.parse(expression, options);
         expect(interval.next().getDate()).toBe(expectedDate);
       });
+    });
+
+    test.each(['8L', '9L', '10L', '55L', '99L', '01L'])('rejects %s in the day of week field', (value) => {
+      expect(() => CronExpressionParser.parse(`0 0 0 * * ${value}`)).toThrow(
+        `CronDayOfWeek Validation error, got value ${value} expected range 0-7 or chars L`,
+      );
+    });
+
+    test.each(['1L', '5L', '15L', '31L'])('rejects %s in the day of month field', (value) => {
+      expect(() => CronExpressionParser.parse(`0 0 0 ${value} * *`)).toThrow(
+        `CronDayOfMonth Validation error, got value ${value} expected range 1-31 or chars L`,
+      );
     });
 
     test('parses cron with last day in a month (wildcard month)', () => {

@@ -63,6 +63,15 @@ export abstract class CronField {
   }
 
   /**
+   * Returns whether a string value, such as `L`, is allowed in this field.
+   * @param {string} value - The value to check
+   * @returns {boolean}
+   */
+  static isValidChar(value: string): boolean {
+    return (this.chars as readonly string[]).includes(value);
+  }
+
+  /**
    * Returns the regular expression used to validate this field.
    */
   static get validChars(): RegExp {
@@ -230,10 +239,10 @@ export abstract class CronField {
     let badValue: number | string | undefined;
     const charsString = this.chars.length > 0 ? ` or chars ${this.chars.join('')}` : '';
 
-    const charTest = (value: string) => (char: string) => new RegExp(`^\\d{0,2}${char}$`).test(value);
+    const field = this.constructor as typeof CronField;
     const rangeTest = (value: number | string) => {
       badValue = value;
-      return typeof value === 'number' ? value >= this.min && value <= this.max : this.chars.some(charTest(value));
+      return typeof value === 'number' ? value >= this.min && value <= this.max : field.isValidChar(value);
     };
     const isValidRange = this.#values.every(rangeTest);
     if (!isValidRange) {
