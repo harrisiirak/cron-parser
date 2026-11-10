@@ -876,4 +876,34 @@ describe('CronExpression', () => {
       expect(romeNext.toISOString()).not.toBe(utcNext.toISOString());
     });
   });
+
+  describe('DST handling - America/New_York (Previous occurrence)', () => {
+    test('keeps the previous matching hour on the transition day', () => {
+      const interval = CronExpressionParser.parse('0 2,22 * * *', {
+        currentDate: new Date('2020-03-09T03:30:00Z'),
+        tz: 'America/New_York',
+      });
+
+      expect(interval.prev().toISOString()).toBe('2020-03-09T02:00:00.000Z');
+    });
+
+    test('preserves minutes when the previous occurrence lands after a skipped hour', () => {
+      const interval = CronExpressionParser.parse('30 2,3 * * *', {
+        currentDate: new Date('2020-03-08T08:01:00Z'),
+        tz: 'America/New_York',
+      });
+
+      expect(interval.prev().toISOString()).toBe('2020-03-08T07:30:00.000Z');
+    });
+
+    test('honors startDate when the previous occurrence falls in the skipped hour', () => {
+      const interval = CronExpressionParser.parse('0 2 * * *', {
+        currentDate: new Date('2020-03-08T09:00:00Z'),
+        startDate: new Date('2020-03-08T08:00:00Z'),
+        tz: 'America/New_York',
+      });
+
+      expect(() => interval.prev()).toThrow('Out of the time span range');
+    });
+  });
 });
