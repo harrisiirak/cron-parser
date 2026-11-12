@@ -1369,7 +1369,7 @@ describe('CronExpressionParser', () => {
     test('endDate: 0 is applied as the upper bound', () => {
       const interval = CronExpressionParser.parse('0 0 * * *', { endDate: 0, currentDate: DAY, tz: 'UTC' });
 
-      expect(interval.next().toISOString()).toBe('1970-01-01T00:00:00.000Z');
+      expect(() => interval.next()).toThrow('Out of the time span range');
     });
   });
 
