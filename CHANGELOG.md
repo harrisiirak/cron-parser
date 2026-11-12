@@ -1,5 +1,21 @@
 # Changelog
 
+## v5.10.5 - 2026-11-12
+
+### What's Changed
+* fix: only allow 0L-7L in day of week and a bare L in day of month by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/468
+* fix: reject an L inside a range or step, or combined with # by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/469
+* perf: skip luxon set when a setter value does not change by @g4lb in https://github.com/harrisiirak/cron-parser/pull/472
+* fix: reject a day of month that none of the listed months have by @Oscar-man-shrestha in https://github.com/harrisiirak/cron-parser/pull/470
+* fix: do not skip a day when a DST change removes its midnight hour by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/471
+* fix: reject a wildcard that is part of a larger value by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/475
+
+### New Contributors
+* @g4lb made their first contribution in https://github.com/harrisiirak/cron-parser/pull/472
+* @Oscar-man-shrestha made their first contribution in https://github.com/harrisiirak/cron-parser/pull/470
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.10.4...v5.10.5
+
 ## v5.10.4 - 2026-11-06
 
 ### What's Changed
