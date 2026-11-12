@@ -335,6 +335,27 @@ describe('CronExpression', () => {
       expect(prevDate.toISOString()).toBe('2022-01-01T00:00:00.000Z');
     });
 
+    test.each([
+      { currentDate: '2024-01-02T00:00:00Z', endDate: '2024-01-01T00:00:00Z', reverse: false },
+      { currentDate: '2024-01-01T00:00:00Z', startDate: '2024-01-02T00:00:00Z', reverse: true },
+    ])('should reject outward iteration after clamping ($reverse)', ({ reverse, ...bounds }) => {
+      const interval = CronExpressionParser.parse('0 0 * * *', { ...bounds, tz: 'UTC' });
+      const outward = () => (reverse ? interval.prev() : interval.next());
+      const hasOutward = () => (reverse ? interval.hasPrev() : interval.hasNext());
+
+      expect(hasOutward()).toBe(false);
+      expect(outward).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+      // A failed outward probe must not consume the inclusive inward boundary.
+      expect((reverse ? interval.next() : interval.prev()).toISOString()).toBe(
+        new Date((reverse ? bounds.startDate : bounds.endDate)!).toISOString(),
+      );
+      interval.reset();
+      expect(hasOutward()).toBe(false);
+      expect(outward).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+      interval.reset(new Date('2024-01-01T12:00:00Z'));
+      expect(outward).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    });
+
     test('should retain the current date when it is within the bounds', () => {
       const cronExpression = new CronExpression(fields, {
         ...options,
@@ -349,8 +370,8 @@ describe('CronExpression', () => {
     test('should throw an error if the current date is after end date', () => {
       const cronExpression = new CronExpression(fields, {
         ...options,
-        currentDate: '2022-01-02T00:00:00Z',
-        endDate: '2022-01-01T12:00:00Z',
+        currentDate: '2022-01-01T00:00:00Z',
+        endDate: '2022-01-01T00:00:00Z',
       });
 
       expect(() => cronExpression.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
@@ -359,8 +380,8 @@ describe('CronExpression', () => {
     test('should throw an error if the current date is before start date', () => {
       const cronExpression = new CronExpression(fields, {
         ...options,
-        currentDate: '2022-01-02T00:00:00Z',
-        startDate: '2022-01-02T12:00:00Z',
+        currentDate: '2022-01-01T00:00:00Z',
+        startDate: '2022-01-01T00:00:00Z',
       });
       expect(() => cronExpression.prev()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
     });
