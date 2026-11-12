@@ -743,7 +743,8 @@ describe('CronExpressionParser', () => {
     const interval = CronExpressionParser.parse('* * * * * *', options);
     const intervals = interval.take(10);
     for (const [index, next] of intervals.entries()) {
-      expect(next.getSeconds()).toEqual(index + 1);
+      // currentDate is exactly on the schedule: inclusive range yields it first
+      expect(next.getSeconds()).toEqual(index);
     }
   });
 
@@ -755,9 +756,10 @@ describe('CronExpressionParser', () => {
 
     const interval = CronExpressionParser.parse('*/20 * * * * *', options);
     const intervals = interval.take(3);
-    expect(intervals[0].getSeconds()).toEqual(20);
-    expect(intervals[1].getSeconds()).toEqual(40);
-    expect(intervals[2].getSeconds()).toEqual(0);
+    // currentDate is exactly on the schedule: inclusive range yields it first
+    expect(intervals[0].getSeconds()).toEqual(0);
+    expect(intervals[1].getSeconds()).toEqual(20);
+    expect(intervals[2].getSeconds()).toEqual(40);
   });
 
   test('using non-standard second field (range)', () => {
@@ -1383,25 +1385,25 @@ describe('CronExpressionParser', () => {
     test('currentDate: 0 starts from the epoch instead of the system time', () => {
       const interval = CronExpressionParser.parse('0 0 * * *', { currentDate: 0, tz: 'UTC' });
 
-      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+      expect(interval.next().toISOString()).toBe('1970-01-01T00:00:00.000Z');
     });
 
     test('startDate: 0 is applied as the lower bound', () => {
       const interval = CronExpressionParser.parse('0 0 * * *', { startDate: 0, currentDate: -2 * DAY, tz: 'UTC' });
 
-      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+      expect(interval.next().toISOString()).toBe('1970-01-01T00:00:00.000Z');
     });
 
     test('startDate: 0 is used as currentDate when none is given', () => {
       const interval = CronExpressionParser.parse('0 0 * * *', { startDate: 0, tz: 'UTC' });
 
-      expect(interval.next().toISOString()).toBe('1970-01-02T00:00:00.000Z');
+      expect(interval.next().toISOString()).toBe('1970-01-01T00:00:00.000Z');
     });
 
     test('endDate: 0 is applied as the upper bound', () => {
       const interval = CronExpressionParser.parse('0 0 * * *', { endDate: 0, currentDate: DAY, tz: 'UTC' });
 
-      expect(() => interval.next()).toThrow(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+      expect(() => interval.next()).toThrow('Out of the time span range');
     });
   });
 
@@ -2041,7 +2043,8 @@ describe('CronExpressionParser', () => {
 
         const interval = CronExpressionParser.parse('0 22,23 * * *', options);
 
-        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+        expect(interval.take(5).map((date) => date.toISOString())).toEqual([
+          '2024-03-30T00:00:00.000Z', // 22:00 on the 29th; currentDate is on the schedule (inclusive)
           '2024-03-30T01:00:00.000Z', // 23:00 on the 29th
           '2024-03-31T00:00:00.000Z', // 22:00 on the 30th
           '2024-03-31T01:00:00.000Z', // 00:00 on the 31st, for the skipped 23:00

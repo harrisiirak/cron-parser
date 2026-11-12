@@ -35,6 +35,7 @@ export class CronExpression {
   readonly #tz?: string;
   readonly #initialDate: CronDate;
   #currentDate: CronDate;
+  #hasReturnedDate = false;
   readonly #startDate: CronDate | null;
   readonly #endDate: CronDate | null;
   readonly #fields: CronFieldCollection;
@@ -254,6 +255,7 @@ export class CronExpression {
    */
   hasNext(): boolean {
     const current = this.#currentDate;
+    const hasReturnedDate = this.#hasReturnedDate;
 
     try {
       this.#findSchedule();
@@ -262,6 +264,7 @@ export class CronExpression {
       return false;
     } finally {
       this.#currentDate = current;
+      this.#hasReturnedDate = hasReturnedDate;
     }
   }
 
@@ -273,6 +276,7 @@ export class CronExpression {
    */
   hasPrev(): boolean {
     const current = this.#currentDate;
+    const hasReturnedDate = this.#hasReturnedDate;
 
     try {
       this.#findSchedule(true);
@@ -281,6 +285,7 @@ export class CronExpression {
       return false;
     } finally {
       this.#currentDate = current;
+      this.#hasReturnedDate = hasReturnedDate;
     }
   }
 
@@ -321,6 +326,7 @@ export class CronExpression {
    */
   reset(newDate?: Date | CronDate): void {
     this.#currentDate = newDate ? new CronDate(newDate, this.#tz) : this.#initialDate;
+    this.#hasReturnedDate = false;
   }
 
   /**
@@ -523,6 +529,15 @@ export class CronExpression {
     const currentDate = new CronDate(this.#currentDate);
     const startTimestamp = currentDate.getTime();
 
+    // Inclusivity must not allow an outward step from the terminal range bound,
+    // including when the constructor clamped currentDate to that bound.
+    if (
+      (!reverse && this.#endDate && startTimestamp >= this.#endDate.getTime()) ||
+      (reverse && this.#startDate && startTimestamp <= this.#startDate.getTime())
+    ) {
+      throw new Error(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    }
+
     if (currentDate.getMilliseconds() > 0) {
       currentDate.setMilliseconds(0);
       if (!reverse) {
@@ -554,7 +569,7 @@ export class CronExpression {
         continue;
       }
 
-      if (startTimestamp === currentDate.getTime()) {
+      if (this.#hasReturnedDate && startTimestamp === currentDate.getTime()) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
         continue;
       }
@@ -565,6 +580,7 @@ export class CronExpression {
       throw new Error(LOOPS_LIMIT_EXCEEDED_ERROR_MESSAGE);
     }
 
+    this.#hasReturnedDate = true;
     this.#currentDate = currentDate;
     return currentDate;
   }
