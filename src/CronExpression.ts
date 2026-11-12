@@ -529,6 +529,15 @@ export class CronExpression {
     const currentDate = new CronDate(this.#currentDate);
     const startTimestamp = currentDate.getTime();
 
+    // Inclusivity must not allow an outward step from the terminal range bound,
+    // including when the constructor clamped currentDate to that bound.
+    if (
+      (!reverse && this.#endDate && startTimestamp >= this.#endDate.getTime()) ||
+      (reverse && this.#startDate && startTimestamp <= this.#startDate.getTime())
+    ) {
+      throw new Error(TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE);
+    }
+
     if (currentDate.getMilliseconds() > 0) {
       currentDate.setMilliseconds(0);
       if (!reverse) {
