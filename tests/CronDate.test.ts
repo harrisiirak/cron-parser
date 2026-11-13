@@ -412,6 +412,15 @@ describe('CronDate', () => {
     expect(date1.toISOString()).toEqual('2026-11-01T06:30:15.000Z');
   });
 
+  test('keeps the deprecated dstEnd accessor', () => {
+    const date = new CronDate(new Date('2026-11-01T06:30:15.000Z'), 'America/New_York');
+    expect(date.dstEnd).toBeNull();
+
+    date.dstEnd = 1;
+    expect(date.dstEnd).toBe(1);
+    expect(new CronDate(date).dstEnd).toBe(1);
+  });
+
   describe('parse cron date formats with local timezone', () => {
     const offset = new Date().getTimezoneOffset();
     const offsetHours = Math.abs(Math.floor(offset / 60));

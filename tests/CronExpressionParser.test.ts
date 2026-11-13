@@ -2264,6 +2264,27 @@ describe('CronExpressionParser', () => {
         ]);
       });
 
+      test('skips the repeated pass of a fixed hour when the expression fires every second', () => {
+        // America/New_York goes from 02:00 EDT back to 01:00 EST on 2024-11-03, at 06:00Z.
+        const forward = CronExpressionParser.parse('* * 1 * * *', {
+          currentDate: new Date('2024-11-03T05:59:58.000Z'),
+          tz: 'America/New_York',
+        });
+        expect(forward.take(2).map((date) => date.toISOString())).toEqual([
+          '2024-11-03T05:59:59.000Z', // 01:59:59 EDT, the last second of the first pass
+          '2024-11-04T06:00:00.000Z', // 01:00:00 EST on the 4th, the 3600 repeated seconds skipped
+        ]);
+
+        const backward = CronExpressionParser.parse('* * 1 * * *', {
+          currentDate: new Date('2024-11-03T06:00:01.000Z'),
+          tz: 'America/New_York',
+        });
+        expect([backward.prev(), backward.prev()].map((date) => date.toISOString())).toEqual([
+          '2024-11-03T06:00:00.000Z', // 01:00:00 EST, the first second of the later pass
+          '2024-11-02T05:59:59.000Z', // 01:59:59 EDT on the 2nd, the earlier pass on the 3rd skipped
+        ]);
+      });
+
       test('keeps hasNext and the iterator going instead of ending them silently', () => {
         // Both report a thrown error as the end of the sequence.
         const interval = CronExpressionParser.parse('0 8 * * *', lordHowe('2024-04-06T00:00:00.000Z'));

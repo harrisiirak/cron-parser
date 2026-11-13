@@ -24,6 +24,7 @@ export class CronDate {
   #date: DateTime;
   #dstStart: number | null = null;
   #dstStartLandingHour: number | null = null;
+  #dstEnd: number | null = null;
 
   /**
    * Constructs a new CronDate instance.
@@ -41,6 +42,7 @@ export class CronDate {
       this.#date = timestamp.#date;
       this.#dstStart = timestamp.#dstStart;
       this.#dstStartLandingHour = timestamp.#dstStartLandingHour;
+      this.#dstEnd = timestamp.#dstEnd;
     } else if (timestamp instanceof Date) {
       this.#date = DateTime.fromJSDate(timestamp, dateOpts);
     } else if (typeof timestamp === 'number') {
@@ -97,6 +99,24 @@ export class CronDate {
   clearDstStart(): void {
     this.#dstStart = null;
     this.#dstStartLandingHour = null;
+  }
+
+  /**
+   * Returns daylight savings end time.
+   * @deprecated The library no longer sets or reads this value. It will be removed in the next major version.
+   * @returns {number | null}
+   */
+  get dstEnd(): number | null {
+    return this.#dstEnd;
+  }
+
+  /**
+   * Sets daylight savings end time.
+   * @deprecated The library no longer sets or reads this value. It will be removed in the next major version.
+   * @param {number | null} value
+   */
+  set dstEnd(value: number | null) {
+    this.#dstEnd = value;
   }
 
   /**

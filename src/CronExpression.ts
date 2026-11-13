@@ -594,7 +594,8 @@ export class CronExpression {
         continue;
       }
       if (this.#isRepeatedPass(currentDate, startTimestamp, startOffset, reverse)) {
-        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
+        // A whole minute at a time: DST changes start and end on a whole minute, so the rest of this minute repeats too
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
         continue;
       }
       break;
