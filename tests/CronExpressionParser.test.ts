@@ -233,6 +233,47 @@ describe('CronExpressionParser', () => {
       expect(fields.dayOfWeek.values).toEqual([1, 2, 3, 6]);
     });
 
+    test.each([
+      ['0 12 * * SUN6', 'SUN6'],
+      ['0 12 * * 6SUN', '6SUN'],
+      ['0 12 * * 0SUN', '0SUN'],
+      ['0 0 * * 0MON-FRI', '0MON-FRI'],
+      ['0 0 * * MON-0FRI', 'MON-0FRI'],
+      ['0 0 * * MON/FRI', 'MON/FRI'],
+      ['0 0 * * */FRI', '*/FRI'],
+      ['0 0 * * SUNMON', 'SUNMON'],
+      ['0 0 * * SUN,MON6', 'SUN,MON6'],
+      ['0 0 * * FRIL1', 'FRIL1'],
+      ['0 0 1 JAN2,JUL *', 'JAN2,JUL'],
+      ['0 0 1 0JAN,JUL *', '0JAN,JUL'],
+      ['0 0 1 JAN,0JUL *', 'JAN,0JUL'],
+      ['0 0 1 JAN/JUL *', 'JAN/JUL'],
+      ['0 0 1 JANFEB *', 'JANFEB'],
+      ['0 0 1 JAN-FEB3 *', 'JAN-FEB3'],
+    ])('month or day of week name that is not on its own - %s', (expression, value) => {
+      expect(() => CronExpressionParser.parse(expression)).toThrow(`Invalid alias, got value: ${value}`);
+    });
+
+    test.each([
+      '0 0 * * SUN',
+      '0 0 * * SUN,MON',
+      '0 0 * * mon-fri',
+      '0 0 * * MON-FRI/2',
+      '0 0 * * SUN#2',
+      '0 0 * * SUN-TUE,FRI',
+      '0 0 1 JAN *',
+      '0 0 1 JAN-MAR/2 *',
+      '0 0 1 JAN,MAR,DEC *',
+      '0 0 1 jan-mar,DEC *',
+    ])('month or day of week name on its own still parses - %s', (expression) => {
+      expect(() => CronExpressionParser.parse(expression)).not.toThrow();
+    });
+
+    test('last weekday written with a name still parses', () => {
+      const named = CronExpressionParser.parse('0 0 * * FRIL').fields.dayOfWeek.values;
+      expect(named).toEqual(CronExpressionParser.parse('0 0 * * 5L').fields.dayOfWeek.values);
+    });
+
     test('invalid list value without value', () => {
       expect(() => {
         CronExpressionParser.parse('*/10 * * * * ,');
