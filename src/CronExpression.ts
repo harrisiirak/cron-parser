@@ -143,6 +143,22 @@ export class CronExpression {
   }
 
   /**
+   * Sets the first allowed minute after an hour step, unless the date is already past it. A sub-hour DST
+   * transition can land part-way through the hour, and going back to the first minute would skip occurrences.
+   * Stepping backwards always lands on :59, so only the forward direction can be past it.
+   *
+   * @param {CronDate} currentDate - Mutable date being iterated
+   * @param {boolean} reverse - When true, iterating backwards
+   * @private
+   */
+  #stepToFirstMinute(currentDate: CronDate, reverse: boolean): void {
+    const minute = this.#getMinOrMax(this.#fields.minute.values as number[], reverse);
+    if (reverse || minute >= currentDate.getMinutes()) {
+      currentDate.setMinutes(minute);
+    }
+  }
+
+  /**
    * Moves the date to the next/previous allowed second value. If there is no remaining allowed second
    * within the current minute, rolls to the next/previous minute and resets seconds to the min/max allowed.
    *
@@ -177,7 +193,6 @@ export class CronExpression {
    * @private
    */
   #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
-    const minutes = this.#fields.minute.values as number[];
     const seconds = this.#fields.second.values as number[];
 
     const currentMinute = currentDate.getMinutes();
@@ -191,7 +206,7 @@ export class CronExpression {
 
     // Roll over to the next/previous hour and start from the min/max allowed minute/second.
     currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
-    currentDate.setMinutes(this.#getMinOrMax(minutes, reverse));
+    this.#stepToFirstMinute(currentDate, reverse);
     currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
   }
 
@@ -436,7 +451,6 @@ export class CronExpression {
 
     const currentHour = currentDate.getHours();
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
-    const isDstEnd = currentDate.dstEnd === currentHour;
 
     // DST start: accept the landing hour when a skipped hour was scheduled.
     // The walk is modular because a gap can wrap midnight, and confined to the
@@ -447,13 +461,6 @@ export class CronExpression {
           return true;
         }
       }
-    }
-
-    // DST end: avoid returning the repeated hour twice when searching forward.
-    if (isDstEnd && !reverse) {
-      currentDate.dstEnd = null;
-      currentDate.applyDateOperation(DateMathOp.Add, TimeUnit.Hour, hours.length);
-      return false;
     }
 
     if (isMatch) {
@@ -471,7 +478,7 @@ export class CronExpression {
     // Fast path: jump directly to the next/previous matching hour and reset lower units.
     //
     // On DST transition days, setting the hour directly can land on a non-existent/repeated local time,
-    // which breaks the existing DST handling that relies on `applyDateOperation()` to set `dstStart/dstEnd`.
+    // which breaks the existing DST handling that relies on `applyDateOperation()` to set `dstStart`.
     // For those days, fall back to stepping hour-by-hour to preserve correctness.
     if (this.#checkDstTransition(currentDate)) {
       const steps = reverse ? currentHour - nextHour : nextHour - currentHour;
@@ -481,10 +488,11 @@ export class CronExpression {
         if (!reverse && currentDate.getHours() >= nextHour) break;
         if (reverse && currentDate.getHours() <= nextHour) break;
       }
+      this.#stepToFirstMinute(currentDate, reverse);
     } else {
       currentDate.setHours(nextHour);
+      currentDate.setMinutes(this.#getMinOrMax(this.#fields.minute.values as number[], reverse));
     }
-    currentDate.setMinutes(this.#getMinOrMax(this.#fields.minute.values as number[], reverse));
     currentDate.setSeconds(this.#getMinOrMax(this.#fields.second.values as number[], reverse));
     return false;
   }
@@ -512,6 +520,32 @@ export class CronExpression {
   }
 
   /**
+   * Checks whether a match is another pass through wall-clock time that a fall-back repeated. With a fixed
+   * hour such a match is skipped, so the occurrence runs once. Going forward the repeat has a lower UTC offset
+   * than the previous occurrence and a wall-clock time that is not after it; going backward it has a higher UTC
+   * offset and a wall-clock time that is not before it.
+   *
+   * @param {CronDate} candidate - Matching date found by the search
+   * @param {number} previousTimestamp - Timestamp the search started from
+   * @param {number} previousOffset - UTC offset in minutes at that timestamp
+   * @param {boolean} reverse - When true, iterating backwards
+   * @returns {boolean} True when the match repeats a wall-clock time
+   * @private
+   */
+  #isRepeatedPass(candidate: CronDate, previousTimestamp: number, previousOffset: number, reverse: boolean): boolean {
+    if (this.#fields.hour.values.length === 24) {
+      return false;
+    }
+    const wallClock = (timestamp: number, offset: number): number => timestamp + offset * 60000;
+    const candidateWallClock = wallClock(candidate.getTime(), candidate.getUTCOffset());
+    const previousWallClock = wallClock(previousTimestamp, previousOffset);
+    if (reverse) {
+      return candidate.getUTCOffset() > previousOffset && candidateWallClock >= previousWallClock;
+    }
+    return candidate.getUTCOffset() < previousOffset && candidateWallClock <= previousWallClock;
+  }
+
+  /**
    * Finds the next or previous schedule based on the cron expression.
    *
    * @param {boolean} [reverse=false] - If true, finds the previous schedule; otherwise, finds the next schedule.
@@ -522,6 +556,7 @@ export class CronExpression {
     const dateMathVerb: DateMathOp = reverse ? DateMathOp.Subtract : DateMathOp.Add;
     const currentDate = new CronDate(this.#currentDate);
     const startTimestamp = currentDate.getTime();
+    const startOffset = currentDate.getUTCOffset();
 
     if (currentDate.getMilliseconds() > 0) {
       currentDate.setMilliseconds(0);
@@ -556,6 +591,11 @@ export class CronExpression {
 
       if (startTimestamp === currentDate.getTime()) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
+        continue;
+      }
+      if (this.#isRepeatedPass(currentDate, startTimestamp, startOffset, reverse)) {
+        // A whole minute at a time: DST changes start and end on a whole minute, so the rest of this minute repeats too
+        currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
         continue;
       }
       break;

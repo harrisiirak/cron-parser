@@ -103,6 +103,7 @@ export class CronDate {
 
   /**
    * Returns daylight savings end time.
+   * @deprecated The library no longer sets or reads this value. It will be removed in the next major version.
    * @returns {number | null}
    */
   get dstEnd(): number | null {
@@ -111,6 +112,7 @@ export class CronDate {
 
   /**
    * Sets daylight savings end time.
+   * @deprecated The library no longer sets or reads this value. It will be removed in the next major version.
    * @param {number | null} value
    */
   set dstEnd(value: number | null) {
@@ -142,7 +144,8 @@ export class CronDate {
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    this.#date = this.#date.plus({ hours: 1 }).startOf('hour');
+    // Elapsed time: startOf('hour') after plus(1h) can land before the start when the clocks go back by less than an hour
+    this.#date = this.#date.plus({ minutes: 60 - this.#date.minute }).startOf('minute');
   }
 
   /**
@@ -486,11 +489,14 @@ export class CronDate {
   }
 
   /**
-   * Sets the minutes.
+   * Sets the minutes by moving elapsed time, so inside a DST transition that is shorter than an hour the hour
+   * (and the day) can change as well.
    * @param m
    */
   setMinutes(m: number): void {
-    this.#set('minute', m);
+    if (m !== this.#date.minute) {
+      this.#date = this.#date.plus({ minutes: m - this.#date.minute });
+    }
   }
 
   /**
@@ -598,10 +604,6 @@ export class CronDate {
         // that starts at 23:00 over midnight.
         this.#dstStart = (previousHour + 1) % 24;
         this.#dstStartLandingHour = currentHour;
-      }
-    } else if (advance === 0 && this.getMinutes() === 0 && this.getSeconds() === 0) {
-      if (hoursLength !== 24) {
-        this.dstEnd = currentHour;
       }
     }
   }
