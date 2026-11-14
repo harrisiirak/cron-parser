@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.10.6 - 2026-11-14
+
+### What's Changed
+* fix: allow only whitelisted characters around an H token by @harrisiirak in https://github.com/harrisiirak/cron-parser/pull/478
+
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.10.5...v5.10.6
+
 ## v5.10.5 - 2026-11-12
 
 ### What's Changed
