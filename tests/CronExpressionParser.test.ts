@@ -183,6 +183,12 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse('10 ) 12 8 0')).toThrow('Invalid characters, got value: )');
     });
 
+    test('rejects a fractional step listed after an H token', () => {
+      expect(() => CronExpressionParser.parse('H/60,1-59/1e-17 * * * *')).toThrow(
+        'Invalid characters, got value: H/60,1-59/1e-17',
+      );
+    });
+
     test('interval with invalid characters test', () => {
       expect(() => CronExpressionParser.parse('10 */A 12 8 0')).toThrow('Invalid characters, got value: */A');
     });
