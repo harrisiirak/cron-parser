@@ -342,6 +342,61 @@ export class CronDate {
   }
 
   /**
+   * Primarily for internal use.
+   * Checks whether the UTC offset changes during this day, including a change that repeats or skips midnight.
+   *
+   * @returns {boolean} True when the offset one second before the start of the day differs from the offset at its end
+   */
+  isDstTransitionDay(): boolean {
+    const { zone } = this.#date;
+    const start = this.#date.startOf('day').toMillis();
+    return zone.offset(start - 1000) !== this.#date.endOf('day').offset;
+  }
+
+  /**
+   * Returns how many minutes the clock was set back when this instant is the later occurrence of a
+   * local time repeated by a backward offset change, such as the end of DST.
+   *
+   * @returns {number} The backward shift in minutes, or 0 when this local time is not repeated
+   */
+  getRepeatedTimeShift(): number {
+    const { zone, offset } = this.#date;
+    const time = this.#date.toMillis();
+    const shift = zone.offset(time - 86_400_000) - offset;
+    if (shift <= 0 || zone.offset(time - shift * 60_000) !== offset + shift) {
+      return 0;
+    }
+    return shift;
+  }
+
+  /**
+   * Primarily for internal use.
+   * Moves the later occurrence of a repeated local time to the last second before the backward offset change.
+   *
+   * @returns {boolean} True when the date was moved, false when this local time is not repeated
+   */
+  skipRepeatedTime(): boolean {
+    const shift = this.getRepeatedTimeShift();
+    if (shift === 0) {
+      return false;
+    }
+
+    const { zone, offset } = this.#date;
+    let earlier = Math.floor((this.#date.toMillis() - shift * 60_000) / 1000);
+    let later = Math.floor(this.#date.toMillis() / 1000);
+    while (later - earlier > 1) {
+      const middle = Math.floor((earlier + later) / 2);
+      if (zone.offset(middle * 1000) === offset) {
+        later = middle;
+      } else {
+        earlier = middle;
+      }
+    }
+    this.#date = DateTime.fromMillis(earlier * 1000, { zone });
+    return true;
+  }
+
+  /**
    * Sets the time to the start of the day (00:00:00.000) in the current timezone.
    */
   setStartOfDay(): void {
