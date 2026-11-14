@@ -41,7 +41,7 @@ export class CronDayOfMonth extends CronField {
     return DAY_CHARS;
   }
   static get validChars(): RegExp {
-    return /^[?,*\dLH/-]+$|^.*H\(\d+-\d+\)\/\d+.*$|^.*H\(\d+-\d+\).*$|^.*H\/\d+.*$/;
+    return /^(?:[?,*\dLH/-]|H\(\d+-\d+\))+$/;
   }
   /**
    * CronDayOfMonth constructor. Initializes the "day of the month" field with the provided values.
