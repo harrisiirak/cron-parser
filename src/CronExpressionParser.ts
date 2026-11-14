@@ -142,12 +142,14 @@ export class CronExpressionParser {
       rand,
       strict,
     ) as MonthRange[];
+    const dayOfMonthMax = Math.max(...month.map((m) => (m === 2 ? 28 : CronMonth.daysInMonth[m - 1])));
     const dayOfMonth = CronExpressionParser.#parseField(
       CronUnit.DayOfMonth,
       rawFields.dayOfMonth,
       CronDayOfMonth.constraints,
       rand,
       strict,
+      dayOfMonthMax,
     ) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
     const dayOfWeek = CronExpressionParser.#parseField(
@@ -215,6 +217,7 @@ export class CronExpressionParser {
     constraints: CronConstraints,
     rand: PRNG,
     strict: boolean,
+    hashedMax?: number,
   ): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
@@ -235,7 +238,7 @@ export class CronExpressionParser {
     }
 
     value = this.#parseWildcard(value, constraints);
-    value = this.#parseHashed(value, constraints, rand, field, strict);
+    value = this.#parseHashed(value, constraints, rand, field, strict, hashedMax);
     return this.#parseSequence(field, value, constraints);
   }
 
@@ -272,6 +275,7 @@ export class CronExpressionParser {
     rand: PRNG,
     field: CronUnit,
     strict: boolean,
+    hashedMax?: number,
   ): string {
     const randomValue = rand();
     let count = 0;
@@ -314,7 +318,7 @@ export class CronExpressionParser {
       }
       // H
       else {
-        return String(CronExpressionParser.#hashedValue(randomValue, constraints.min, constraints.max));
+        return String(CronExpressionParser.#hashedValue(randomValue, constraints.min, hashedMax ?? constraints.max));
       }
     });
   }

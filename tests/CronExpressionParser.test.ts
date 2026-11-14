@@ -2521,6 +2521,28 @@ describe('CronExpressionParser', () => {
           expect(CronExpressionParser.parse(expression, options).stringify(true)).toBe(expected);
         }
       });
+
+      test('bounds plain H in dayOfMonth to valid days for the month', () => {
+        for (let i = 0; i < 400; i++) {
+          const hashSeed = `job-${i}`;
+          const febDays = CronExpressionParser.parse('0 0 H 2 *', { hashSeed }).fields.dayOfMonth.values as number[];
+          expect(febDays).toHaveLength(1);
+          expect(febDays[0]).toBeGreaterThanOrEqual(1);
+          expect(febDays[0]).toBeLessThanOrEqual(28);
+
+          const thirtyDayMonths = CronExpressionParser.parse('0 0 H 4,6 *', { hashSeed }).fields.dayOfMonth
+            .values as number[];
+          expect(thirtyDayMonths).toHaveLength(1);
+          expect(thirtyDayMonths[0]).toBeGreaterThanOrEqual(1);
+          expect(thirtyDayMonths[0]).toBeLessThanOrEqual(30);
+        }
+
+        for (const hashSeed of ['backup-8', 'backup-9', 'job-27']) {
+          const days = CronExpressionParser.parse('0 0 H 2 *', { hashSeed }).fields.dayOfMonth.values as number[];
+          expect(days[0]).toBeGreaterThanOrEqual(1);
+          expect(days[0]).toBeLessThanOrEqual(28);
+        }
+      });
     });
   });
 });
