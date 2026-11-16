@@ -131,14 +131,8 @@ export class CronExpression {
       return this.#isDstTransitionDay;
     }
 
-    const startOfDay = new CronDate(currentDate);
-    startOfDay.setStartOfDay();
-
-    const endOfDay = new CronDate(currentDate);
-    endOfDay.setEndOfDay();
-
     this.#dstTransitionDayKey = key;
-    this.#isDstTransitionDay = startOfDay.getUTCOffset() !== endOfDay.getUTCOffset();
+    this.#isDstTransitionDay = currentDate.isDstTransitionDay();
     return this.#isDstTransitionDay;
   }
 
@@ -177,6 +171,18 @@ export class CronExpression {
    * @private
    */
   #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
+    if (reverse && this.#checkDstTransition(currentDate)) {
+      const target = new CronDate(currentDate);
+      this.#stepToNextMinute(target, dateMathVerb, reverse);
+      if (target.getUTCOffset() > currentDate.getUTCOffset() && currentDate.skipRepeatedTime()) {
+        return;
+      }
+    }
+
+    this.#stepToNextMinute(currentDate, dateMathVerb, reverse);
+  }
+
+  #stepToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
     const minutes = this.#fields.minute.values as number[];
     const seconds = this.#fields.second.values as number[];
 
@@ -358,7 +364,7 @@ export class CronExpression {
       return false;
     }
 
-    return true;
+    return hour.values.length === 24 || dt.getRepeatedTimeShift() === 0;
   }
 
   /**
@@ -433,6 +439,10 @@ export class CronExpression {
   #matchHour(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): boolean {
     const hourValues = this.#fields.hour.values;
     const hours = hourValues as number[];
+
+    if (reverse && hours.length !== 24 && this.#checkDstTransition(currentDate) && currentDate.skipRepeatedTime()) {
+      return false;
+    }
 
     const currentHour = currentDate.getHours();
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
