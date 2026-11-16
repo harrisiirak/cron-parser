@@ -301,6 +301,15 @@ describe('CronExpressionParser', () => {
       expect(() => CronExpressionParser.parse(expression, { strict: true })).toThrow();
     });
 
+    test.each([
+      ['0 0 12 ? * 1', '2022-09-19T12:00:00.000Z'],
+      ['0 0 12 15 * ?', '2022-09-15T12:00:00.000Z'],
+      ['0 0 12 ? * ?', '2022-09-13T12:00:00.000Z'],
+    ])('%s leaves dayOfMonth or dayOfWeek unrestricted in strict mode', (expression, expected) => {
+      const options = { currentDate: new Date('2022-09-12T14:00:00Z'), tz: 'UTC', strict: true };
+      expect(CronExpressionParser.parse(expression, options).next().toISOString()).toBe(expected);
+    });
+
     test('missing fields when in strict mode', () => {
       const expression = '20 15 * *';
       expect(() => CronExpressionParser.parse(expression, { strict: true })).toThrow();

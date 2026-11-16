@@ -110,7 +110,9 @@ export class CronExpressionParser {
       expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions];
     }
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
-    if (!(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict)) {
+    // `?` is an alias for `*`, so either of them leaves the day field unrestricted
+    const isWildcard = (value: string) => value === '*' || value === '?';
+    if (strict && !isWildcard(rawFields.dayOfMonth) && !isWildcard(rawFields.dayOfWeek)) {
       throw new Error('Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
     }
 
