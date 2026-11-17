@@ -221,11 +221,16 @@ export class CronExpressionParser {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
       const aliases: Record<string, number | string> = field === CronUnit.Month ? Months : DayOfWeek;
-      value = value.replace(/[a-z]{3}/gi, (match) => {
+      value = value.replace(/[a-z]{3}/gi, (match, offset: number) => {
         match = match.toLowerCase();
         const replacer = aliases[match];
         if (replacer === undefined) {
           throw new Error(`Validation error, cannot resolve alias "${match}"`);
+        }
+        // A name has to stand alone, or SUN6 would be read as 06, JANFEB as 12 and MON/FRI as 1/5.
+        // Only the L of the last weekday form can follow a name, like in FRIL.
+        if (/[a-z\d/]/i.test(value.charAt(offset - 1)) || /^(?!L(?![a-z\d]))[a-z\d]/i.test(value.slice(offset + 3))) {
+          throw new Error(`Invalid alias, got value: ${value}`);
         }
         return replacer.toString();
       });
