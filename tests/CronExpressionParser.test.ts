@@ -2,6 +2,7 @@ import CronDate from '../src/CronDate';
 import { CronExpression, CronExpressionOptions, TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE } from '../src/CronExpression';
 import { CronExpressionParser } from '../src/CronExpressionParser';
 import { CronFieldCollection } from '../src/CronFieldCollection';
+import { CronDayOfMonth, MonthRange } from '../src/fields';
 
 describe('CronExpressionParser', () => {
   describe('invalid expression', () => {
@@ -2522,19 +2523,13 @@ describe('CronExpressionParser', () => {
         }
       });
 
-      test('bounds plain H in dayOfMonth to valid days for the month', () => {
+      test('bounds plain H in dayOfMonth to 28 for February', () => {
         for (let i = 0; i < 400; i++) {
-          const hashSeed = `job-${i}`;
-          const febDays = CronExpressionParser.parse('0 0 H 2 *', { hashSeed }).fields.dayOfMonth.values as number[];
-          expect(febDays).toHaveLength(1);
-          expect(febDays[0]).toBeGreaterThanOrEqual(1);
-          expect(febDays[0]).toBeLessThanOrEqual(28);
-
-          const thirtyDayMonths = CronExpressionParser.parse('0 0 H 4,6 *', { hashSeed }).fields.dayOfMonth
+          const days = CronExpressionParser.parse('0 0 H 2 *', { hashSeed: `job-${i}` }).fields.dayOfMonth
             .values as number[];
-          expect(thirtyDayMonths).toHaveLength(1);
-          expect(thirtyDayMonths[0]).toBeGreaterThanOrEqual(1);
-          expect(thirtyDayMonths[0]).toBeLessThanOrEqual(30);
+          expect(days).toHaveLength(1);
+          expect(days[0]).toBeGreaterThanOrEqual(1);
+          expect(days[0]).toBeLessThanOrEqual(28);
         }
 
         for (const hashSeed of ['backup-8', 'backup-9', 'job-27']) {
@@ -2542,6 +2537,34 @@ describe('CronExpressionParser', () => {
           expect(days[0]).toBeGreaterThanOrEqual(1);
           expect(days[0]).toBeLessThanOrEqual(28);
         }
+      });
+
+      test('bounds plain H in dayOfMonth to 30 for 30-day months', () => {
+        for (let i = 0; i < 400; i++) {
+          const days = CronExpressionParser.parse('0 0 H 4,6 *', { hashSeed: `job-${i}` }).fields.dayOfMonth
+            .values as number[];
+          expect(days).toHaveLength(1);
+          expect(days[0]).toBeGreaterThanOrEqual(1);
+          expect(days[0]).toBeLessThanOrEqual(30);
+        }
+      });
+
+      test('bounds plain H in dayOfMonth for 0 0 H H *', () => {
+        for (let i = 0; i < 400; i++) {
+          const parsed = CronExpressionParser.parse('0 0 H H *', { hashSeed: `job-${i}` });
+          const days = parsed.fields.dayOfMonth.values as number[];
+          const months = parsed.fields.month.values as MonthRange[];
+          expect(days).toHaveLength(1);
+          expect(months).toHaveLength(1);
+          expect(days[0]).toBeGreaterThanOrEqual(1);
+          expect(days[0]).toBeLessThanOrEqual(CronDayOfMonth.hashMax(months));
+        }
+      });
+
+      test('keeps the same day for 0 0 H * * as before', () => {
+        const parsed = CronExpressionParser.parse('0 0 H * *', { hashSeed: 'F00D' });
+        expect(parsed.fields.dayOfMonth.values).toEqual([12]);
+        expect(parsed.stringify()).toBe('0 0 12 * *');
       });
     });
   });

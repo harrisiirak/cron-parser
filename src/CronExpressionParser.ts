@@ -142,14 +142,13 @@ export class CronExpressionParser {
       rand,
       strict,
     ) as MonthRange[];
-    const dayOfMonthMax = Math.max(...month.map((m) => (m === 2 ? 28 : CronMonth.daysInMonth[m - 1])));
     const dayOfMonth = CronExpressionParser.#parseField(
       CronUnit.DayOfMonth,
       rawFields.dayOfMonth,
       CronDayOfMonth.constraints,
       rand,
       strict,
-      dayOfMonthMax,
+      CronDayOfMonth.hashMax(month),
     ) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
     const dayOfWeek = CronExpressionParser.#parseField(
