@@ -142,7 +142,11 @@ export class CronDate {
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    this.#date = this.#date.plus({ hours: 1 }).startOf('hour');
+    const next = this.#date.plus({ hours: 1 }).startOf('hour');
+    // When a DST end repeats only part of an hour (Lord Howe: 02:00 +11 -> 01:30 +10:30), flooring
+    // the wall clock lands back in the earlier offset. Then the next boundary is one elapsed hour
+    // after the start of the current hour, which is the transition instant.
+    this.#date = next > this.#date ? next : this.#date.startOf('hour').plus({ hours: 1 });
   }
 
   /**

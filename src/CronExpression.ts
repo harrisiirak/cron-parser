@@ -190,7 +190,14 @@ export class CronExpression {
     }
 
     // Roll over to the next/previous hour and start from the min/max allowed minute/second.
+    const previousOffset = currentDate.getUTCOffset();
     currentDate.applyDateOperation(dateMathVerb, TimeUnit.Hour, this.#fields.hour.values.length);
+    // A sub-hour DST end (e.g. Lord Howe, 02:00 +11 -> 01:30 +10:30) makes the next hour start
+    // mid-way through the repeated wall-clock hour. Its earlier minutes only exist in the old
+    // offset, in the past, so setting them would move backwards: search on from here instead.
+    if (!reverse && currentDate.getUTCOffset() < previousOffset && currentDate.getMinutes() !== 0) {
+      return;
+    }
     currentDate.setMinutes(this.#getMinOrMax(minutes, reverse));
     currentDate.setSeconds(this.#getMinOrMax(seconds, reverse));
   }
