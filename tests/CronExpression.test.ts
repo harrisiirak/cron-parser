@@ -803,6 +803,30 @@ describe('CronExpression', () => {
     });
   });
 
+  describe('DST handling - America/Nuuk (prev() across a change late in the evening)', () => {
+    // On 2024-03-30 the clock jumps from 23:00 (-02:00) to 00:00 (-01:00) on 31 March.
+    test.each([
+      ['0 12 30 * *', '2024-04-01T00:30:00Z'],
+      ['0 12 * * 6', '2024-04-01T00:30:00Z'],
+      ['0 12 29,30 * *', '2024-04-01T00:10:00Z'],
+    ])('should find the run on 30 March for %s', (expression, currentDate) => {
+      const interval = CronExpressionParser.parse(expression, { currentDate, tz: 'America/Nuuk' });
+      expect(interval.prev().toISOString()).toBe('2024-03-30T14:00:00.000Z');
+    });
+
+    test('should keep stepping back one day at a time', () => {
+      const interval = CronExpressionParser.parse('15 3 * * *', {
+        currentDate: '2024-04-01T02:00:00Z',
+        tz: 'America/Nuuk',
+      });
+      expect([interval.prev(), interval.prev(), interval.prev()].map((date) => date.toISOString())).toEqual([
+        '2024-03-31T04:15:00.000Z',
+        '2024-03-30T05:15:00.000Z',
+        '2024-03-29T05:15:00.000Z',
+      ]);
+    });
+  });
+
   describe('DST handling - Europe/Rome (Spring Forward)', () => {
     const baseOptions = {
       currentDate: new Date('2025-03-29T00:00:00Z'),
