@@ -150,6 +150,7 @@ export class CronExpressionParser {
       CronDayOfMonth.constraints,
       rand,
       strict,
+      CronDayOfMonth.hashMax(month),
     ) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
     const dayOfWeek = CronExpressionParser.#parseField(
@@ -208,6 +209,7 @@ export class CronExpressionParser {
    * @param {CronConstraints} constraints - The constraints for the field.
    * @param {PRNG} rand - The random number generator to use.
    * @param {boolean} strict - If true, will throw an error on an unusable hashed range or step.
+   * @param {number} [hashedMax] - Optional upper bound for a plain hashed value, defaulting to `constraints.max`.
    * @private
    * @returns {(number | string)[]} The parsed field.
    */
@@ -217,6 +219,7 @@ export class CronExpressionParser {
     constraints: CronConstraints,
     rand: PRNG,
     strict: boolean,
+    hashedMax?: number,
   ): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
@@ -242,7 +245,7 @@ export class CronExpressionParser {
     }
 
     value = this.#parseWildcard(value, constraints);
-    value = this.#parseHashed(value, constraints, rand, field, strict);
+    value = this.#parseHashed(value, constraints, rand, field, strict, hashedMax);
     return this.#parseSequence(field, value, constraints);
   }
 
@@ -271,6 +274,7 @@ export class CronExpressionParser {
    * @param {PRNG} rand - The random number generator to use.
    * @param {CronUnit} field - The field being parsed, used when reporting an unusable range or step.
    * @param {boolean} strict - If true, will throw an error on an unusable hashed range or step.
+   * @param {number} [hashedMax] - Optional upper bound for a plain hashed value, defaulting to `constraints.max`.
    * @private
    */
   static #parseHashed(
@@ -279,6 +283,7 @@ export class CronExpressionParser {
     rand: PRNG,
     field: CronUnit,
     strict: boolean,
+    hashedMax?: number,
   ): string {
     const randomValue = rand();
     let count = 0;
@@ -321,7 +326,7 @@ export class CronExpressionParser {
       }
       // H
       else {
-        return String(CronExpressionParser.#hashedValue(randomValue, constraints.min, constraints.max));
+        return String(CronExpressionParser.#hashedValue(randomValue, constraints.min, hashedMax ?? constraints.max));
       }
     });
   }

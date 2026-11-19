@@ -29,6 +29,16 @@ export class CronDayOfMonth extends CronField {
     return new CronDayOfMonth(days.length > 0 ? days : values, options);
   }
 
+  /**
+   * Returns the maximum day-of-month value for plain `H` given the parsed month values.
+   * Caps February at 28 so hashed expressions remain valid in non-leap years.
+   * @param {MonthRange[]} month - Values for the "month" field
+   * @returns {number}
+   */
+  static hashMax(month: MonthRange[]): number {
+    return Math.max(...month.map((m) => (m === 2 ? 28 : CronMonth.daysInMonth[m - 1])));
+  }
+
   static get min(): CronMin {
     return MIN_DAY;
   }
