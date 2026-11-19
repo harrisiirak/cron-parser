@@ -179,7 +179,9 @@ export class CronDate {
    * If the day is 1, it will subtract one month instead.
    */
   subtractDay(): void {
-    this.#date = this.#date.minus({ days: 1 }).endOf('day').startOf('second');
+    // Step back from the start of the current day: going back one day from a late time can land in a DST gap
+    // on the previous day and roll forward into the current day again (America/Nuuk, 2024-03-30 23:00).
+    this.#date = this.#date.startOf('day').minus({ seconds: 1 });
   }
 
   /**
