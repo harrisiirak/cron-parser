@@ -207,6 +207,7 @@ export class CronExpressionParser {
    * @param {CronConstraints} constraints - The constraints for the field.
    * @param {PRNG} rand - The random number generator to use.
    * @param {boolean} strict - If true, will throw an error on an unusable hashed range or step.
+   * @param {number} [hashedMax] - Optional upper bound for a plain hashed value, defaulting to `constraints.max`.
    * @private
    * @returns {(number | string)[]} The parsed field.
    */
@@ -266,6 +267,7 @@ export class CronExpressionParser {
    * @param {PRNG} rand - The random number generator to use.
    * @param {CronUnit} field - The field being parsed, used when reporting an unusable range or step.
    * @param {boolean} strict - If true, will throw an error on an unusable hashed range or step.
+   * @param {number} [hashedMax] - Optional upper bound for a plain hashed value, defaulting to `constraints.max`.
    * @private
    */
   static #parseHashed(
