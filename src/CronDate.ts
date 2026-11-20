@@ -142,7 +142,8 @@ export class CronDate {
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    this.#date = this.#date.plus({ hours: 1 }).startOf('hour');
+    const next = this.#date.plus({ hours: 1 }).startOf('hour');
+    this.#date = next > this.#date ? next : this.#date.plus({ minutes: 60 - this.#date.minute }).startOf('minute');
   }
 
   /**

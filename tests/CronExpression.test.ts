@@ -909,5 +909,26 @@ describe('CronExpression', () => {
       const utcNext = utc.next().toDate();
       expect(romeNext.toISOString()).not.toBe(utcNext.toISOString());
     });
+
+    test('should advance monotonically across Pacific/Chatham sub-hour fall-back', () => {
+      const start = new Date('2016-04-01T14:00:00Z');
+      const end = new Date('2016-04-03T14:00:00Z');
+      let current = start;
+      let steps = 0;
+
+      while (current < end && steps < 400) {
+        const next = CronExpressionParser.parse('*/15 * * * *', {
+          currentDate: current,
+          tz: 'Pacific/Chatham',
+        })
+          .next()
+          .toDate();
+        expect(next.getTime()).toBeGreaterThan(current.getTime());
+        current = next;
+        steps++;
+      }
+
+      expect(current.getTime()).toBeGreaterThanOrEqual(end.getTime());
+    });
   });
 });
