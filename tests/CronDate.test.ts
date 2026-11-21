@@ -88,6 +88,15 @@ describe('CronDate', () => {
     expect(date.toISOString()).toBe('2024-04-06T15:30:00.000Z'); // 02:00 LHST
   });
 
+  test('addHour stops at the start of the next hour when the clocks go forward by half an hour', () => {
+    // America/Caracas: 02:30 at UTC-04:30 becomes 03:00 at UTC-04:00 on 2016-05-01, at 07:00Z.
+    const date = new CronDate(new Date('2016-05-01T06:30:00.000Z'), 'America/Caracas'); // 02:00 at UTC-04:30
+    date.addHour();
+    expect(date.toISOString()).toBe('2016-05-01T07:00:00.000Z'); // 03:00 at UTC-04:00, 30 minutes later
+    expect(date.getHours()).toBe(3);
+    expect(date.getMinutes()).toBe(0);
+  });
+
   test('setMinutes moves by elapsed time', () => {
     const date = new CronDate(new Date('2024-04-06T14:10:00.000Z'), 'Australia/Lord_Howe'); // 01:10 LHDT
     date.setMinutes(45);

@@ -145,7 +145,11 @@ export class CronDate {
    */
   addHour(): void {
     // Elapsed time: startOf('hour') after plus(1h) can land before the start when the clocks go back by less than an hour
-    this.#date = this.#date.plus({ minutes: 60 - this.#date.minute }).startOf('minute');
+    const next = this.#date.plus({ minutes: 60 - this.#date.minute }).startOf('minute');
+    // When the clocks go forward by less than an hour, the elapsed hour lands part-way through the next hour,
+    // and its start is the earlier, correct step
+    const startOfHour = next.startOf('hour');
+    this.#date = startOfHour > this.#date ? startOfHour : next;
   }
 
   /**

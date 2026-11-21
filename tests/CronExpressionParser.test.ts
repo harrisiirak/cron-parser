@@ -2475,6 +2475,44 @@ describe('CronExpressionParser', () => {
         ]);
       });
 
+      test('steps back to the first pass when prev() starts inside the repeated hour', () => {
+        // America/New_York goes from 02:00 EDT back to 01:00 EST on 2026-11-01, at 06:00Z.
+        const interval = CronExpressionParser.parse('30 1 * * *', {
+          currentDate: new Date('2026-11-01T06:15:00.000Z'), // 01:15 EST
+          tz: 'America/New_York',
+        });
+
+        expect([interval.prev(), interval.prev()].map((date) => date.toISOString())).toEqual([
+          '2026-11-01T05:30:00.000Z', // 01:30 EDT, 45 minutes earlier
+          '2026-10-31T05:30:00.000Z',
+        ]);
+      });
+
+      test('steps to the start of the next hour when the clocks go forward by half an hour', () => {
+        // America/Caracas goes from 02:30 at UTC-04:30 forward to 03:00 at UTC-04:00 on 2016-05-01, at 07:00Z.
+        const caracas = (expression: string, currentDate: string) =>
+          CronExpressionParser.parse(expression, { currentDate: new Date(currentDate), tz: 'America/Caracas' });
+
+        expect(
+          caracas('0 3 * * *', '2016-04-30T12:00:00.000Z')
+            .take(2)
+            .map((date) => date.toISOString()),
+        ).toEqual([
+          '2016-05-01T07:00:00.000Z', // 03:00 at UTC-04:00
+          '2016-05-02T07:00:00.000Z',
+        ]);
+
+        expect(
+          caracas('0 * * * *', '2016-05-01T06:00:00.000Z')
+            .take(3)
+            .map((date) => date.toISOString()),
+        ).toEqual([
+          '2016-05-01T06:30:00.000Z', // 02:00 at UTC-04:30
+          '2016-05-01T07:00:00.000Z', // 03:00 at UTC-04:00, 30 minutes later
+          '2016-05-01T08:00:00.000Z', // 04:00
+        ]);
+      });
+
       test('fires every minute of a fixed hour once when a whole-hour fall-back repeats it', () => {
         // America/New_York goes from 02:00 EDT back to 01:00 EST on 2024-11-03, at 06:00Z.
         const interval = CronExpressionParser.parse('0,30 1 * * *', {
