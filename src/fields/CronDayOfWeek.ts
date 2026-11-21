@@ -28,7 +28,7 @@ export class CronDayOfWeek extends CronField {
   }
 
   static get validChars(): RegExp {
-    return /^[?,*\dLH#/-]+$|^.*H\(\d+-\d+\)\/\d+.*$|^.*H\(\d+-\d+\).*$|^.*H\/\d+.*$/;
+    return /^(?:[?,*\dLH#/-]|H\(\d+-\d+\))+$/;
   }
 
   /**

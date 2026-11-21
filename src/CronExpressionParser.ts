@@ -110,7 +110,9 @@ export class CronExpressionParser {
       expression = PredefinedExpressions[expression as keyof typeof PredefinedExpressions];
     }
     const rawFields = CronExpressionParser.#getRawFields(expression, strict);
-    if (!(rawFields.dayOfMonth === '*' || rawFields.dayOfWeek === '*' || !strict)) {
+    // `?` is an alias for `*`, so either of them leaves the day field unrestricted
+    const isWildcard = (value: string) => value === '*' || value === '?';
+    if (strict && !isWildcard(rawFields.dayOfMonth) && !isWildcard(rawFields.dayOfWeek)) {
       throw new Error('Cannot use both dayOfMonth and dayOfWeek together in strict mode!');
     }
 
@@ -148,6 +150,7 @@ export class CronExpressionParser {
       CronDayOfMonth.constraints,
       rand,
       strict,
+      CronDayOfMonth.hashMax(month),
     ) as DayOfMonthRange[];
     const { dayOfWeek: _dayOfWeek, nthDayOfWeek } = CronExpressionParser.#parseNthDay(rawFields.dayOfWeek);
     const dayOfWeek = CronExpressionParser.#parseField(
@@ -206,6 +209,7 @@ export class CronExpressionParser {
    * @param {CronConstraints} constraints - The constraints for the field.
    * @param {PRNG} rand - The random number generator to use.
    * @param {boolean} strict - If true, will throw an error on an unusable hashed range or step.
+   * @param {number} [hashedMax] - Optional upper bound for a plain hashed value, defaulting to `constraints.max`.
    * @private
    * @returns {(number | string)[]} The parsed field.
    */
@@ -215,15 +219,21 @@ export class CronExpressionParser {
     constraints: CronConstraints,
     rand: PRNG,
     strict: boolean,
+    hashedMax?: number,
   ): (number | string)[] {
     // Replace aliases for month and dayOfWeek
     if (field === CronUnit.Month || field === CronUnit.DayOfWeek) {
       const aliases: Record<string, number | string> = field === CronUnit.Month ? Months : DayOfWeek;
-      value = value.replace(/[a-z]{3}/gi, (match) => {
+      value = value.replace(/[a-z]{3}/gi, (match, offset: number) => {
         match = match.toLowerCase();
         const replacer = aliases[match];
         if (replacer === undefined) {
           throw new Error(`Validation error, cannot resolve alias "${match}"`);
+        }
+        // A name has to stand alone, or SUN6 would be read as 06, JANFEB as 12 and MON/FRI as 1/5.
+        // Only the L of the last weekday form can follow a name, like in FRIL.
+        if (/[a-z\d/]/i.test(value.charAt(offset - 1)) || /^(?!L(?![a-z\d]))[a-z\d]/i.test(value.slice(offset + 3))) {
+          throw new Error(`Invalid alias, got value: ${value}`);
         }
         return replacer.toString();
       });
@@ -235,7 +245,7 @@ export class CronExpressionParser {
     }
 
     value = this.#parseWildcard(value, constraints);
-    value = this.#parseHashed(value, constraints, rand, field, strict);
+    value = this.#parseHashed(value, constraints, rand, field, strict, hashedMax);
     return this.#parseSequence(field, value, constraints);
   }
 
@@ -246,7 +256,15 @@ export class CronExpressionParser {
    * @private
    */
   static #parseWildcard(value: string, constraints: CronConstraints): string {
-    return value.replace(/[*?]/g, constraints.min + '-' + constraints.max);
+    // Only a whole list item (optionally with a step) stands for the full range
+    const parsed = value.replace(
+      /(^|,)[*?](?=\/|,|$)/g,
+      (_, separator: string) => `${separator}${constraints.min}-${constraints.max}`,
+    );
+    if (/[*?]/.test(parsed)) {
+      throw new Error(`Invalid wildcard, got value: ${value}`);
+    }
+    return parsed;
   }
 
   /**
@@ -256,6 +274,7 @@ export class CronExpressionParser {
    * @param {PRNG} rand - The random number generator to use.
    * @param {CronUnit} field - The field being parsed, used when reporting an unusable range or step.
    * @param {boolean} strict - If true, will throw an error on an unusable hashed range or step.
+   * @param {number} [hashedMax] - Optional upper bound for a plain hashed value, defaulting to `constraints.max`.
    * @private
    */
   static #parseHashed(
@@ -264,6 +283,7 @@ export class CronExpressionParser {
     rand: PRNG,
     field: CronUnit,
     strict: boolean,
+    hashedMax?: number,
   ): string {
     const randomValue = rand();
     let count = 0;
@@ -306,7 +326,7 @@ export class CronExpressionParser {
       }
       // H
       else {
-        return String(CronExpressionParser.#hashedValue(randomValue, constraints.min, constraints.max));
+        return String(CronExpressionParser.#hashedValue(randomValue, constraints.min, hashedMax ?? constraints.max));
       }
     });
   }

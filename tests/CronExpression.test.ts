@@ -744,6 +744,34 @@ describe('CronExpression', () => {
       expect(cronExpression.includesDate(new Date('2024-02-01T00:00:00.000Z'))).toBeFalsy();
     });
 
+    test('should accept only the first occurrence of a time repeated by a fall-back', () => {
+      const berlin = CronExpressionParser.parse('0 30 2,3 * * *', { tz: 'Europe/Berlin' });
+      expect(berlin.includesDate(new Date('2025-10-26T00:30:00Z'))).toBeTruthy();
+      expect(berlin.includesDate(new Date('2025-10-26T01:30:00Z'))).toBeFalsy();
+      expect(berlin.includesDate(new Date('2025-10-26T02:30:00Z'))).toBeTruthy();
+
+      const lordHowe = CronExpressionParser.parse('0 45 1 * * *', { tz: 'Australia/Lord_Howe' });
+      expect(lordHowe.includesDate(new Date('2025-04-05T14:45:00Z'))).toBeTruthy();
+      expect(lordHowe.includesDate(new Date('2025-04-05T15:15:00Z'))).toBeFalsy();
+
+      const troll = CronExpressionParser.parse('0 30 2 * * *', { tz: 'Antarctica/Troll' });
+      expect(troll.includesDate(new Date('2025-10-26T00:30:00Z'))).toBeTruthy();
+      expect(troll.includesDate(new Date('2025-10-26T02:30:00Z'))).toBeFalsy();
+    });
+
+    test.each([
+      ['Europe/Berlin', '0 30 * * * *', '2025-10-26T00:30:00Z', '2025-10-26T01:30:00Z'],
+      ['Australia/Lord_Howe', '0 45 * * * *', '2025-04-05T14:45:00Z', '2025-04-05T15:15:00Z'],
+      ['Antarctica/Troll', '0 30 * * * *', '2025-10-26T00:30:00Z', '2025-10-26T02:30:00Z'],
+    ])(
+      'should accept both occurrences of a repeated time when every hour is scheduled - %s',
+      (tz, expression, first, second) => {
+        const cronExpression = CronExpressionParser.parse(expression, { tz });
+        expect(cronExpression.includesDate(new Date(first))).toBeTruthy();
+        expect(cronExpression.includesDate(new Date(second))).toBeTruthy();
+      },
+    );
+
     test('should support last weekday of month', () => {
       const cronExpression = CronExpressionParser.parse('0 0 0 * * 1L', {
         currentDate: new Date('2023-01-01T00:00:00Z'),

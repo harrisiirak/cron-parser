@@ -131,14 +131,8 @@ export class CronExpression {
       return this.#isDstTransitionDay;
     }
 
-    const startOfDay = new CronDate(currentDate);
-    startOfDay.setStartOfDay();
-
-    const endOfDay = new CronDate(currentDate);
-    endOfDay.setEndOfDay();
-
     this.#dstTransitionDayKey = key;
-    this.#isDstTransitionDay = startOfDay.getUTCOffset() !== endOfDay.getUTCOffset();
+    this.#isDstTransitionDay = currentDate.isDstTransitionDay();
     return this.#isDstTransitionDay;
   }
 
@@ -193,6 +187,18 @@ export class CronExpression {
    * @private
    */
   #moveToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
+    if (reverse && this.#checkDstTransition(currentDate)) {
+      const target = new CronDate(currentDate);
+      this.#stepToNextMinute(target, dateMathVerb, reverse);
+      if (target.getUTCOffset() > currentDate.getUTCOffset() && currentDate.skipRepeatedTime()) {
+        return;
+      }
+    }
+
+    this.#stepToNextMinute(currentDate, dateMathVerb, reverse);
+  }
+
+  #stepToNextMinute(currentDate: CronDate, dateMathVerb: DateMathOp, reverse: boolean): void {
     const seconds = this.#fields.second.values as number[];
 
     const currentMinute = currentDate.getMinutes();
@@ -373,7 +379,7 @@ export class CronExpression {
       return false;
     }
 
-    return true;
+    return hour.values.length === 24 || dt.getRepeatedTimeShift() === 0;
   }
 
   /**
@@ -449,6 +455,10 @@ export class CronExpression {
     const hourValues = this.#fields.hour.values;
     const hours = hourValues as number[];
 
+    if (reverse && hours.length !== 24 && this.#checkDstTransition(currentDate) && currentDate.skipRepeatedTime()) {
+      return false;
+    }
+
     const currentHour = currentDate.getHours();
     const isMatch = CronExpression.#matchSchedule(currentHour, hourValues);
 
@@ -520,28 +530,24 @@ export class CronExpression {
   }
 
   /**
-   * Checks whether a match is another pass through wall-clock time that a fall-back repeated. With a fixed
-   * hour such a match is skipped, so the occurrence runs once. Going forward the repeat has a lower UTC offset
-   * than the previous occurrence and a wall-clock time that is not after it; going backward it has a higher UTC
-   * offset and a wall-clock time that is not before it.
+   * Checks whether a forward match is a second pass through wall-clock time that a fall-back repeated. With a
+   * fixed hour such a match is skipped, so the occurrence runs once, on the first pass. The repeat has a lower
+   * UTC offset than the previous occurrence and a wall-clock time that is not after it. Going backward, the
+   * later pass is skipped in `#matchHour()` and `#moveToNextMinute()`.
    *
-   * @param {CronDate} candidate - Matching date found by the search
+   * @param {CronDate} candidate - Matching date found by the forward search
    * @param {number} previousTimestamp - Timestamp the search started from
    * @param {number} previousOffset - UTC offset in minutes at that timestamp
-   * @param {boolean} reverse - When true, iterating backwards
    * @returns {boolean} True when the match repeats a wall-clock time
    * @private
    */
-  #isRepeatedPass(candidate: CronDate, previousTimestamp: number, previousOffset: number, reverse: boolean): boolean {
+  #isRepeatedPass(candidate: CronDate, previousTimestamp: number, previousOffset: number): boolean {
     if (this.#fields.hour.values.length === 24) {
       return false;
     }
     const wallClock = (timestamp: number, offset: number): number => timestamp + offset * 60000;
     const candidateWallClock = wallClock(candidate.getTime(), candidate.getUTCOffset());
     const previousWallClock = wallClock(previousTimestamp, previousOffset);
-    if (reverse) {
-      return candidate.getUTCOffset() > previousOffset && candidateWallClock >= previousWallClock;
-    }
     return candidate.getUTCOffset() < previousOffset && candidateWallClock <= previousWallClock;
   }
 
@@ -593,7 +599,7 @@ export class CronExpression {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Second, this.#fields.hour.values.length);
         continue;
       }
-      if (this.#isRepeatedPass(currentDate, startTimestamp, startOffset, reverse)) {
+      if (!reverse && this.#isRepeatedPass(currentDate, startTimestamp, startOffset)) {
         // A whole minute at a time: DST changes start and end on a whole minute, so the rest of this minute repeats too
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Minute, this.#fields.hour.values.length);
         continue;
