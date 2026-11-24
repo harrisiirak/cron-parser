@@ -820,6 +820,16 @@ describe('CronExpression', () => {
     });
   });
 
+  describe('DST handling - America/Havana (fall-back at midnight)', () => {
+    test('should keep the first copy of a time repeated by a midnight fall-back', () => {
+      const interval = CronExpressionParser.parse('30 0 * * *', {
+        currentDate: new Date('2025-11-01T16:00:00Z'),
+        tz: 'America/Havana',
+      });
+      expect(interval.next().toDate().toISOString()).toBe('2025-11-02T04:30:00.000Z');
+    });
+  });
+
   describe('DST handling - Europe/Rome (Spring Forward)', () => {
     const baseOptions = {
       currentDate: new Date('2025-03-29T00:00:00Z'),
