@@ -1,5 +1,19 @@
 # Changelog
 
+## v5.10.7 - 2026-11-25
+
+### What's Changed
+* fix: handle times repeated by a fall-back in prev() and includesDate() by @spokodev in https://github.com/harrisiirak/cron-parser/pull/446
+* fix: accept ? as an unrestricted day field in strict mode by @Enesuygurs in https://github.com/harrisiirak/cron-parser/pull/474
+* fix: reject a month or day of week name that is not on its own by @simonkundrik in https://github.com/harrisiirak/cron-parser/pull/476
+* fix: bound plain H in dayOfMonth to valid days for the month by @EnesKartal in https://github.com/harrisiirak/cron-parser/pull/479
+
+### New Contributors
+* @Enesuygurs made their first contribution in https://github.com/harrisiirak/cron-parser/pull/474
+* @EnesKartal made their first contribution in https://github.com/harrisiirak/cron-parser/pull/479
+
+**Full Changelog**: https://github.com/harrisiirak/cron-parser/compare/v5.10.6...v5.10.7
+
 ## v5.10.6 - 2026-11-14
 
 ### What's Changed
