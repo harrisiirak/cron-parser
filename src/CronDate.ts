@@ -1,4 +1,4 @@
-import { DateTime, DateObjectUnits } from 'luxon';
+import { DateTime, DateObjectUnits, FixedOffsetZone } from 'luxon';
 
 export enum TimeUnit {
   Second = 'Second',
@@ -25,6 +25,12 @@ export class CronDate {
   #dstStart: number | null = null;
   #dstStartLandingHour: number | null = null;
   #dstEnd: number | null = null;
+  // First existing instant after a misaligned (partial-hour) spring-forward
+  // gap, in epoch milliseconds, and the gap length. Wall times inside the gap
+  // do not exist; each maps forward by the gap length, so the window
+  // [dstGapStart, dstGapStart + dstGapLenMs) contains their realizations.
+  #dstGapStart: number | null = null;
+  #dstGapLenMs: number | null = null;
 
   /**
    * Constructs a new CronDate instance.
@@ -43,6 +49,8 @@ export class CronDate {
       this.#dstStart = timestamp.#dstStart;
       this.#dstStartLandingHour = timestamp.#dstStartLandingHour;
       this.#dstEnd = timestamp.#dstEnd;
+      this.#dstGapStart = timestamp.#dstGapStart;
+      this.#dstGapLenMs = timestamp.#dstGapLenMs;
     } else if (timestamp instanceof Date) {
       this.#date = DateTime.fromJSDate(timestamp, dateOpts);
     } else if (typeof timestamp === 'number') {
@@ -99,6 +107,36 @@ export class CronDate {
   clearDstStart(): void {
     this.#dstStart = null;
     this.#dstStartLandingHour = null;
+    this.#dstGapStart = null;
+    this.#dstGapLenMs = null;
+  }
+
+  /**
+   * Returns the wall-time pre-image of this instant when it lies inside the
+   * realization window of a misaligned spring-forward gap. A schedule that
+   * names a nonexistent wall time inside the skipped interval is realized gap
+   * length minutes later, so a candidate instant X matches both its own wall
+   * fields and the wall fields of X - gap.
+   *
+   * @returns {CronDate | null} A copy of this date shifted back by the gap, or null outside the window
+   */
+  gapPreImage(): CronDate | null {
+    if (this.#dstGapStart === null || this.#dstGapLenMs === null) {
+      return null;
+    }
+    const time = this.#date.toMillis();
+    if (time < this.#dstGapStart || time >= this.#dstGapStart + this.#dstGapLenMs) {
+      return null;
+    }
+    const pre = new CronDate(this);
+    // The pre-image wall time does not exist in this zone, so render it under
+    // a fixed offset equal to the post-transition one: shifting the instant by
+    // the gap then displays exactly wall(X) - gap, which is what scheduled
+    // fields inside the skipped interval are compared against.
+    pre.#date = DateTime.fromMillis(time - this.#dstGapLenMs, {
+      zone: FixedOffsetZone.instance(this.#date.offset),
+    });
+    return pre;
   }
 
   /**
@@ -142,7 +180,32 @@ export class CronDate {
    * Adds one hour to the current CronDate.
    */
   addHour(): void {
-    this.#date = this.#date.plus({ hours: 1 }).startOf('hour');
+    const previousMillis = this.#date.toMillis();
+    const previousOffset = this.#date.offset;
+    const stepped = this.#date.plus({ hours: 1 }).startOf('hour');
+    if (stepped.offset > previousOffset) {
+      // A spring-forward gap was crossed. When the gap does not cover a whole
+      // clock hour, the skipped wall interval has a first existing instant
+      // inside the hour the step lands past; land there instead of
+      // overshooting its occurrences.
+      const zone = this.#date.zone;
+      let lo = previousMillis;
+      let hi = stepped.toMillis();
+      while (hi - lo > 1) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (zone.offset(mid) === stepped.offset) {
+          hi = mid;
+        } else {
+          lo = mid;
+        }
+      }
+      const firstValid = DateTime.fromMillis(hi, { zone });
+      if (firstValid < stepped) {
+        this.#date = firstValid;
+        return;
+      }
+    }
+    this.#date = stepped;
   }
 
   /**
@@ -496,8 +559,51 @@ export class CronDate {
    */
   #set(unit: keyof DateObjectUnits, value: number): void {
     if (this.#date[unit] !== value) {
+      const previousMillis = this.#date.toMillis();
+      const previousOffset = this.#date.offset;
       this.#date = this.#date.set({ [unit]: value });
+      // A `set` that landed on a nonexistent wall time resolves forward across
+      // the skipped interval; record it so scheduled times inside the gap can
+      // still be found at their realized instants.
+      this.#recordSpringGap(previousMillis, previousOffset);
     }
+  }
+
+  /**
+   * Records a spring-forward gap crossed by the last mutating operation, when
+   * the UTC offset increased. Gaps that span whole clock hours are already
+   * handled by the dstStart/dstEnd machinery; this covers misaligned
+   * (partial-hour) gaps such as Lord Howe's 30 minute and Chatham's
+   * non-hour-aligned change.
+   *
+   * @param {number} previousMillis - The instant before the operation, in epoch milliseconds
+   * @param {number} previousOffset - The zone offset before the operation, in minutes
+   */
+  #recordSpringGap(previousMillis: number, previousOffset: number): void {
+    const offsetDelta = this.getUTCOffset() - previousOffset;
+    if (offsetDelta <= 0) {
+      return;
+    }
+    const zone = this.#date.zone;
+    const newOffset = this.getUTCOffset();
+    // Binary search for the first instant carrying the new offset.
+    let lo = previousMillis;
+    let hi = this.#date.toMillis();
+    while (hi - lo > 1) {
+      const mid = Math.floor((lo + hi) / 2);
+      if (zone.offset(mid) === newOffset) {
+        hi = mid;
+      } else {
+        lo = mid;
+      }
+    }
+    const gapLen = offsetDelta * 60_000;
+    const gapWall = DateTime.fromMillis(hi, { zone });
+    if (gapLen % 3_600_000 === 0 && gapWall.minute === 0 && gapWall.second === 0) {
+      return;
+    }
+    this.#dstGapStart = hi;
+    this.#dstGapLenMs = gapLen;
   }
 
   /**
@@ -638,8 +744,12 @@ export class CronDate {
     }
 
     const previousHour = this.getHours();
+    const previousMillis = this.#date.toMillis();
     const previousOffset = this.getUTCOffset();
     this.invokeDateOperation(op, unit);
+    if (op === DateMathOp.Add) {
+      this.#recordSpringGap(previousMillis, previousOffset);
+    }
     const currentHour = this.getHours();
     // Wall-clock hours crossed, modular so a step over midnight measures the
     // same as one within the day.

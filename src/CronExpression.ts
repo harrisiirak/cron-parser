@@ -429,6 +429,36 @@ export class CronExpression {
   }
 
   /**
+   * Pure field match against every unit except seconds, with no iteration side
+   * effects. Used to evaluate candidate instants inside a spring-forward gap
+   * realization window.
+   *
+   * @param {CronDate} date - The candidate date to test
+   * @returns {boolean} True when month, day, hour and minute all match
+   */
+  #fieldsMatchExceptSecond(date: CronDate): boolean {
+    return (
+      CronExpression.#matchSchedule(date.getMonth() + 1, this.#fields.month.values) &&
+      this.#matchDayOfMonth(date) &&
+      CronExpression.#matchSchedule(date.getHours(), this.#fields.hour.values) &&
+      CronExpression.#matchSchedule(date.getMinutes(), this.#fields.minute.values)
+    );
+  }
+
+  /**
+   * Pure field match against every unit, with no iteration side effects.
+   *
+   * @param {CronDate} date - The candidate date to test
+   * @returns {boolean} True when every field matches
+   */
+  #fieldsMatch(date: CronDate): boolean {
+    return (
+      this.#fieldsMatchExceptSecond(date) &&
+      CronExpression.#matchSchedule(date.getSeconds(), this.#fields.second.values)
+    );
+  }
+
+  /**
    * Determines if the current hour matches the cron expression.
    *
    * @param {CronDate} currentDate - The current date object.
@@ -543,6 +573,27 @@ export class CronExpression {
     let stepCount = 0;
     while (++stepCount < LOOP_LIMIT) {
       this.#validateTimeSpan(currentDate);
+
+      // Inside the realization window of a misaligned spring-forward gap an
+      // instant is a candidate under both its own wall fields and the wall
+      // fields gap length minutes earlier (a scheduled time that fell into the
+      // gap is realized that much later). Walk the window so neither side's
+      // occurrences are skipped.
+      if (!reverse) {
+        const gapPre = currentDate.gapPreImage();
+        if (gapPre !== null) {
+          const matched = this.#fieldsMatch(currentDate) || this.#fieldsMatch(gapPre);
+          if (matched && startTimestamp !== currentDate.getTime()) {
+            break;
+          }
+          const unit =
+            !matched && !this.#fieldsMatchExceptSecond(currentDate) && !this.#fieldsMatchExceptSecond(gapPre)
+              ? TimeUnit.Minute
+              : TimeUnit.Second;
+          currentDate.applyDateOperation(dateMathVerb, unit, this.#fields.hour.values.length);
+          continue;
+        }
+      }
 
       if (!CronExpression.#matchSchedule(currentDate.getMonth() + 1, this.#fields.month.values)) {
         currentDate.applyDateOperation(dateMathVerb, TimeUnit.Month, this.#fields.hour.values.length);
