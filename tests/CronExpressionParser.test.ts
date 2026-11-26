@@ -2198,15 +2198,68 @@ describe('CronExpressionParser', () => {
 
         const interval = CronExpressionParser.parse('30 1,2 * * *', options);
 
-        // The second value pins master's behaviour, not the correct answer:
-        // 02:30 exists on the transition day and is what was asked for, but the
-        // hour step from 01:30 crosses the shift and lands past it. Known
-        // limitation, unrelated to the gap logic this block covers.
         expect(interval.take(3).map((date) => date.toISOString())).toEqual([
           '2026-10-03T15:00:00.000Z', // 01:30 at UTC+10:30
-          '2026-10-03T16:30:00.000Z', // 03:30, where 02:30 was scheduled
+          '2026-10-03T15:30:00.000Z', // 02:30, the first valid time after the gap
           '2026-10-04T14:30:00.000Z', // 01:30 on the 5th
         ]);
+      });
+
+      test('keeps every occurrence inside a sub-hour transition', () => {
+        // Lord Howe skips 02:00-02:29, so the half-hourly schedule resumes at
+        // 02:30 rather than missing the rest of the hour.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-10-03T15:20:00.000Z'),
+          tz: 'Australia/Lord_Howe',
+        };
+
+        const interval = CronExpressionParser.parse('*/5 * * * *', options);
+
+        expect(interval.take(4).map((date) => date.toISOString())).toEqual([
+          '2026-10-03T15:25:00.000Z', // 01:55 at UTC+10:30
+          '2026-10-03T15:30:00.000Z', // 02:30 at UTC+11:00
+          '2026-10-03T15:35:00.000Z', // 02:35
+          '2026-10-03T15:40:00.000Z', // 02:40
+        ]);
+      });
+
+      test('lands on the first valid minute of a sub-hour transition', () => {
+        // Chatham springs forward 02:45 -> 03:45, so the wall minutes
+        // 02:45-03:44 do not exist. 03:45 and 03:50 are the first valid times
+        // and must not be pushed a whole hour later.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-09-26T13:30:00.000Z'),
+          tz: 'Pacific/Chatham',
+        };
+
+        const at45 = CronExpressionParser.parse('45 3 * * *', options);
+        expect(at45.next().toISOString()).toEqual('2026-09-26T14:00:00.000Z'); // 03:45 at UTC+13:45
+
+        const at50 = CronExpressionParser.parse('50 3 * * *', options);
+        expect(at50.next().toISOString()).toEqual('2026-09-26T14:05:00.000Z'); // 03:50
+      });
+
+      test('compensates wall times inside a misaligned transition', () => {
+        // Times Chatham skipped (02:45-03:44) shift forward by the gap length,
+        // matching how whole-hour gaps compensate their skipped schedule.
+        const options: CronExpressionOptions = {
+          currentDate: new Date('2026-09-26T00:00:00.000Z'),
+          tz: 'Pacific/Chatham',
+        };
+
+        const hourly = CronExpressionParser.parse('45 1-5 * * *', options);
+        expect(hourly.take(4).map((date) => date.toISOString())).toEqual([
+          '2026-09-26T13:00:00.000Z', // 01:45 at UTC+12:45
+          '2026-09-26T14:00:00.000Z', // 03:45, where 02:45 was scheduled
+          '2026-09-26T15:00:00.000Z', // 04:45
+          '2026-09-26T16:00:00.000Z', // 05:45
+        ]);
+
+        const at0 = CronExpressionParser.parse('0 3 * * *', {
+          currentDate: new Date('2026-09-26T12:00:00.000Z'),
+          tz: 'Pacific/Chatham',
+        });
+        expect(at0.next().toISOString()).toEqual('2026-09-26T14:15:00.000Z'); // 04:00, where 03:00 was scheduled
       });
 
       test('does not compensate when stepping backward over a fall-back', () => {
