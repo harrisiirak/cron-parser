@@ -1,7 +1,7 @@
 ---
 name: Question
 about: Ask a question about using cron-parser
-title: '[QUESTION] '
+type: Question
 labels: ['question']
 assignees: ''
 ---

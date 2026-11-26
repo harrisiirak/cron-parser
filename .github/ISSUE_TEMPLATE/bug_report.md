@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Report a bug to help us improve cron-parser
-title: '[BUG] '
+type: Bug
 labels: ['bug']
 assignees: ''
 ---
