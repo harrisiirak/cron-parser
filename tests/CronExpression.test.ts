@@ -803,6 +803,33 @@ describe('CronExpression', () => {
     });
   });
 
+  describe('DST handling - America/Nuuk (change late in the evening)', () => {
+    test('should not skip the run on the day before a change at 23:00', () => {
+      const expression = '0 12 * * *';
+      let date = new Date('2024-03-30T01:00:00Z');
+      const results: string[] = [];
+      for (let i = 0; i < 3; i++) {
+        date = CronExpressionParser.parse(expression, { currentDate: date, tz: 'America/Nuuk' }).next().toDate();
+        results.push(date.toISOString());
+      }
+      expect(results).toEqual([
+        '2024-03-30T14:00:00.000Z',
+        '2024-03-31T13:00:00.000Z',
+        '2024-04-01T13:00:00.000Z',
+      ]);
+    });
+  });
+
+  describe('DST handling - America/Havana (fall-back at midnight)', () => {
+    test('should keep the first copy of a time repeated by a midnight fall-back', () => {
+      const interval = CronExpressionParser.parse('30 0 * * *', {
+        currentDate: new Date('2025-11-01T16:00:00Z'),
+        tz: 'America/Havana',
+      });
+      expect(interval.next().toDate().toISOString()).toBe('2025-11-02T04:30:00.000Z');
+    });
+  });
+
   describe('DST handling - Europe/Rome (Spring Forward)', () => {
     const baseOptions = {
       currentDate: new Date('2025-03-29T00:00:00Z'),

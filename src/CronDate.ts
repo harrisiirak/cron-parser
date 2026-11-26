@@ -135,7 +135,8 @@ export class CronDate {
    * Adds one day to the current CronDate.
    */
   addDay(): void {
-    this.#date = this.#date.plus({ days: 1 }).startOf('day');
+    // Start from midnight so the offset comes from the current day. A late wall-clock time can fall in a DST gap on the next day and roll into the day after.
+    this.#date = this.#date.startOf('day').plus({ days: 1 }).startOf('day');
   }
 
   /**
