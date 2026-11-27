@@ -71,7 +71,8 @@ describe('CronFileParser', () => {
       const [expression] = result.expressions;
       expect(expression.stringify()).toBe('15 9 * * 1-5');
       expression.reset(new Date('2026-09-25T09:15:00.000Z'));
-      expect(expression.next().toISOString()).toBe('2026-09-28T09:15:00.000Z');
+      // the reset date is exactly on the schedule: inclusive range yields it
+      expect(expression.next().toISOString()).toBe('2026-09-25T09:15:00.000Z');
     });
   });
 
