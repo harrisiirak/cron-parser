@@ -83,6 +83,7 @@ describe('CronField', () => {
       const values: (number | string)[] = ['5L'];
       const field = new CronDayOfWeek(values as DayOfWeekRange[]);
       expect(field.values).toEqual(['5L']);
+      expect(field.hasLastChar).toBeTruthy();
     });
 
     test('should throw an error when a day of week L is qualified by something other than a weekday', () => {

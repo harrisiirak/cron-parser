@@ -5,7 +5,7 @@ import {
   TIME_SPAN_OUT_OF_BOUNDS_ERROR_MESSAGE,
 } from '../src/CronExpression';
 import { CronDate, TimeUnit } from '../src/CronDate';
-import { CronFieldCollection, CronFields } from '../src/CronFieldCollection';
+import { CronFieldCollection, CronFieldOverride, CronFields } from '../src/CronFieldCollection';
 import { expect } from '@jest/globals';
 import { CronDayOfMonth, CronDayOfWeek, CronHour, CronMinute, CronMonth, CronSecond } from '../src/fields';
 import CronExpressionParser from '../src';
@@ -31,6 +31,41 @@ describe('CronExpression', () => {
   test('should create a new CronExpression instance', () => {
     const cronExpression = new CronExpression(fields, options);
     expect(cronExpression).toBeInstanceOf(CronExpression);
+  });
+
+  describe('schedules constructed from field values', () => {
+    test.each<[string, Record<string, (number | string)[]>, string[]]>([
+      ['last Monday', { dayOfWeek: ['1L'] }, ['2026-11-30']],
+      ['last Sunday', { dayOfWeek: ['0L'] }, ['2026-11-29']],
+      ['last Sunday alias', { dayOfWeek: ['7L'] }, ['2026-11-29']],
+      [
+        'Mondays and last Friday',
+        { dayOfWeek: [1, '5L'] },
+        ['2026-11-02', '2026-11-09', '2026-11-16', '2026-11-23', '2026-11-27', '2026-11-30'],
+      ],
+      ['Mondays', { dayOfWeek: [1] }, ['2026-11-02', '2026-11-09', '2026-11-16', '2026-11-23', '2026-11-30']],
+      ['last day of month', { dayOfMonth: ['L'] }, ['2026-11-30']],
+    ])('matches %s when iterating and checking dates', (_name, overrides, dates) => {
+      const options = {
+        currentDate: '2026-11-01T00:00:00Z',
+        startDate: '2026-11-01T00:00:00Z',
+        endDate: '2026-12-01T00:00:00Z',
+        tz: 'UTC',
+      };
+      const base = CronExpressionParser.parse('0 0 0 * * *', options);
+      const fields = CronFieldCollection.from(base.fields, overrides as CronFieldOverride);
+      const expression = CronExpression.fieldsToExpression(fields, options);
+      const expected = dates.map((date) => `${date}T00:00:00.000Z`);
+
+      expect(expression.take(expected.length + 1).map((date) => date.toISOString())).toEqual(expected);
+      expression.reset(new Date(options.endDate));
+      expect(expression.take(-expected.length - 1).map((date) => date.toISOString())).toEqual([...expected].reverse());
+
+      for (let day = 1; day <= 30; day++) {
+        const date = new Date(Date.UTC(2026, 10, day));
+        expect(expression.includesDate(date)).toBe(expected.includes(date.toISOString()));
+      }
+    });
   });
 
   test('should return the next scheduled date', () => {
